@@ -1,0 +1,68 @@
+name: Check gstack upstream updates
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'  # Every Monday at 8am UTC
+  workflow_dispatch:       # Manual trigger
+
+jobs:
+  check-update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check upstream version
+        id: check
+        run: |
+          LOCAL_VERSION=$(cat .claude/skills/gstack/VERSION 2>/dev/null || echo "unknown")
+          UPSTREAM_VERSION=$(curl -sL https://raw.githubusercontent.com/garrytan/gstack/main/VERSION 2>/dev/null || echo "unknown")
+          echo "local=$LOCAL_VERSION" >> "$GITHUB_OUTPUT"
+          echo "upstream=$UPSTREAM_VERSION" >> "$GITHUB_OUTPUT"
+          if [ "$LOCAL_VERSION" != "$UPSTREAM_VERSION" ]; then
+            echo "needs_update=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needs_update=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update gstack
+        if: steps.check.outputs.needs_update == 'true'
+        run: |
+          git clone --depth 1 https://github.com/garrytan/gstack.git /tmp/gstack-upstream
+          rm -rf /tmp/gstack-upstream/.git
+          rm -f /tmp/gstack-upstream/bin/gstack-global-discover
+          rsync -av --delete \
+            --exclude='dist/' \
+            --exclude='node_modules/' \
+            --exclude='gstack-global-discover' \
+            /tmp/gstack-upstream/ .claude/skills/gstack/
+
+      - name: Create PR
+        if: steps.check.outputs.needs_update == 'true'
+        run: |
+          BRANCH="chore/update-gstack-${{ steps.check.outputs.upstream }}"
+          git checkout -b "$BRANCH"
+          git add .claude/skills/gstack/
+          git commit -m "chore: update gstack from ${{ steps.check.outputs.local }} to ${{ steps.check.outputs.upstream }}"
+          git push origin "$BRANCH"
+          gh pr create \
+            --title "Update gstack to ${{ steps.check.outputs.upstream }}" \
+            --body "$(cat <<EOF
+          ## Summary
+          - gstack upstream released **${{ steps.check.outputs.upstream }}** (we have **${{ steps.check.outputs.local }}**)
+          - Auto-detected by weekly check against garrytan/gstack
+
+          ## Review
+          - Check the diff for breaking changes to skills you use
+          - After merging, run \`cd .claude/skills/gstack && ./setup\` to rebuild the browser binary
+
+          ## Test plan
+          - [ ] Review CHANGELOG for breaking changes
+          - [ ] Verify skill names haven't changed
+          - [ ] Rebuild browser binary after merge
+          EOF
+          )"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
