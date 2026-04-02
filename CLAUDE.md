@@ -151,3 +151,31 @@ When a skill gives bad advice or misses something, fix it directly:
 1. Edit the skill file in `skills/<skill-name>/SKILL.md`
 2. Commit with the project change that revealed the gap
 3. The improvement is live immediately for all future work
+
+## Org Connect (live org debugging)
+
+Use `org-connect` skill when debugging against a live Salesforce org.
+
+### Connect to an org
+```bash
+bash scripts/connect-org.sh gulf --production --type customer
+bash scripts/connect-org.sh ohanafy --sandbox --type sandbox
+```
+
+### Check connected orgs
+```bash
+sf org list
+```
+
+### Read org state
+After connecting, read `projects/<name>/<env>/org-snapshot.md` for:
+- Metadata counts (classes, triggers, flows, objects, fields, validation rules)
+- Detected OHFY SKU packages
+- Quick commands for testing and querying
+
+### Debugging pattern
+1. Check if org is connected (`sf org list`)
+2. Read the org snapshot for context
+3. Read specific metadata (triggers, validation rules, flows) for the failing object
+4. Cross-reference with `ohfy-*-expert` skills for expected behavior
+5. Refresh metadata if stale (`sf project retrieve start`)
