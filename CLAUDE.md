@@ -1,6 +1,6 @@
 # Daniel's Ohanafy Monorepo
 
-Unified skills, agents, and projects for Ohanafy development.
+Unified skills, agents, patterns, and projects for Ohanafy development.
 
 ## gstack skills (workflow layer)
 
@@ -10,7 +10,7 @@ Available gstack skills: `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`
 
 ## Salesforce skills (domain layer)
 
-33 Salesforce-specific skills in `skills/`. These activate based on file patterns:
+33 Salesforce-specific skills in `skills/sf-*`. Activate based on file patterns:
 - `.cls`, `.trigger` -> sf-apex
 - `.flow-meta.xml` -> sf-flow
 - `/lwc/**/*.js`, `.html` -> sf-lwc
@@ -19,25 +19,87 @@ Available gstack skills: `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`
 - `.object-meta.xml`, `.field-meta.xml` -> sf-metadata
 - `.namedCredential-meta.xml` -> sf-integration
 
-## Domain skills
+## Integration skills (Tray / Ohanafy platform)
 
-Additional domain-specific skills in `skills/`:
+14 integration-specific skills in `skills/`:
+- **tray-architecture** — Tray.io project structure reference
+- **tray-embedded-customjs** — Custom JS patterns in Tray workflows
+- **tray-errors** — Tray error handling protocols
+- **tray-diagrams** — Workflow visualization
+- **tray-insights** — Project analysis
+- **tray-script-generator** — Script scaffolding from templates
+- **csv-output** — CSV formatting patterns
+- **salesforce-composite** — SF Composite API patterns
+- **salesforce-field-object-creator** — Field/object definition utilities
+- **ohfy-core-expert** — Ohanafy business logic and domain rules
+- **ohfy-transformation-settings** — Transformation rule configuration
+- **deploy-prep** — Deployment workflow preparation
+- **test-script** — Script testing infrastructure
+- **security** — Integration security patterns
+
+## Domain skills (UKG / ERP)
+
 - **ukg-expert** — UKG API, data model, authentication, scheduling
 - **ukg-api-debug** — UKG API debugging and troubleshooting
 - **ukg-field-mapper** — UKG-to-Ohanafy field mapping
-- **tray-expert** — Tray.io iPaaS patterns for beverage industry integrations
+- **tray-expert** — Tray.io iPaaS patterns for beverage industry
 
 ## Agents
 
-8 specialist agents in `agents/`:
+17 specialist agents in `agents/`:
+
+**Salesforce / FDE Team:**
 - **fde-strategist** — Planning and delegation (read-only, spawns other agents)
 - **fde-engineer** — Agentforce implementation (Apex, Agent Scripts, metadata)
 - **fde-qa-engineer** — Test execution, debug logs, observability
 - **fde-release-engineer** — Deployment, Connected Apps, CI/CD
 - **fde-experience-specialist** — Conversation design, persona, LWC UI
+
+**Professional Services:**
 - **ps-technical-architect** — Backend Apex, integrations, data modeling
 - **ps-solution-architect** — Metadata design, Flows, security, architecture docs
-- **beverage-erp-expert** — Beverage distribution domain (VIP, Encompass, DSD, three-tier)
+
+**Integration Team:**
+- **salesforce-integration-architect** — SF Composite API, Named Credentials, platform events
+- **edi-processing-specialist** — EDI X12 (850/810/856), OpenText, Transcepta
+- **tray-script-generator** — Tray script creation from patterns
+- **tray-script-tester** — Tray script validation and testing
+- **ohanafy-data-model** — Ohanafy object model, relationships, field usage
+- **domain-specialist-designer** — Domain-specific integration design
+- **progressive-disclosure-executor** — Phased implementation approach
+
+**Domain:**
+- **beverage-erp-expert** — Beverage distribution (VIP, Encompass, DSD, three-tier)
+
+**Support:**
+- **documentation-consolidation-specialist** — Doc organization and consolidation
+- **integration-guide-curator** — Integration guide maintenance
+
+## Integration patterns
+
+11 production-tested JS modules in `integrations/patterns/`:
+- `soql-query-builder.js` — SELECT/WHERE builder, IN operator, 2000-value chunking
+- `batch-processing.js` — Array chunking, groupBy, dedup, SF Composite batches
+- `data-mapping.js` — Field rules engine with AND/OR logic, multi-priority resolution
+- `error-handling.js` — SF Composite error extraction, SOAP fault handling
+- `validation.js` — Required fields, type/length/format checks
+- `string-manipulation.js` — Business name normalization, SOQL sanitization
+- `csv-output.js` — Fixed-width formatters, CSV generation
+- `date-time.js` — SF date formats, timezone conversion (no external libs)
+- `lookup-maps.js` — Map/Set factories, status mapper, partitioning
+- `output-structuring.js` — Success/error envelopes, summaries
+- `script-scaffold.js` — Full validate-transform-batch-output starter
+
+## Integration reference docs
+
+In `docs/integration-guides/`:
+- `OHFY_BUSINESS_LOGIC_LIBRARY.md` — Order processing, validation, field mappings, rollups
+- `ORG_CONFIGURATION_MATRIX.md` — Multi-org setup, environment management, feature flags
+- `TRAY_CONNECTOR_OPERATIONS.md` — Connector reference, operation types, error handling
+- `OHFY_INTEGRATION_MASTER_GUIDE.md` — End-to-end integration methodology
+- `CONSOLIDATED_SCENARIO_EXAMPLES.md` — Real integration workflows and examples
+- `SCRIPT_CONSOLIDATION_PATTERNS.md` — Refactoring and consolidation strategies
+- `Tray-AI-Project-JSON-Structure-Guide.md` — Tray export JSON schema breakdown
 
 ## Project structure
 
@@ -50,25 +112,11 @@ projects/
   rehrig-ohanafy/         # Rehrig integration
 ```
 
-## Integration code
-
-```
-integrations/
-  tray/                   # Tray.io GraphQL integration layer
-  marketplace-ui/         # React marketplace components (SolutionGrid, config, JWT)
-```
-
 ## Migration scripts
 
 Production-tested ETL scripts in `scripts/migrations/vip-to-ohanafy/`:
 - Wave-based SF Bulk API migration with resume and dry-run
 - Loaders for POs, invoices, contacts, inventory, keg shells, route customers
-- Data comparison and validation tools
-
-## Reference docs
-
-- `docs/case-studies/gulf-vip-to-ohanafy/` — Complete VIP-to-Ohanafy data mapping (60KB guide + ERD + schema refs)
-- `docs/templates/` — Document templates with Ohanafy branding
 
 ## Conventions
 
@@ -78,6 +126,8 @@ Production-tested ETL scripts in `scripts/migrations/vip-to-ohanafy/`:
 - Flows: follow naming conventions in sf-flow skill
 - LWC: use SLDS, wire adapters, LMS for cross-component communication
 - Tests: 85%+ Apex coverage target, meaningful assertions
+- Tray scripts: use patterns from `integrations/patterns/`, follow validate-transform-batch-output flow
+- Integration scripts: always use `script-scaffold.js` as starting template
 
 ## Hooks
 

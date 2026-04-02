@@ -1,0 +1,370 @@
+{
+  "meta": {
+    "version": "2.0.0",
+    "last_updated": "2025-01-25",
+    "description": "Production-verified Tray.io script examples with real input/output samples",
+    "total_examples": 10
+  },
+  "examples": {
+    "salesforce_composite_response_processing": {
+      "name": "Salesforce Composite Response Processing",
+      "description": "Process Salesforce composite API responses with comprehensive error handling",
+      "source": "Shopify_2GP/versions/current/scripts/scripts/Shopify_02_Products/2-execute_script/script.js",
+      "complexity": "advanced",
+      "patterns_used": [
+        "salesforce_composite_response_handler",
+        "error_types_enumeration",
+        "http_status_to_error_type_mapping",
+        "retry_strategy_pattern"
+      ],
+      "input_example": {
+        "compositeResponse": [
+          {
+            "body": {
+              "id": "a0X5e000001234ABC",
+              "success": true,
+              "created": true
+            },
+            "httpHeaders": {
+              "Location": "/services/data/v61.0/sobjects/Item__c/a0X5e000001234ABC"
+            },
+            "httpStatusCode": 201,
+            "referenceId": "Item1"
+          },
+          {
+            "body": [
+              {
+                "errorCode": "REQUIRED_FIELD_MISSING",
+                "message": "Required fields are missing: [Name]",
+                "fields": ["Name"]
+              }
+            ],
+            "httpStatusCode": 400,
+            "referenceId": "Item2"
+          }
+        ]
+      },
+      "output_example": {
+        "successful_operations": [
+          {
+            "salesforce_id": "a0X5e000001234ABC",
+            "reference_id": "Item1",
+            "operation_type": "created",
+            "http_status": 201,
+            "location": "/services/data/v61.0/sobjects/Item__c/a0X5e000001234ABC",
+            "success": true
+          }
+        ],
+        "errors": [
+          {
+            "error": {
+              "response": {
+                "body": {
+                  "Type": "ValidationFailed",
+                  "Message": "Required fields are missing: [Name]",
+                  "ErrorCode": "REQUIRED_FIELD_MISSING"
+                }
+              },
+              "message": "Required fields are missing: [Name]",
+              "statusCode": 400,
+              "retryable": false,
+              "retryStrategy": {
+                "maxRetries": 0,
+                "delayMs": null,
+                "backoffMultiplier": 1,
+                "recommendation": "Not retryable, fix error and resubmit"
+              }
+            },
+            "id": "Salesforce Operation Reference # Item2",
+            "service": "Salesforce Composite API Processing",
+            "fields": ["Name"]
+          }
+        ],
+        "summary": {
+          "total_operations": 2,
+          "successful_operations": 1,
+          "failed_operations": 1,
+          "records_created": 1,
+          "records_updated": 0,
+          "success_rate": 50
+        },
+        "total_responses": 2,
+        "processed_at": "2025-01-25T10:30:00.000Z"
+      }
+    },
+    "lookup_map_transformation": {
+      "name": "Lookup Map Data Transformation",
+      "description": "Build lookup maps and transform data with error deduplication",
+      "source": "GP_Analytics_2GP/GPA_10_CORE/5-new_create_csv_rows/script.js",
+      "complexity": "intermediate",
+      "patterns_used": [
+        "lookup_map_builder",
+        "filter_reduce_chain",
+        "error_deduplication",
+        "unique_set_deduplication"
+      ],
+      "input_example": {
+        "gpa_data": [
+          {
+            "id": "forecast_001",
+            "product_gpa_id": "1019#HRB",
+            "buyer_id": "BUYER123",
+            "week": 4,
+            "year": 2025,
+            "sales_rate_per_week": 100,
+            "brand_name": "Premium Brand",
+            "package_size": "12oz"
+          }
+        ],
+        "ohfy_products": [
+          {
+            "Original_ID__c": "1019#HRB",
+            "Product__c": "a0Y5e000001PROD1"
+          }
+        ],
+        "ohfy_accounts": [
+          {
+            "Original_ID__c": "BUYER123",
+            "Account__c": "0015e000001ACCT1"
+          }
+        ],
+        "namespace_prefix": "ohfy__"
+      },
+      "output_example": {
+        "rows": [
+          {
+            "External_ID__c": "forecast_001",
+            "Item__c": "a0Y5e000001PROD1",
+            "Account__c": "0015e000001ACCT1",
+            "Week__c": 4,
+            "Year__c": 2025,
+            "Sales_Rate_Per_Week__c": 100
+          }
+        ],
+        "errors": [],
+        "summary": [
+          {"metric": "Total Rows Processed", "count": 1},
+          {"metric": "Successful Rows", "count": 1}
+        ]
+      }
+    },
+    "simple_statistics_aggregation": {
+      "name": "Simple Statistics Aggregation",
+      "description": "Aggregate statistics and calculate percentages",
+      "source": "CSV_Upload_v1/04_Process_Results/1-process_results/script.js",
+      "complexity": "beginner",
+      "patterns_used": [
+        "aggregation_reducer",
+        "percentage_calculator",
+        "array_spread_merge"
+      ],
+      "input_example": {
+        "orderResults": [
+          {"created": 5, "updated": 3, "dataErrors": 1, "apiErrors": 0},
+          {"created": 10, "updated": 7, "dataErrors": 2, "apiErrors": 1}
+        ],
+        "orderItemResults": [
+          {"created": 20, "updated": 15, "dataErrors": 3, "apiErrors": 1}
+        ],
+        "totalRows": 100,
+        "dataErrors": [],
+        "apiErrors": []
+      },
+      "output_example": {
+        "orderStats": {
+          "created": 15,
+          "updated": 10,
+          "dataErrors": 3,
+          "apiErrors": 1
+        },
+        "orderItemStats": {
+          "created": 20,
+          "updated": 15,
+          "dataErrors": 3,
+          "apiErrors": 1
+        },
+        "hasApiErrors": true,
+        "errors": []
+      }
+    },
+    "url_encoding_external_ids": {
+      "name": "Salesforce URL Encoding for External IDs",
+      "description": "Properly encode external ID values for Salesforce composite URLs",
+      "source": "GP_Analytics_2GP/GPA_10_CORE/5-new_create_csv_rows/script.js",
+      "complexity": "intermediate",
+      "patterns_used": [
+        "salesforce_url_encoding",
+        "url_safe_character_handling",
+        "composite_request_builder"
+      ],
+      "input_example": {
+        "external_id_value": "1019#HRB",
+        "object_type": "Item",
+        "namespace_prefix": "ohfy__",
+        "api_version": "v61.0"
+      },
+      "output_example": {
+        "unencoded_url": "/services/data/v61.0/sobjects/ohfy__Item__c/ohfy__Original_ID__c/1019#HRB",
+        "encoded_url": "/services/data/v61.0/sobjects/ohfy__Item__c/ohfy__Original_ID__c/1019%23HRB",
+        "note": "Hash character (#) encoded to %23 to prevent URL truncation"
+      }
+    },
+    "chunking_large_payloads": {
+      "name": "Chunking Strategy for Large Payloads",
+      "description": "Split large datasets into 400KB chunks for API limits",
+      "source": "GP_Analytics_2GP/GPA_10_CORE/5-new_create_csv_rows/script.js",
+      "complexity": "intermediate",
+      "patterns_used": [
+        "payload_size_calculator",
+        "chunk_splitter",
+        "batch_processor"
+      ],
+      "input_example": {
+        "items": [
+          {"id": 1, "data": "large_data_string_1"},
+          {"id": 2, "data": "large_data_string_2"},
+          {"id": 3, "data": "large_data_string_3"}
+        ],
+        "max_chunk_size_bytes": 400000
+      },
+      "output_example": {
+        "chunks": [
+          {
+            "chunk_number": 1,
+            "items": [{"id": 1, "data": "large_data_string_1"}],
+            "size_bytes": 150000
+          },
+          {
+            "chunk_number": 2,
+            "items": [{"id": 2, "data": "large_data_string_2"}],
+            "size_bytes": 150000
+          }
+        ],
+        "summary": {
+          "total_chunks": 2,
+          "total_items": 3,
+          "max_chunk_size": 150000
+        }
+      }
+    },
+    "error_deduplication": {
+      "name": "Error Deduplication Pattern",
+      "description": "Remove duplicate errors using Set for unique identification",
+      "source": "GP_Analytics_2GP/GPA_10_CORE/5-new_create_csv_rows/script.js",
+      "complexity": "beginner",
+      "patterns_used": [
+        "unique_set_deduplication",
+        "error_tracking",
+        "json_stringify_comparison"
+      ],
+      "input_example": {
+        "errors": [
+          {"type": "MissingProduct", "id": "1019#HRB", "message": "Product not found"},
+          {"type": "MissingAccount", "id": "BUYER123", "message": "Account not found"},
+          {"type": "MissingProduct", "id": "1019#HRB", "message": "Product not found"}
+        ]
+      },
+      "output_example": {
+        "unique_errors": [
+          {"type": "MissingProduct", "id": "1019#HRB", "message": "Product not found"},
+          {"type": "MissingAccount", "id": "BUYER123", "message": "Account not found"}
+        ],
+        "original_count": 3,
+        "deduplicated_count": 2
+      }
+    },
+    "namespace_field_builder": {
+      "name": "Namespace Field Name Builder",
+      "description": "Build Salesforce field names with proper namespace handling",
+      "source": "GP_Analytics_2GP/GPA_10_CORE/5-new_create_csv_rows/script.js",
+      "complexity": "beginner",
+      "patterns_used": [
+        "namespace_prefix_handler",
+        "field_name_builder",
+        "conditional_namespace"
+      ],
+      "input_example": {
+        "field_name": "Item__c",
+        "namespace_prefix": "ohfy__",
+        "use_namespace": true
+      },
+      "output_example": {
+        "with_namespace": "ohfy__Item__c",
+        "without_namespace": "Item__c",
+        "custom_field": "ohfy__Sales_Rate_Per_Week__c"
+      }
+    },
+    "filter_reduce_chain": {
+      "name": "Filter-Reduce Chain Pattern",
+      "description": "Chain filter and reduce operations for data transformation",
+      "source": "GP_Analytics_2GP/GPA_10_CORE/5-new_create_csv_rows/script.js",
+      "complexity": "intermediate",
+      "patterns_used": [
+        "filter_map_reduce",
+        "functional_composition",
+        "immutable_data_flow"
+      ],
+      "input_example": {
+        "forecasts": [
+          {"id": 1, "valid": true, "amount": 100},
+          {"id": 2, "valid": false, "amount": 200},
+          {"id": 3, "valid": true, "amount": 150}
+        ]
+      },
+      "output_example": {
+        "valid_forecasts": [
+          {"id": 1, "valid": true, "amount": 100},
+          {"id": 3, "valid": true, "amount": 150}
+        ],
+        "total_amount": 250,
+        "average_amount": 125,
+        "count": 2
+      }
+    },
+    "retry_strategy_determination": {
+      "name": "Retry Strategy Determination",
+      "description": "Determine retry strategy based on error code and HTTP status",
+      "source": "Shopify_2GP/versions/current/scripts/scripts/Shopify_02_Products/2-execute_script/script.js",
+      "complexity": "advanced",
+      "patterns_used": [
+        "retry_strategy_pattern",
+        "error_code_mapping",
+        "exponential_backoff"
+      ],
+      "input_example": {
+        "error_code": "UNABLE_TO_LOCK_ROW",
+        "http_status": 409
+      },
+      "output_example": {
+        "retryable": true,
+        "retry_strategy": {
+          "maxRetries": 3,
+          "delayMs": 2000,
+          "backoffMultiplier": 2,
+          "recommendation": "Retry with exponential backoff, max 10 seconds wait"
+        }
+      }
+    },
+    "http_status_error_mapping": {
+      "name": "HTTP Status to Error Type Mapping",
+      "description": "Map HTTP status codes to standardized error types",
+      "source": "Shopify_2GP/versions/current/scripts/scripts/Shopify_02_Products/2-execute_script/script.js",
+      "complexity": "intermediate",
+      "patterns_used": [
+        "http_status_to_error_type_mapping",
+        "error_classification",
+        "fallback_error_handling"
+      ],
+      "input_example": {
+        "status_code": 400,
+        "salesforce_error_code": "REQUIRED_FIELD_MISSING"
+      },
+      "output_example": {
+        "error_type": "ValidationFailed",
+        "is_client_error": true,
+        "is_retryable": false,
+        "http_category": "Client Error (4xx)"
+      }
+    }
+  }
+}

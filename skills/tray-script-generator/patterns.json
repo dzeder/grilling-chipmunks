@@ -1,0 +1,352 @@
+{
+  "meta": {
+    "version": "2.0.0",
+    "last_updated": "2025-01-25",
+    "description": "Comprehensive Tray.io script patterns extracted from production code",
+    "total_patterns": 52
+  },
+  "patterns": {
+    "salesforce_composite_response_handler": {
+      "category": "Salesforce Integration",
+      "description": "Complete Salesforce composite/batch API response processing with comprehensive error mapping",
+      "source": "Shopify_2GP/versions/current/scripts/scripts/Shopify_02_Products/2-execute_script/script.js",
+      "complexity": "advanced",
+      "features": [
+        "ERROR_TYPES enumeration (14 types)",
+        "HTTP_STATUS_TO_ERROR_TYPE mapping",
+        "SALESFORCE_ERROR_CODES mapping",
+        "Retry logic with strategies",
+        "Response extraction from multiple formats",
+        "Success/failure filtering",
+        "Summary statistics generation"
+      ],
+      "libraries_required": [],
+      "template_key": "salesforce_response_handler"
+    },
+    "salesforce_url_encoding": {
+      "category": "Salesforce Integration",
+      "description": "Properly URL-encode external ID values for Salesforce composite PATCH requests",
+      "critical": "Always use encodeURIComponent() for external ID values in URLs to handle special characters like #, /, ?, &, etc.",
+      "complexity": "beginner",
+      "example": "const encodedValue = encodeURIComponent(externalIdValue);\nconst url = `/services/data/v61.0/sobjects/${objectName}/${externalIdField}/${encodedValue}`;",
+      "common_issues": ["Hash (#) character truncates URL", "Forward slash (/) breaks URL structure", "Unencoded values cause Salesforce API errors"]
+    },
+    "lookup_map_builder": {
+      "category": "Data Processing",
+      "description": "Build efficient lookup maps using filter-reduce chain for O(1) access",
+      "source": "GP_Analytics_2GP/GPA_10_CORE/5-new_create_csv_rows/script.js",
+      "complexity": "intermediate",
+      "features": ["Immutable reduce pattern", "Filter validation", "Hash map creation"],
+      "template": "function buildLookup(items) {\n  return items\n    .filter(hasValidMapping)\n    .reduce((lookup, item) => ({\n      ...lookup,\n      [item.key]: item.value\n    }), {});\n}"
+    },
+    "error_deduplication": {
+      "category": "Error Handling",
+      "description": "Deduplicate errors by counting occurrences and creating unique error entries",
+      "source": "GP_Analytics_2GP/GPA_10_CORE/5-new_create_csv_rows/script.js",
+      "complexity": "intermediate",
+      "template": "function deduplicateErrors(items, getData) {\n  const counts = items.reduce((acc, item) => {\n    const key = getData(item).id;\n    acc[key] = (acc[key] || 0) + 1;\n    return acc;\n  }, {});\n  \n  return Object.entries(counts).map(([id, count]) => createError(id, count));\n}"
+    },
+    "aggregation_reducer": {
+      "category": "Data Processing",
+      "description": "Aggregate statistics from arrays of objects using reduce",
+      "source": "CSV_Upload_v1/04_Process_Results/1-process_results/script.js",
+      "complexity": "beginner",
+      "template": "const stats = results.reduce((accumulator, current) => {\n  Object.keys(current).forEach(key => {\n    accumulator[key] = (accumulator[key] || 0) + current[key];\n  });\n  return accumulator;\n}, {});"
+    },
+    "percentage_calculator": {
+      "category": "Utilities",
+      "description": "Safely calculate percentages with division-by-zero protection",
+      "complexity": "beginner",
+      "template": "const calculatePercentage = (value, total) => {\n  return total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';\n};"
+    },
+    "orchestration_only_exports_step": {
+      "category": "Core Structure",
+      "description": "Minimal exports.step that delegates all logic to helper functions defined below",
+      "critical": "NEVER define functions inside exports.step - all helpers must be defined below",
+      "complexity": "beginner",
+      "template": "exports.step = function(input, fileInput) {\n  const validated = validateInput(input);\n  const processed = processData(validated);\n  const summary = createSummary(processed);\n  \n  return {\n    data: processed,\n    summary: summary\n  };\n};\n\n// All helpers below\nfunction validateInput(input) { /* ... */ }\nfunction processData(data) { /* ... */ }\nfunction createSummary(data) { /* ... */ }"
+    },
+    "destructured_input_3_to_5_params": {
+      "category": "Core Structure",
+      "description": "Use destructured parameters for 3-5 input variables",
+      "complexity": "beginner",
+      "template": "exports.step = function({data, config, namespace_prefix}, fileInput) {\n  // Variables directly accessible without input. prefix\n  return processData(data, config, namespace_prefix);\n};"
+    },
+    "object_input_6_plus_params": {
+      "category": "Core Structure",
+      "description": "Use object parameter for 6+ input variables",
+      "complexity": "beginner",
+      "template": "exports.step = function(input, fileInput) {\n  const { field1, field2, field3, field4, field5, field6, field7 } = input;\n  // Or pass entire input object to helpers\n  return processInput(input);\n};"
+    },
+    "error_types_enumeration": {
+      "category": "Error Handling",
+      "description": "Standard ERROR_TYPES constant for consistent error handling",
+      "source": "Shopify_2GP/2-execute_script/script.js",
+      "complexity": "beginner",
+      "template": "const ERROR_TYPES = {\n  VALIDATION_FAILED: 'ValidationFailed',\n  PROCESSING_ERROR: 'ProcessingError',\n  DATA_TRANSFORMATION_ERROR: 'DataTransformationError',\n  SALESFORCE_API_ERROR: 'SalesforceApiError',\n  AUTHENTICATION_ERROR: 'AuthenticationError',\n  AUTHORIZATION_ERROR: 'AuthorizationError',\n  RESOURCE_NOT_FOUND: 'ResourceNotFound',\n  RATE_LIMIT_ERROR: 'RateLimitError',\n  SERVER_ERROR: 'ServerError',\n  SERVICE_UNAVAILABLE: 'ServiceUnavailable',\n  RECORD_LOCK_ERROR: 'RecordLockError',\n  DUPLICATE_ERROR: 'DuplicateError',\n  BATCH_ERROR: 'BatchError',\n  TIMEOUT_ERROR: 'TimeoutError'\n};"
+    },
+    "http_status_to_error_type_mapping": {
+      "category": "Error Handling",
+      "description": "Map HTTP status codes to ERROR_TYPES",
+      "source": "Shopify_2GP/2-execute_script/script.js",
+      "complexity": "beginner",
+      "template": "const HTTP_STATUS_TO_ERROR_TYPE = {\n  400: ERROR_TYPES.VALIDATION_FAILED,\n  401: ERROR_TYPES.AUTHENTICATION_ERROR,\n  403: ERROR_TYPES.AUTHORIZATION_ERROR,\n  404: ERROR_TYPES.RESOURCE_NOT_FOUND,\n  405: ERROR_TYPES.VALIDATION_FAILED,\n  409: ERROR_TYPES.DUPLICATE_ERROR,\n  412: ERROR_TYPES.BATCH_ERROR,\n  415: ERROR_TYPES.VALIDATION_FAILED,\n  500: ERROR_TYPES.SERVER_ERROR,\n  502: ERROR_TYPES.SERVER_ERROR,\n  503: ERROR_TYPES.SERVICE_UNAVAILABLE\n};"
+    },
+    "salesforce_error_codes_mapping": {
+      "category": "Error Handling",
+      "description": "Map Salesforce-specific error codes to ERROR_TYPES",
+      "source": "Shopify_2GP/2-execute_script/script.js",
+      "complexity": "intermediate",
+      "template": "const SALESFORCE_ERROR_CODES = {\n  INVALID_SESSION_ID: ERROR_TYPES.AUTHENTICATION_ERROR,\n  REQUEST_LIMIT_EXCEEDED: ERROR_TYPES.RATE_LIMIT_ERROR,\n  UNABLE_TO_LOCK_ROW: ERROR_TYPES.RECORD_LOCK_ERROR,\n  DUPLICATE_VALUE: ERROR_TYPES.DUPLICATE_ERROR,\n  ENTITY_IS_DELETED: ERROR_TYPES.RESOURCE_NOT_FOUND,\n  REQUIRED_FIELD_MISSING: ERROR_TYPES.VALIDATION_FAILED,\n  INVALID_FIELD: ERROR_TYPES.VALIDATION_FAILED,\n  MALFORMED_ID: ERROR_TYPES.VALIDATION_FAILED,\n  INVALID_FIELD_FOR_INSERT_UPDATE: ERROR_TYPES.VALIDATION_FAILED,\n  FIELD_CUSTOM_VALIDATION_EXCEPTION: ERROR_TYPES.VALIDATION_FAILED,\n  INVALID_BATCH_SIZE: ERROR_TYPES.BATCH_ERROR,\n  ALL_OR_NONE_OPERATION_ROLLED_BACK: ERROR_TYPES.BATCH_ERROR,\n  QUERY_TIMEOUT: ERROR_TYPES.TIMEOUT_ERROR,\n  EXCEEDED_MAX_SIZE_REQUEST: ERROR_TYPES.VALIDATION_FAILED\n};"
+    },
+    "retry_strategy_pattern": {
+      "category": "Error Handling",
+      "description": "Define retry strategies with exponential backoff for different error types",
+      "source": "Shopify_2GP/2-execute_script/script.js",
+      "complexity": "advanced",
+      "template": "function getRetryStrategy(errorCode, statusCode) {\n  const strategies = {\n    UNABLE_TO_LOCK_ROW: {\n      maxRetries: 3,\n      delayMs: 2000,\n      backoffMultiplier: 2,\n      recommendation: 'Retry with exponential backoff, max 10 seconds wait'\n    },\n    REQUEST_LIMIT_EXCEEDED: {\n      maxRetries: 0,\n      delayMs: null,\n      backoffMultiplier: 1,\n      recommendation: 'Wait until 24-hour window resets or increase API limits'\n    }\n  };\n  \n  return strategies[errorCode] || defaultStrategy;\n}"
+    },
+    "immutable_reduce": {
+      "category": "Functional Programming",
+      "description": "Use reduce with spread operator for immutable accumulation",
+      "complexity": "intermediate",
+      "template": "const result = items.reduce((acc, item) => ({\n  ...acc,\n  [item.key]: item.value\n}), {});"
+    },
+    "immutable_map": {
+      "category": "Functional Programming",
+      "description": "Transform arrays immutably with map",
+      "complexity": "beginner",
+      "template": "const transformed = items.map(item => ({\n  ...item,\n  newField: calculateValue(item)\n}));"
+    },
+    "filter_reduce_chain": {
+      "category": "Functional Programming",
+      "description": "Chain filter and reduce for efficient data processing",
+      "complexity": "intermediate",
+      "template": "const result = items\n  .filter(isValid)\n  .reduce((acc, item) => processAndAccumulate(acc, item), initial);"
+    },
+    "array_spread_merge": {
+      "category": "Functional Programming",
+      "description": "Merge arrays immutably using spread operator",
+      "complexity": "beginner",
+      "template": "const combined = [...array1, ...array2];\nconst withNew = [...existingArray, newItem];"
+    },
+    "object_spread_merge": {
+      "category": "Functional Programming",
+      "description": "Merge objects immutably using spread operator",
+      "complexity": "beginner",
+      "template": "const merged = {...baseObject, ...overrides};\nconst updated = {...original, field: newValue};"
+    },
+    "pure_function_helper": {
+      "category": "Functional Programming",
+      "description": "Define pure helper functions below exports.step",
+      "critical": "Never modify input parameters, always return new values",
+      "complexity": "beginner",
+      "template": "function transformItem(item) {\n  // Pure - no mutations, no side effects\n  return {\n    ...item,\n    processed: true,\n    timestamp: new Date().toISOString()\n  };\n}"
+    },
+    "unique_set_deduplication": {
+      "category": "Data Processing",
+      "description": "Remove duplicates using Set",
+      "complexity": "beginner",
+      "template": "const unique = [...new Set(items)];\nconst uniqueIds = [...new Set(items.map(i => i.id))];"
+    },
+    "safe_array_access": {
+      "category": "Utilities",
+      "description": "Safely access array elements with default values",
+      "complexity": "beginner",
+      "template": "const items = input.items || [];\nconst firstItem = items[0] || null;\nconst value = items.find(i => i.id === id) || defaultValue;"
+    },
+    "safe_property_access": {
+      "category": "Utilities",
+      "description": "Safely access nested object properties",
+      "complexity": "beginner",
+      "template": "const value = obj && obj.nested && obj.nested.property || default;\n// Or with optional chaining if available\nconst value2 = obj?.nested?.property || default;"
+    },
+    "input_validation_pattern": {
+      "category": "Validation",
+      "description": "Validate required input fields at start of exports.step",
+      "complexity": "beginner",
+      "template": "exports.step = function(input, fileInput) {\n  if (!input) {\n    return createErrorResponse('Input is required');\n  }\n  \n  if (!input.requiredField) {\n    return createErrorResponse('Missing required field: requiredField');\n  }\n  \n  // Continue processing...\n};"
+    },
+    "lodash_get_safe_access": {
+      "category": "Utilities",
+      "description": "Use lodash _.get for deeply nested property access",
+      "libraries_required": ["lodash"],
+      "complexity": "beginner",
+      "template": "const _ = require('lodash');\nconst value = _.get(obj, 'deeply.nested.property', defaultValue);"
+    },
+    "lodash_flow_composition": {
+      "category": "Functional Programming",
+      "description": "Compose functions using lodash flow",
+      "libraries_required": ["lodash"],
+      "complexity": "intermediate",
+      "template": "const _ = require('lodash');\nconst process = _.flow([\n  validateData,\n  transformData,\n  filterResults,\n  formatOutput\n]);\nconst result = process(input);"
+    },
+    "lodash_groupby": {
+      "category": "Data Processing",
+      "description": "Group items by a property using lodash",
+      "libraries_required": ["lodash"],
+      "complexity": "beginner",
+      "template": "const _ = require('lodash');\nconst grouped = _.groupBy(items, 'category');\nconst byId = _.groupBy(items, item => item.id);"
+    },
+    "moment_date_formatting": {
+      "category": "Date/Time",
+      "description": "Format dates using moment-timezone",
+      "libraries_required": ["moment-timezone"],
+      "complexity": "beginner",
+      "template": "const moment = require('moment-timezone');\nconst formatted = moment().tz('UTC').format('YYYY-MM-DD');\nconst iso = moment().toISOString();"
+    },
+    "moment_date_parsing": {
+      "category": "Date/Time",
+      "description": "Parse and validate dates with moment",
+      "libraries_required": ["moment-timezone"],
+      "complexity": "beginner",
+      "template": "const moment = require('moment-timezone');\nconst parsed = moment(dateString, 'YYYY-MM-DD');\nif (!parsed.isValid()) {\n  return createErrorResponse('Invalid date format');\n}"
+    },
+    "crypto_hash_generation": {
+      "category": "Security",
+      "description": "Generate hash using crypto module",
+      "libraries_required": ["crypto"],
+      "complexity": "beginner",
+      "template": "const crypto = require('crypto');\nconst hash = crypto.createHash('sha256').update(data).digest('hex');\nconst shortHash = hash.substring(0, 8);"
+    },
+    "crypto_random_id": {
+      "category": "Security",
+      "description": "Generate random UUID using crypto",
+      "libraries_required": ["crypto"],
+      "complexity": "beginner",
+      "template": "const crypto = require('crypto');\nconst id = crypto.randomUUID();"
+    },
+    "buffer_base64_encode": {
+      "category": "Data Encoding",
+      "description": "Encode data to base64 using Buffer",
+      "libraries_required": ["Buffer"],
+      "complexity": "beginner",
+      "template": "const { Buffer } = require('buffer');\nconst encoded = Buffer.from(data, 'utf8').toString('base64');"
+    },
+    "buffer_base64_decode": {
+      "category": "Data Encoding",
+      "description": "Decode base64 data using Buffer",
+      "libraries_required": ["Buffer"],
+      "complexity": "beginner",
+      "template": "const { Buffer } = require('buffer');\nconst decoded = Buffer.from(encoded, 'base64').toString('utf8');"
+    },
+    "url_parsing": {
+      "category": "Utilities",
+      "description": "Parse and construct URLs using URL module",
+      "libraries_required": ["URL"],
+      "complexity": "beginner",
+      "template": "const { URL } = require('url');\nconst parsed = new URL(urlString);\nconst params = parsed.searchParams.get('param');"
+    },
+    "url_construction": {
+      "category": "Utilities",
+      "description": "Build URLs with query parameters",
+      "libraries_required": ["URL"],
+      "complexity": "beginner",
+      "template": "const { URL } = require('url');\nconst url = new URL('https://api.example.com/resource');\nurl.searchParams.append('key', 'value');\nconst fullUrl = url.toString();"
+    },
+    "try_catch_error_handling": {
+      "category": "Error Handling",
+      "description": "Wrap exports.step in try-catch for global error handling",
+      "complexity": "beginner",
+      "template": "exports.step = function(input, fileInput) {\n  try {\n    return processData(input);\n  } catch (error) {\n    return createErrorResponse(\n      ERROR_TYPES.PROCESSING_ERROR,\n      error.message,\n      { stackTrace: error.stack }\n    );\n  }\n};"
+    },
+    "summary_statistics": {
+      "category": "Data Processing",
+      "description": "Generate summary statistics for processed data",
+      "complexity": "intermediate",
+      "template": "function createSummary(processed, errors) {\n  return {\n    total_processed: processed.length + errors.length,\n    successful: processed.length,\n    failed: errors.length,\n    success_rate: calculatePercentage(processed.length, processed.length + errors.length)\n  };\n}"
+    },
+    "response_formatting": {
+      "category": "Core Structure",
+      "description": "Format final response object for downstream steps",
+      "complexity": "beginner",
+      "template": "return {\n  data: processedData,\n  errors: errors,\n  summary: summary,\n  metadata: {\n    processed_at: new Date().toISOString(),\n    processor_version: '1.0.0'\n  }\n};"
+    },
+    "multi_source_data_merge": {
+      "category": "Data Processing",
+      "description": "Merge data from multiple sources using lookups",
+      "complexity": "intermediate",
+      "template": "function mergeData(primaryData, lookup1, lookup2) {\n  return primaryData.map(item => ({\n    ...item,\n    enriched_field1: lookup1[item.key1] || null,\n    enriched_field2: lookup2[item.key2] || null\n  }));\n}"
+    },
+    "conditional_field_assignment": {
+      "category": "Data Processing",
+      "description": "Conditionally assign fields to objects",
+      "complexity": "beginner",
+      "template": "const result = {\n  required_field: value,\n  ...(condition && { optional_field: optionalValue }),\n  ...(data && { data_field: data })\n};"
+    },
+    "array_chunking": {
+      "category": "Data Processing",
+      "description": "Split large arrays into chunks for payload limits",
+      "critical": "Keep payload under 400KB - implement chunking for large data",
+      "complexity": "intermediate",
+      "template": "function chunkArray(array, chunkSize) {\n  const chunks = [];\n  for (let i = 0; i < array.length; i += chunkSize) {\n    chunks.push(array.slice(i, i + chunkSize));\n  }\n  return chunks;\n}\n\nconst chunks = chunkArray(largeArray, 100);\nreturn { chunks, chunk_count: chunks.length };"
+    },
+    "field_mapping_engine": {
+      "category": "Data Processing",
+      "description": "Map fields using configuration object",
+      "complexity": "intermediate",
+      "template": "function mapFields(source, fieldMapping) {\n  const mapped = {};\n  Object.entries(fieldMapping).forEach(([targetField, sourceField]) => {\n    mapped[targetField] = source[sourceField] || null;\n  });\n  return mapped;\n}"
+    },
+    "null_safe_string_operations": {
+      "category": "Utilities",
+      "description": "Safely perform string operations with null checks",
+      "complexity": "beginner",
+      "template": "const cleaned = (str || '').trim().toLowerCase();\nconst parts = (str || '').split(':');\nconst safe = str ? str.toUpperCase() : null;"
+    },
+    "date_range_calculation": {
+      "category": "Date/Time",
+      "description": "Calculate date ranges for batch processing",
+      "libraries_required": ["moment-timezone"],
+      "complexity": "intermediate",
+      "template": "const moment = require('moment-timezone');\nfunction generateDateRanges(start, end, intervalDays) {\n  const ranges = [];\n  let current = moment(start);\n  const endDate = moment(end);\n  \n  while (current.isBefore(endDate)) {\n    const rangeEnd = moment.min(current.clone().add(intervalDays, 'days'), endDate);\n    ranges.push({\n      start: current.format('YYYY-MM-DD'),\n      end: rangeEnd.format('YYYY-MM-DD')\n    });\n    current = rangeEnd.add(1, 'day');\n  }\n  \n  return ranges;\n}"
+    },
+    "enum_status_mapping": {
+      "category": "Data Processing",
+      "description": "Map between different status enumerations",
+      "complexity": "beginner",
+      "template": "const STATUS_MAPPING = {\n  'source_pending': 'target_new',\n  'source_approved': 'target_active',\n  'source_rejected': 'target_cancelled'\n};\n\nfunction mapStatus(sourceStatus) {\n  return STATUS_MAPPING[sourceStatus] || 'target_unknown';\n}"
+    },
+    "pagination_metadata": {
+      "category": "API Integration",
+      "description": "Generate pagination metadata for API responses",
+      "complexity": "intermediate",
+      "template": "function createPaginationMetadata(currentPage, pageSize, totalItems) {\n  const totalPages = Math.ceil(totalItems / pageSize);\n  const hasMore = currentPage < totalPages;\n  \n  return {\n    current_page: currentPage,\n    page_size: pageSize,\n    total_items: totalItems,\n    total_pages: totalPages,\n    has_more: hasMore,\n    next_page: hasMore ? currentPage + 1 : null\n  };\n}"
+    },
+    "config_object_builder": {
+      "category": "Configuration",
+      "description": "Build configuration objects with defaults and overrides",
+      "complexity": "beginner",
+      "template": "const DEFAULT_CONFIG = {\n  timeout: 30000,\n  retries: 3,\n  batchSize: 100\n};\n\nfunction buildConfig(overrides) {\n  return {\n    ...DEFAULT_CONFIG,\n    ...overrides\n  };\n}"
+    },
+    "title_case_formatter": {
+      "category": "Utilities",
+      "description": "Convert strings to title case",
+      "complexity": "beginner",
+      "template": "function toTitleCase(str) {\n  return str.split(' ').map(word => \n    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()\n  ).join(' ');\n}"
+    },
+    "json_stringify_safe": {
+      "category": "Utilities",
+      "description": "Safely stringify JSON with error handling",
+      "complexity": "beginner",
+      "template": "function safeStringify(obj) {\n  try {\n    return JSON.stringify(obj);\n  } catch (error) {\n    return '{\"error\": \"Failed to stringify object\"}';\n  }\n}"
+    },
+    "batch_operation_results": {
+      "category": "Data Processing",
+      "description": "Collect and aggregate results from batch operations",
+      "complexity": "intermediate",
+      "template": "function aggregateBatchResults(batches) {\n  return batches.reduce((aggregate, batch) => ({\n    successful: aggregate.successful + batch.successful,\n    failed: aggregate.failed + batch.failed,\n    items: [...aggregate.items, ...batch.items]\n  }), { successful: 0, failed: 0, items: [] });\n}"
+    },
+    "find_with_default": {
+      "category": "Utilities",
+      "description": "Find item in array with default fallback",
+      "complexity": "beginner",
+      "template": "function findOrDefault(array, predicate, defaultValue) {\n  return array.find(predicate) || defaultValue;\n}\n\nconst item = findOrDefault(items, i => i.id === targetId, null);"
+    },
+    "timestamp_generation": {
+      "category": "Date/Time",
+      "description": "Generate ISO 8601 timestamps",
+      "complexity": "beginner",
+      "template": "const timestamp = new Date().toISOString();\nconst timestampWithTimezone = new Date().toISOString();"
+    }
+  }
+}
