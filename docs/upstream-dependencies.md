@@ -92,3 +92,23 @@ Since you're both building this monorepo together, the simplest approach is:
 - Both contribute directly to daniels-ohanafy
 - His Integrations repo becomes the reference/archive
 - New skills and patterns go into daniels-ohanafy first
+
+## shanraisshan/claude-code-best-practice
+
+**What:** Claude Code best practices, tips, implementation guides, orchestration patterns
+**Vendored to:** `references/claude-code-best-practices/`
+**Sync method:** VERSION file (commit hash) + `scripts/update-best-practices.sh`
+**Auto-check:** `.github/workflows/check-best-practices-update.yml` (weekly, Wednesdays)
+
+### What we vendor
+- `best-practice/` — 7 core docs (skills, subagents, commands, memory, MCP, settings, power-ups)
+- `tips/` — Tips from Boris Cherny, Thariq, and others
+- `implementation/` — 5 implementation guides
+- `orchestration/` — Multi-agent orchestration workflow
+- `reports/` — 4 selected reports (monorepo skills, agent memory, tool use, command-skill comparison)
+
+### Manual update
+```bash
+bash scripts/update-best-practices.sh           # preview
+bash scripts/update-best-practices.sh --apply   # apply
+```

@@ -1,0 +1,46 @@
+name: Check Claude Code Best Practices Update
+
+on:
+  schedule:
+    - cron: '0 10 * * 3'  # Wednesdays at 10am UTC
+  workflow_dispatch:
+
+jobs:
+  check-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for upstream changes
+        id: check
+        run: |
+          CURRENT_HASH=$(cat references/claude-code-best-practices/VERSION | tr -d '[:space:]')
+          UPSTREAM_HASH=$(git ls-remote https://github.com/shanraisshan/claude-code-best-practice.git HEAD | cut -f1)
+          echo "current=$CURRENT_HASH" >> $GITHUB_OUTPUT
+          echo "upstream=$UPSTREAM_HASH" >> $GITHUB_OUTPUT
+          if [ "$CURRENT_HASH" != "$UPSTREAM_HASH" ]; then
+            echo "needs_update=true" >> $GITHUB_OUTPUT
+          else
+            echo "needs_update=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Apply update
+        if: steps.check.outputs.needs_update == 'true'
+        run: bash scripts/update-best-practices.sh --apply
+
+      - name: Create PR
+        if: steps.check.outputs.needs_update == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update claude-code-best-practices from upstream"
+          title: "Update Claude Code Best Practices"
+          body: |
+            Upstream `shanraisshan/claude-code-best-practice` has new commits.
+
+            **Previous:** `${{ steps.check.outputs.current }}`
+            **New:** `${{ steps.check.outputs.upstream }}`
+
+            Review the diff and merge if the changes look good.
+          branch: update-best-practices
+          delete-branch: true

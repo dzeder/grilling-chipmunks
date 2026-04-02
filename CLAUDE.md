@@ -119,6 +119,18 @@ In `docs/integration-guides/`:
 - `SCRIPT_CONSOLIDATION_PATTERNS.md` — Refactoring and consolidation strategies
 - `Tray-AI-Project-JSON-Structure-Guide.md` — Tray export JSON schema breakdown
 
+## Claude Code Best Practices (reference layer)
+
+Vendored from [shanraisshan/claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice). Consult before creating/modifying skills, agents, or CLAUDE.md.
+
+Key references in `references/claude-code-best-practices/`:
+- `best-practice/claude-skills.md` — Skill authoring patterns
+- `best-practice/claude-subagents.md` — Subagent design
+- `best-practice/claude-commands.md` — Command patterns
+- `reports/claude-skills-for-larger-mono-repos.md` — Monorepo skill organization
+
+Update: `bash scripts/update-best-practices.sh` (also checked weekly via GitHub Action)
+
 ## Project structure
 
 ```
