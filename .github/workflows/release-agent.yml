@@ -1,0 +1,66 @@
+name: Release Agent
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog
+        run: |
+          PREV_TAG=$(git tag --sort=-creatordate | sed -n '2p')
+          if [ -z "$PREV_TAG" ]; then
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD)
+          fi
+          echo "## What's Changed" > changelog.md
+          echo "" >> changelog.md
+          echo "### Features" >> changelog.md
+          git log ${PREV_TAG}..HEAD --pretty="- %s (%h)" --grep="feat:" >> changelog.md 2>/dev/null || true
+          echo "" >> changelog.md
+          echo "### Bug Fixes" >> changelog.md
+          git log ${PREV_TAG}..HEAD --pretty="- %s (%h)" --grep="fix:" >> changelog.md 2>/dev/null || true
+          echo "" >> changelog.md
+          echo "### Documentation" >> changelog.md
+          git log ${PREV_TAG}..HEAD --pretty="- %s (%h)" --grep="docs:" >> changelog.md 2>/dev/null || true
+          echo "" >> changelog.md
+          echo "### Other Changes" >> changelog.md
+          git log ${PREV_TAG}..HEAD --pretty="- %s (%h)" --invert-grep --grep="feat:\|fix:\|docs:\|style:\|chore:" >> changelog.md 2>/dev/null || true
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run build
+
+      - name: Generate docs bundle
+        run: |
+          sudo apt-get update && sudo apt-get install -y pandoc
+          mkdir -p release-docs
+          find docs/ -name "*.md" -not -name "README.md" | while read f; do
+            base=$(basename "$f" .md)
+            pandoc "$f" -o "release-docs/${base}.docx"
+            pandoc "$f" -o "release-docs/${base}.html" --standalone \
+              --css="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css"
+            cp "$f" "release-docs/${base}.md"
+          done
+          tar czf docs-bundle.tar.gz release-docs/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: changelog.md
+          files: |
+            docs-bundle.tar.gz
+          generate_release_notes: true

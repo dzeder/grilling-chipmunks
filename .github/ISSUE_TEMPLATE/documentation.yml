@@ -1,0 +1,44 @@
+name: Documentation
+description: Documentation creation or update
+title: "[Docs] "
+labels: ["type:docs", "status:triage"]
+body:
+  - type: dropdown
+    id: doc-category
+    attributes:
+      label: Documentation Category
+      options:
+        - End User
+        - Configuration
+        - Technical
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What documentation needs to be created or updated?
+    validations:
+      required: true
+  - type: checkboxes
+    id: deliverables
+    attributes:
+      label: Required Deliverables
+      description: "All three formats are required per project rules"
+      options:
+        - label: "Markdown (.md)"
+          required: true
+        - label: "Word Document (.docx)"
+          required: true
+        - label: "Demo HTML (.html)"
+          required: true
+  - type: textarea
+    id: time-tracking
+    attributes:
+      label: Time Tracking
+      value: |
+        | Metric | Value |
+        |--------|-------|
+        | Human Estimate (hrs) | |
+        | AI Actual (hrs) | |
+        | Time Saved (%) | |

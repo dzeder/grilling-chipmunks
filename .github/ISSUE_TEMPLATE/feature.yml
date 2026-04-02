@@ -1,0 +1,68 @@
+name: Feature Request
+description: Propose a new feature or capability
+title: "[Feature] "
+labels: ["type:feature", "status:triage"]
+body:
+  - type: markdown
+    attributes:
+      value: "## Feature Request"
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Clear description of the feature
+    validations:
+      required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: "Who needs this and why? (e.g., which wholesaler scenario)"
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: "What must be true for this to be complete?"
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Pricing Engine
+        - Data Model
+        - API
+        - UI
+        - Promotions
+        - Billback
+        - Documentation
+        - CI/CD
+    validations:
+      required: true
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Estimated Effort (human)
+      options:
+        - "XS (< 1 hour)"
+        - "S (1-4 hours)"
+        - "M (4-8 hours)"
+        - "L (1-3 days)"
+        - "XL (> 3 days)"
+    validations:
+      required: true
+  - type: textarea
+    id: time-tracking
+    attributes:
+      label: Time Tracking
+      description: "Fill in after completion"
+      value: |
+        | Metric | Value |
+        |--------|-------|
+        | Human Estimate (hrs) | |
+        | AI Actual (hrs) | |
+        | Time Saved (%) | |
+        | Notes | |

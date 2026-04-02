@@ -1,0 +1,52 @@
+name: Task
+description: General work item or chore
+title: "[Task] "
+labels: ["type:task", "status:triage"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Task Description
+    validations:
+      required: true
+  - type: textarea
+    id: done-criteria
+    attributes:
+      label: Definition of Done
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Pricing Engine
+        - Data Model
+        - API
+        - UI
+        - Promotions
+        - Billback
+        - Documentation
+        - CI/CD
+    validations:
+      required: true
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Estimated Effort
+      options:
+        - "XS (< 1 hour)"
+        - "S (1-4 hours)"
+        - "M (4-8 hours)"
+        - "L (1-3 days)"
+        - "XL (> 3 days)"
+  - type: textarea
+    id: time-tracking
+    attributes:
+      label: Time Tracking
+      value: |
+        | Metric | Value |
+        |--------|-------|
+        | Human Estimate (hrs) | |
+        | AI Actual (hrs) | |
+        | Time Saved (%) | |

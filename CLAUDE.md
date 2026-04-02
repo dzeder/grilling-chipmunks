@@ -19,9 +19,17 @@ Available gstack skills: `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`
 - `.object-meta.xml`, `.field-meta.xml` -> sf-metadata
 - `.namedCredential-meta.xml` -> sf-integration
 
+## Domain skills
+
+Additional domain-specific skills in `skills/`:
+- **ukg-expert** — UKG API, data model, authentication, scheduling
+- **ukg-api-debug** — UKG API debugging and troubleshooting
+- **ukg-field-mapper** — UKG-to-Ohanafy field mapping
+- **tray-expert** — Tray.io iPaaS patterns for beverage industry integrations
+
 ## Agents
 
-7 specialist agents in `agents/`:
+8 specialist agents in `agents/`:
 - **fde-strategist** — Planning and delegation (read-only, spawns other agents)
 - **fde-engineer** — Agentforce implementation (Apex, Agent Scripts, metadata)
 - **fde-qa-engineer** — Test execution, debug logs, observability
@@ -29,6 +37,7 @@ Available gstack skills: `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`
 - **fde-experience-specialist** — Conversation design, persona, LWC UI
 - **ps-technical-architect** — Backend Apex, integrations, data modeling
 - **ps-solution-architect** — Metadata design, Flows, security, architecture docs
+- **beverage-erp-expert** — Beverage distribution domain (VIP, Encompass, DSD, three-tier)
 
 ## Project structure
 
@@ -40,6 +49,26 @@ projects/
   xero-ohanafy/           # Xero integration
   rehrig-ohanafy/         # Rehrig integration
 ```
+
+## Integration code
+
+```
+integrations/
+  tray/                   # Tray.io GraphQL integration layer
+  marketplace-ui/         # React marketplace components (SolutionGrid, config, JWT)
+```
+
+## Migration scripts
+
+Production-tested ETL scripts in `scripts/migrations/vip-to-ohanafy/`:
+- Wave-based SF Bulk API migration with resume and dry-run
+- Loaders for POs, invoices, contacts, inventory, keg shells, route customers
+- Data comparison and validation tools
+
+## Reference docs
+
+- `docs/case-studies/gulf-vip-to-ohanafy/` — Complete VIP-to-Ohanafy data mapping (60KB guide + ERD + schema refs)
+- `docs/templates/` — Document templates with Ohanafy branding
 
 ## Conventions
 

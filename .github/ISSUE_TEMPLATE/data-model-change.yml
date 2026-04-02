@@ -1,0 +1,39 @@
+name: Data Model Change
+description: Propose a change to the pricing data model
+title: "[Data Model] "
+labels: ["type:data-model", "component:data-model", "status:triage"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Change Description
+      description: "What entities/fields are being added, modified, or removed?"
+    validations:
+      required: true
+  - type: textarea
+    id: entities
+    attributes:
+      label: Affected Entities
+      description: "List affected entities (promotion_program, pricing_group, pricing_group_rule, scopes, etc.)"
+    validations:
+      required: true
+  - type: textarea
+    id: migration
+    attributes:
+      label: Migration Strategy
+      description: "How will existing data be migrated?"
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact Analysis
+      description: "What APIs, UI components, or calculations are affected?"
+  - type: textarea
+    id: time-tracking
+    attributes:
+      label: Time Tracking
+      value: |
+        | Metric | Value |
+        |--------|-------|
+        | Human Estimate (hrs) | |
+        | AI Actual (hrs) | |
+        | Time Saved (%) | |

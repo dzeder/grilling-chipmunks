@@ -1,0 +1,84 @@
+name: Security Agent
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  schedule:
+    - cron: "0 6 * * 1" # Weekly Monday 6am UTC
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+  security-events: write
+
+jobs:
+  dependency-scan:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+      - run: npm ci
+      - name: Run npm audit
+        id: audit
+        run: |
+          npm audit --json > audit-results.json 2>&1 || true
+
+      - name: Post security report
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            let body = '## 🤖 Security Agent Report\n\n';
+            try {
+              const audit = JSON.parse(fs.readFileSync('audit-results.json', 'utf8'));
+              const v = audit.metadata?.vulnerabilities || {};
+              body += '### Dependency Vulnerabilities\n\n';
+              body += '| Severity | Count |\n|----------|-------|\n';
+              body += `| Critical | ${v.critical || 0} |\n`;
+              body += `| High | ${v.high || 0} |\n`;
+              body += `| Moderate | ${v.moderate || 0} |\n`;
+              body += `| Low | ${v.low || 0} |\n\n`;
+              if ((v.critical || 0) > 0 || (v.high || 0) > 0) {
+                body += '🚨 **Critical or High vulnerabilities found. Please address before merging.**\n';
+              } else {
+                body += '✅ No critical or high vulnerabilities found.\n';
+              }
+            } catch (e) {
+              body += '✅ No vulnerability data (audit clean or not applicable)\n';
+            }
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+
+      - name: Add agent label
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['agent:security']
+            });
+
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: javascript-typescript
+      - uses: github/codeql-action/analyze@v4

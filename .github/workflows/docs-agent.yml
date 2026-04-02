@@ -1,0 +1,107 @@
+name: Documentation Agent
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "src/**"
+      - "docs/**"
+  pull_request:
+    paths:
+      - "src/**"
+      - "docs/**"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check-docs:
+    name: Documentation Check
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check for missing docs
+        run: |
+          MISSING=""
+          CHANGED_SRC=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'src/**/*.ts' 2>/dev/null || echo "")
+          for file in $CHANGED_SRC; do
+            module=$(basename "$file" .ts)
+            if ! find docs/ -name "*${module}*" -print -quit 2>/dev/null | grep -q .; then
+              MISSING="$MISSING\n- \`$file\` has no corresponding documentation"
+            fi
+          done
+          echo "MISSING_DOCS<<EOF" >> $GITHUB_ENV
+          echo -e "$MISSING" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Post docs reminder
+        if: env.MISSING_DOCS != ''
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const missing = process.env.MISSING_DOCS;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## 🤖 Documentation Agent Report\n\n### Missing Documentation\n${missing}\n\nPlease ensure all three formats are generated:\n- [ ] Markdown (.md)\n- [ ] Word Document (.docx)\n- [ ] Demo HTML (.html)\n\n*See \`scripts/convert-docs.sh\` for automated conversion.*`
+            });
+
+      - name: Add agent label
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['agent:docs']
+            });
+
+  convert-docs:
+    name: Generate Triple Deliverables
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install pandoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+
+      - name: Convert MD to DOCX and HTML
+        run: |
+          find docs/ -name "*.md" -not -name "README.md" | while read mdfile; do
+            dir=$(dirname "$mdfile")
+            base=$(basename "$mdfile" .md)
+            # Generate DOCX
+            pandoc "$mdfile" -o "${dir}/${base}.docx"
+            # Generate standalone HTML with demo styling
+            if [ -f "docs/templates/demo-template.html" ]; then
+              pandoc "$mdfile" -o "${dir}/${base}.html" \
+                --standalone \
+                --template=docs/templates/demo-template.html
+            else
+              pandoc "$mdfile" -o "${dir}/${base}.html" --standalone \
+                --metadata title="$base" \
+                --css="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css"
+            fi
+          done
+
+      - name: Commit generated docs
+        run: |
+          git config user.name "docs-agent[bot]"
+          git config user.email "docs-agent[bot]@users.noreply.github.com"
+          git add docs/**/*.docx docs/**/*.html 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "No doc changes to commit"
+          else
+            git commit -m "docs: auto-generate DOCX and HTML deliverables [skip ci]"
+            git push
+          fi

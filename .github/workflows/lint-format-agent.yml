@@ -1,0 +1,68 @@
+name: Lint & Format Agent
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  lint-format:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+
+      - name: Run ESLint
+        id: eslint
+        run: npm run lint -- --format json --output-file eslint-results.json
+        continue-on-error: true
+
+      - name: Run Prettier check
+        id: prettier
+        run: npx prettier --check "src/**/*.{ts,js,json,md}" 2>&1 | tee prettier-results.txt
+        continue-on-error: true
+
+      - name: Auto-fix formatting
+        if: steps.prettier.outcome == 'failure'
+        run: |
+          npx prettier --write "src/**/*.{ts,js,json,md}"
+          git config user.name "lint-agent[bot]"
+          git config user.email "lint-agent[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --staged --quiet; then
+            git commit -m "style: auto-format code [skip ci]"
+            git push
+          fi
+
+      - name: Post lint report
+        if: steps.eslint.outcome == 'failure'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            let body = '## 🤖 Lint Agent Report\n\n';
+            body += '❌ ESLint found issues. Please fix before merging.\n\n';
+            try {
+              const results = JSON.parse(fs.readFileSync('eslint-results.json', 'utf8'));
+              const errors = results.reduce((sum, r) => sum + r.errorCount, 0);
+              const warnings = results.reduce((sum, r) => sum + r.warningCount, 0);
+              body += `**${errors} errors, ${warnings} warnings**\n`;
+            } catch (e) {}
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });

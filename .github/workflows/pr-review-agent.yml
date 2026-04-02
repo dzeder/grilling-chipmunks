@@ -1,0 +1,119 @@
+name: PR Review Agent
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  review:
+    name: Automated Code Review
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed
+        uses: tj-actions/changed-files@v47
+
+      - name: Check file size
+        run: |
+          MAX_SIZE=500
+          WARNINGS=""
+          for file in ${{ steps.changed.outputs.all_changed_files }}; do
+            if [ -f "$file" ]; then
+              lines=$(wc -l < "$file")
+              if [ "$lines" -gt "$MAX_SIZE" ]; then
+                WARNINGS="$WARNINGS\n- \`$file\`: $lines lines (max $MAX_SIZE)"
+              fi
+            fi
+          done
+          echo "SIZE_WARNINGS<<EOF" >> $GITHUB_ENV
+          echo -e "$WARNINGS" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Check for common issues
+        run: |
+          ISSUES=""
+          for file in ${{ steps.changed.outputs.all_changed_files }}; do
+            if [ -f "$file" ]; then
+              # Check for console.log in production code
+              if echo "$file" | grep -qE '\.(ts|js)$' && ! echo "$file" | grep -q 'test'; then
+                FOUND=$(grep -n 'console\.log' "$file" 2>/dev/null || true)
+                if [ -n "$FOUND" ]; then
+                  ISSUES="$ISSUES\n- \`$file\`: Contains console.log statements"
+                fi
+              fi
+              # Check for hardcoded secrets patterns
+              FOUND=$(grep -nE "(password|secret|api_key|token)\s*=\s*[\"'][^\"']+[\"']" "$file" 2>/dev/null || true)
+              if [ -n "$FOUND" ]; then
+                ISSUES="$ISSUES\n- :warning: \`$file\`: Possible hardcoded secret detected"
+              fi
+            fi
+          done
+          echo "REVIEW_ISSUES<<EOF" >> $GITHUB_ENV
+          echo -e "$ISSUES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Check PR description quality
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          WARNINGS=""
+          if [ -z "$PR_BODY" ] || [ ${#PR_BODY} -lt 50 ]; then
+            WARNINGS="$WARNINGS\n- PR description is too short. Please describe your changes."
+          fi
+          if ! echo "$PR_BODY" | grep -qE 'Closes #|Relates to #|Fixes #'; then
+            WARNINGS="$WARNINGS\n- No linked issues found. Please link related issues."
+          elif ! echo "$PR_BODY" | grep -qE 'Closes #|Fixes #'; then
+            WARNINGS="$WARNINGS\n- PR uses \`Relates to\` but no \`Closes #N\` or \`Fixes #N\`. Issues won't auto-close on merge."
+          fi
+          if ! echo "$PR_BODY" | grep -q 'Time Tracking'; then
+            WARNINGS="$WARNINGS\n- Time tracking section not found or not filled in."
+          fi
+          echo "PR_WARNINGS<<EOF" >> $GITHUB_ENV
+          echo -e "$WARNINGS" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Post review comment
+        if: env.REVIEW_ISSUES != '' || env.PR_WARNINGS != '' || env.SIZE_WARNINGS != ''
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const issues = process.env.REVIEW_ISSUES || '';
+            const warnings = process.env.PR_WARNINGS || '';
+            const sizeWarnings = process.env.SIZE_WARNINGS || '';
+            let body = '## 🤖 PR Review Agent Report\n\n';
+            if (warnings) {
+              body += '### PR Template Checks\n' + warnings + '\n\n';
+            }
+            if (sizeWarnings) {
+              body += '### Large Files\n' + sizeWarnings + '\n\n';
+            }
+            if (issues) {
+              body += '### Code Review Findings\n' + issues + '\n\n';
+            }
+            body += '---\n*Automated review — a human reviewer should also review this PR.*';
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+
+      - name: Add agent label
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['agent:pr-review']
+            });
