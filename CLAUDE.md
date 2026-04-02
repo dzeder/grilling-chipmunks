@@ -19,6 +19,25 @@ Available gstack skills: `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`
 - `.object-meta.xml`, `.field-meta.xml` -> sf-metadata
 - `.namedCredential-meta.xml` -> sf-integration
 
+## Ohanafy SKU expert skills (product layer)
+
+Each SKU skill clones from the Ohanafy GitHub org on demand. Use these when working on or integrating with specific Ohanafy products:
+
+| Skill | Ohanafy Repo(s) | Domain |
+|-------|-----------------|--------|
+| **ohfy-core-expert** | OHFY-Core | Triggers, services, bypass patterns, 143 objects |
+| **ohfy-data-model-expert** | OHFY-Data_Model | 30+ custom objects, field schemas, value sets |
+| **ohfy-platform-expert** | OHFY-Platform | Shared platform services across all SKUs |
+| **ohfy-oms-expert** | OHFY-OMS + OHFY-OMS-UI | Order management, fulfillment |
+| **ohfy-wms-expert** | OHFY-WMS + OHFY-WMS-UI | Warehouse ops, inventory, picking/packing |
+| **ohfy-rex-expert** | OHFY-REX + OHFY-REX-UI | Retail excellence, POS, displays |
+| **ohfy-ecom-expert** | OHFY-Ecom | E-commerce, Shopify/WooCommerce |
+| **ohfy-payments-expert** | OHFY-Payments | Payment processing, settlement |
+| **ohfy-edi-expert** | OHFY-EDI | X12 850/810/856, B2B interchange |
+| **ohfy-configure-expert** | OHFY-Configure | System config, feature flags, setup |
+
+Source sync roadmap: `docs/ohanafy-source-sync-roadmap.md`
+
 ## Integration skills (Tray / Ohanafy platform)
 
 14 integration-specific skills in `skills/`:
@@ -31,7 +50,6 @@ Available gstack skills: `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`
 - **csv-output** — CSV formatting patterns
 - **salesforce-composite** — SF Composite API patterns
 - **salesforce-field-object-creator** — Field/object definition utilities
-- **ohfy-core-expert** — Ohanafy business logic and domain rules
 - **ohfy-transformation-settings** — Transformation rule configuration
 - **deploy-prep** — Deployment workflow preparation
 - **test-script** — Script testing infrastructure
@@ -111,12 +129,6 @@ projects/
   xero-ohanafy/           # Xero integration
   rehrig-ohanafy/         # Rehrig integration
 ```
-
-## Migration scripts
-
-Production-tested ETL scripts in `scripts/migrations/vip-to-ohanafy/`:
-- Wave-based SF Bulk API migration with resume and dry-run
-- Loaders for POs, invoices, contacts, inventory, keg shells, route customers
 
 ## Conventions
 

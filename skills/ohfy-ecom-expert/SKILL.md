@@ -1,0 +1,51 @@
+---
+name: ohfy-ecom-expert
+description: |
+  Expert knowledge of the Ohanafy E-Commerce system (OHFY-Ecom). Apply when:
+  - Building or debugging e-commerce features (catalog, cart, checkout)
+  - Integrating Shopify, WooCommerce, or other e-commerce platforms
+  - Working with online order capture and fulfillment
+  - Understanding e-commerce data flows into Ohanafy
+  Covers: Online storefront integration, catalog management, cart/checkout,
+  e-commerce order processing, and Shopify/WooCommerce connectors.
+---
+
+# OHFY-Ecom Expert Skill
+
+## Source Repository
+
+**Repo:** `Ohanafy/OHFY-Ecom`
+**Languages:** Apex, OpenEdge ABL
+**Dependencies:** OHFY-Core
+
+### Accessing Current Source
+
+```bash
+if [ ! -d /tmp/ohfy-ecom ]; then
+  gh repo clone Ohanafy/OHFY-Ecom /tmp/ohfy-ecom -- --depth 1
+fi
+```
+
+## Domain Coverage
+
+- E-commerce platform integration (Shopify, WooCommerce)
+- Online catalog management
+- Cart and checkout flows
+- E-commerce order creation in Ohanafy
+- Product sync between platforms
+- Pricing and inventory availability
+- Customer account linking
+
+## Related Integration Projects
+
+Reference the Tray workflow exports for active e-commerce integrations:
+- Shopify connector workflows (in dhsOhanafy/Integrations)
+- WooCommerce connector workflows
+- CSV upload for bulk product management
+
+## Delegates To
+
+- **ohfy-core-expert** — For Salesforce-side order processing
+- **ohfy-oms-expert** — For order fulfillment after capture
+- **tray-architecture** — For Tray.io workflow patterns
+- **salesforce-composite** — For API integration patterns
