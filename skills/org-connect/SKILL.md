@@ -43,7 +43,7 @@ sf project retrieve start --target-org <alias> --manifest ./package.xml
 
 ## What the Script Does
 
-1. **Creates project directory** under `projects/<name>/<env>/`
+1. **Creates project directory** under `customers/<name>/orgs/<env>/`
 2. **Authenticates** via browser login (or reuses existing auth)
 3. **Generates manifest** from the org with wildcard retrieval for critical types
 4. **Retrieves all metadata** — Apex, triggers, flows, objects, fields, validation rules, LWC, etc.
@@ -52,15 +52,28 @@ sf project retrieve start --target-org <alias> --manifest ./package.xml
 
 ## Using the Snapshot
 
-After connecting, read `projects/<name>/<env>/org-snapshot.md` for a quick overview:
+After connecting, read `customers/<name>/orgs/<env>/org-snapshot.md` for a quick overview:
 - What's deployed (counts of classes, triggers, flows, etc.)
 - Which OHFY SKU packages are installed
 - Per-object field and validation rule counts
 - Quick commands for testing and querying
 
+## Customer Context
+
+Before diving into metadata, read the customer profile for context:
+```bash
+cat customers/<name>/profile.md
+```
+This tells you their installed SKUs, org topology, data profile, external systems, and any migration history. When you learn something new about a customer during debugging, write it to their `customers/<name>/notes.md`.
+
 ## Debugging Workflow
 
 When a user reports an issue (e.g., "orders are failing on Gulf prod"):
+
+### Step 0: Read the customer profile
+```bash
+cat customers/gulf/profile.md
+```
 
 ### Step 1: Check if org is connected
 ```bash
@@ -68,7 +81,7 @@ sf org list | grep gulf
 ```
 
 ### Step 2: Read the snapshot
-Read `projects/gulf/production/org-snapshot.md` for context on what's deployed.
+Read `customers/gulf/orgs/production/org-snapshot.md` for context on what's deployed.
 
 ### Step 3: Read relevant metadata
 Based on the error, read the specific metadata:
@@ -76,19 +89,19 @@ Based on the error, read the specific metadata:
 **Validation rule errors:**
 ```bash
 # Find validation rules on the object
-find projects/gulf/production/force-app -path "*Order__c/validationRules*" -name "*.xml"
+find customers/gulf/orgs/production/force-app -path "*Order__c/validationRules*" -name "*.xml"
 ```
 
 **Trigger errors:**
 ```bash
 # Read triggers for the object
-find projects/gulf/production/force-app -name "*.trigger" | grep -i order
+find customers/gulf/orgs/production/force-app -name "*.trigger" | grep -i order
 ```
 
 **Flow errors:**
 ```bash
 # Find record-triggered flows
-find projects/gulf/production/force-app -name "*.flow-meta.xml" | grep -i order
+find customers/gulf/orgs/production/force-app -name "*.flow-meta.xml" | grep -i order
 ```
 
 ### Step 4: Cross-reference with SKU skills
@@ -97,7 +110,7 @@ Use the relevant `ohfy-*-expert` skill to understand the expected behavior, then
 ### Step 5: Refresh if stale
 If the snapshot might be outdated:
 ```bash
-cd projects/gulf/production
+cd customers/gulf/orgs/production
 sf project retrieve start --target-org gulf-production --manifest ./package.xml
 ```
 
@@ -117,7 +130,7 @@ The `ohfy-*-expert` skills reference GitHub source (what should be deployed). Th
 
 After connecting:
 ```
-projects/gulf/production/
+customers/gulf/orgs/production/
 ├── sfdx-project.json
 ├── package.xml
 ├── org-snapshot.md          # Generated summary

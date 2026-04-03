@@ -19,9 +19,19 @@ description: |
 **Version:** 0.1.0
 **Language:** JavaScript, CSS (metadata definitions + static resources)
 
-### Accessing Current Source
+### Quick Reference (auto-synced)
 
-Before answering questions about the data model, ensure you have the latest source:
+Read `references/source-index.md` for a pre-built index of all classes, triggers,
+service methods, object fields, and LWC components. Check `references/last-synced.txt` —
+if older than 7 days, refresh:
+
+```bash
+bash scripts/sync-ohanafy-index.sh --repo OHFY-Data_Model
+```
+
+### Deep Dive (clone for full source)
+
+When the index isn't enough (need implementation details, method bodies, test patterns):
 
 ```bash
 if [ ! -d /tmp/ohfy-data-model ]; then

@@ -56,14 +56,15 @@ if [ -z "$ENV_NAME" ]; then
 fi
 
 # --- Derived paths ---
+# Customer and sandbox orgs go to customers/<name>/orgs/<env>/
+# Template orgs go to projects/<name>/<env>/
 case "$ORG_TYPE" in
-  customer) BASE_DIR="projects" ;;
-  template) BASE_DIR="projects" ;;
-  sandbox)  BASE_DIR="projects" ;;
+  customer) BASE_DIR="customers/${CUSTOMER_NAME}/orgs" ;;
+  sandbox)  BASE_DIR="customers/${CUSTOMER_NAME}/orgs" ;;
+  template) BASE_DIR="projects/${CUSTOMER_NAME}" ;;
 esac
 
-PROJECT_DIR="${REPO_ROOT}/${BASE_DIR}/${CUSTOMER_NAME}"
-ORG_DIR="${PROJECT_DIR}/${ENV_NAME}"
+ORG_DIR="${REPO_ROOT}/${BASE_DIR}/${ENV_NAME}"
 ALIAS="${CUSTOMER_NAME}-${ENV_NAME}"
 
 case "$ENV_NAME" in
@@ -171,23 +172,27 @@ if find force-app -name "*.cls" 2>/dev/null | xargs grep -l "ohfy__" 2>/dev/null
   echo "  Found ohfy__ namespace references"
 fi
 
-# Detect SKUs by class name patterns
-declare -A SKU_PATTERNS=(
-  ["OMS"]="Order_.*Service\|OrderItem\|Fulfillment"
-  ["WMS"]="Warehouse\|Inventory.*Service\|Pick\|Pack\|Ship"
-  ["REX"]="Display\|Retail\|Equipment\|Route.*Account"
-  ["Ecom"]="Ecommerce\|Shopify\|WooCommerce\|Cart"
-  ["Payments"]="Payment\|Settlement\|Refund"
-  ["Configure"]="Configuration\|PackageInstall\|Setup"
-  ["EDI"]="EDI\|X12\|AS2\|Trading.*Partner"
-  ["Planogram"]="Planogram\|Shelf\|PlacementLayout"
+# Detect SKUs by class name patterns (bash 3.2 compatible)
+SKU_NAMES=("OMS" "WMS" "REX" "Ecom" "Payments" "Configure" "EDI" "Planogram")
+SKU_PATTERNS=(
+  'Order_.*Service\|OrderItem\|Fulfillment'
+  'Warehouse\|Inventory.*Service\|Pick\|Pack\|Ship'
+  'Display\|Retail\|Equipment\|Route.*Account'
+  'Ecommerce\|Shopify\|WooCommerce\|Cart'
+  'Payment\|Settlement\|Refund'
+  'Configuration\|PackageInstall\|Setup'
+  'EDI\|X12\|AS2\|Trading.*Partner'
+  'Planogram\|Shelf\|PlacementLayout'
 )
 
-for sku in "${!SKU_PATTERNS[@]}"; do
-  if find force-app -name "*.cls" -o -name "*.trigger" 2>/dev/null | xargs grep -l "${SKU_PATTERNS[$sku]}" 2>/dev/null | head -1 | grep -q .; then
+idx=0
+for sku in "${SKU_NAMES[@]}"; do
+  pattern="${SKU_PATTERNS[$idx]}"
+  if find force-app -name "*.cls" -o -name "*.trigger" 2>/dev/null | xargs grep -l "$pattern" 2>/dev/null | head -1 | grep -q .; then
     PACKAGES_FOUND+=("$sku")
     echo "  Detected: OHFY-${sku}"
   fi
+  idx=$((idx + 1))
 done
 
 # --- Generate org snapshot ---

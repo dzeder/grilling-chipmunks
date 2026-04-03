@@ -19,7 +19,19 @@ description: |
 **Languages:** Apex, JavaScript, HTML, CSS
 **Dependencies:** OHFY-Core 1.92.0+
 
-### Accessing Current Source
+### Quick Reference (auto-synced)
+
+Read `references/source-index.md` for a pre-built index of all classes, triggers,
+service methods, object fields, and LWC components. Check `references/last-synced.txt` —
+if older than 7 days, refresh:
+
+```bash
+bash scripts/sync-ohanafy-index.sh --repo OHFY-Payments
+```
+
+### Deep Dive (clone for full source)
+
+When the index isn't enough (need implementation details, method bodies, test patterns):
 
 ```bash
 if [ ! -d /tmp/ohfy-payments ]; then
