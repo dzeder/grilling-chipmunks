@@ -160,3 +160,43 @@ Standalone: OHFY-Utilities, OHFY-CICD, OHFY-SF-Perf, OHFY-Workflows
 bash scripts/update-best-practices.sh           # preview
 bash scripts/update-best-practices.sh --apply   # apply
 ```
+
+## Ecosystem Watch (external repos)
+
+**What:** Lightweight monitoring of high-value Claude Code ecosystem repos
+**Marker files:** `references/ecosystem-watch/*.last-checked`
+**Sync method:** Biweekly GitHub Action creates Issues with change digests
+**Script:** `scripts/check-ecosystem.sh`
+
+### Monitored repos
+
+| Repo | Why we watch it | What we look for |
+|------|-----------------|------------------|
+| `anthropics/claude-code` | Official harness | New hook types, CLI features, harness changes |
+| `hesreallyhim/awesome-claude-code` | Curated community patterns | Skills/plugins gaining traction |
+
+### What we decided NOT to monitor
+
+After evaluating the Claude Code ecosystem (April 2026), we rejected most external repos:
+
+| Repo | Why rejected |
+|------|-------------|
+| `wshobson/agents` (112 agents) | Breadth over depth — our 17 coordinated agents with pod structure are more sophisticated |
+| `VoltAgent/awesome-claude-code-subagents` | Generic install-script subagents dilute domain expertise |
+| `VoltAgent/awesome-agent-skills` | Our domain skills (ohfy-*, sf-*, tray-*) are already more specialized; check for packaging conventions only |
+| `ruvnet/ruflo` (agent swarms) | Solves general compute parallelism, not domain-expert coordination |
+| `shareAI-lab/learn-claude-code` | Heartbeat/cron patterns interesting but we already have /loop and /schedule |
+
+### Manual check
+```bash
+bash scripts/check-ecosystem.sh    # show digest of changes
+```
+
+### Automated notifications
+
+A GitHub Action (`.github/workflows/check-ecosystem.yml`) runs biweekly (1st and 15th):
+1. Checks monitored repos via `git ls-remote`
+2. If changes detected and no existing open issue, creates a GitHub Issue
+3. Issues are labeled `ecosystem-watch` for easy filtering
+
+Schedule across the month: 1st + 15th (ecosystem), plus weekly Mon/Wed/Fri for gstack/best-practices/sf-skills.
