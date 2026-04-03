@@ -46,7 +46,9 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install dependencies
-        run: pip install -e ".[dev]" 2>/dev/null || echo "No Python package to install"
+        run: |
+          pip install pytest -q
+          pip install -e ".[dev]" 2>/dev/null || echo "No Python package extras to install"
       - name: Run tests
         run: |
           if [ -f pytest.ini ] || [ -f pyproject.toml ]; then
