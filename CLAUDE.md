@@ -179,6 +179,13 @@ When a skill gives bad advice or misses something, fix it directly:
 2. Commit with the project change that revealed the gap
 3. The improvement is live immediately for all future work
 
+Templates and quality tools:
+- **Skill template:** `docs/SKILL_TEMPLATE.md` — required structure for all SKILL.md files
+- **Agent template:** `docs/AGENT_TEMPLATE.md` — required structure for all agent definitions
+- **Routing matrix:** `docs/SKILL_ROUTING_MATRIX.md` — cross-skill handoff rules
+- **Lint skills:** `bash scripts/lint-skills.sh` — check all skills for template compliance
+- **Ecosystem watch:** `bash scripts/check-ecosystem.sh` — check upstream repos for relevant changes
+
 ## Org Connect (live org debugging)
 
 Use `org-connect` skill when debugging against a live Salesforce org.
@@ -214,6 +221,8 @@ cat customers/gulf/orgs/production/org-snapshot.md  # Deployed metadata state
 When the user's request matches an available skill, ALWAYS invoke it using the Skill
 tool as your FIRST action. Do NOT answer directly, do NOT use other tools first.
 The skill has specialized workflows that produce better results than ad-hoc answers.
+
+For cross-skill handoffs (when one skill encounters work outside its scope), see `docs/SKILL_ROUTING_MATRIX.md`.
 
 Key routing rules:
 - Product ideas, "is this worth building", brainstorming → invoke office-hours
