@@ -76,7 +76,7 @@ jobs:
             fi
           done
 
-          # Write summary to a file to avoid shell injection via ${{ }} interpolation
+          # Write summary to a file to avoid shell injection via expression interpolation
           SUMMARY_FILE=$(mktemp)
           {
             echo "## Upstream sf-skills changes"
