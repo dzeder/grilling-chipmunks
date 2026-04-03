@@ -1,0 +1,136 @@
+name: Check sf-skills Upstream
+
+on:
+  schedule:
+    - cron: '0 10 * * 5'  # Fridays at 10am UTC
+  workflow_dispatch:
+
+concurrency:
+  group: sf-skills-check
+  cancel-in-progress: true
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  check-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for upstream changes
+        id: check
+        run: |
+          CURRENT_HASH=$(cat skills/.sf-skills-upstream-version 2>/dev/null | tr -d '[:space:]' || echo "none")
+          if ! echo "$CURRENT_HASH" | grep -qE '^[0-9a-f]{40}$'; then
+            echo "Invalid or missing version marker, treating as first run"
+            CURRENT_HASH="none"
+          fi
+          UPSTREAM_HASH=$(git ls-remote https://github.com/Jaganpro/sf-skills.git HEAD | cut -f1)
+          echo "current=$CURRENT_HASH" >> $GITHUB_OUTPUT
+          echo "upstream=$UPSTREAM_HASH" >> $GITHUB_OUTPUT
+          if [ "$CURRENT_HASH" != "$UPSTREAM_HASH" ]; then
+            echo "needs_update=true" >> $GITHUB_OUTPUT
+          else
+            echo "needs_update=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check for existing open issue
+        if: steps.check.outputs.needs_update == 'true'
+        id: existing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OPEN=$(gh issue list --label "sf-skills-upstream" --state open --json number --jq 'length' 2>/dev/null || echo "error")
+          if [ "$OPEN" = "error" ]; then
+            echo "open_count=unknown" >> $GITHUB_OUTPUT
+          else
+            echo "open_count=$OPEN" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build change summary
+        if: steps.check.outputs.needs_update == 'true' && steps.existing.outputs.open_count == '0'
+        id: summary
+        run: |
+          TMP_DIR=$(mktemp -d)
+          trap 'rm -rf "$TMP_DIR"' EXIT
+          git clone --depth 100 https://github.com/Jaganpro/sf-skills.git "$TMP_DIR" 2>/dev/null
+
+          CURRENT="${{ steps.check.outputs.current }}"
+
+          # Get commit log
+          COMMITS=$(cd "$TMP_DIR" && git log --oneline "${CURRENT}..HEAD" 2>/dev/null || git log --oneline -20)
+
+          # Count changed skills
+          CHANGED=""
+          NEW=""
+          for upstream_dir in "$TMP_DIR"/skills/sf-*/; do
+            [ -d "$upstream_dir" ] || continue
+            skill=$(basename "$upstream_dir")
+            local_dir="skills/${skill}"
+            if [ ! -d "$local_dir" ]; then
+              NEW="${NEW}- \`${skill}\` (new upstream)\n"
+            elif ! diff -rq "$local_dir" "$upstream_dir" --exclude='.DS_Store' > /dev/null 2>&1; then
+              CHANGED="${CHANGED}- \`${skill}\`\n"
+            fi
+          done
+
+          # Write summary to a file to avoid shell injection via ${{ }} interpolation
+          SUMMARY_FILE=$(mktemp)
+          {
+            echo "## Upstream sf-skills changes"
+            echo ""
+            echo "**Last reviewed:** \`${CURRENT:0:8}\`"
+            echo "**Upstream HEAD:** \`${{ steps.check.outputs.upstream }}\`"
+            echo ""
+            echo "### Commits"
+            echo '```'
+            echo "$COMMITS"
+            echo '```'
+            echo ""
+            if [ -n "$NEW" ]; then
+              echo "### New skills"
+              printf '%b' "$NEW"
+            fi
+            if [ -n "$CHANGED" ]; then
+              echo "### Changed skills"
+              printf '%b' "$CHANGED"
+            fi
+            if [ -z "$NEW" ] && [ -z "$CHANGED" ]; then
+              echo "### Skills"
+              echo "No skill-level changes detected (changes may be in agents, shared, or infra)."
+            fi
+            echo ""
+            echo "### What to do"
+            echo "Run the preview script for full details:"
+            echo '```bash'
+            echo "bash scripts/update-sf-skills.sh"
+            echo '```'
+            echo "Cherry-pick what you want, then mark as reviewed:"
+            echo '```bash'
+            echo "bash scripts/update-sf-skills.sh --mark-reviewed"
+            echo '```'
+          } > "$SUMMARY_FILE"
+
+          echo "summary_file=$SUMMARY_FILE" >> $GITHUB_OUTPUT
+
+      - name: Ensure label exists
+        if: steps.check.outputs.needs_update == 'true' && steps.existing.outputs.open_count == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create sf-skills-upstream \
+            --description "Upstream sf-skills change notification" \
+            --color "0E8A16" \
+            --force 2>/dev/null || true
+
+      - name: Create issue
+        if: steps.check.outputs.needs_update == 'true' && steps.existing.outputs.open_count == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "sf-skills upstream has new changes ($(date +%Y-%m-%d))" \
+            --label "sf-skills-upstream" \
+            --body-file "${{ steps.summary.outputs.summary_file }}"
