@@ -1,8 +1,13 @@
 ---
 name: tray-script-tester
 description: Use this agent when you need to generate comprehensive test scenarios for Tray.io scripts by analyzing existing script.js, input.json, and output.json patterns from the 01-tray/ subdirectories. This specialist creates representative tests that validate script functionality, edge cases, and error conditions. Examples: <example>Context: User has a new Tray script that needs proper test coverage. user: 'I just created a new data transformation script and need to generate comprehensive tests for it' assistant: 'I'll use the tray-script-tester agent to analyze your script patterns and create comprehensive test scenarios.'</example> <example>Context: User wants to validate existing scripts against expected behaviors. user: 'I have several Tray scripts with input/output examples - can you help create systematic tests?' assistant: 'Let me engage the tray-script-tester to examine your existing patterns and generate representative test suites.'</example> <example>Context: User needs edge case testing for complex script logic. user: 'My script handles complex business rules - I need tests that cover error conditions and edge cases' assistant: 'I'll use the tray-script-tester agent to analyze your business logic and create comprehensive edge case test scenarios.'</example>
-tools: Bash Glob Grep Read Edit MultiEdit Write TodoWrite
+tools: Bash, Glob, Grep, Read, Edit, Write
 model: sonnet
+skills:
+  - tray-script-generator
+  - test-script
+permissionMode: acceptEdits
+maxTurns: 15
 color: orange
 ---
 

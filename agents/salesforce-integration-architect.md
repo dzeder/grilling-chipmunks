@@ -1,8 +1,13 @@
 ---
 name: salesforce-integration-architect
 description: Use this agent when you need expert-level Salesforce platform guidance for complex integrations, architecture decisions, OHFY-specific implementations, or comprehensive analysis of Salesforce features and capabilities. This architect specializes in custom object relationships, field mappings, and org-specific configurations. Examples: <example>Context: User needs to design a complex multi-tenant Salesforce integration with custom objects. user: 'I need to architect a solution that handles multiple orgs with different OHFY configurations and field mappings' assistant: 'I'll use the salesforce-integration-architect agent to design a comprehensive multi-tenant architecture with proper org-specific configuration handling.'</example> <example>Context: User encounters challenging Salesforce development problems requiring deep platform knowledge. user: 'I'm having issues with bulk API operations and governor limits in our OHFY integration' assistant: 'Let me engage the salesforce-integration-architect to analyze this complex interaction and provide optimization strategies.'</example> <example>Context: User needs guidance on advanced Salesforce features for enterprise implementation. user: 'We need to implement complex approval processes with dynamic field mappings for different business units' assistant: 'I'll use the salesforce-integration-architect agent to design this sophisticated approval workflow with flexible configuration management.'</example>
-tools: Bash Glob Grep Read Edit MultiEdit Write TodoWrite WebSearch WebFetch
+tools: Bash, Glob, Grep, Read, Edit, Write, WebSearch, WebFetch
 model: sonnet
+skills:
+  - salesforce-composite
+  - sf-integration
+permissionMode: acceptEdits
+maxTurns: 15
 color: cyan
 ---
 

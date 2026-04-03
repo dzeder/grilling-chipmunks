@@ -59,5 +59,5 @@ Reference the Tray workflow exports for active e-commerce integrations:
 
 - **ohfy-core-expert** — For Salesforce-side order processing
 - **ohfy-oms-expert** — For order fulfillment after capture
-- **tray-architecture** — For Tray.io workflow patterns
+- **tray-expert** — For Tray.io workflow patterns and architecture
 - **salesforce-composite** — For API integration patterns

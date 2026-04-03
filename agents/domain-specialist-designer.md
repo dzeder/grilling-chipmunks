@@ -1,8 +1,10 @@
 ---
 name: domain-specialist-designer
 description: Use this agent when you need to create new domain-specific agents by probing users for requirements, analyzing repository patterns, and designing comprehensive agent specifications. This designer ensures proper knowledge background and context is built into new agents during the creation process. Examples: <example>Context: User needs a specialist agent for a new integration domain not covered by existing agents. user: 'I need to create an agent that specializes in payment processing integrations - can you help me design one?' assistant: 'I'll use the domain-specialist-designer agent to interview you about payment processing requirements and design a comprehensive agent specification.'</example> <example>Context: User wants to create an agent for a specific business workflow or system. user: 'We're building integrations for a new ERP system and need a specialist agent' assistant: 'Let me engage the domain-specialist-designer to probe your ERP requirements and create a tailored agent with the right knowledge base.'</example> <example>Context: User needs an agent with specific technical expertise for a complex integration scenario. user: 'I need an agent that understands both blockchain APIs and our legacy accounting systems' assistant: 'I'll use the domain-specialist-designer agent to map out the knowledge requirements and design a specialist with both blockchain and accounting expertise.'</example>
-tools: Bash Glob Grep Read Edit MultiEdit Write TodoWrite WebSearch
+tools: Bash, Glob, Grep, Read, Edit, Write, WebSearch
 model: sonnet
+permissionMode: acceptEdits
+maxTurns: 15
 color: yellow
 ---
 

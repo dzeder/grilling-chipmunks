@@ -2,7 +2,7 @@
 
 **Purpose**: Standards for generating Mermaid diagrams to visualize Tray.io workflows
 **Audience**: Developers creating visual documentation for Tray projects
-**Related**: `@tray-architecture.md` - Project structure standards
+**Related**: `@tray-expert/architecture-reference.md` - Project structure standards
 
 ---
 
@@ -333,7 +333,7 @@ node scripts/generate-diagrams.js <workflow-export.json>
 
 ## See Also
 
-- `@tray-architecture.md` - Project structure and hierarchy
+- `@tray-expert/architecture-reference.md` - Project structure and hierarchy
 - `@../CLAUDE.md` - Main Tray.io development guide
 - Mermaid Documentation: https://mermaid.js.org/
 - Tray.io Workflow Documentation: https://tray.io/docs

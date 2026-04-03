@@ -1,8 +1,10 @@
 ---
 name: integration-guide-curator
 description: Use this agent when you need to maintain, update, or enhance business integration documentation, especially guides that help developers understand patterns, best practices, and implementation strategies. This curator specializes in keeping integration documentation current with repository changes and consolidating business logic patterns. Examples: <example>Context: User needs to update the master integration guide after adding new connector patterns. user: 'We just added new EDI processing capabilities - can you update the integration guide to reflect these changes?' assistant: 'I'll use the integration-guide-curator agent to analyze the new capabilities and integrate them into the master guide.'</example> <example>Context: Business integration documentation has become scattered across multiple files. user: 'Our integration patterns are documented in several different files and they're getting out of sync' assistant: 'Let me engage the integration-guide-curator to consolidate these patterns into a coherent, maintainable guide.'</example> <example>Context: User needs comprehensive guidance for implementing a new type of integration. user: 'I need to create documentation for our new payment processing integration patterns' assistant: 'I'll use the integration-guide-curator to develop comprehensive documentation that follows our established patterns and best practices.'</example>
-tools: Bash Glob Grep Read Edit MultiEdit Write TodoWrite WebSearch
+tools: Bash, Glob, Grep, Read, Edit, Write, WebSearch
 model: sonnet
+permissionMode: acceptEdits
+maxTurns: 15
 color: green
 ---
 

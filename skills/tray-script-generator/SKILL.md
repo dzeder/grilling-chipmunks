@@ -1,8 +1,9 @@
-# Tray.io Script Generation Skill
+---
+name: tray-script-generator
+description: Production-grade Tray.io script generation with patterns, templates, and examples from real Ohanafy integrations. Use when generating, refactoring, or debugging Tray.io exports.step scripts.
+---
 
-**Version**: 2.1.0
-**Last Updated**: 2026-03-06
-**Purpose**: Production-grade Tray.io script generation with comprehensive patterns, templates, and examples
+# Tray.io Script Generation Skill
 
 ## Skill Overview
 

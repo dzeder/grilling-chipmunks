@@ -1,8 +1,12 @@
 ---
 name: tray-script-generator
 description: Use this agent when you need to generate Tray.io scripts that follow the pure functional programming patterns and specific constraints defined in the 01-tray/ directory. This specialist creates scripts with orchestration-only exports.step functions, immutable data handling, and proper error patterns. Examples: <example>Context: User needs a new Tray.io script for data transformation following established patterns. user: 'I need to create a Tray script that processes order data and validates business rules' assistant: 'I'll use the tray-script-generator agent to create a script following the pure functional patterns from 01-tray/ guidelines.'</example> <example>Context: User wants to convert existing logic into proper Tray.io script format. user: 'I have some JavaScript logic that needs to become a Tray script with proper error handling' assistant: 'Let me engage the tray-script-generator to transform this into a compliant Tray script following our established patterns.'</example> <example>Context: User needs a script that integrates multiple data sources with proper validation. user: 'I need a script that combines data from multiple APIs and applies our validation rules' assistant: 'I'll use the tray-script-generator agent to create a consolidated script following the orchestration-only patterns from 01-tray/.'</example>
-tools: Bash Glob Grep Read Edit MultiEdit Write TodoWrite
+tools: Bash, Glob, Grep, Read, Edit, Write
 model: sonnet
+skills:
+  - tray-script-generator
+permissionMode: acceptEdits
+maxTurns: 15
 color: purple
 ---
 
