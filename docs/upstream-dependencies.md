@@ -62,25 +62,53 @@ git subtree pull --prefix=.claude/skills/gstack https://github.com/garrytan/gsta
 
 This preserves upstream commit messages and handles merges better, but the commands are harder to remember.
 
-## sf-skills (davis-v1)
+## sf-skills (Jaganpro/sf-skills)
 
 **Location:** `skills/sf-*`, `agents/fde-*`, `agents/ps-*`, `shared/`, `tools/`, `tests/`
-**Upstream:** The original sf-skills repo (ask Jag for the URL)
-**Strategy:** Cherry-pick improvements you want
+**Upstream:** https://github.com/Jaganpro/sf-skills
+**Version marker:** `skills/.sf-skills-upstream-version` (commit hash of last-reviewed upstream state)
+**Strategy:** Preview upstream changes, cherry-pick what you want
 
-Since you've restructured sf-skills into this monorepo, there's no 1:1 sync. When the upstream author releases improvements:
+Unlike gstack and best-practices, sf-skills is **not auto-applied**. You've restructured the skills into this monorepo and are increasingly customizing them for Ohanafy. The sync tool shows what changed upstream so you can cherry-pick generic Salesforce improvements while skipping things that conflict with your customizations.
+
+### Preview what changed
 
 ```bash
-# Add as remote
-git remote add sf-skills-upstream <url>
+bash scripts/update-sf-skills.sh
+```
+
+This shows: upstream commit log, per-skill diffs (NEW/CHANGED), agent changes, and shared infrastructure changes. It does not modify any files.
+
+### Cherry-pick improvements
+
+```bash
+# Add the remote (first time only)
+git remote add sf-skills-upstream https://github.com/Jaganpro/sf-skills.git
 git fetch sf-skills-upstream
 
 # Cherry-pick specific commits
-git cherry-pick <commit-sha>
+git cherry-pick <sha>
 
-# Or diff and manually apply
+# Or diff and manually apply a specific skill
 git diff sf-skills-upstream/main -- skills/sf-apex/SKILL.md
 ```
+
+### Mark as reviewed
+
+After cherry-picking (or deciding to skip), update the version marker so the next run only shows new changes:
+
+```bash
+bash scripts/update-sf-skills.sh --mark-reviewed
+```
+
+### Automated notifications
+
+A GitHub Action (`.github/workflows/check-sf-skills-update.yml`) runs every Friday:
+1. Compares your version marker against upstream HEAD
+2. If different and no existing open issue, opens a GitHub Issue with a change summary
+3. The issue includes commit log, changed skills, and cherry-pick instructions
+
+Schedule across the week: Monday (gstack), Wednesday (best-practices), Friday (sf-skills).
 
 ## dhsOhanafy/Integrations
 

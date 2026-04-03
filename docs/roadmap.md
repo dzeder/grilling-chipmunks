@@ -44,7 +44,7 @@
 |-----------|--------|-------------|-----------------|
 | gstack | garrytan/gstack | `scripts/update-gstack.sh` | Weekly (Action) |
 | Best practices | shanraisshan/claude-code-best-practice | `scripts/update-best-practices.sh` | Weekly (Action) |
-| sf-skills | davis-v1 branch | Manual (vendored at v1) | As needed |
+| sf-skills | Jaganpro/sf-skills | `scripts/update-sf-skills.sh` (preview) | Weekly (Action → Issue) |
 | DHS Integrations | dhsOhanafy/Integrations | Manual (vendored) | As needed |
 | Ohanafy source | Ohanafy/* (54 repos) | Clone-on-demand → weekly index | Evolving |
 
