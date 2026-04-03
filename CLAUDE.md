@@ -65,6 +65,7 @@ Source sync roadmap: `docs/ohanafy-source-sync-roadmap.md`
 
 - **org-connect** — Connect to live Salesforce orgs for debugging and metadata retrieval
 - **claude-code-best-practices** — Skill/agent authoring patterns and monorepo organization
+- **github-agent** — GitHub Actions health audit, CI/CD best practices, repo configuration review
 
 ## Agents
 
@@ -228,3 +229,4 @@ Key routing rules:
 - Architecture review → invoke plan-eng-review
 - Save progress, checkpoint, resume → invoke checkpoint
 - Code quality, health check → invoke health
+- GitHub Actions, CI/CD failures, workflow issues, repo config → invoke github-agent
