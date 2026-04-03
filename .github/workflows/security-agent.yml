@@ -2,9 +2,9 @@ name: Security Agent
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master, main]
   push:
-    branches: [master]
+    branches: [master, main]
   schedule:
     - cron: "0 6 * * 1" # Weekly Monday 6am UTC
 
@@ -20,47 +20,48 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "20"
-      - run: npm ci
-      - name: Run npm audit
-        id: audit
+
+      - name: Scan for secrets
         run: |
-          npm audit --json > audit-results.json 2>&1 || true
+          echo "Checking for potential secrets in tracked files..."
+          patterns='(PRIVATE.KEY|password\s*=\s*["\x27][^"\x27]+|api_key\s*=\s*["\x27][^"\x27]+|secret\s*=\s*["\x27][^"\x27]+)'
+          if git diff --name-only HEAD~1 2>/dev/null | xargs grep -lEi "$patterns" 2>/dev/null; then
+            echo "::warning::Potential secrets detected in changed files — please review"
+          else
+            echo "No obvious secrets found in changed files."
+          fi
+        continue-on-error: true
+
+      - name: Check for sensitive file patterns
+        run: |
+          sensitive_files=(.env .env.local credentials.json service-account.json *.pem *.key)
+          found=0
+          for pattern in "${sensitive_files[@]}"; do
+            if git ls-files "$pattern" 2>/dev/null | grep -q .; then
+              echo "::warning::Sensitive file pattern found: $pattern"
+              found=1
+            fi
+          done
+          if [ "$found" -eq 0 ]; then
+            echo "No sensitive files found in repo."
+          fi
+
+      - name: Check JS patterns for known issues
+        run: |
+          errors=0
+          for js in integrations/patterns/*.js; do
+            if [ -f "$js" ]; then
+              # Check for eval() usage
+              if grep -n 'eval(' "$js" 2>/dev/null; then
+                echo "::warning file=$js::eval() usage found"
+                errors=$((errors + 1))
+              fi
+            fi
+          done
+          echo "JS security scan complete. $errors issue(s) found."
+        continue-on-error: true
 
       - name: Post security report
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const fs = require('fs');
-            let body = '## 🤖 Security Agent Report\n\n';
-            try {
-              const audit = JSON.parse(fs.readFileSync('audit-results.json', 'utf8'));
-              const v = audit.metadata?.vulnerabilities || {};
-              body += '### Dependency Vulnerabilities\n\n';
-              body += '| Severity | Count |\n|----------|-------|\n';
-              body += `| Critical | ${v.critical || 0} |\n`;
-              body += `| High | ${v.high || 0} |\n`;
-              body += `| Moderate | ${v.moderate || 0} |\n`;
-              body += `| Low | ${v.low || 0} |\n\n`;
-              if ((v.critical || 0) > 0 || (v.high || 0) > 0) {
-                body += '🚨 **Critical or High vulnerabilities found. Please address before merging.**\n';
-              } else {
-                body += '✅ No critical or high vulnerabilities found.\n';
-              }
-            } catch (e) {
-              body += '✅ No vulnerability data (audit clean or not applicable)\n';
-            }
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: body
-            });
-
-      - name: Add agent label
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v8
         with:
