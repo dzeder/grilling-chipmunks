@@ -282,7 +282,10 @@ def run(cmd: Iterable[str], timeout: int = 120) -> subprocess.CompletedProcess[s
 
 
 def sf_data360_available() -> bool:
-    return run(["sf", "data360", "man"]).returncode == 0
+    try:
+        return run(["sf", "data360", "man"]).returncode == 0
+    except FileNotFoundError:
+        return False
 
 
 def output_text(result: subprocess.CompletedProcess[str]) -> str:

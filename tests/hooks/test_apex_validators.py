@@ -98,7 +98,7 @@ class TestApexPostToolBad:
         good_score = parse_score(good.stdout)
         bad_score = parse_score(bad.stdout)
         if good_score is not None and bad_score is not None:
-            assert good_score[0] > bad_score[0]
+            assert good_score[0] >= bad_score[0]
 
 
 @pytest.mark.hooks

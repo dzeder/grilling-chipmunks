@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+concurrency:
+  group: pr-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: write
@@ -14,19 +18,22 @@ jobs:
     name: Automated Code Review
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           fetch-depth: 0
 
       - name: Get changed files
         id: changed
-        uses: tj-actions/changed-files@v47
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62  # v47
 
       - name: Check file size
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed.outputs.all_changed_files }}
         run: |
           MAX_SIZE=500
           WARNINGS=""
-          for file in ${{ steps.changed.outputs.all_changed_files }}; do
+          IFS=' ' read -ra files <<< "$ALL_CHANGED_FILES"
+          for file in "${files[@]}"; do
             if [ -f "$file" ]; then
               lines=$(wc -l < "$file")
               if [ "$lines" -gt "$MAX_SIZE" ]; then
@@ -39,9 +46,12 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: Check for common issues
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed.outputs.all_changed_files }}
         run: |
           ISSUES=""
-          for file in ${{ steps.changed.outputs.all_changed_files }}; do
+          IFS=' ' read -ra files <<< "$ALL_CHANGED_FILES"
+          for file in "${files[@]}"; do
             if [ -f "$file" ]; then
               # Check for console.log in production code
               if echo "$file" | grep -qE '\.(ts|js)$' && ! echo "$file" | grep -q 'test'; then
@@ -83,7 +93,7 @@ jobs:
 
       - name: Post review comment
         if: env.REVIEW_ISSUES != '' || env.PR_WARNINGS != '' || env.SIZE_WARNINGS != ''
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8
         with:
           script: |
             const issues = process.env.REVIEW_ISSUES || '';
@@ -108,7 +118,7 @@ jobs:
             });
 
       - name: Add agent label
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8
         with:
           script: |
             await github.rest.issues.addLabels({

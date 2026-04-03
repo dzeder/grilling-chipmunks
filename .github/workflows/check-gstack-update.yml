@@ -5,6 +5,10 @@ on:
     - cron: '0 8 * * 1'  # Every Monday at 8am UTC
   workflow_dispatch:       # Manual trigger
 
+concurrency:
+  group: gstack-check
+  cancel-in-progress: true
+
 jobs:
   check-update:
     runs-on: ubuntu-latest
@@ -12,7 +16,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
 
       - name: Check upstream version
         id: check
@@ -41,28 +45,30 @@ jobs:
 
       - name: Create PR
         if: steps.check.outputs.needs_update == 'true'
-        run: |
-          BRANCH="chore/update-gstack-${{ steps.check.outputs.upstream }}"
-          git checkout -b "$BRANCH"
-          git add .claude/skills/gstack/
-          git commit -m "chore: update gstack from ${{ steps.check.outputs.local }} to ${{ steps.check.outputs.upstream }}"
-          git push origin "$BRANCH"
-          gh pr create \
-            --title "Update gstack to ${{ steps.check.outputs.upstream }}" \
-            --body "$(cat <<EOF
-          ## Summary
-          - gstack upstream released **${{ steps.check.outputs.upstream }}** (we have **${{ steps.check.outputs.local }}**)
-          - Auto-detected by weekly check against garrytan/gstack
-
-          ## Review
-          - Check the diff for breaking changes to skills you use
-          - After merging, run \`cd .claude/skills/gstack && ./setup\` to rebuild the browser binary
-
-          ## Test plan
-          - [ ] Review CHANGELOG for breaking changes
-          - [ ] Verify skill names haven't changed
-          - [ ] Rebuild browser binary after merge
-          EOF
-          )"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPSTREAM_VER: ${{ steps.check.outputs.upstream }}
+          LOCAL_VER: ${{ steps.check.outputs.local }}
+        run: |
+          BRANCH="chore/update-gstack-${UPSTREAM_VER}"
+          git checkout -b "$BRANCH"
+          git add .claude/skills/gstack/
+          git commit -m "chore: update gstack from ${LOCAL_VER} to ${UPSTREAM_VER}"
+          git push origin "$BRANCH"
+          {
+            echo "## Summary"
+            echo "- gstack upstream released **${UPSTREAM_VER}** (we have **${LOCAL_VER}**)"
+            echo "- Auto-detected by weekly check against garrytan/gstack"
+            echo ""
+            echo "## Review"
+            echo "- Check the diff for breaking changes to skills you use"
+            echo "- After merging, run \`cd .claude/skills/gstack && ./setup\` to rebuild the browser binary"
+            echo ""
+            echo "## Test plan"
+            echo "- [ ] Review CHANGELOG for breaking changes"
+            echo "- [ ] Verify skill names haven't changed"
+            echo "- [ ] Rebuild browser binary after merge"
+          } > /tmp/pr-body.md
+          gh pr create \
+            --title "Update gstack to ${UPSTREAM_VER}" \
+            --body-file /tmp/pr-body.md

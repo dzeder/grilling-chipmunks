@@ -2,11 +2,15 @@ name: Security Agent
 
 on:
   pull_request:
-    branches: [master, main]
+    branches: [main]
   push:
-    branches: [master, main]
+    branches: [main]
   schedule:
     - cron: "0 6 * * 1" # Weekly Monday 6am UTC
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   actions: read
@@ -18,7 +22,7 @@ jobs:
     name: Dependency Audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
 
       - name: Scan for secrets
         run: |
@@ -29,7 +33,6 @@ jobs:
           else
             echo "No obvious secrets found in changed files."
           fi
-        continue-on-error: true
 
       - name: Check for sensitive file patterns
         run: |
@@ -58,11 +61,10 @@ jobs:
             fi
           done
           echo "JS security scan complete. $errors issue(s) found."
-        continue-on-error: true
 
       - name: Post security report
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8
         with:
           script: |
             await github.rest.issues.addLabels({

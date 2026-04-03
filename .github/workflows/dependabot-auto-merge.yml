@@ -3,6 +3,10 @@ name: Dependabot Auto-Merge
 on:
   pull_request:
 
+concurrency:
+  group: dependabot-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
   pull-requests: write
@@ -14,7 +18,7 @@ jobs:
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
-        uses: dependabot/fetch-metadata@v2
+        uses: dependabot/fetch-metadata@ffa630c65fa7e0ecfa0625b5ceda64399aea1b36  # v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
