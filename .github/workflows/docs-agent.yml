@@ -2,7 +2,7 @@ name: Documentation Agent
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - "src/**"
       - "docs/**"
@@ -10,6 +10,10 @@ on:
     paths:
       - "src/**"
       - "docs/**"
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -21,14 +25,16 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           fetch-depth: 0
 
       - name: Check for missing docs
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
           MISSING=""
-          CHANGED_SRC=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- 'src/**/*.ts' 2>/dev/null || echo "")
+          CHANGED_SRC=$(git diff --name-only "origin/${BASE_REF}...HEAD" -- 'src/**/*.ts' 2>/dev/null || echo "")
           for file in $CHANGED_SRC; do
             module=$(basename "$file" .ts)
             if ! find docs/ -name "*${module}*" -print -quit 2>/dev/null | grep -q .; then
@@ -41,7 +47,7 @@ jobs:
 
       - name: Post docs reminder
         if: env.MISSING_DOCS != ''
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8
         with:
           script: |
             const missing = process.env.MISSING_DOCS;
@@ -53,7 +59,7 @@ jobs:
             });
 
       - name: Add agent label
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8
         with:
           script: |
             await github.rest.issues.addLabels({
@@ -65,10 +71,10 @@ jobs:
 
   convert-docs:
     name: Generate Triple Deliverables
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
 
       - name: Install pandoc
         run: |
