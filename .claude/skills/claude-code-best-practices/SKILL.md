@@ -1,0 +1,1 @@
+../../../skills/claude-code-best-practices/SKILL.md

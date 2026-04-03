@@ -1,0 +1,1 @@
+../../../skills/sf-industry-commoncore-integration-procedure/SKILL.md

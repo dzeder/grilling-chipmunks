@@ -1,0 +1,1 @@
+../../../skills/sf-industry-commoncore-flexcard/SKILL.md

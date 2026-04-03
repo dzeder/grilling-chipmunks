@@ -1,1 +1,1 @@
-/Users/danielzeder/conductor/workspaces/daniels-ohanafy/calgary-v1/.claude/skills/gstack/land-and-deploy/SKILL.md
+../gstack/land-and-deploy/SKILL.md

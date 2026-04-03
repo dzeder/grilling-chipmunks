@@ -1,0 +1,1 @@
+../../../skills/ohfy-data-model-expert/SKILL.md

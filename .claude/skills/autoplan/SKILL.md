@@ -1,1 +1,1 @@
-/Users/danielzeder/conductor/workspaces/daniels-ohanafy/calgary-v1/.claude/skills/gstack/autoplan/SKILL.md
+../gstack/autoplan/SKILL.md

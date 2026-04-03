@@ -1,0 +1,1 @@
+../../../skills/sf-diagram-nanobananapro/SKILL.md
