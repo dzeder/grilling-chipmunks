@@ -52,15 +52,16 @@ jobs:
       - name: Build change summary
         if: steps.check.outputs.needs_update == 'true' && steps.existing.outputs.open_count == '0'
         id: summary
+        env:
+          CURRENT_HASH: ${{ steps.check.outputs.current }}
+          UPSTREAM_HASH: ${{ steps.check.outputs.upstream }}
         run: |
           TMP_DIR=$(mktemp -d)
           trap 'rm -rf "$TMP_DIR"' EXIT
           git clone --depth 100 https://github.com/Jaganpro/sf-skills.git "$TMP_DIR" 2>/dev/null
 
-          CURRENT="${{ steps.check.outputs.current }}"
-
           # Get commit log
-          COMMITS=$(cd "$TMP_DIR" && git log --oneline "${CURRENT}..HEAD" 2>/dev/null || git log --oneline -20)
+          COMMITS=$(cd "$TMP_DIR" && git log --oneline "${CURRENT_HASH}..HEAD" 2>/dev/null || git log --oneline -20)
 
           # Count changed skills
           CHANGED=""
@@ -81,8 +82,8 @@ jobs:
           {
             echo "## Upstream sf-skills changes"
             echo ""
-            echo "**Last reviewed:** \`${CURRENT:0:8}\`"
-            echo "**Upstream HEAD:** \`${{ steps.check.outputs.upstream }}\`"
+            echo "**Last reviewed:** \`${CURRENT_HASH:0:8}\`"
+            echo "**Upstream HEAD:** \`${UPSTREAM_HASH}\`"
             echo ""
             echo "### Commits"
             echo '```'
@@ -129,8 +130,9 @@ jobs:
         if: steps.check.outputs.needs_update == 'true' && steps.existing.outputs.open_count == '0'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SUMMARY_FILE: ${{ steps.summary.outputs.summary_file }}
         run: |
           gh issue create \
             --title "sf-skills upstream has new changes ($(date +%Y-%m-%d))" \
             --label "sf-skills-upstream" \
-            --body-file "${{ steps.summary.outputs.summary_file }}"
+            --body-file "$SUMMARY_FILE"
