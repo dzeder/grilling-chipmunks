@@ -37,13 +37,6 @@ jobs:
           echo "### Other Changes" >> changelog.md
           git log ${PREV_TAG}..HEAD --pretty="- %s (%h)" --invert-grep --grep="feat:\|fix:\|docs:\|style:\|chore:" >> changelog.md 2>/dev/null || true
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "20"
-          cache: "npm"
-      - run: npm ci
-      - run: npm run build
-
       - name: Generate docs bundle
         run: |
           sudo apt-get update && sudo apt-get install -y pandoc

@@ -93,6 +93,26 @@ Since you're both building this monorepo together, the simplest approach is:
 - His Integrations repo becomes the reference/archive
 - New skills and patterns go into daniels-ohanafy first
 
+## Ohanafy SKU Repos (Ohanafy GitHub org)
+
+**What:** Source indexes for 20+ Ohanafy product repos (Apex classes, triggers, methods, fields, LWC)
+**Indexed to:** `skills/ohfy-*/references/source-index.md` and `references/ohanafy-index/*/source-index.md`
+**Sync method:** Agent-driven — agents run `scripts/sync-ohanafy-index.sh` when indexes are stale
+**Deep dive fallback:** Clone-on-demand to `/tmp/` for full source access
+
+### Sync commands
+```bash
+bash scripts/sync-ohanafy-index.sh                    # sync all mapped repos
+bash scripts/sync-ohanafy-index.sh --repo OHFY-OMS    # sync single repo
+bash scripts/sync-ohanafy-index.sh --discover          # find new repos in org
+```
+
+### Mapped repos (20)
+Primary: OHFY-Core, OHFY-Data_Model, OHFY-Platform, OHFY-OMS, OHFY-WMS, OHFY-REX, OHFY-Ecom, OHFY-Payments, OHFY-EDI, OHFY-Configure
+UI: OHFY-OMS-UI, OHFY-WMS-UI, OHFY-REX-UI, OHFY-PLTFM-UI
+Secondary: OHFY-Service_Locator, OHFY-Planogram
+Standalone: OHFY-Utilities, OHFY-CICD, OHFY-SF-Perf, OHFY-Workflows
+
 ## shanraisshan/claude-code-best-practice
 
 **What:** Claude Code best practices, tips, implementation guides, orchestration patterns

@@ -21,7 +21,7 @@ Available gstack skills: `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`
 
 ## Ohanafy SKU expert skills (product layer)
 
-Each SKU skill clones from the Ohanafy GitHub org on demand. Use these when working on or integrating with specific Ohanafy products:
+Each SKU skill has a pre-built source index (`references/source-index.md`) with classes, triggers, methods, fields, and LWC components. Check `references/last-synced.txt` — if stale (>7 days), refresh with `bash scripts/sync-ohanafy-index.sh --repo REPO`. Clone-on-demand remains as a deep dive fallback. Use `--discover` to find new repos in the Ohanafy org.
 
 | Skill | Ohanafy Repo(s) | Domain |
 |-------|-----------------|--------|
@@ -140,7 +140,18 @@ projects/
   qbo-ohanafy/            # QuickBooks Online integration
   xero-ohanafy/           # Xero integration
   rehrig-ohanafy/         # Rehrig integration
+
+customers/
+  _template/              # Copy to create a new customer
+  gulf/                   # Gulf Distributing
+    profile.md            # Org topology, SKUs, data profile, external systems
+    orgs/                 # Per-environment metadata (populated by connect-org.sh)
+      production/
+      cam-sandbox/
 ```
+
+`projects/` = shared technical work (integrations, reports, LWC).
+`customers/` = per-customer Salesforce/Ohanafy configurations and knowledge.
 
 ## Conventions
 
@@ -171,7 +182,7 @@ Use `org-connect` skill when debugging against a live Salesforce org.
 ### Connect to an org
 ```bash
 bash scripts/connect-org.sh gulf --production --type customer
-bash scripts/connect-org.sh ohanafy --sandbox --type sandbox
+bash scripts/connect-org.sh gulf-cam --sandbox --type sandbox
 ```
 
 ### Check connected orgs
@@ -179,15 +190,17 @@ bash scripts/connect-org.sh ohanafy --sandbox --type sandbox
 sf org list
 ```
 
-### Read org state
-After connecting, read `projects/<name>/<env>/org-snapshot.md` for:
-- Metadata counts (classes, triggers, flows, objects, fields, validation rules)
-- Detected OHFY SKU packages
-- Quick commands for testing and querying
+### Read customer context
+```bash
+cat customers/gulf/profile.md              # Customer overview, SKUs, topology
+cat customers/gulf/orgs/production/org-snapshot.md  # Deployed metadata state
+```
 
 ### Debugging pattern
-1. Check if org is connected (`sf org list`)
-2. Read the org snapshot for context
-3. Read specific metadata (triggers, validation rules, flows) for the failing object
-4. Cross-reference with `ohfy-*-expert` skills for expected behavior
-5. Refresh metadata if stale (`sf project retrieve start`)
+1. Read the customer profile (`customers/<name>/profile.md`)
+2. Check if org is connected (`sf org list`)
+3. Read the org snapshot for metadata context
+4. Read specific metadata (triggers, validation rules, flows) for the failing object
+5. Cross-reference with `ohfy-*-expert` skills for expected behavior
+6. Write customer-specific learnings to `customers/<name>/notes.md`
+7. Refresh metadata if stale (`sf project retrieve start`)

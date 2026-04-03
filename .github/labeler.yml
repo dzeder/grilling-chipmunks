@@ -1,0 +1,52 @@
+# Labels applied automatically by actions/labeler@v6
+# See: https://github.com/actions/labeler
+
+skills:
+  - changed-files:
+      - any-glob-to-any-file: 'skills/**'
+
+agents:
+  - changed-files:
+      - any-glob-to-any-file: 'agents/**'
+
+integrations:
+  - changed-files:
+      - any-glob-to-any-file: 'integrations/**'
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'docs/**'
+          - '*.md'
+
+scripts:
+  - changed-files:
+      - any-glob-to-any-file: 'scripts/**'
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file: '.github/**'
+
+customers:
+  - changed-files:
+      - any-glob-to-any-file: 'customers/**'
+
+projects:
+  - changed-files:
+      - any-glob-to-any-file: 'projects/**'
+
+references:
+  - changed-files:
+      - any-glob-to-any-file: 'references/**'
+
+salesforce:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'skills/sf-*/**'
+          - 'skills/ohfy-*/**'
+
+tray:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'skills/tray-*/**'
+          - 'integrations/patterns/**'

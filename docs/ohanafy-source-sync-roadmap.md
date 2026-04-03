@@ -2,29 +2,38 @@
 
 How skills and agents access the Ohanafy product codebase — current state and evolution path.
 
-## Current State: Option 1 — Clone on Demand
+## Current State: Option 2 — Agent-Driven Index Sync (implemented 2026-04-03)
 
-Each SKU expert skill (`ohfy-oms-expert`, `ohfy-wms-expert`, etc.) clones the relevant Ohanafy repo to `/tmp/` when first needed in a session.
+Each SKU expert skill has a pre-built `references/source-index.md` containing class names, triggers, method signatures, object fields, and LWC components. Agents check `references/last-synced.txt` and refresh the index when it's stale (>7 days):
 
 ```bash
-# Example from ohfy-oms-expert/SKILL.md
-if [ ! -d /tmp/ohfy-oms ]; then
-  gh repo clone Ohanafy/OHFY-OMS /tmp/ohfy-oms -- --depth 1
-fi
+# Sync one repo
+bash scripts/sync-ohanafy-index.sh --repo OHFY-OMS
+
+# Sync all mapped repos
+bash scripts/sync-ohanafy-index.sh
+
+# Discover new repos in the Ohanafy org
+bash scripts/sync-ohanafy-index.sh --discover
 ```
 
+Clone-on-demand remains as the **deep dive** fallback when the index isn't enough (need implementation details, method bodies, test patterns).
+
 **Pros:**
-- Zero maintenance — always gets latest code
-- No storage overhead in daniels-ohanafy
-- Works immediately, no setup required
+- Fast skill activation (index is local, no clone needed for quick lookups)
+- Works offline (index is committed to repo)
+- Smaller context window cost (structured tables, not raw source)
+- Agent-driven — refreshes when needed, not on a fixed schedule
+- Discovers new repos automatically via `--discover`
 
 **Cons:**
-- Slow on first use (~5-10s per repo clone)
-- Requires GitHub access and Ohanafy org membership
-- Context window cost — agent must read raw source files each session
-- No offline capability
+- Index can be stale (agents decide when to refresh)
+- Index captures structure, not implementation details
+- Requires GitHub access for refresh
 
-**When to evolve:** When you find yourself repeatedly cloning the same repos and waiting, or when the context window cost of reading raw Apex files is slowing down sessions.
+### Previous: Option 1 — Clone on Demand
+
+Still available as a fallback. Each skill's "Deep Dive" section clones the repo to `/tmp/` for full source access.
 
 ---
 

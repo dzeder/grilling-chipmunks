@@ -24,7 +24,37 @@ description: |
 
 This skill provides progressive disclosure of expert knowledge about the OHFY-Core Salesforce managed package to help prevent integration errors and optimize API interactions.
 
-## Quick References
+## Source Repository
+
+**Backend:** `Ohanafy/OHFY-Core` (Apex, v1.132.0.NEXT)
+
+### Quick Reference (auto-synced)
+
+Read `references/source-index.md` for a pre-built index of all classes, triggers,
+service methods, and object fields. Check `references/last-synced.txt` —
+if older than 7 days, refresh:
+
+```bash
+bash scripts/sync-ohanafy-index.sh --repo OHFY-Core
+```
+
+### Deep Dive (clone for full source)
+
+When the index isn't enough (need implementation details, method bodies, test patterns):
+
+```bash
+if [ ! -d /tmp/ohfy-core ]; then
+  gh repo clone Ohanafy/OHFY-Core /tmp/ohfy-core -- --depth 1
+fi
+```
+
+Key paths:
+- Apex classes: `/tmp/ohfy-core/force-app/main/default/classes/`
+- Apex triggers: `/tmp/ohfy-core/force-app/main/default/triggers/`
+- Custom objects: `/tmp/ohfy-core/force-app/main/default/objects/`
+- Custom metadata: `/tmp/ohfy-core/force-app/main/default/customMetadata/`
+
+## Curated References
 
 ### Objects
 See `references/data-model/` for complete object documentation:
@@ -172,7 +202,9 @@ Account (Customer)
 
 ## Maintenance Notes
 
-This skill is generated from OHFY-Core repository source code:
-- Location: `/Users/derekhsquires/Documents/Ohanafy/github-repos/OHFY-Core`
-- Source: `force-app/main/default/` (objects, classes, triggers)
-- Update skill when OHFY-Core package version changes
+This skill's curated references are hand-maintained from OHFY-Core source.
+The auto-synced `references/source-index.md` is refreshed by agents via:
+```bash
+bash scripts/sync-ohanafy-index.sh --repo OHFY-Core
+```
+Update curated references when OHFY-Core package version changes significantly.
