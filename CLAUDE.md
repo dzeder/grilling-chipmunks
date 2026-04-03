@@ -6,7 +6,7 @@ Unified skills, agents, patterns, and projects for Ohanafy development.
 
 Use `/browse` for all web browsing. Never use `mcp__claude-in-chrome__*` tools when `/browse` is available.
 
-Available gstack skills: `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`, `/plan-design-review`, `/design-consultation`, `/design-shotgun`, `/design-html`, `/review`, `/ship`, `/land-and-deploy`, `/canary`, `/benchmark`, `/browse`, `/connect-chrome`, `/qa`, `/qa-only`, `/design-review`, `/setup-browser-cookies`, `/setup-deploy`, `/retro`, `/investigate`, `/document-release`, `/codex`, `/autoplan`, `/careful`, `/freeze`, `/guard`, `/unfreeze`, `/learn`.
+Available gstack skills: `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`, `/plan-design-review`, `/design-consultation`, `/design-shotgun`, `/design-html`, `/review`, `/ship`, `/land-and-deploy`, `/canary`, `/benchmark`, `/browse`, `/connect-chrome`, `/qa`, `/qa-only`, `/design-review`, `/setup-browser-cookies`, `/setup-deploy`, `/retro`, `/investigate`, `/document-release`, `/codex`, `/autoplan`, `/careful`, `/freeze`, `/guard`, `/unfreeze`, `/learn`, `/checkpoint`, `/cso`, `/gstack`, `/gstack-upgrade`, `/health`.
 
 ## Salesforce skills (domain layer)
 
@@ -40,13 +40,13 @@ Source sync roadmap: `docs/ohanafy-source-sync-roadmap.md`
 
 ## Integration skills (Tray / Ohanafy platform)
 
-14 integration-specific skills in `skills/`:
-- **tray-architecture** — Tray.io project structure reference
-- **tray-embedded-customjs** — Custom JS patterns in Tray workflows
+13 integration-specific skills in `skills/`:
+- **tray-expert** — Tray.io platform expert (Q&A, workflow design, integration audit, architecture)
+- **tray-embedded-customjs** — Custom JS patterns for Tray Embedded config wizards
 - **tray-errors** — Tray error handling protocols
-- **tray-diagrams** — Workflow visualization
-- **tray-insights** — Project analysis
-- **tray-script-generator** — Script scaffolding from templates
+- **tray-diagrams** — Workflow visualization with Mermaid
+- **tray-insights** — Project usage metrics and analytics
+- **tray-script-generator** — Script scaffolding from production patterns
 - **csv-output** — CSV formatting patterns
 - **salesforce-composite** — SF Composite API patterns
 - **salesforce-field-object-creator** — Field/object definition utilities
@@ -60,7 +60,11 @@ Source sync roadmap: `docs/ohanafy-source-sync-roadmap.md`
 - **ukg-expert** — UKG API, data model, authentication, scheduling
 - **ukg-api-debug** — UKG API debugging and troubleshooting
 - **ukg-field-mapper** — UKG-to-Ohanafy field mapping
-- **tray-expert** — Tray.io iPaaS patterns for beverage industry
+
+## Utility skills
+
+- **org-connect** — Connect to live Salesforce orgs for debugging and metadata retrieval
+- **claude-code-best-practices** — Skill/agent authoring patterns and monorepo organization
 
 ## Agents
 

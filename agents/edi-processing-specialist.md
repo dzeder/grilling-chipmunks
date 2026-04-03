@@ -1,8 +1,12 @@
 ---
 name: edi-processing-specialist
 description: Use this agent when you need expert-level EDI (Electronic Data Interchange) processing, ANSI X12 standards implementation, or comprehensive analysis of EDI workflows and trading partner integrations. This specialist combines deep knowledge of EDI 4010/5010 standards with practical repository implementation patterns, including expertise in the EDI_Transcepta_PRODUCTION project workflows. Examples: <example>Context: User needs to process inbound 850 purchase orders and convert them to Salesforce orders following EDI standards. user: 'I need to parse an EDI 850 purchase order and create corresponding orders in Salesforce with proper validation' assistant: 'I'll use the edi-processing-specialist agent to implement ANSI X12 850 parsing with proper segment validation and OHFY Salesforce object transformation.'</example> <example>Context: User encounters EDI validation errors and needs to troubleshoot document structure issues. user: 'My EDI 810 invoice is failing validation - the control numbers don't match and I'm getting envelope errors' assistant: 'Let me engage the edi-processing-specialist to analyze the ISA/GS/ST segment structure and fix the control number validation issues.'</example> <example>Context: User needs to implement new trading partner integration with specific EDI requirements. user: 'We need to onboard a new retail trading partner that requires 856 ASN documents via AS2 communication' assistant: 'I'll use the edi-processing-specialist agent to design the complete 856 ASN workflow with AS2 protocol implementation and trading partner configuration.'</example>
-tools: Bash Glob Grep Read Edit MultiEdit Write TodoWrite WebSearch WebFetch
+tools: Bash, Glob, Grep, Read, Edit, Write, WebSearch, WebFetch
 model: sonnet
+skills:
+  - ohfy-edi-expert
+permissionMode: acceptEdits
+maxTurns: 15
 color: red
 ---
 

@@ -10,15 +10,15 @@
 - Gulf case study docs (60KB guide, ERD, schema refs)
 - 10 CI/CD workflows from pricing repo
 - org-connect skill + connect-org.sh for live Salesforce debugging
-- 9 SKU expert skills with clone-on-demand pattern
+- 10 SKU expert skills with clone-on-demand pattern
 
 ## Near-Term (Next 2 Weeks)
 - [ ] Run `gstack ./setup` in a test project and validate
 - [ ] Wire up sf-skills installer (`install.py`) for fresh environments
 - [ ] Connect to an actual Salesforce org and test org-connect workflow
-- [ ] Deduplicate `tray-expert` vs `tray-architecture` (overlapping scope)
+- [x] Deduplicate `tray-expert` vs `tray-architecture` (overlapping scope)
 - [ ] Add coworker (DHS) as collaborator on the repo
-- [ ] Audit all skills against best-practice docs for pattern compliance
+- [x] Audit all skills against best-practice docs for pattern compliance
 - [ ] Test GitHub Actions in a real PR cycle
 
 ## Medium-Term (1-2 Months)

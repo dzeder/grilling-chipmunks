@@ -1,7 +1,5 @@
 ---
 name: tray-expert
-preamble-tier: 2
-version: 1.0.0
 description: |
   Tray.io expert agent. Three modes: Q&A (answer Tray questions from the expert guide),
   Build (design Tray workflows step-by-step), Review (audit integration designs for
@@ -320,6 +318,35 @@ Priority documentation URLs:
 - Developer portal: `https://developer.tray.ai/developer-portal/cdk/getting-started/introduction/`
 
 Use WebSearch for topics not covered in the guide or official docs.
+
+---
+
+## Architecture Quick Reference
+
+Tray.io projects follow a strict 4-level hierarchy. See `architecture-reference.md` for full details.
+
+### 4-Level Hierarchy
+```
+Workspace → Project → Version → Component
+01-tray/Embedded/CSV_Upload_v1_[UUID]/versions/current/scripts/
+```
+
+### Critical Rules
+1. **NEVER modify UUID-based directory names** (breaks sync)
+2. **NEVER edit project-metadata.json manually** (sync-managed)
+3. **ALWAYS work within version directories** (current/ or 1.0/)
+4. **ALWAYS verify path before modifications** (pwd check)
+
+### Correct Navigation Pattern
+```bash
+cd 01-tray/[Workspace]/[Project_UUID]/versions/current/scripts/
+```
+
+### Common Pitfalls
+- Working at project root instead of version directory
+- Renaming directories with UUIDs
+- Manual metadata.json edits
+- Use tray-sync.js for all sync operations
 
 ---
 

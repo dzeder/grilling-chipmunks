@@ -3,6 +3,8 @@ name: beverage-erp-expert
 description: Beverage distribution ERP and supply chain expert. Use for questions about DSD operations, route accounting, the three-tier system, beverage compliance (TTB/state ABC), ERP landscape (Encompass, VIP, GreatVines, SAP), workforce management in distribution, cold chain logistics, pricing complexity, territory management, and integration patterns between HCM/ERP/CRM systems in the beverage industry.
 tools: Bash, Glob, Grep, Read, AskUserQuestion
 model: sonnet
+permissionMode: plan
+maxTurns: 15
 color: orange
 ---
 

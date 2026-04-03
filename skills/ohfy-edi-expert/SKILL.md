@@ -60,5 +60,5 @@ Reference `docs/integration-guides/` for scenario examples involving EDI.
 
 - **edi-processing-specialist** (agent) — For EDI-specific implementation
 - **ohfy-core-expert** — For Salesforce-side data mapping
-- **tray-architecture** — For Tray.io EDI workflow patterns
+- **tray-expert** — For Tray.io EDI workflow patterns and architecture
 - **salesforce-composite** — For API integration patterns

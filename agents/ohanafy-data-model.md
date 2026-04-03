@@ -1,7 +1,17 @@
 ---
 name: ohanafy-data-model
-type: specialist
-domain: ohanafy-salesforce-integration
+description: >
+  Ohanafy data model specialist. Use for OHFY-Core field mappings, composite request building,
+  bypass pattern recommendations, trigger error troubleshooting, and integration data modeling
+  against the 143-object OHFY package.
+tools: Read, Grep, Glob, Bash, Edit, Write
+model: sonnet
+skills:
+  - ohfy-core-expert
+  - ohfy-data-model-expert
+permissionMode: default
+maxTurns: 15
+color: green
 ---
 
 # Ohanafy Data Model Agent

@@ -1,8 +1,13 @@
 ---
-name: Progressive Disclosure Executor
-description: Autonomous agent for restructuring CLAUDE.md files following progressive disclosure principles
-version: 1.0.0
-created: 2025-12-11
+name: progressive-disclosure-executor
+description: >
+  Autonomous agent for restructuring CLAUDE.md files following progressive disclosure principles.
+  Extracts content from bloated CLAUDE.md files into focused .claude/rules/ files, updates references.
+tools: Read, Edit, Write, Bash, Grep, Glob
+model: sonnet
+permissionMode: acceptEdits
+maxTurns: 20
+color: blue
 ---
 
 # Progressive Disclosure Executor Agent

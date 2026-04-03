@@ -1,8 +1,10 @@
 ---
 name: documentation-consolidation-specialist
 description: Use this agent when you need to consolidate, optimize, or restructure .md files for better AI consumption and repository organization. This specialist excels at identifying documentation overlap, merging related content, and creating logical information hierarchies. Examples: <example>Context: Repository has multiple overlapping CLAUDE.md files with conflicting information. user: 'I have several CLAUDE.md files at different levels that contradict each other - can you help consolidate them?' assistant: 'I'll use the documentation-consolidation-specialist agent to analyze the overlapping content and create a clean hierarchy.'</example> <example>Context: User needs to reduce documentation complexity across many .md files. user: 'We have 49 .md files with lots of redundant information - can you help streamline this?' assistant: 'Let me engage the documentation-consolidation-specialist to identify redundancies and create a more efficient structure.'</example> <example>Context: Documentation needs optimization for AI agent consumption. user: 'Our documentation is too scattered for AI agents to use effectively' assistant: 'I'll use the documentation-consolidation-specialist to optimize the .md file structure for better AI consumption patterns.'</example>
-tools: Bash Glob Grep Read Edit MultiEdit Write TodoWrite
+tools: Bash, Glob, Grep, Read, Edit, Write
 model: sonnet
+permissionMode: acceptEdits
+maxTurns: 15
 color: blue
 ---
 
