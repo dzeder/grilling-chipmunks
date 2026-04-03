@@ -1,0 +1,1 @@
+../../../skills/sf-metadata/SKILL.md

@@ -1,1 +1,1 @@
-/Users/danielzeder/conductor/workspaces/daniels-ohanafy/calgary-v1/.claude/skills/gstack/freeze/SKILL.md
+../gstack/freeze/SKILL.md

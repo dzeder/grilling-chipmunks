@@ -1,0 +1,1 @@
+../../../skills/tray-diagrams/SKILL.md

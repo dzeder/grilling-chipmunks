@@ -1,0 +1,1 @@
+../../../skills/ohfy-configure-expert/SKILL.md

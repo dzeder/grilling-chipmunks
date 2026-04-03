@@ -1,0 +1,1 @@
+../../../skills/sf-datacloud-segment/SKILL.md

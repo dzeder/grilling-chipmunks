@@ -1,0 +1,1 @@
+../../../skills/tray-embedded-customjs/SKILL.md

@@ -1,1 +1,1 @@
-/Users/danielzeder/conductor/workspaces/daniels-ohanafy/calgary-v1/.claude/skills/gstack/design-shotgun/SKILL.md
+../gstack/design-shotgun/SKILL.md

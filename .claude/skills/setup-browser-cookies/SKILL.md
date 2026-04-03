@@ -1,1 +1,1 @@
-/Users/danielzeder/conductor/workspaces/daniels-ohanafy/calgary-v1/.claude/skills/gstack/setup-browser-cookies/SKILL.md
+../gstack/setup-browser-cookies/SKILL.md

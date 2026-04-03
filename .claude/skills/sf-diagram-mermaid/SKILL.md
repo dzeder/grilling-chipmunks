@@ -1,0 +1,1 @@
+../../../skills/sf-diagram-mermaid/SKILL.md

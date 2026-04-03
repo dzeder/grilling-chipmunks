@@ -1,0 +1,1 @@
+../../../skills/sf-datacloud-connect/SKILL.md

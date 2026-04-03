@@ -1,0 +1,1 @@
+../../../skills/sf-industry-commoncore-callable-apex/SKILL.md

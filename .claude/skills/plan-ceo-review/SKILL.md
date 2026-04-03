@@ -1,1 +1,1 @@
-/Users/danielzeder/conductor/workspaces/daniels-ohanafy/calgary-v1/.claude/skills/gstack/plan-ceo-review/SKILL.md
+../gstack/plan-ceo-review/SKILL.md
