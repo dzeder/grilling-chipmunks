@@ -34,6 +34,12 @@ Delegate elsewhere when the user is:
 
 ---
 
+## Examples
+
+- "Create a data stream for the Contact object using the SalesforceDotCom_Home connection"
+- "Check if the Order DLO has all expected fields after ingestion and verify record counts"
+- "Set up a DocAI transform to extract invoice line items from uploaded PDF documents"
+
 ## Required Context to Gather First
 
 Ask for or infer:

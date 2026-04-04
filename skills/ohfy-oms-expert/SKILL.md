@@ -7,6 +7,8 @@ description: |
   - Developing OMS-specific LWC components
   - Integrating external systems with Ohanafy order processing
   - Understanding order lifecycle, status transitions, and validation rules
+  TRIGGER when: user asks about Ohanafy order management, order lifecycle,
+  fulfillment status transitions, or OMS-specific Apex/LWC components.
   Covers: Order creation, fulfillment workflows, order item management,
   pricing calculations, and OMS-specific business logic.
 ---
@@ -56,6 +58,12 @@ Key paths:
 - Returns and credit processing
 - Integration with WMS for warehouse fulfillment
 - Integration with Payments for order settlement
+
+## Examples
+
+- "How does order status transition from New to Complete?" -- explain the full order lifecycle and validation rules
+- "Debug a fulfillment trigger error on Order_Item__c" -- check trigger actions, bypass patterns, and status constraints
+- "Build an LWC component for order line editing" -- reference OMS-UI components and platform patterns
 
 ## Delegates To
 

@@ -1,6 +1,13 @@
 ---
 name: tray-insights
-description: Query Tray Insights API for project usage metrics and execution analytics. Use when you need to retrieve usage data for Tray projects, including execution KPIs, time-series trends, success/failure rates, or data-driven prioritization for architecture diagrams. Automatically invoke when creating architecture diagrams, analyzing workflow performance, investigating execution issues, or prioritizing development work based on usage patterns.
+description: >
+  Query Tray Insights API for project usage metrics and execution analytics.
+  TRIGGER when: user asks about Tray project usage data, execution KPIs,
+  time-series trends, success/failure rates, task run volume, or needs
+  data-driven prioritization for architecture diagrams. Automatically invoke
+  when creating architecture diagrams, analyzing workflow performance,
+  investigating execution issues, or prioritizing development work based on
+  usage patterns.
 ---
 
 # Tray Insights Skill
@@ -226,3 +233,11 @@ node 04-utilities/tools/tray-insights/src/index.js get-metrics abc123-project-id
 ```
 
 This data-driven approach ensures architecture diagrams focus on the most important and heavily-used workflows.
+
+## Delegation
+
+Do not trigger this skill for:
+- General Tray.io workflow design or Q&A -- delegate to `tray-expert`
+- Generating Mermaid diagrams (after fetching data here) -- hand off to `tray-diagrams`
+- Tray script generation or debugging -- delegate to `tray-script-generator` or `tray-errors`
+- Salesforce-specific analytics or reporting -- delegate to `sf-data`

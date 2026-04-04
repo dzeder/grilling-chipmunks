@@ -6,6 +6,8 @@ description: |
   - Integrating B2B partners via OpenText, Transcepta, or Orderful
   - Debugging EDI document parsing or generation
   - Understanding EDI workflows and trading partner management
+  TRIGGER when: user asks about EDI documents (850/810/856), B2B interchange,
+  trading partner setup, or EDI-to-Salesforce mapping.
   Covers: ANSI X12 document processing, B2B data interchange, trading partner
   configuration, and EDI-to-Salesforce data mapping.
 ---

@@ -9,6 +9,9 @@ description: |
   - Understanding inventory lifecycle, location management, and transfer workflows
   Covers: Inventory operations, warehouse workflows, picking/packing/shipping,
   location management, lot tracking, and WMS-specific business logic.
+  TRIGGER when: user asks about warehouse operations, inventory management,
+  picking/packing/shipping, lot tracking, allocation logic, or WMS-specific
+  Apex classes, triggers, or LWC components.
 ---
 
 # OHFY-WMS Expert Skill
@@ -58,6 +61,29 @@ Key paths:
 - Allocation and reservation logic
 - Integration with OMS for order fulfillment
 - 3PL and external warehouse integration
+
+## Examples
+
+- "How does Ohanafy handle pick wave generation for multi-zone warehouses?"
+- "Debug the inventory allocation trigger — units are being double-reserved on concurrent orders"
+- "Build an LWC packing station screen that scans lot-tracked items and validates expiration dates"
+
+## Workflow
+
+### 1. Check the source index
+Read `references/source-index.md` for the pre-built class/trigger/LWC index. If stale, refresh with `bash scripts/sync-ohanafy-index.sh --repo OHFY-WMS`.
+
+### 2. Identify the relevant domain area
+Narrow down to the specific WMS domain: inventory, picking, packing, shipping, lot tracking, location management, allocation, or transfer.
+
+### 3. Locate implementation details
+Use the source index to find the relevant classes, triggers, or LWC components. Clone the repo for full source when the index is insufficient.
+
+### 4. Cross-reference dependencies
+Check OHFY-Platform for shared services, OHFY-Data-Model for object schemas, and OHFY-Core for trigger framework patterns.
+
+### 5. Deliver guidance or code
+Provide architecture advice, code changes, or debugging steps. Delegate to the appropriate skill if the work crosses into OMS, Apex patterns, or LWC development.
 
 ## Delegates To
 

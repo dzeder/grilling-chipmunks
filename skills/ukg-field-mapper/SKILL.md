@@ -5,10 +5,10 @@ description: |
   UKG API responses and Salesforce custom objects. Lists available fields by
   entity, generates mapping tables with data type conversions, and flags
   product-specific differences.
-  Use when: "map UKG fields", "field mapping", "what fields does UKG return",
-  "UKG to Salesforce mapping", "add a field to the sync", "what data can we get from UKG".
-  Proactively invoke when the user is working on field mappings or asking about
-  available UKG data fields.
+  TRIGGER when: user asks to "map UKG fields", "field mapping", "what fields
+  does UKG return", "UKG to Salesforce mapping", "add a field to the sync",
+  "what data can we get from UKG". Proactively invoke when the user is working
+  on field mappings or asking about available UKG data fields.
 allowed-tools:
   - Read
   - Grep
@@ -35,6 +35,34 @@ Read both documents:
 ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo '.')"
 ls -la "$ROOT"/ukg-expert-reference.html "$ROOT"/ukg-ohanafy-integration-design.html 2>/dev/null
 ```
+
+## Examples
+
+- "What employee fields can we get from UKG Pro WFM?" -- list the full field inventory for the employee entity, grouped by required vs nice-to-have
+- "Create a field mapping table for schedule sync" -- generate a UKG-to-Salesforce mapping table with data types, transforms, and external ID strategy
+- "Can we also sync the employee's supervisor name?" -- check if the field exists in UKG's API, verify the target SF field, and generate the mapping row
+
+## Delegation
+
+Do not trigger this skill for:
+- General UKG questions about API endpoints, auth, or admin -- delegate to `ukg-expert`
+- Debugging UKG API errors or sync failures -- delegate to `ukg-api-debug`
+- Salesforce field/object creation metadata -- delegate to `salesforce-field-object-creator`
+- Tray.io workflow design for the sync -- delegate to `tray-expert`
+
+## Workflow
+
+### 1. Load the UKG and Salesforce reference docs
+Read `ukg-expert-reference.html` for field inventories and `ukg-ohanafy-integration-design.html` for the target Salesforce data model.
+
+### 2. Classify the request
+Determine whether the user wants to list fields, generate a mapping, add a field, validate existing mappings, or compare product differences.
+
+### 3. Generate or validate the mapping
+Produce a mapping table in the standard format (UKG API Field, UKG Type, SF Object.Field, SF Type, Transform) with appropriate data type conversions and null handling.
+
+### 4. Flag gaps and next steps
+Identify unmappable fields, product-specific unknowns, and questions for the customer discovery call.
 
 ## Phase 2: Understand the Request
 

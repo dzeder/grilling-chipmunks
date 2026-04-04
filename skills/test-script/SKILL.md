@@ -1,6 +1,10 @@
 ---
 name: test-script
-description: Run Tray script tester with automatic environment validation, dependency installation, and execution of node run.js in a script directory.
+description: >
+  Run Tray script tester with automatic environment validation, dependency
+  installation, and execution of node run.js in a script directory.
+  TRIGGER when: user wants to test a Tray.io script, run a script tester,
+  validate script output, or execute run.js against input.json.
 ---
 
 # Test Tray Script
@@ -36,6 +40,19 @@ Optional path to script directory (defaults to current directory).
    - Detect and highlight errors (red) vs. success (green)
    - Show execution time
    - If errors detected, parse error messages and suggest fixes
+
+## Examples
+
+- "Run the tests for my order transform script" -- validate environment, install deps, execute `node run.js`, and report pass/fail
+- "Test this script with the sample input" -- check for `script.js` and `input.json`, run the tester, highlight any errors
+- "My Tray script is throwing an error, help me debug it" -- execute the script, parse the stack trace, and suggest fixes
+
+## Delegation
+
+Do not trigger this skill for:
+- Writing or generating new Tray scripts from scratch -- delegate to `tray-script-generator`
+- Debugging Tray error patterns or retry logic -- delegate to `tray-errors`
+- Deploying scripts to Tray.io -- delegate to `deploy-prep`
 
 ## Error Handling
 

@@ -1,6 +1,10 @@
 ---
 name: tray-script-generator
-description: Production-grade Tray.io script generation with patterns, templates, and examples from real Ohanafy integrations. Use when generating, refactoring, or debugging Tray.io exports.step scripts.
+description: >
+  Production-grade Tray.io script generation with patterns, templates, and examples
+  from real Ohanafy integrations. TRIGGER when: user wants to generate a new Tray.io
+  exports.step script, refactor an existing script to FP patterns, or build
+  Salesforce composite API data transformation pipelines.
 ---
 
 # Tray.io Script Generation Skill
@@ -220,6 +224,17 @@ function processItems(items) { return [...items, newItem]; }
 - **2.1.0** (2026-03-06): Trimmed to ~350 lines; extracted pattern-categories and usage-examples to `references/`; replaced inline URL encoding and error handling sections with cross-references to `salesforce-composite` and `tray-errors` skills
 - **2.0.0** (2025-01-25): Complete rewrite; 52 patterns; 12 templates; 10 examples; production source references
 - **1.0.0**: Initial implementation guide
+
+---
+
+## Delegation
+
+Do not trigger this skill for:
+- General Tray.io workflow design, Q&A, or integration architecture -- delegate to `tray-expert`
+- Tray error handling patterns, ERROR_TYPES, retry strategies -- delegate to `tray-errors`
+- Running and testing scripts locally -- delegate to `test-script`
+- Mermaid diagrams for Tray workflows -- delegate to `tray-diagrams`
+- Tray Embedded Custom JS for config wizards -- delegate to `tray-embedded-customjs`
 
 ---
 

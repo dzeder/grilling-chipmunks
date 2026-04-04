@@ -5,9 +5,9 @@ description: |
   auth failures (401/403), rate limits (429), timeouts, sync failures, missing data,
   and Tray.io workflow errors. Reads the expert reference for auth flows, rate limit
   patterns, and error codes, then walks through diagnosis steps.
-  Use when: "UKG API error", "sync failing", "401 from UKG", "429 rate limit",
-  "UKG timeout", "schedule not syncing", "employee data missing", "Tray.io workflow failed".
-  Proactively invoke when the user reports any UKG integration error or sync issue.
+  TRIGGER when: user reports "UKG API error", "sync failing", "401 from UKG",
+  "429 rate limit", "UKG timeout", "schedule not syncing", "employee data missing",
+  "Tray.io workflow failed", or any UKG integration error or sync issue.
 allowed-tools:
   - Read
   - Grep
@@ -106,3 +106,17 @@ After diagnosis:
 **Verify:** [How to confirm the fix worked]
 
 **Prevention:** [How to prevent this from recurring, if applicable]
+
+## Examples
+
+- "We're getting 401 errors from UKG on the employee sync" -- check token freshness, credential rotation, auth_chain parameter, and service account status
+- "The schedule sync is returning empty results for some employees" -- verify Hyperfind scope, Data Access Profile, rolling window range, and sync timing order
+- "UKG API calls are being rate limited (429) during peak sync" -- analyze call volume, check for concurrent workflows, recommend batching and exponential backoff
+
+## Delegation
+
+Do not trigger this skill for:
+- General UKG questions about data model, admin, or API endpoints -- delegate to `ukg-expert`
+- Field mapping between UKG and Salesforce -- delegate to `ukg-field-mapper`
+- Tray.io workflow design (not debugging) -- delegate to `tray-expert`
+- Salesforce-side errors after successful UKG fetch -- delegate to `sf-debug`

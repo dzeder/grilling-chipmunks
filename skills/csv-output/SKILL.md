@@ -1,6 +1,9 @@
 ---
 name: csv-output
-description: Tray CSV output structure — columns/rows format, fixed-width formatting, record generation, and bulk output patterns for Tray.io scripts.
+description: >
+  Tray CSV output structure — columns/rows format, fixed-width formatting, record generation,
+  and bulk output patterns for Tray.io scripts. TRIGGER when: user asks about CSV formatting,
+  bulk export structure, csv_data wrapper, or structured file output in Tray scripts.
 ---
 
 # Tray CSV Output Structure Expert
@@ -52,6 +55,12 @@ function createStructuredOutput(columns, rows, recordType, externalLookupField) 
     };
 }
 ```
+
+## Delegate Elsewhere
+
+- **deploy-prep** — For validating CSV output format before deployment
+- **tray-expert** — For Tray.io workflow architecture questions beyond CSV structure
+- **salesforce-composite** — For Salesforce API batch operations (not CSV file output)
 
 ### Workflow
 1. Confirm data sets with user (parent/child records)

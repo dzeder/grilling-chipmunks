@@ -6,6 +6,8 @@ description: |
   - Working with payment settlement, refunds, or credit operations
   - Integrating payment gateways or financial systems
   - Understanding payment lifecycle and transaction management
+  TRIGGER when: user asks about Ohanafy payment processing, settlement,
+  refunds, payment gateway integration, or financial transaction tracking.
   Covers: Payment processing, settlement workflows, refund handling,
   payment method management, and financial transaction tracking.
 ---
@@ -53,6 +55,12 @@ Key paths:
 - Gateway integration
 - Payment reconciliation
 - Integration with OMS for order payment
+
+## Examples
+
+- "How does payment settlement work in Ohanafy?" -- explain the capture-to-settlement lifecycle
+- "Debug a refund processing error" -- check payment transaction records, gateway responses, and Apex service methods
+- "Integrate a new payment gateway" -- review gateway integration patterns and payment method configuration
 
 ## Delegates To
 

@@ -3,7 +3,7 @@ name: tray-expert
 description: |
   Tray.io expert agent. Three modes: Q&A (answer Tray questions from the expert guide),
   Build (design Tray workflows step-by-step), Review (audit integration designs for
-  best practices). Use when asked about Tray.io, Tray workflows, Tray connectors,
+  best practices). TRIGGER when: user asks about Tray.io, Tray workflows, Tray connectors,
   Tray admin, Tray API, Tray Embedded, Tray best practices, or iPaaS architecture.
   Proactively suggest when the user is designing or building Tray.io integrations.
 allowed-tools:
@@ -358,3 +358,13 @@ After completing any mode, ask:
 
 If the user's question is outside Tray.io scope, say so and suggest the appropriate
 skill (e.g., /investigate for bugs, /ship for deployment).
+
+## Delegation
+
+Route to specialized Tray skills when the request is narrow:
+- Tray Custom JS for Embedded config wizards -- delegate to `tray-embedded-customjs`
+- Tray error handling, ERROR_TYPES, retry patterns -- delegate to `tray-errors`
+- Tray Mermaid diagrams and workflow visualization -- delegate to `tray-diagrams`
+- Tray Insights API usage metrics -- delegate to `tray-insights`
+- Tray exports.step script generation from patterns -- delegate to `tray-script-generator`
+- Testing a Tray script locally -- delegate to `test-script`

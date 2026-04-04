@@ -1,11 +1,34 @@
 ---
 name: deploy-prep
-description: Validate Tray scripts against functional programming patterns, check Salesforce API compliance, validate CSV output format, run tests, and generate a deployment checklist.
+description: >
+  Validate Tray scripts against functional programming patterns, check Salesforce API compliance,
+  validate CSV output format, run tests, and generate a deployment checklist. TRIGGER when: user
+  says "deploy prep", "ready to deploy", "validate script", or asks for a deployment checklist.
 ---
 
 # Deployment Preparation
 
 Validate a Tray script against functional programming patterns and generate a comprehensive deployment checklist.
+
+## Delegate Elsewhere
+
+- **tray-expert** — For Tray.io workflow design questions (not deployment validation)
+- **sf-deploy** — For Salesforce metadata deployments
+- **test-script** — For building new tests (not running existing ones)
+- **security** — For secrets or credential validation
+
+## Use Cases
+
+- "Is this script ready to deploy?" -- run full validation checklist
+- "Check my Tray script for anti-patterns" -- validate functional patterns
+- "Generate a deployment checklist for the order sync script" -- produce markdown checklist with pass/fail
+
+## Workflow
+
+### 1. Locate and read the script
+### 2. Validate functional patterns and Salesforce API compliance
+### 3. Run available tests
+### 4. Generate deployment checklist with findings
 
 ## Arguments
 

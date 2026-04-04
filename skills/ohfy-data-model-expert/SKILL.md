@@ -7,6 +7,8 @@ description: |
   - Mapping external system data to Ohanafy objects
   - Building SOQL queries against Ohanafy objects
   - Designing new custom objects or fields that integrate with the platform
+  TRIGGER when: user asks about Ohanafy custom objects, field definitions,
+  picklist values, object relationships, or data model design.
   Covers: 30+ custom objects spanning CRM, supply chain, retail, accounting,
   and integration tracking. Foundation for all other SKU packages.
 ---
@@ -44,6 +46,19 @@ Then read the relevant metadata:
 - Custom fields: `force-app/main/default/objects/*/fields/`
 - Value sets: `force-app/main/default/globalValueSets/`
 - Custom metadata: `force-app/main/default/customMetadata/`
+
+## Examples
+
+- "What fields are on the Order__c object?" -- look up field definitions in the source index
+- "How does Account_Route relate to Account and Delivery?" -- trace object relationships in the data model
+- "I need to add a custom field for tracking ecom order source" -- check existing fields and advise on the right object
+
+## Workflow
+
+### 1. Check the source index for the object or field in question
+### 2. Clone the repo if deeper field-level detail is needed
+### 3. Review relationships and value sets for the relevant category
+### 4. Advise on schema design or SOQL query patterns
 
 ## Key Object Categories
 

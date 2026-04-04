@@ -6,6 +6,8 @@ description: |
   - Working with metadata-driven feature flags or settings
   - Understanding post-install setup and configuration UI
   - Debugging configuration-related behavior across packages
+  TRIGGER when: user asks about Ohanafy system configuration, feature flags,
+  setup wizards, custom metadata settings, or the OHFY_Configuration page.
   Covers: System configuration, setup wizards, feature flags, custom metadata
   settings, and the OHFY_Configuration Lightning page.
 ---
@@ -40,6 +42,19 @@ if [ ! -d /tmp/ohfy-configure ]; then
   gh repo clone Ohanafy/OHFY-Configure /tmp/ohfy-configure -- --depth 1
 fi
 ```
+
+## Examples
+
+- "How do I enable a feature flag for WMS in the sandbox?" -- check custom metadata settings and OHFY_Configuration page
+- "What happens during package post-install?" -- explain OHFYPackageInstallHandler auto-configuration
+- "Why is this configuration setting not taking effect?" -- debug metadata-driven configuration
+
+## Workflow
+
+### 1. Read the source index to identify relevant configuration classes or metadata
+### 2. Check the OHFY_Configuration Lightning page setup
+### 3. Review custom metadata records for the feature or setting in question
+### 4. Verify package dependencies and post-install handler behavior
 
 ## Domain Coverage
 

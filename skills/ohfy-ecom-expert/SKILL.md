@@ -6,6 +6,8 @@ description: |
   - Integrating Shopify, WooCommerce, or other e-commerce platforms
   - Working with online order capture and fulfillment
   - Understanding e-commerce data flows into Ohanafy
+  TRIGGER when: user asks about Shopify or WooCommerce integration, e-commerce
+  order capture, online catalog sync, or cart/checkout flows in Ohanafy.
   Covers: Online storefront integration, catalog management, cart/checkout,
   e-commerce order processing, and Shopify/WooCommerce connectors.
 ---
@@ -47,6 +49,12 @@ fi
 - Product sync between platforms
 - Pricing and inventory availability
 - Customer account linking
+
+## Examples
+
+- "How do Shopify orders get into Ohanafy?" -- explain the Shopify-to-Ohanafy sync flow and connector patterns
+- "Debug a WooCommerce product sync failure" -- check External_ID mapping, API payloads, and sync status
+- "Set up a new e-commerce channel integration" -- walk through catalog sync, order capture, and fulfillment hooks
 
 ## Related Integration Projects
 

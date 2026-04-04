@@ -6,6 +6,8 @@ description: |
   - Understanding the service locator and dependency injection patterns
   - Debugging cross-package behavior or shared infrastructure
   - Building features that need to work across multiple SKUs
+  TRIGGER when: user asks about shared Ohanafy platform services, service
+  locator patterns, cross-SKU infrastructure, or OHFY-Platform package.
   Covers: Platform-level Apex services, shared LWC components, and
   infrastructure that all product SKUs depend on.
 ---
@@ -45,6 +47,19 @@ Key paths to read:
 - Apex triggers: `force-app/main/default/triggers/`
 - LWC components: `force-app/main/default/lwc/`
 - Custom metadata: `force-app/main/default/customMetadata/`
+
+## Examples
+
+- "How does the service locator resolve dependencies across SKUs?" -- explain OHFY-Service-Locator registration and lookup
+- "What shared LWC components are available for OMS and WMS?" -- check source index for platform-level components
+- "Debug a cross-package error in the platform layer" -- trace service registration, error handling, and logging
+
+## Workflow
+
+### 1. Check the source index for platform-level classes and components
+### 2. Identify which SKU is consuming the platform service
+### 3. Review service locator registration and dependency chain
+### 4. Trace cross-cutting concerns (logging, error handling, configuration)
 
 ## Role in Architecture
 
