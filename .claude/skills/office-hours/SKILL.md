@@ -1,1 +1,1 @@
-/Users/danielzeder/conductor/workspaces/daniels-ohanafy/riyadh/.claude/skills/gstack/office-hours/SKILL.md
+../gstack/office-hours/SKILL.md

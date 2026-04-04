@@ -1,1 +1,1 @@
-/Users/danielzeder/conductor/workspaces/daniels-ohanafy/riyadh/.claude/skills/gstack/plan-design-review/SKILL.md
+../gstack/plan-design-review/SKILL.md

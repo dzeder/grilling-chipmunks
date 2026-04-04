@@ -1,5 +1,5 @@
 #!/bin/bash
-# Unified health check for the riyadh monorepo
+# Unified health check for the monorepo
 # Usage:
 #   bash scripts/doctor.sh                   # full check (all 7 sections)
 #   bash scripts/doctor.sh --quick           # fast check (prereqs, symlinks, agents, GH Actions)
@@ -12,7 +12,7 @@ cd "$REPO_ROOT"
 
 # Validate we're in the right repo
 if [ ! -f CLAUDE.md ] || [ ! -d agents ] || [ ! -d .claude/skills ]; then
-    echo "❌ Not in the riyadh monorepo root"
+    echo "❌ Not in the monorepo root (expected CLAUDE.md, agents/, .claude/skills/)"
     exit 1
 fi
 
@@ -162,14 +162,18 @@ check_symlinks() {
         total=$((total + 1))
 
         if [ -L "$skill_file" ]; then
-            if [ -e "$skill_file" ]; then
-                valid=$((valid + 1))
-            else
+            local target
+            target=$(readlink "$skill_file" 2>/dev/null || echo "unknown")
+            if [ ! -e "$skill_file" ]; then
                 broken=$((broken + 1))
-                local target
-                target=$(readlink "$skill_file" 2>/dev/null || echo "unknown")
                 broken_list+="   ❌ ${skill_name} → ${target}\n"
                 broken_md+="- \`${skill_name}\` → \`${target}\`\n"
+            elif [[ "$target" == /* ]]; then
+                broken=$((broken + 1))
+                broken_list+="   ⚠️  ${skill_name} → ${target} (absolute path — not portable)\n"
+                broken_md+="- \`${skill_name}\` → \`${target}\` (absolute path)\n"
+            else
+                valid=$((valid + 1))
             fi
         elif [ -f "$skill_file" ]; then
             valid=$((valid + 1))
@@ -189,7 +193,7 @@ check_symlinks() {
         record_fail
         queue_issue \
             "Doctor: ${broken} broken skill symlinks" \
-            "$(printf "${broken} of ${total} skill symlinks in \`.claude/skills/\` are broken:\n\n%b\nClaude Code cannot discover these skills until the symlinks are fixed.\n\n**How to fix:** Re-run \`bash scripts/update-gstack.sh\` or \`bash scripts/update-sf-skills.sh\`, then verify with \`bash scripts/doctor.sh --quick\`." "$broken_md")"
+            "$(printf "${broken} of ${total} skill symlinks in \`.claude/skills/\` are broken:\n\n%b\nClaude Code cannot discover these skills until the symlinks are fixed.\n\n**How to fix:** Run \`bash scripts/fix-gstack-symlinks.sh\` to normalize symlinks, then verify with \`bash scripts/doctor.sh --quick\`." "$broken_md")"
     fi
 }
 
@@ -317,9 +321,9 @@ check_repo_hygiene() {
         # Count issues by type from the output
         local issue_count missing_count anchor_count forbidden_count
         issue_count=$(echo "$output" | head -1 | grep -oE '[0-9]+' | head -1 || echo "0")
-        missing_count=$(echo "$output" | grep -c '^MISSING' 2>/dev/null || echo "0")
-        anchor_count=$(echo "$output" | grep -c '^ANCHOR' 2>/dev/null || echo "0")
-        forbidden_count=$(echo "$output" | grep -c '^FORBIDDEN' 2>/dev/null || echo "0")
+        missing_count=$(echo "$output" | grep -c '^MISSING' 2>/dev/null) || missing_count=0
+        anchor_count=$(echo "$output" | grep -c '^ANCHOR' 2>/dev/null) || anchor_count=0
+        forbidden_count=$(echo "$output" | grep -c '^FORBIDDEN' 2>/dev/null) || forbidden_count=0
         echo "   ❌ ${issue_count} hygiene issues (${missing_count} missing links, ${anchor_count} broken anchors, ${forbidden_count} forbidden patterns)"
         record_fail
         queue_issue \
@@ -503,7 +507,7 @@ create_issues() {
 # Main
 # ─────────────────────────────────────────────
 
-echo "🩺 Doctor — Riyadh Monorepo Health Check"
+echo "🩺 Doctor — Monorepo Health Check"
 echo "════════════════════════════════════════"
 
 check_prerequisites

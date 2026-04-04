@@ -99,6 +99,10 @@ if [ "$MODE" = "--apply" ]; then
     --exclude='gstack-global-discover' \
     "$TMP_DIR/" "$GSTACK_DIR/"
   
+  # Normalize symlinks — gstack's setup/relink scripts create absolute paths
+  echo "  Normalizing gstack symlinks to relative paths..."
+  bash "$REPO_ROOT/scripts/fix-gstack-symlinks.sh"
+
   echo ""
   echo "Updated to ${UPSTREAM_VERSION}."
   echo "Backup at: ${BACKUP_DIR}"
@@ -106,7 +110,8 @@ if [ "$MODE" = "--apply" ]; then
   echo "Next steps:"
   echo "  1. Review changes: git diff .claude/skills/gstack/"
   echo "  2. Rebuild browser: cd .claude/skills/gstack && ./setup"
-  echo "  3. Commit: git add .claude/skills/gstack && git commit -m 'chore: update gstack to ${UPSTREAM_VERSION}'"
+  echo "  3. Re-normalize symlinks: bash scripts/fix-gstack-symlinks.sh"
+  echo "  4. Commit: git add .claude/skills/ && git commit -m 'chore: update gstack to ${UPSTREAM_VERSION}'"
 else
   echo "This was a preview. To apply the update, run:"
   echo "  bash scripts/update-gstack.sh --apply"
