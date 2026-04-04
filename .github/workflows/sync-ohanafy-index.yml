@@ -1,0 +1,92 @@
+name: Sync Ohanafy source indexes
+
+on:
+  schedule:
+    - cron: '0 6 * * 0'  # Every Sunday at 6am UTC
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: 'Sync a single repo (e.g., OHFY-Core). Leave empty for all.'
+        required: false
+        default: ''
+  push:
+    paths:
+      - '.github/workflows/sync-ohanafy-index.yml'
+
+concurrency:
+  group: ohanafy-sync
+  cancel-in-progress: true
+
+jobs:
+  sync-indexes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.OHANAFY_SYNC_TOKEN }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+
+      - name: Check GitHub auth
+        id: auth
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::OHANAFY_SYNC_TOKEN secret is not set. Add a PAT with read-only org scope. Skipping sync."
+            echo "authenticated=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          gh auth status
+          echo "authenticated=true" >> "$GITHUB_OUTPUT"
+
+      - name: Run sync script
+        if: steps.auth.outputs.authenticated == 'true'
+        run: |
+          REPO_ARG=""
+          if [ -n "${{ github.event.inputs.repo }}" ]; then
+            REPO_ARG="--repo ${{ github.event.inputs.repo }}"
+          fi
+          bash scripts/sync-ohanafy-index.sh $REPO_ARG 2>&1 | tee /tmp/sync-output.txt
+
+      - name: Check for changes
+        if: steps.auth.outputs.authenticated == 'true'
+        id: changes
+        run: |
+          if git diff --quiet skills/ohfy-*/references/; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No index changes detected."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "=== Changed files ==="
+            git diff --stat skills/ohfy-*/references/
+            echo ""
+            echo "=== Summary ==="
+            # Count new/modified sections
+            git diff skills/ohfy-*/references/source-index.md | grep "^+" | grep -c "^+|" || true
+          fi
+
+      - name: Create pull request
+        if: steps.auth.outputs.authenticated == 'true' && steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0  # v8
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: refresh Ohanafy source indexes (${{ github.event.inputs.repo || 'all repos' }})"
+          title: "chore: refresh Ohanafy source indexes (${{ github.run_id }})"
+          body: |
+            ## Automated Ohanafy Source Index Refresh
+
+            Synced source indexes from Ohanafy repos. Changes include updated:
+            - Apex class listings
+            - Trigger → Handler maps
+            - Service layer graphs
+            - Cross-object relationships
+            - Common patterns
+            - Test coverage summaries
+
+            **Trigger:** ${{ github.event_name == 'schedule' && 'Weekly schedule (Sunday 6am UTC)' || github.event_name == 'workflow_dispatch' && 'Manual trigger' || 'Workflow file change' }}
+            **Repo scope:** ${{ github.event.inputs.repo || 'All mapped repos' }}
+          branch: chore/sync-ohanafy-indexes
+          delete-branch: true
+          labels: |
+            automated
+            dependencies

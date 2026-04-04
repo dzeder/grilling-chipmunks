@@ -1,9 +1,14 @@
 # Customer: {{CUSTOMER_NAME}}
 
-## How to use this directory
+## Context loading order
 
-This directory captures everything specific to this customer's Salesforce/Ohanafy instance.
-Agents should read `profile.md` first for context, then check `orgs/` for environment-specific metadata.
+When working on this customer, read files in this order:
+
+1. **`profile.md`** — Org topology, installed SKUs, data profile, external systems, customization delta
+2. **`orgs/<env>/org-snapshot.md`** — Deployed metadata state (packages, objects, flows, validation rules)
+3. **`integrations.md`** — Integration inventory, Tray projects, named credentials
+4. **`known-issues.md`** — Open issues, workarounds, recurring patterns
+5. **`notes.md`** — Running notes from debugging sessions
 
 ## Connected orgs
 
@@ -22,14 +27,21 @@ After connecting, read `orgs/<env>/org-snapshot.md` for metadata counts and quic
 
 ## What belongs here
 
-- `profile.md` — Customer overview, org topology, installed SKUs, key contacts
+- `profile.md` — Customer overview, org topology, installed SKUs, data profile, customization delta
 - `orgs/<env>/` — Per-environment metadata retrieved by connect-org.sh
-- `customizations.md` — Custom fields, picklist values, validation rules that differ from standard OHFY
-- `integrations.md` — What systems they connect to, credentials, sync patterns
+- `integrations.md` — Integration inventory, Tray projects, credentials, sync patterns
+- `known-issues.md` — Open issues, workarounds, recurring patterns
 - `notes.md` — Running notes from debugging sessions, design decisions, gotchas
+- `customizations.md` — Custom fields, picklist values, validation rules that differ from standard OHFY
 
 ## What does NOT belong here
 
 - Shared integration code (goes in `projects/`)
 - OHFY product knowledge (goes in `skills/ohfy-*-expert/`)
 - Credentials and secrets (use Named Credentials, env vars, or a vault)
+
+## Cross-referencing
+
+When debugging this customer, also load the relevant OHFY package source indexes:
+- Check which SKUs are installed in `profile.md`
+- Read `skills/ohfy-<package>-expert/references/source-index.md` for trigger maps, service graphs, and patterns

@@ -476,6 +476,273 @@ extract_lwc_components() {
   echo ""
 }
 
+# --- Enhanced extraction functions (Deep Knowledge Layer) ---
+
+# Extract trigger → handler mapping: what class does each trigger call?
+extract_trigger_handler_map() {
+  local src_dir="$1"
+  local trigger_files
+  trigger_files=$(find "$src_dir" -name "*.trigger" 2>/dev/null | sort || true)
+  local count=0
+  if [ -n "$trigger_files" ]; then
+    count=$(echo "$trigger_files" | wc -l | tr -d ' ')
+  fi
+
+  if [ "$count" = "0" ]; then
+    return
+  fi
+
+  echo "## Trigger → Handler Map"
+  echo ""
+  echo "> **Coverage Limitations:** This map captures static patterns only (direct class"
+  echo "> instantiation, method calls visible in trigger body). Dynamic dispatch, factory"
+  echo "> patterns, and conditional handler resolution are not captured."
+  echo ""
+  echo "| Trigger | sObject | Handler Class | Call Pattern |"
+  echo "|---------|---------|---------------|-------------|"
+
+  echo "$trigger_files" | while IFS= read -r f; do
+    [ -z "$f" ] && continue
+    local tname sobject
+    local trigger_line
+    trigger_line=$(grep -m1 -E 'trigger[[:space:]]+[A-Za-z_]+[[:space:]]+on[[:space:]]+[A-Za-z_]' "$f" 2>/dev/null || echo "")
+    [ -z "$trigger_line" ] && continue
+
+    tname=$(echo "$trigger_line" | sed -E 's/trigger[[:space:]]+([^ ]+)[[:space:]]+on.*/\1/')
+    sobject=$(echo "$trigger_line" | sed -E 's/.*on[[:space:]]+([^ (]+).*/\1/')
+
+    # Look for handler class references in trigger body
+    # Pattern 1: new ClassName(
+    local handlers
+    handlers=$(grep -oE 'new[[:space:]]+[A-Z][A-Za-z_0-9]+[[:space:]]*\(' "$f" 2>/dev/null | sed 's/new[[:space:]]*//' | sed 's/[[:space:]]*(//' | sort -u | tr '\n' ', ' | sed 's/,$//')
+    local pattern="new ClassName()"
+    if [ -z "$handlers" ]; then
+      # Pattern 2: ClassName.methodName(
+      handlers=$(grep -oE '[A-Z][A-Za-z_0-9]+\.[a-z][A-Za-z_0-9]*[[:space:]]*\(' "$f" 2>/dev/null | sed 's/[[:space:]]*(//' | sort -u | head -5 | tr '\n' ', ' | sed 's/,$//')
+      pattern="Class.method()"
+    fi
+    if [ -z "$handlers" ]; then
+      handlers="(body too complex to parse)"
+      pattern="unknown"
+    fi
+    echo "| $tname | $sobject | $handlers | $pattern |"
+  done
+
+  echo ""
+}
+
+# Extract service layer graph: one level deep, direct calls only
+extract_service_graph() {
+  local src_dir="$1"
+  local svc_files
+  svc_files=$(find "$src_dir" -name "*.cls" \( -name "*Service*" -o -name "*Svc*" -o -name "*Handler*" \) \
+    -not -name "*Test*" -not -name "*Mock*" -not -name "*Stub*" 2>/dev/null | sort || true)
+  local count=0
+  if [ -n "$svc_files" ]; then
+    count=$(echo "$svc_files" | wc -l | tr -d ' ')
+  fi
+
+  if [ "$count" = "0" ]; then
+    return
+  fi
+
+  echo "## Service Layer Graph (one level deep)"
+  echo ""
+  echo "> **Coverage Limitations:** Captures static patterns only: \`new *Service(\`,"
+  echo "> \`ServiceLocator.getInstance(\`, \`System.enqueueJob\`. Dynamic dispatch and"
+  echo "> factory patterns are not captured. Treat as a starting map, not exhaustive."
+  echo ""
+  echo "| Service Class | Calls / Instantiates | Pattern |"
+  echo "|--------------|---------------------|---------|"
+
+  echo "$svc_files" | while IFS= read -r f; do
+    [ -z "$f" ] && continue
+    local classname
+    classname=$(basename "$f" .cls)
+
+    local deps=""
+    local dep_pattern=""
+
+    # Pattern: new *Service( or new *Handler(
+    local new_deps
+    new_deps=$(grep -oE 'new[[:space:]]+[A-Z][A-Za-z_0-9]*(Service|Svc|Handler)[[:space:]]*\(' "$f" 2>/dev/null | sed 's/new[[:space:]]*//' | sed 's/[[:space:]]*(//' | sort -u | tr '\n' ', ' | sed 's/,$//')
+
+    # Pattern: ServiceLocator.getInstance(
+    local locator_deps
+    locator_deps=$(grep -oE "ServiceLocator\.[a-zA-Z_]+\(" "$f" 2>/dev/null | sed 's/(//' | sort -u | tr '\n' ', ' | sed 's/,$//')
+
+    # Pattern: System.enqueueJob(new ClassName
+    local queue_deps
+    queue_deps=$(grep -oE 'System\.enqueueJob[[:space:]]*\([[:space:]]*new[[:space:]]+[A-Z][A-Za-z_0-9]+' "$f" 2>/dev/null | sed 's/.*new[[:space:]]*//' | sort -u | tr '\n' ', ' | sed 's/,$//')
+
+    if [ -n "$new_deps" ]; then
+      deps="$new_deps"
+      dep_pattern="new Instance()"
+    fi
+    if [ -n "$locator_deps" ]; then
+      [ -n "$deps" ] && deps="$deps, "
+      deps="${deps}${locator_deps}"
+      dep_pattern="${dep_pattern:+$dep_pattern, }ServiceLocator"
+    fi
+    if [ -n "$queue_deps" ]; then
+      [ -n "$deps" ] && deps="$deps, "
+      deps="${deps}${queue_deps}"
+      dep_pattern="${dep_pattern:+$dep_pattern, }enqueueJob"
+    fi
+
+    if [ -n "$deps" ]; then
+      echo "| $classname | $deps | $dep_pattern |"
+    fi
+  done
+
+  echo ""
+}
+
+# Extract cross-object relationship summary from field metadata
+extract_relationship_summary() {
+  local src_dir="$1"
+  local obj_dirs
+  obj_dirs=$(find "$src_dir" -type d -name "objects" 2>/dev/null | head -1)
+
+  if [ -z "$obj_dirs" ] || [ ! -d "$obj_dirs" ]; then
+    return
+  fi
+
+  local has_relationships=false
+  local rel_lines=""
+
+  find "$obj_dirs" -name "*.field-meta.xml" 2>/dev/null | while read -r field_file; do
+    local ref_to
+    ref_to=$(sed -n 's/.*<referenceTo>\(.*\)<\/referenceTo>.*/\1/p' "$field_file" 2>/dev/null | head -1)
+    [ -z "$ref_to" ] && continue
+
+    local rel_type
+    rel_type=$(sed -n 's/.*<type>\(.*\)<\/type>.*/\1/p' "$field_file" 2>/dev/null | head -1)
+
+    # Get parent object name from directory path
+    local obj_name
+    obj_name=$(basename "$(dirname "$(dirname "$field_file")")")
+    local field_name
+    field_name=$(basename "$field_file" .field-meta.xml)
+
+    echo "$obj_name|$field_name|$rel_type|$ref_to"
+  done | sort -u > "$TMP_BASE/relationships.tmp"
+
+  local rel_count
+  rel_count=$(wc -l < "$TMP_BASE/relationships.tmp" 2>/dev/null | tr -d ' ')
+
+  if [ "$rel_count" = "0" ] || [ -z "$rel_count" ]; then
+    return
+  fi
+
+  echo "## Cross-Object Relationships ($rel_count)"
+  echo ""
+  echo "| From Object | Field | Type | To Object |"
+  echo "|-------------|-------|------|-----------|"
+
+  while IFS='|' read -r obj field rel ref; do
+    [ -z "$obj" ] && continue
+    echo "| $obj | $field | $rel | $ref |"
+  done < "$TMP_BASE/relationships.tmp"
+
+  echo ""
+}
+
+# Extract common Apex patterns
+extract_common_patterns() {
+  local src_dir="$1"
+
+  echo "## Common Patterns"
+  echo ""
+
+  # TriggerBypass usage
+  local bypass_count
+  bypass_count=$(grep -rl "TriggerBypass\|Bypass_Trigger\|bypassTrigger\|BYPASS" "$src_dir" --include="*.cls" 2>/dev/null | wc -l | tr -d ' ')
+
+  # ServiceLocator usage
+  local locator_count
+  locator_count=$(grep -rl "ServiceLocator\|Service_Locator" "$src_dir" --include="*.cls" 2>/dev/null | wc -l | tr -d ' ')
+
+  # Batch/Schedulable chains
+  local batch_count
+  batch_count=$(find "$src_dir" -name "*.cls" 2>/dev/null | xargs grep -l "Database\.executeBatch\|System\.scheduleBatch\|implements[[:space:]]*Schedulable\|implements[[:space:]]*Database\.Batchable" 2>/dev/null | wc -l | tr -d ' ')
+
+  # Queueable
+  local queue_count
+  queue_count=$(find "$src_dir" -name "*.cls" 2>/dev/null | xargs grep -l "System\.enqueueJob\|implements[[:space:]]*Queueable" 2>/dev/null | wc -l | tr -d ' ')
+
+  # Platform events
+  local event_count
+  event_count=$(grep -rl "EventBus\.publish\|__e" "$src_dir" --include="*.cls" 2>/dev/null | wc -l | tr -d ' ')
+
+  echo "| Pattern | Files Using It | Notes |"
+  echo "|---------|---------------|-------|"
+  echo "| Trigger Bypass | $bypass_count | Classes referencing bypass mechanisms |"
+  echo "| Service Locator | $locator_count | Classes using service locator pattern |"
+  echo "| Batch/Schedulable | $batch_count | Classes implementing batch or schedulable |"
+  echo "| Queueable | $queue_count | Classes using async queueable jobs |"
+  echo "| Platform Events | $event_count | Classes publishing or subscribing to events |"
+  echo ""
+}
+
+# Test coverage summary
+extract_test_coverage_summary() {
+  local src_dir="$1"
+
+  local prod_count
+  prod_count=$(find "$src_dir" -name "*.cls" -not -name "*Test*" -not -name "*Mock*" -not -name "*Stub*" -not -name "*_T.cls" 2>/dev/null | wc -l | tr -d ' ')
+
+  local test_count
+  test_count=$(find "$src_dir" -name "*.cls" \( -name "*Test*" -o -name "*_T.cls" -o -name "*Mock*" -o -name "*Stub*" \) 2>/dev/null | wc -l | tr -d ' ')
+
+  local ratio="N/A"
+  if [ "$prod_count" -gt 0 ] 2>/dev/null; then
+    # Bash integer math: multiply by 100 first for percentage
+    ratio="$((test_count * 100 / prod_count))%"
+  fi
+
+  echo "## Test Coverage Summary"
+  echo ""
+  echo "| Metric | Count |"
+  echo "|--------|-------|"
+  echo "| Production classes | $prod_count |"
+  echo "| Test/Mock/Stub classes | $test_count |"
+  echo "| Test-to-production ratio | $ratio |"
+  echo ""
+
+  # List production classes without apparent test coverage
+  local untested=""
+  local untested_count=0
+  find "$src_dir" -name "*.cls" -not -name "*Test*" -not -name "*Mock*" -not -name "*Stub*" -not -name "*_T.cls" 2>/dev/null | sort | while IFS= read -r f; do
+    local classname
+    classname=$(basename "$f" .cls)
+    # Check if a test class exists for this class
+    local has_test=false
+    if find "$src_dir" -name "${classname}_T.cls" -o -name "${classname}Test.cls" -o -name "${classname}_Test.cls" 2>/dev/null | grep -q .; then
+      has_test=true
+    fi
+    if [ "$has_test" = "false" ]; then
+      echo "$classname"
+    fi
+  done > "$TMP_BASE/untested.tmp" 2>/dev/null
+
+  untested_count=$(wc -l < "$TMP_BASE/untested.tmp" 2>/dev/null | tr -d ' ')
+  if [ "$untested_count" -gt 0 ] 2>/dev/null && [ "$untested_count" -lt 50 ]; then
+    echo "### Classes Without Apparent Test Coverage ($untested_count)"
+    echo ""
+    head -30 "$TMP_BASE/untested.tmp" | while read -r cls; do
+      echo "- \`$cls\`"
+    done
+    if [ "$untested_count" -gt 30 ]; then
+      echo "- ... and $((untested_count - 30)) more"
+    fi
+    echo ""
+  elif [ "$untested_count" -ge 50 ] 2>/dev/null; then
+    echo "_${untested_count} classes without apparent test coverage (too many to list)._"
+    echo ""
+  fi
+}
+
 # --- Sync a single repo ---
 sync_repo() {
   local repo="$1"
@@ -539,7 +806,7 @@ sync_repo() {
     return 0
   fi
 
-  # Primary repo: generate full index
+  # Primary repo: generate full index (write to temp, atomic move on success)
   local index_content="$TMP_BASE/${repo}-index.md"
   {
     echo "# $repo Source Index"
@@ -547,8 +814,17 @@ sync_repo() {
     echo ""
     extract_apex_classes "$src_path"
     extract_triggers "$src_path"
+    extract_trigger_handler_map "$src_path"
     extract_service_methods "$src_path"
+    extract_service_graph "$src_path"
+    extract_relationship_summary "$src_path"
     extract_object_fields "$src_path"
+    extract_common_patterns "$src_path"
+    extract_test_coverage_summary "$src_path"
+    echo "## Known Gotchas"
+    echo ""
+    echo "_No known gotchas recorded yet. This section is populated by operational learnings from debugging sessions._"
+    echo ""
   } > "$index_content"
 
   if $DRY_RUN; then

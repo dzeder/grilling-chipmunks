@@ -1,5 +1,5 @@
 # OHFY-Core Source Index
-> Last synced: 2026-04-03T12:18:16Z | Commit: fc4299ea | Repo: Ohanafy/OHFY-Core
+> Last synced: 2026-04-04T14:54:36Z | Commit: fc4299ea | Repo: Ohanafy/OHFY-Core
 
 ## Apex Classes (583 production, 10 test/mock excluded)
 
@@ -631,6 +631,52 @@
 | TransferGroupTrigger | Transfer_Group__c |  |
 | TransferTrigger | Transfer__c |  |
 
+## Trigger → Handler Map
+
+> **Coverage Limitations:** This map captures static patterns only (direct class
+> instantiation, method calls visible in trigger body). Dynamic dispatch, factory
+> patterns, and conditional handler resolution are not captured.
+
+| Trigger | sObject | Handler Class | Call Pattern |
+|---------|---------|---------------|-------------|
+| AccountTrigger | Account | MetadataTriggerHandler | new ClassName() |
+| CommitmentTrigger | Commitment__c | MetadataTriggerHandler | new ClassName() |
+| ContactTrigger | Contact | MetadataTriggerHandler | new ClassName() |
+| CreditTrigger | Credit__c | MetadataTriggerHandler | new ClassName() |
+| DeliveryTrigger | Delivery__c | MetadataTriggerHandler | new ClassName() |
+| DistributorPlacementTrigger | Distributor_Placement__c | MetadataTriggerHandler | new ClassName() |
+| EquipmentTrigger | Equipment__c | MetadataTriggerHandler | new ClassName() |
+| EventTrigger | Event | MetadataTriggerHandler | new ClassName() |
+| GoalTrackingTrigger | Goal_Tracking__c | MetadataTriggerHandler | new ClassName() |
+| IncentiveTrigger | Incentive__c | MetadataTriggerHandler | new ClassName() |
+| InventoryAdjustmentTrigger | Inventory_Adjustment__c | MetadataTriggerHandler | new ClassName() |
+| InventoryLogGroupTrigger | Inventory_Log_Group__c | MetadataTriggerHandler | new ClassName() |
+| InventoryLogTrigger | Inventory_Log__c | MetadataTriggerHandler | new ClassName() |
+| InventoryReceiptItemTrigger | Inventory_Receipt_Item__c | MetadataTriggerHandler | new ClassName() |
+| InventoryReceiptTrigger | Inventory_Receipt__c | MetadataTriggerHandler | new ClassName() |
+| InventoryTrigger | Inventory__c | MetadataTriggerHandler | new ClassName() |
+| InvoiceFeeTrigger | Order_Fee__c | MetadataTriggerHandler | new ClassName() |
+| ItemTrigger | Item__c | MetadataTriggerHandler | new ClassName() |
+| ItemTypeTrigger | Item_Type__c | MetadataTriggerHandler | new ClassName() |
+| LocationTrigger | Location__c | MetadataTriggerHandler | new ClassName() |
+| LotInventoryTrigger | Lot_Inventory__c | MetadataTriggerHandler | new ClassName() |
+| LotTrigger | Lot__c | MetadataTriggerHandler | new ClassName() |
+| OrderItemTrigger | Order_Item__c | MetadataTriggerHandler | new ClassName() |
+| OrderTrigger | Order__c | MetadataTriggerHandler | new ClassName() |
+| PaymentMethodTrigger | Payment_Method__c | MetadataTriggerHandler | new ClassName() |
+| PricelistItemTrigger | Pricelist_Item__c | MetadataTriggerHandler | new ClassName() |
+| PricelistSettingTrigger | Pricelist_Setting__c | MetadataTriggerHandler | new ClassName() |
+| PricelistTrigger | Pricelist__c | MetadataTriggerHandler | new ClassName() |
+| PromotionProductTrigger | Promotion_Product__c | MetadataTriggerHandler | new ClassName() |
+| PromotionTrigger | Promotion__c | MetadataTriggerHandler | new ClassName() |
+| PurchaseOrderItemTrigger | Purchase_Order_Item__c | MetadataTriggerHandler | new ClassName() |
+| PurchaseOrderTrigger | Purchase_Order__c | MetadataTriggerHandler | new ClassName() |
+| RelatedAccountTrigger | Related_Account__c | MetadataTriggerHandler | new ClassName() |
+| TaskTrigger | Task | MetadataTriggerHandler | new ClassName() |
+| TierSettingTrigger | Tier_Setting__c | MetadataTriggerHandler | new ClassName() |
+| TransferGroupTrigger | Transfer_Group__c | MetadataTriggerHandler | new ClassName() |
+| TransferTrigger | Transfer__c | MetadataTriggerHandler | new ClassName() |
+
 ## Service Methods
 
 | Class | Method | Signature |
@@ -655,6 +701,287 @@
 | MetadataTriggerHandler | isBypassed | `public static Boolean isBypassed(String actionName) ` |
 | MetadataTriggerHandler | clearAllBypasses | `public static void clearAllBypasses() ` |
 | U_SendEmailService | sendEmailWithTemplate | `public static void sendEmailWithTemplate(String subject, List<String> messages, List<String> recipientEmails) ` |
+
+## Service Layer Graph (one level deep)
+
+> **Coverage Limitations:** Captures static patterns only: `new *Service(`,
+> `ServiceLocator.getInstance(`, `System.enqueueJob`. Dynamic dispatch and
+> factory patterns are not captured. Treat as a starting map, not exhaustive.
+
+| Service Class | Calls / Instantiates | Pattern |
+|--------------|---------------------|---------|
+
+## Cross-Object Relationships (267)
+
+| From Object | Field | Type | To Object |
+|-------------|-------|------|-----------|
+| Account_Goal_Breakdown__c | Account_Goal__c | MasterDetail | Account_Goal__c |
+| Account_Goal_Breakdown__c | Brand__c | Lookup | Item_Type__c |
+| Account_Goal_Breakdown__c | Supplier_Account__c | Lookup | Account |
+| Account_Goal__c | Account__c | Lookup | Account |
+| Account_Item__c | Account__c | MasterDetail | Account |
+| Account_Item__c | Item__c | MasterDetail | Item__c |
+| Account_Route__c | Customer__c | MasterDetail | Account |
+| Account_Route__c | Route__c | MasterDetail | Route__c |
+| Accounting_Adjustment__c | Financial_Account__c | Lookup | Financial_Account__c |
+| Accounting_Adjustment__c | Inventory_Adjustment__c | MasterDetail | Inventory_Adjustment__c |
+| Account | Auto_Assigned_Driver__c | Lookup | User |
+| Account | Billing_Contact__c | Lookup | Contact |
+| Account | Chain_Banner_Lookup__c | Lookup | Account |
+| Account | Delivery_Contact__c | Lookup | Contact |
+| Account | Distributor_Rep__c | Lookup | Contact |
+| Account | Distributor__c | Lookup | Account |
+| Account | Event_Primary_Contact__c | Lookup | Contact |
+| Account | Fulfilled_From__c | Lookup | Location__c |
+| Account | Pricelist__c | Lookup | Pricelist__c |
+| Account | Sales_Rep__c | Lookup | User |
+| Account | Territory__c | Lookup | Territory__c |
+| Activity_Goal__c | Goal_Tracking__c | MasterDetail | Goal_Tracking__c |
+| Activity | Criteria__c | Lookup | Criteria__c |
+| Allocation__c | Customer__c | Lookup | Account |
+| Allocation__c | Item__c | Lookup | Item__c |
+| Allocation__c | Location__c | Lookup | Location__c |
+| Allocation__c | Sales_Rep__c | Lookup | User |
+| Benefit__c | Employee__c | MasterDetail | Employee__c |
+| Billback__c | Incentive__c | Lookup | Incentive__c |
+| Brand_Territory_Exclusion__c | Brand__c | MasterDetail | Item_Type__c |
+| Brand_Territory_Exclusion__c | Territory__c | MasterDetail | Territory__c |
+| Candidate__c | Account_Name__c | Lookup | Account |
+| Candidate__c | Employee__c | Lookup | Employee__c |
+| Commitment_Item__c | Commitment__c | MasterDetail | Commitment__c |
+| Commitment_Item__c | Product__c | MasterDetail | Item__c |
+| Commitment__c | Account_Customer__c | Lookup | Account |
+| Commitment__c | Account_Distributor__c | Lookup | Account |
+| Compensation__c | Employee__c | MasterDetail | Employee__c |
+| Control_State_Code__c | Item__c | Lookup | Item__c |
+| Credit__c | Account__c | MasterDetail | Account |
+| Credit__c | Delivery__c | Lookup | Delivery__c |
+| Credit__c | Invoice__c | Lookup | Order__c |
+| Credit__c | Item__c | Lookup | Item__c |
+| Credit__c | Location__c | Lookup | Location__c |
+| Credit__c | Lot__c | Lookup | Lot__c |
+| Criteria__c | Task_Manager__c | MasterDetail | Task_Manager__c |
+| Deal_Item__c | Deal__c | MasterDetail | Deal__c |
+| Deal_Item__c | Item__c | MasterDetail | Item__c |
+| Delivery__c | Delivery__c | Lookup | Delivery__c |
+| Delivery__c | Driver__c | Lookup | User |
+| Delivery__c | Route__c | Lookup | Route__c |
+| Delivery__c | Vehicle__c | Lookup | Equipment__c |
+| Device__c | Equipment__c | MasterDetail | Equipment__c |
+| Display_Item__c | Display__c | MasterDetail | Display__c |
+| Display_Item__c | Product__c | Lookup | Item__c |
+| Display_Run__c | Chain_Banner__c | MasterDetail | Account |
+| Display__c | Account__c | Lookup | Account |
+| Display__c | Display_Run__c | MasterDetail | Display_Run__c |
+| Distributor_Placement__c | Customer__c | MasterDetail | Account |
+| Distributor_Placement__c | Item__c | Lookup | Item__c |
+| Earning__c | Employee__c | MasterDetail | Employee__c |
+| Equipment__c | Location__c | MasterDetail | Location__c |
+| Equipment__c | Truck_Location__c | Lookup | Location__c |
+| Equipment__c | Vendor__c | Lookup | Account |
+| Event_Expense__c | Event__c | MasterDetail | Event__c |
+| Event_Junction__c | Criteria__c | MasterDetail | Criteria__c |
+| Event_Junction__c | Event_Template__c | MasterDetail | Event_Template__c |
+| Event_MDF__c | Event__c | MasterDetail | Event__c |
+| Event_MDF__c | MDF_Partner_Account__c | Lookup | Account |
+| Event_MDF__c | MDF_Partner_Contact__c | Lookup | Contact |
+| Event_Registration__c | Contact__c | Lookup | Contact |
+| Event_Registration__c | Event__c | MasterDetail | Event__c |
+| Event_Registration__c | Primary_Track_of_Interest__c | Lookup | Track__c |
+| Event__c | Event_Manager__c | Lookup | User |
+| Event__c | Event_Vendor_Account__c | Lookup | Account |
+| Event__c | Parent_Event__c | Lookup | Event__c |
+| Event__c | Primary_Vendor_Contact__c | Lookup | Contact |
+| Event__c | Venue__c | Lookup | Venue__c |
+| Expense_Report__c | Approver__c | Lookup | User |
+| Expense_Report__c | Employee__c | MasterDetail | Employee__c |
+| Expense__c | Expense_Report__c | MasterDetail | Expense_Report__c |
+| Expense__c | Merchant__c | Lookup | Merchant__c |
+| Financial_Account__c | Parent_Account__c | Lookup | Financial_Account__c |
+| Goal_Tracking__c | Account__c | Lookup | Account |
+| Goal_Tracking__c | Brand__c | Lookup | Item_Type__c |
+| Goal_Tracking__c | Contact__c | Lookup | Contact |
+| Goal_Tracking__c | Goal_Template__c | Lookup | Goal_Template__c |
+| Goal_Tracking__c | Incentive__c | Lookup | Incentive__c |
+| Goal_Tracking__c | Product__c | Lookup | Item__c |
+| Goal_Tracking__c | Supplier__c | Lookup | Item_Line__c |
+| Goal_Tracking__c | Territory__c | Lookup | Territory__c |
+| Goal_Tracking__c | User__c | Lookup | User |
+| Incentive__c | Billback__c | Lookup | Billback__c |
+| Incentive__c | Brand__c | Lookup | Item_Type__c |
+| Incentive__c | Goal_Template__c | Lookup | Goal_Template__c |
+| Incentive__c | Product__c | Lookup | Item__c |
+| Incentive__c | Supplier__c | Lookup | Item_Line__c |
+| Integration_Sync_Failure__c | Integration_Sync__c | MasterDetail | Integration_Sync__c |
+| Interview__c | Job_Candidate__c | Lookup | Job_Candidate__c |
+| Inventory_Adjustment__c | Credit__c | Lookup | Credit__c |
+| Inventory_Adjustment__c | Inventory_Log__c | Lookup | Inventory_Log__c |
+| Inventory_Adjustment__c | Inventory_Receipt_Item__c | Lookup | Inventory_Receipt_Item__c |
+| Inventory_Adjustment__c | Inventory_Receipt__c | Lookup | Inventory_Receipt__c |
+| Inventory_Adjustment__c | Inventory__c | MasterDetail | Inventory__c |
+| Inventory_Adjustment__c | Invoice_Item_Lookup__c | Lookup | Order_Item__c |
+| Inventory_Adjustment__c | Invoice_Lookup__c | Lookup | Order__c |
+| Inventory_Adjustment__c | Lot_Inventory__c | Lookup | Lot_Inventory__c |
+| Inventory_Adjustment__c | Lot__c | Lookup | Lot__c |
+| Inventory_Adjustment__c | Original_Invoice__c | Lookup | Order__c |
+| Inventory_Adjustment__c | Purchase_Order_Item__c | Lookup | Purchase_Order_Item__c |
+| Inventory_Adjustment__c | Purchase_Order__c | Lookup | Purchase_Order__c |
+| Inventory_Adjustment__c | Transfer__c | Lookup | Transfer__c |
+| Inventory_History__c | Inventory__c | MasterDetail | Inventory__c |
+| Inventory_History__c | Item__c | MasterDetail | Item__c |
+| Inventory_Log_Group__c | Location__c | Lookup | Location__c |
+| Inventory_Log__c | Inventory_Log_Group__c | Lookup | Inventory_Log_Group__c |
+| Inventory_Log__c | Inventory__c | MasterDetail | Inventory__c |
+| Inventory_Log__c | Location__c | Lookup | Location__c |
+| Inventory_Log__c | Lot_Inventory__c | Lookup | Lot_Inventory__c |
+| Inventory_Receipt_Fee__c | Fee__c | MasterDetail | Fee__c |
+| Inventory_Receipt_Fee__c | Inventory_Receipt__c | MasterDetail | Inventory_Receipt__c |
+| Inventory_Receipt_Item__c | Inventory_Location__c | Lookup | Location__c |
+| Inventory_Receipt_Item__c | Inventory_Receipt_Item__c | Lookup | Inventory_Receipt_Item__c |
+| Inventory_Receipt_Item__c | Inventory_Receipt__c | MasterDetail | Inventory_Receipt__c |
+| Inventory_Receipt_Item__c | Item__c | MasterDetail | Item__c |
+| Inventory_Receipt__c | Purchase_Order__c | MasterDetail | Purchase_Order__c |
+| Inventory_Receipt__c | Supplier__c | Lookup | Account |
+| Inventory__c | Item__c | MasterDetail | Item__c |
+| Inventory__c | Location__c | Lookup | Location__c |
+| Invoice_Adjustment__c | Adjustment__c | MasterDetail | Adjustment__c |
+| Invoice_Adjustment__c | Invoice__c | MasterDetail | Order__c |
+| Invoice_Goal__c | Goal_Tracking__c | MasterDetail | Goal_Tracking__c |
+| Invoice_Goal__c | Order__c | MasterDetail | Order__c |
+| Invoice_Group__c | Customer__c | Lookup | Account |
+| Item_Component__c | Child_Item__c | Lookup | Item__c |
+| Item_Component__c | Parent_Item__c | MasterDetail | Item__c |
+| Item_Line__c | Supplier__c | Lookup | Account |
+| Item_Type__c | Item_Line__c | Lookup | Item_Line__c |
+| Item__c | Default_Location__c | Lookup | Location__c |
+| Item__c | Item_Line__c | Lookup | Item_Line__c |
+| Item__c | Item_Type__c | Lookup | Item_Type__c |
+| Job_Candidate__c | Candidate__c | MasterDetail | Candidate__c |
+| Job_Candidate__c | Job__c | MasterDetail | Job__c |
+| Label__c | ItemType__c | Lookup | Item_Type__c |
+| Label__c | Item_Type__c | Lookup | Item_Type__c |
+| Label__c | Item__c | MasterDetail | Item__c |
+| Location__c | Location__c | Lookup | Location__c |
+| Location__c | Site__c | Lookup | Location__c |
+| Lot_Adjustment__c | Inventory_Adjustment__c | Lookup | Inventory_Adjustment__c |
+| Lot_Adjustment__c | Lot_Inventory__c | Lookup | Lot_Inventory__c |
+| Lot_Inventory_Receipt_Item__c | Inventory_Receipt_Item__c | Lookup | Inventory_Receipt_Item__c |
+| Lot_Inventory_Receipt_Item__c | Lot__c | Lookup | Lot__c |
+| Lot_Inventory__c | Inventory__c | Lookup | Inventory__c |
+| Lot_Inventory__c | Lot__c | Lookup | Lot__c |
+| Lot_Invoice_Item__c | Invoice_Item_Lookup__c | Lookup | Order_Item__c |
+| Lot_Invoice_Item__c | Lot__c | Lookup | Lot__c |
+| Lot__c | Item__c | Lookup | Item__c |
+| Lot__c | Supplier__c | Lookup | Account |
+| Maintenance__c | Equipment__c | MasterDetail | Equipment__c |
+| Maintenance__c | Service_Provider__c | MasterDetail | Account |
+| Onboarding_Plan__c | Employee__c | MasterDetail | Employee__c |
+| Onboarding_Task__c | Assigned_To__c | Lookup | User |
+| Onboarding_Task__c | Onboarding_Plan__c | MasterDetail | Onboarding_Plan__c |
+| Order_Fee__c | Fee__c | MasterDetail | Fee__c |
+| Order_Fee__c | Order__c | MasterDetail | Order__c |
+| Order_Item__c | Allocation__c | Lookup | Allocation__c |
+| Order_Item__c | Delivery__c | Lookup | Delivery__c |
+| Order_Item__c | Item__c | MasterDetail | Item__c |
+| Order_Item__c | Order_Item__c | Lookup | Order_Item__c |
+| Order_Item__c | Order__c | MasterDetail | Order__c |
+| Order__c | Contact__c | Lookup | Contact |
+| Order__c | Customer__c | MasterDetail | Account |
+| Order__c | Delivery__c | Lookup | Delivery__c |
+| Order__c | Fulfillment_Location__c | Lookup | Location__c |
+| Order__c | Invoice_Group__c | Lookup | Invoice_Group__c |
+| Order__c | Payment_Account__c | Lookup | Payment_Method__c |
+| Order__c | Pricelist__c | Lookup | Pricelist__c |
+| Order__c | Sales_Rep__c | Lookup | User |
+| Pallet_Item__c | Invoice_Item__c | Lookup | Order_Item__c |
+| Pallet_Item__c | Pallet__c | MasterDetail | Pallet__c |
+| Pallet__c | Delivery__c | Lookup | Delivery__c |
+| Pallet__c | Invoice__c | Lookup | Order__c |
+| Payment_Method__c | Customer__c | MasterDetail | Account |
+| Payment__c | Customer__c | Lookup | Account |
+| Payment__c | Invoice_Lookup__c | Lookup | Order__c |
+| Payment__c | Payment_Method__c | Lookup | Payment_Method__c |
+| Performance_Review__c | Employee__c | MasterDetail | Employee__c |
+| Performance_Review__c | Reviewer__c | Lookup | User |
+| Pricelist_Account__c | Account__c | MasterDetail | Account |
+| Pricelist_Account__c | Pricelist__c | MasterDetail | Pricelist__c |
+| Pricelist_Item__c | Front_Line_Promotion__c | Lookup | Promotion_Product__c |
+| Pricelist_Item__c | Item__c | MasterDetail | Item__c |
+| Pricelist_Item__c | Pricelist__c | MasterDetail | Pricelist__c |
+| Pricelist_Setting__c | Pricelist_Group__c | Lookup | Pricelist_Group__c |
+| Pricelist__c | Pricelist_Group__c | Lookup | Pricelist_Group__c |
+| Product_Group_Account__c | Customer__c | Lookup | Account |
+| Product_Group_Account__c | Product_Group__c | Lookup | Product_Group__c |
+| Promotion_Brand__c | Brand__c | MasterDetail | Item_Type__c |
+| Promotion_Brand__c | Promotion__c | MasterDetail | Promotion__c |
+| Promotion_Invoice_Item__c | Invoice_Item__c | Lookup | Order_Item__c |
+| Promotion_Invoice_Item__c | Promotion__c | MasterDetail | Promotion__c |
+| Promotion_Product__c | Product__c | MasterDetail | Item__c |
+| Promotion_Product__c | Promotion__c | MasterDetail | Promotion__c |
+| Promotion_Supplier__c | Promotion__c | MasterDetail | Promotion__c |
+| Promotion_Supplier__c | Supplier__c | MasterDetail | Item_Line__c |
+| Promotion__c | Billback__c | Lookup | Billback__c |
+| Promotion__c | Customer__c | Lookup | Account |
+| Promotion__c | Territory__c | Lookup | Territory__c |
+| Purchase_Order_Item__c | Item__c | MasterDetail | Item__c |
+| Purchase_Order_Item__c | Purchase_Order_Item__c | Lookup | Purchase_Order_Item__c |
+| Purchase_Order_Item__c | Purchase_Order__c | MasterDetail | Purchase_Order__c |
+| Purchase_Order__c | Location__c | Lookup | Location__c |
+| Purchase_Order__c | Supplier__c | MasterDetail | Account |
+| Related_Account__c | Account__c | Lookup | Account |
+| Related_Account__c | Deal__c | Lookup | Deal__c |
+| Related_Contact__c | Contact__c | Lookup | Contact |
+| Related_Contact__c | Deal__c | Lookup | Deal__c |
+| Related_Financial_Account__c | Accounting_Setting__c | MasterDetail | Accounting_Setting__c |
+| Related_Financial_Account__c | Financial_Account__c | Lookup | Financial_Account__c |
+| Related_Lot__c | Child_Lot__c | Lookup | Lot__c |
+| Related_Lot__c | Parent_Lot__c | Lookup | Lot__c |
+| Retail_Inventory__c | Invoice__c | Lookup | Order__c |
+| Retail_Inventory__c | Product__c | Lookup | Account_Item__c |
+| Room__c | Venue__c | MasterDetail | Venue__c |
+| Route__c | Driver__c | Lookup | User |
+| Route__c | Vehicle__c | Lookup | Equipment__c |
+| Session__c | Room__c | Lookup | Room__c |
+| Session__c | Track__c | MasterDetail | Track__c |
+| Speaker__c | Account__c | Lookup | Account |
+| Speaker__c | Internal_Handler__c | Lookup | User |
+| Speaker__c | Session__c | MasterDetail | Session__c |
+| Speaker__c | Speaker_Contact__c | Lookup | Contact |
+| Speaker__c | Track__c | Lookup | Track__c |
+| Survey__c | Account__c | MasterDetail | Account |
+| Survey__c | Assigned_To__c | Lookup | User |
+| Survey__c | Vehicle__c | Lookup | Equipment__c |
+| Task_Junction__c | Criteria__c | MasterDetail | Criteria__c |
+| Task_Junction__c | Task_Template__c | MasterDetail | Task_Template__c |
+| Team_Member__c | Account__c | Lookup | Account |
+| Team_Member__c | Team__c | Lookup | Team__c |
+| Team_Member__c | User__c | Lookup | User |
+| Territory__c | Parent_Territory__c | Lookup | Territory__c |
+| Territory__c | Salesperson__c | Lookup | User |
+| Tier_Setting__c | Item_Type__c | Lookup | Item_Type__c |
+| Tier_Setting__c | Pricelist_Group__c | Lookup | Pricelist_Group__c |
+| Time_Off_Entry__c | Time_Off__c | MasterDetail | Time_Off__c |
+| Time_Off__c | Employee__c | MasterDetail | Employee__c |
+| Timesheet_Entry__c | Employee__c | Lookup | Employee__c |
+| Timesheet_Entry__c | Timesheet__c | MasterDetail | Timesheet__c |
+| Timesheet__c | Employee__c | MasterDetail | Employee__c |
+| Track__c | Event__c | MasterDetail | Event__c |
+| Transfer_Group__c | Current_Location__c | Lookup | Location__c |
+| Transfer_Group__c | New_Location__c | Lookup | Location__c |
+| Transfer__c | Current_Location__c | Lookup | Location__c |
+| Transfer__c | Item__c | MasterDetail | Item__c |
+| Transfer__c | New_Location__c | Lookup | Location__c |
+| Transfer__c | Transfer_Group__c | Lookup | Transfer_Group__c |
+| Trigger_Action__mdt | After_Delete__c | MetadataRelationship | sObject_Trigger_Setting__mdt |
+| Trigger_Action__mdt | After_Insert__c | MetadataRelationship | sObject_Trigger_Setting__mdt |
+| Trigger_Action__mdt | After_Undelete__c | MetadataRelationship | sObject_Trigger_Setting__mdt |
+| Trigger_Action__mdt | After_Update__c | MetadataRelationship | sObject_Trigger_Setting__mdt |
+| Trigger_Action__mdt | Before_Delete__c | MetadataRelationship | sObject_Trigger_Setting__mdt |
+| Trigger_Action__mdt | Before_Insert__c | MetadataRelationship | sObject_Trigger_Setting__mdt |
+| Trigger_Action__mdt | Before_Update__c | MetadataRelationship | sObject_Trigger_Setting__mdt |
+| Venue__c | Contact_2__c | Lookup | Contact |
+| Venue__c | Contact_3__c | Lookup | Contact |
+| Venue__c | Primary_Contact__c | Lookup | Contact |
 
 ## Custom Objects & Fields
 
@@ -2379,4 +2706,28 @@
 | Scheduled_Date__c | Date | false |  |
 | Service_Provider__c | MasterDetail | false | Account |
 | Type__c | Picklist | false |  |
+
+## Common Patterns
+
+| Pattern | Files Using It | Notes |
+|---------|---------------|-------|
+| Trigger Bypass | 4 | Classes referencing bypass mechanisms |
+| Service Locator | 0 | Classes using service locator pattern |
+| Batch/Schedulable | 28 | Classes implementing batch or schedulable |
+| Queueable | 16 | Classes using async queueable jobs |
+| Platform Events | 0 | Classes publishing or subscribing to events |
+
+## Test Coverage Summary
+
+| Metric | Count |
+|--------|-------|
+| Production classes | 316 |
+| Test/Mock/Stub classes | 277 |
+| Test-to-production ratio | 87% |
+
+_51 classes without apparent test coverage (too many to list)._
+
+## Known Gotchas
+
+_No known gotchas recorded yet. This section is populated by operational learnings from debugging sessions._
 

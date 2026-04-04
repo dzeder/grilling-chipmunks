@@ -1,40 +1,53 @@
 # daniels-ohanafy Roadmap
 
-## Current State (v1.0)
-- 61 skills across Salesforce, integration, Ohanafy SKU, and domain areas
+## Current State (v2.0 — Deep Knowledge Layer)
+- 98 skills across Salesforce, integration, Ohanafy SKU, and domain areas
 - 17 agents spanning FDE, PS, integration, and domain specialties
 - gstack vendored with sync script + weekly GitHub Action
 - Claude Code best practices vendored with sync script + weekly GitHub Action
-- 11 integration patterns from DHS production code
-- 15 VIP-to-Ohanafy migration scripts + 5 playbooks
+- 12 integration patterns from DHS production code
 - Gulf case study docs (60KB guide, ERD, schema refs)
-- 10 CI/CD workflows from pricing repo
+- 15 GitHub workflows (14 original + 1 new Ohanafy sync)
 - org-connect skill + connect-org.sh for live Salesforce debugging
-- 10 SKU expert skills with clone-on-demand pattern
+- 10 SKU expert skills with **enhanced source indexes** (trigger maps, service graphs, relationships, patterns, test coverage)
+- **Context Loading Protocol** in CLAUDE.md — agents auto-load customer + package context
+- **Customer knowledge structure** — expanded templates with integrations, known issues, customization delta
+- **Automated Ohanafy repo monitoring** via weekly GitHub Action
+
+## Completed (v2.0)
+- [x] Enhanced `sync-ohanafy-index.sh` with deep code intelligence (trigger maps, service graphs, cross-object relationships, common patterns, test coverage)
+- [x] Context Loading Protocol added to CLAUDE.md (decision tree for auto-loading knowledge)
+- [x] Customer template expanded (integrations.md, known-issues.md, customization delta, deployment history)
+- [x] Gulf fleshed out as reference customer
+- [x] GitHub Action for weekly Ohanafy source index sync (`sync-ohanafy-index.yml`)
+- [x] Deduplicate `tray-expert` vs `tray-architecture` (overlapping scope)
+- [x] Audit all skills against best-practice docs for pattern compliance
 
 ## Near-Term (Next 2 Weeks)
+- [ ] Run full `sync-ohanafy-index.sh` across all 10 repos and validate output quality
+- [ ] Connect to Gulf production org and populate org-snapshot.md with real metadata
+- [ ] Set up `OHANAFY_SYNC_TOKEN` repo secret for automated sync workflow
 - [ ] Run `gstack ./setup` in a test project and validate
 - [ ] Wire up sf-skills installer (`install.py`) for fresh environments
-- [ ] Connect to an actual Salesforce org and test org-connect workflow
-- [x] Deduplicate `tray-expert` vs `tray-architecture` (overlapping scope)
 - [ ] Add coworker (DHS) as collaborator on the repo
-- [x] Audit all skills against best-practice docs for pattern compliance
 - [ ] Test GitHub Actions in a real PR cycle
+- [ ] End-to-end validation: checkout `dzeder/gulf-oms-fix`, verify agents load correct context
 
-## Medium-Term (1-2 Months)
+## Medium-Term: Self-Evolving System (Approach C)
+- [ ] Post-session learning extraction: hook that appends to "Known Gotchas" section after debugging sessions
+- [ ] Branch detective: hook that auto-runs Context Loading Protocol on branch checkout
+- [ ] Auto-freshness: skill checks source index staleness and auto-triggers sync when >7 days
+- [ ] Cross-customer pattern detection: diff customer profiles to find reusable patterns
 - [ ] Build connector-specific skills: `tray-netsuite`, `tray-qbo`, `tray-ukg-pro`
-- [ ] Option 2: Weekly index sync for Ohanafy source repos (script + Action ready in `docs/ohanafy-source-sync-roadmap.md`)
 - [ ] Create Ohanafy brand/voice skill for customer-facing docs
-- [ ] Per-customer project templates (scaffolding from org-connect output)
 - [ ] Add pre-commit hooks for skill schema validation
 - [ ] Build integration test suite for skills (trigger-rule coverage)
+- [ ] Enhance `connect-org.sh` to capture richer metadata (installed package versions, active flows, validation rules, custom fields per object)
 
 ## Longer-Term (3-6 Months)
-- [ ] Option 3: Git submodules for Ohanafy source repos (evaluated after Option 2 stabilizes)
 - [ ] Multi-agent orchestration: FDE strategist delegates to SKU experts automatically
-- [ ] Operational learning system: capture debugging patterns as new skills
 - [ ] Skill quality scoring dashboard (trigger accuracy, user corrections)
-- [ ] Webhook-driven sync from Ohanafy repos (Option 4)
+- [ ] Webhook-driven sync from Ohanafy repos (real-time index updates)
 - [ ] Cross-customer pattern library: reusable integration recipes
 - [ ] Claude Code best-practice compliance linter (auto-check skill frontmatter, agent config)
 
@@ -46,7 +59,7 @@
 | Best practices | shanraisshan/claude-code-best-practice | `scripts/update-best-practices.sh` | Weekly (Action) |
 | sf-skills | Jaganpro/sf-skills | `scripts/update-sf-skills.sh` (preview) | Weekly (Action → Issue) |
 | DHS Integrations | dhsOhanafy/Integrations | Manual (vendored) | As needed |
-| Ohanafy source | Ohanafy/* (54 repos) | Clone-on-demand → weekly index | Evolving |
+| Ohanafy source | Ohanafy/* (54 repos) | `sync-ohanafy-index.sh` + weekly Action | Weekly (Action) |
 
 ## Decision Log
 
@@ -57,3 +70,8 @@
 | 2026-04-02 | Clone-on-demand for Ohanafy source | Don't vendor 54 repos; clone to /tmp/ when needed |
 | 2026-04-02 | Advisory-only hooks | Blocking hooks frustrate developers; warn but don't block |
 | 2026-04-02 | Vendor best-practice docs | Need offline access + stability; weekly sync catches updates |
+| 2026-04-04 | Deep Knowledge Layer (Approach B) | Source indexes need depth (triggers, services, relationships), not just class listings |
+| 2026-04-04 | Context Loading Protocol | Agents should auto-load customer + package context based on branch name and task keywords |
+| 2026-04-04 | Machine user PAT for sync | Single PAT with read-only org scope is simpler than per-repo deploy keys |
+| 2026-04-04 | Static grep for service graphs | One level deep, static patterns only. Coverage limitations documented in index. |
+| 2026-04-04 | Commit org snapshots as markdown | Committed for agent access; raw JSON gitignored. Regenerate on-demand via connect-org.sh |
