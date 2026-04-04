@@ -36,6 +36,12 @@ jobs:
             echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Ensure label exists
+        if: steps.check.outputs.has_changes == 'true'
+        run: gh label create ecosystem-watch --description "Ecosystem watch digest" --color "0e8a16" 2>/dev/null || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Check for existing open issue
         if: steps.check.outputs.has_changes == 'true'
         id: existing
