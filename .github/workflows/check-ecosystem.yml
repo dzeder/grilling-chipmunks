@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '0 10 1,15 * *'  # 1st and 15th of each month at 10am UTC
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/check-ecosystem.yml'
 
 concurrency:
   group: ecosystem-check
