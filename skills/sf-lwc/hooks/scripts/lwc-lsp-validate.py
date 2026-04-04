@@ -25,7 +25,7 @@ import os
 import sys
 import tempfile
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any
 
 # Add shared lsp-engine to path
 # The installer places lsp-engine at ~/.claude/lsp-engine/ but in a dev
@@ -248,7 +248,7 @@ def main():
     # Try to import LSP engine
     try:
         from lsp_client import LSPClient
-    except ImportError as e:
+    except ImportError:
         # LSP engine not available - skip validation silently
         # This allows the plugin to work even without LSP
         sys.exit(0)
@@ -262,7 +262,7 @@ def main():
     # Create LSP client with LWC wrapper and language ID
     try:
         client = LSPClient(wrapper_path=str(lwc_wrapper), language_id="javascript")
-    except Exception as e:
+    except Exception:
         # LSP initialization error - skip silently
         sys.exit(0)
 

@@ -4,13 +4,13 @@ Renderers for sf-permissions output.
 Provides ASCII tree (terminal) and Mermaid (documentation) output formats.
 """
 
-from .ascii_tree import (
+from .ascii_tree import (  # noqa: F401
     render_hierarchy_tree,
     render_user_tree,
     render_detection_table,
     render_summary_panel,
 )
-from .mermaid import (
+from .mermaid import (  # noqa: F401
     render_hierarchy_mermaid,
     render_user_mermaid,
 )

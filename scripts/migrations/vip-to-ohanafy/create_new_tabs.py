@@ -427,7 +427,6 @@ def transform_promotion_item_types(rows):
         # Use the first item's promo key as the Promotion lookup
         # Promotions are keyed as {disc_code}-{item}-{price_code}
         # For type-level, we reference the discount code as the parent
-        promo_ref = f"{disc_code}-{brand_code}-{price_code}"
         dedup_key = (disc_code, brand_code, price_code)
         if dedup_key in seen:
             continue

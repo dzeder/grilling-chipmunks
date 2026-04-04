@@ -9,7 +9,6 @@ metadata in a Salesforce org, similar to the Metadata API but
 with a REST interface.
 """
 
-from typing import Optional
 from simple_salesforce import Salesforce
 
 
@@ -75,7 +74,7 @@ def get_tab_settings(sf: Salesforce, ps_id: str) -> list[dict]:
             }
             for r in result.get('records', [])
         ]
-    except Exception as e:
+    except Exception:
         # Tooling API might not be available or query might fail
         return []
 

@@ -124,9 +124,6 @@ class ScoreMerger:
         "EmptyTryOrFinallyBlock": ScoreCategory.ERROR_HANDLING,
         "EmptyStatementBlock": ScoreCategory.ERROR_HANDLING,
 
-        "AvoidHardcodingId": ScoreCategory.PERFORMANCE,
-        "OperationWithLimitsInLoop": ScoreCategory.PERFORMANCE,
-
         "ApexDoc": ScoreCategory.DOCUMENTATION,
 
         # Regex rules

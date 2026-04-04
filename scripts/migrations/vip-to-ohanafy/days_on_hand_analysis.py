@@ -300,7 +300,6 @@ def calc_doh_table(df):
 
     df_active = df[df["warehouse"].isin(WAREHOUSE_NAMES.keys()) & df["is_weekday"]].copy()
     today = date.today()
-    current_month = today.month
 
     results = []
     for (item, wh), grp in df_active.groupby(["item_code", "warehouse"]):
@@ -886,18 +885,18 @@ def write_calculator_tab(ref_data, item_descs):
 
     # --- Build item and warehouse dropdown lists ---
     items_list = sorted(set(r["item"] for r in ref_data))
-    item_labels = [f"{code} - {item_descs.get(code, '')[:40]}" for code in items_list]
+    [f"{code} - {item_descs.get(code, '')[:40]}" for code in items_list]
     wh_list = sorted(set(r["warehouse"] for r in ref_data))
-    wh_labels = [f"{code} - {WAREHOUSE_NAMES.get(code, code)}" for code in wh_list]
+    [f"{code} - {WAREHOUSE_NAMES.get(code, code)}" for code in wh_list]
 
     # --- Write dropdown source lists (columns T-U, hidden area) ---
     # Items in T2:T{n}, Warehouses in U2:U{n}
     item_dropdown_data = [[code] for code in items_list]
     wh_dropdown_data = [[code] for code in wh_list]
     # Item labels for display in V
-    item_label_data = [[code, item_descs.get(code, "")] for code in items_list]
+    [[code, item_descs.get(code, "")] for code in items_list]
     # WH labels for display in W
-    wh_label_data = [[code, WAREHOUSE_NAMES.get(code, code)] for code in wh_list]
+    [[code, WAREHOUSE_NAMES.get(code, code)] for code in wh_list]
 
     ws.update(range_name="T1", values=[["Items"]])
     ws.update(range_name="T2", values=item_dropdown_data)

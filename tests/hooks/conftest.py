@@ -9,7 +9,6 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-import pytest
 
 # Repo root — two levels up from tests/hooks/
 ROOT = Path(__file__).resolve().parents[2]

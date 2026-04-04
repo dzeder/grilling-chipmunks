@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
 
 from tests.datacloud_test_utils import ROOT, load_registry
 

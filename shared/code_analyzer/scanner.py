@@ -22,7 +22,7 @@ import os
 import tempfile
 from pathlib import Path
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 
 from .dependency_checker import DependencyChecker
@@ -250,7 +250,7 @@ class CodeAnalyzerScanner:
                 filtered_selectors.append(selector)
             else:
                 if engine not in [e for e, _ in unavailable_engines]:
-                    unavailable_engines.append((engine, f"Missing dependencies"))
+                    unavailable_engines.append((engine, "Missing dependencies"))
 
         if not filtered_selectors:
             return ScanResult(

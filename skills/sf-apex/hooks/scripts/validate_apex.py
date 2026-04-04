@@ -20,7 +20,7 @@ validation phase. This avoids duplicate checking with less accuracy.
 import re
 import sys
 import os
-from typing import Dict, List, Tuple
+from typing import Dict
 
 
 class ApexValidator:
@@ -109,7 +109,6 @@ class ApexValidator:
         # Look for patterns like variable.method() without prior null check
         # This is a simplified check
         null_check_pattern = r'(\w+)\s*!=\s*null'
-        method_call_pattern = r'(\w+)\.\w+\s*\('
 
         checked_vars = set()
         for line in self.lines:
@@ -161,8 +160,6 @@ class ApexValidator:
 
     def _check_error_handling(self):
         """Check for error handling patterns."""
-        has_try = 'try {' in self.content or 'try{' in self.content
-        has_catch = 'catch (' in self.content or 'catch(' in self.content
 
         # Check for empty catch blocks
         empty_catch_pattern = r'catch\s*\([^)]+\)\s*\{\s*\}'

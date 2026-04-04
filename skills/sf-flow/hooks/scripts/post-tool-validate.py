@@ -54,7 +54,7 @@ def validate_flow_with_ca(file_path: str) -> dict:
         dict with validation results and output message
     """
     output_parts = []
-    file_name = os.path.basename(file_path)
+    os.path.basename(file_path)
 
     try:
         # ═══════════════════════════════════════════════════════════════════
@@ -68,7 +68,7 @@ def validate_flow_with_ca(file_path: str) -> dict:
         flow_name = custom_results.get('flow_name', 'Unknown')
         custom_score = custom_results.get('overall_score', 0)
         custom_max = 110
-        custom_rating = custom_results.get('rating', '')
+        custom_results.get('rating', '')
 
         # Collect issues from all categories
         custom_issues = []

@@ -30,7 +30,6 @@ Usage:
 import argparse
 import csv
 import json
-import os
 
 # Conversion data: UOM -> (fluid_oz, pounds, measurement_system)
 CONVERSIONS = {

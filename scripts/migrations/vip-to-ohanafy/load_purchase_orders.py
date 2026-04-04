@@ -262,12 +262,12 @@ def step3_build_and_load_headers(vip_rows, supplier_map, item_map, location_map)
     headers = []
     for (po_num, supp_code), lines in sorted(po_groups.items()):
         # Derive header fields from lines
-        min_date = min(int(l["po_date"]) for l in lines if int(l["po_date"]) > 0)
-        receipt_dates = [int(l["receipt_date"]) for l in lines if int(l["receipt_date"]) > 0]
+        min_date = min(int(line["po_date"]) for line in lines if int(line["po_date"]) > 0)
+        receipt_dates = [int(line["receipt_date"]) for line in lines if int(line["receipt_date"]) > 0]
         max_receipt = max(receipt_dates) if receipt_dates else 0
 
         # Status: use highest-priority status across lines
-        line_statuses = [l["status"] for l in lines if l["status"]]
+        line_statuses = [line["status"] for line in lines if line["status"]]
         if line_statuses:
             best_status = max(line_statuses, key=lambda s: STATUS_PRIORITY.get(s, -1))
             ohanafy_status = STATUS_MAP.get(best_status, "New")
@@ -276,9 +276,9 @@ def step3_build_and_load_headers(vip_rows, supplier_map, item_map, location_map)
 
         # Warehouse: use most common across lines
         whse_counts = defaultdict(int)
-        for l in lines:
-            if l["warehouse"]:
-                whse_counts[l["warehouse"]] += 1
+        for line in lines:
+            if line["warehouse"]:
+                whse_counts[line["warehouse"]] += 1
         predominant_whse = max(whse_counts, key=whse_counts.get) if whse_counts else ""
         location_id = location_map.get(predominant_whse, "")
 

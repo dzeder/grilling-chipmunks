@@ -54,7 +54,6 @@ License: MIT
 import argparse
 import glob
 import json
-import os
 import re
 import subprocess
 import sys

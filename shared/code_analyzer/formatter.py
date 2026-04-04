@@ -296,7 +296,6 @@ def format_compact_summary(
 
 if __name__ == "__main__":
     # Demo output
-    from score_merger import MergedScore
 
     category_scores = {
         "bulkification": (25, 25),

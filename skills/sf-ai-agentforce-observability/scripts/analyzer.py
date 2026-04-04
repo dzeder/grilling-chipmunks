@@ -22,11 +22,9 @@ Usage:
     timeline = analyzer.message_timeline("session_id")
 """
 
-import json
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, Dict, Any
 from dataclasses import dataclass
-from datetime import datetime, timedelta
 
 import polars as pl
 from rich.console import Console
@@ -190,7 +188,7 @@ class STDMAnalyzer:
             Polars DataFrame with step distribution
         """
         steps = self.load_steps()
-        interactions = self.load_interactions()
+        self.load_interactions()
 
         if agent_name:
             # Agent name is in AIAgentMoment, not AIAgentSession
@@ -761,7 +759,6 @@ class STDMAnalyzer:
                         console.print(f"           │ [blue][RESPONSE][/blue] {content}")
                 else:
                     # Show step (LLM_STEP or ACTION_STEP)
-                    icon = "⚡" if event_type == "ACTION_STEP" else "🤖"
                     content = request[:77] + "..." if len(request or "") > 80 else request or ""
                     console.print(f"{time_str} │ [yellow][{event_type}][/yellow] {content}")
 

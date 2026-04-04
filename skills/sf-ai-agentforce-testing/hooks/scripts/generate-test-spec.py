@@ -16,7 +16,6 @@ Output:
 import argparse
 import re
 import sys
-import os
 from pathlib import Path
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional
@@ -84,7 +83,6 @@ def parse_agent_file(file_path: str) -> AgentStructure:
     current_block = None  # 'config', 'topic', 'actions', etc.
     current_topic: Optional[AgentTopic] = None
     current_action: Optional[AgentAction] = None
-    current_indent = 0
     block_indent = 0
     in_inputs_outputs = False  # Track if inside inputs:/outputs: sub-block
     io_indent = 0
@@ -359,11 +357,11 @@ def _generate_agent_prompt(action: AgentAction, topic: AgentTopic) -> str:
     if 'order' in desc or 'status' in desc:
         return f"I'd be happy to help you with {topic_label.lower()}. Could you please provide the Order ID?"
     if 'account' in desc or 'lookup' in desc:
-        return f"Sure, I can help with that. Could you please provide your account information?"
+        return "Sure, I can help with that. Could you please provide your account information?"
     if 'case' in desc or 'ticket' in desc:
-        return f"I can help you create a support case. Could you describe the issue?"
+        return "I can help you create a support case. Could you describe the issue?"
     if 'search' in desc or 'find' in desc:
-        return f"I can help you search. What are you looking for?"
+        return "I can help you search. What are you looking for?"
 
     return f"I can help you with {topic_label.lower()}. Could you please provide the required information?"
 
@@ -609,7 +607,7 @@ Examples:
         structure.agent_name = agent_file.stem
 
     # Generate test spec
-    content = generate_test_spec(structure, args.output)
+    generate_test_spec(structure, args.output)
 
     # Print summary
     if args.verbose:

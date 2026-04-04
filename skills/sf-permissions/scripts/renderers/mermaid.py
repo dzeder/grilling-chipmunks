@@ -6,7 +6,6 @@ Mermaid diagrams can be rendered in GitHub, GitLab, Notion, and many
 other documentation platforms.
 """
 
-from typing import Optional
 
 
 def render_hierarchy_mermaid(hierarchy) -> str:

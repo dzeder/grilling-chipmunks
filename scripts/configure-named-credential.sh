@@ -46,7 +46,7 @@ usage() {
     echo "  $0 VisualCrossingWeather weatherAPIKey AIZoom"
     echo ""
     echo -e "${BLUE}Available External Credentials in this project:${NC}"
-    find . -name "*.externalCredential-meta.xml" -type f 2>/dev/null | while read file; do
+    find . -name "*.externalCredential-meta.xml" -type f 2>/dev/null | while read -r file; do
         basename "$file" .externalCredential-meta.xml | sed 's/^/  - /'
     done
     echo ""
@@ -127,7 +127,7 @@ echo -e "${YELLOW}Enter API Key for '$EXTERNAL_CREDENTIAL_NAME'${NC}"
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo -e "${BLUE}API Key (input hidden):${NC}"
-read -s API_KEY
+read -rs API_KEY
 echo ""
 
 if [ -z "$API_KEY" ]; then

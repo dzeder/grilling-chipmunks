@@ -282,7 +282,7 @@ check_skill_lint() {
     local output
     output=$(bash scripts/lint-skills.sh --summary 2>&1) || exit_code=$?
 
-    echo "$output" | sed 's/^/   /'
+    echo "$output" | while IFS= read -r line; do echo "   $line"; done
 
     if [ "$exit_code" -eq 0 ]; then
         record_pass
@@ -291,9 +291,10 @@ check_skill_lint() {
         local fail_count
         fail_count=$(echo "$output" | grep -oE 'Fail: [0-9]+' | awk '{print $2}' || echo "?")
         record_fail
+        # shellcheck disable=SC2016
         queue_issue \
             "Doctor: ${fail_count} skills failing lint" \
-            "$(printf "\`scripts/lint-skills.sh\` reports ${fail_count} skill(s) failing structural checks.\n\nRun \`bash scripts/lint-skills.sh\` for full details.\n\nSee \`docs/SKILL_TEMPLATE.md\` for required structure.")"
+            "$(printf '`scripts/lint-skills.sh` reports %s skill(s) failing structural checks.\n\nRun `bash scripts/lint-skills.sh` for full details.\n\nSee `docs/SKILL_TEMPLATE.md` for required structure.' "$fail_count")"
     fi
 }
 
@@ -326,9 +327,10 @@ check_repo_hygiene() {
         forbidden_count=$(echo "$output" | grep -c '^FORBIDDEN' 2>/dev/null) || forbidden_count=0
         echo "   ❌ ${issue_count} hygiene issues (${missing_count} missing links, ${anchor_count} broken anchors, ${forbidden_count} forbidden patterns)"
         record_fail
+        # shellcheck disable=SC2016
         queue_issue \
             "Doctor: ${issue_count} repo hygiene issues" \
-            "$(printf "\`tools/check_repo_hygiene.py\` found ${issue_count} issue(s):\n\n| Type | Count |\n|------|-------|\n| Missing link targets | ${missing_count} |\n| Broken anchors | ${anchor_count} |\n| Forbidden patterns | ${forbidden_count} |\n\nMost are missing \`references/*.md\` files that skills link to but haven't been created yet.\n\nRun \`python3 tools/check_repo_hygiene.py\` for full details.")"
+            "$(printf '`tools/check_repo_hygiene.py` found %s issue(s):\n\n| Type | Count |\n|------|-------|\n| Missing link targets | %s |\n| Broken anchors | %s |\n| Forbidden patterns | %s |\n\nMost are missing `references/*.md` files that skills link to but haven'\''t been created yet.\n\nRun `python3 tools/check_repo_hygiene.py` for full details.' "$issue_count" "$missing_count" "$anchor_count" "$forbidden_count")"
     fi
 }
 
@@ -436,7 +438,7 @@ check_install_health() {
     local output
     output=$(python3 tools/install.py --diagnose 2>&1) || exit_code=$?
 
-    echo "$output" | sed 's/^/   /'
+    echo "$output" | while IFS= read -r line; do echo "   $line"; done
 
     if [ "$exit_code" -eq 0 ]; then
         record_pass
@@ -556,4 +558,4 @@ else
     fi
 fi
 
-exit $([ "$FAIL" -eq 0 ] && echo 0 || echo 1)
+exit "$([ "$FAIL" -eq 0 ] && echo 0 || echo 1)"

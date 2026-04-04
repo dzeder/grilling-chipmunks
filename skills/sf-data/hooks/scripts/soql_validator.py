@@ -8,7 +8,7 @@ Used by the main validation module for query-specific checks.
 """
 
 import re
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 
 class SOQLValidator:
     """Validates SOQL queries for best practices."""

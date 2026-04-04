@@ -19,11 +19,10 @@ Commands:
     count               Count records in Data Cloud
 """
 
-import os
 import sys
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Optional, List
+from typing import Optional
 
 import click
 from rich.console import Console
@@ -122,7 +121,6 @@ def extract(
         # Filter by agent
         stdm-extract extract --org prod --agent Customer_Support_Agent
     """
-    from scripts.auth import DataCloudAuth
     from scripts.datacloud_client import DataCloudClient
     from scripts.extractor import STDMExtractor
 
@@ -137,7 +135,7 @@ def extract(
     # Get authentication
     auth = get_auth(org, consumer_key, key_path)
 
-    console.print(f"\n[bold cyan]📊 STDM Extraction[/bold cyan]")
+    console.print("\n[bold cyan]📊 STDM Extraction[/bold cyan]")
     console.print(f"Org: [cyan]{org}[/cyan]")
     console.print(f"Period: {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
     if agent:
@@ -213,7 +211,7 @@ def extract_tree(
 
     auth = get_auth(org, consumer_key, key_path)
 
-    console.print(f"\n[bold cyan]📊 Session Tree Extraction[/bold cyan]")
+    console.print("\n[bold cyan]📊 Session Tree Extraction[/bold cyan]")
     console.print(f"Sessions: {len(session_id)}")
     console.print(f"Output: {output}")
     console.print("")
@@ -271,7 +269,7 @@ def extract_quality(
 
     auth = get_auth(org, consumer_key, key_path)
 
-    console.print(f"\n[bold cyan]📊 Quality DMO Extraction[/bold cyan]")
+    console.print("\n[bold cyan]📊 Quality DMO Extraction[/bold cyan]")
     console.print(f"Data dir: {data_dir}")
     console.print("")
 
@@ -334,7 +332,7 @@ def extract_incremental(
 
     auth = get_auth(org, consumer_key, key_path)
 
-    console.print(f"\n[bold cyan]📊 Incremental Extraction[/bold cyan]")
+    console.print("\n[bold cyan]📊 Incremental Extraction[/bold cyan]")
     console.print(f"Output: {output}")
     console.print("")
 
@@ -541,7 +539,7 @@ def count(org: str, consumer_key: Optional[str], key_path: Optional[str], entity
 
         record_count = client.count(dmo, where_clause)
 
-        console.print(f"\n[bold cyan]Record Count[/bold cyan]")
+        console.print("\n[bold cyan]Record Count[/bold cyan]")
         console.print(f"Entity: {entity}")
         console.print(f"Period: Last {days} days")
         console.print(f"Count: [green]{record_count:,}[/green]")
@@ -773,7 +771,7 @@ def find_hallucinations(data_dir: str, limit: int, output_format: str):
         summary = analyzer.hallucination_summary()
         summary_row = summary.row(0, named=True)
 
-        console.print(f"\n[bold cyan]🔍 HALLUCINATION ANALYSIS[/bold cyan]")
+        console.print("\n[bold cyan]🔍 HALLUCINATION ANALYSIS[/bold cyan]")
         console.print("═" * 60)
         console.print(f"Total hallucinations: [yellow]{summary_row['total_hallucinations']}[/yellow]")
         console.print(f"Affected sessions: [yellow]{summary_row['affected_sessions']}[/yellow] / {summary_row['total_sessions']}")
@@ -836,29 +834,29 @@ def test_auth(org: str, consumer_key: Optional[str], key_path: Optional[str]):
     """
     auth = get_auth(org, consumer_key, key_path)
 
-    console.print(f"\n[bold cyan]Testing Authentication[/bold cyan]")
+    console.print("\n[bold cyan]Testing Authentication[/bold cyan]")
     console.print(f"Org: {org}")
     console.print(f"Key: {auth.key_path}")
 
     try:
         # Get org info
-        console.print(f"\n[dim]Getting org info...[/dim]")
+        console.print("\n[dim]Getting org info...[/dim]")
         org_info = auth.org_info
         console.print(f"Instance: {org_info.instance_url}")
         console.print(f"Username: {org_info.username}")
         console.print(f"Sandbox: {org_info.is_sandbox}")
 
         # Test token generation
-        console.print(f"\n[dim]Testing token generation...[/dim]")
-        token = auth.get_token()
-        console.print(f"[green]✓ Token generated[/green]")
+        console.print("\n[dim]Testing token generation...[/dim]")
+        auth.get_token()
+        console.print("[green]✓ Token generated[/green]")
 
         # Test Data Cloud connection
-        console.print(f"\n[dim]Testing Data Cloud access...[/dim]")
+        console.print("\n[dim]Testing Data Cloud access...[/dim]")
         auth.test_connection()
-        console.print(f"[green]✓ Data Cloud accessible[/green]")
+        console.print("[green]✓ Data Cloud accessible[/green]")
 
-        console.print(f"\n[bold green]Authentication successful![/bold green]")
+        console.print("\n[bold green]Authentication successful![/bold green]")
 
     except Exception as e:
         console.print(f"\n[red]✗ Authentication failed: {e}[/red]")

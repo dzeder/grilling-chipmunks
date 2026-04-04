@@ -13,8 +13,10 @@ REFERENCE_DOCX="$PROJECT_ROOT/docs/templates/reference.docx"
 
 convert_file() {
   local mdfile="$1"
-  local dir=$(dirname "$mdfile")
-  local base=$(basename "$mdfile" .md)
+  local dir
+  dir=$(dirname "$mdfile")
+  local base
+  base=$(basename "$mdfile" .md)
 
   echo "Converting: $mdfile"
 
@@ -46,7 +48,7 @@ if [ $# -gt 0 ]; then
 else
   # Convert all docs (excluding README files)
   COUNT=0
-  while read mdfile; do
+  while read -r mdfile; do
     convert_file "$mdfile"
     COUNT=$((COUNT + 1))
   done < <(find "$PROJECT_ROOT/docs" -name "*.md" -not -name "README.md")

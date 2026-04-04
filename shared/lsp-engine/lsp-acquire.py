@@ -23,11 +23,9 @@ Usage:
 import argparse
 import hashlib
 import json
-import os
 import shutil
 import sys
 import tempfile
-import time
 import urllib.error
 import urllib.request
 import zipfile
@@ -246,7 +244,7 @@ def acquire_server(server_name: str, force: bool = False, check: bool = False) -
     print(f"{'='*60}")
 
     # Query marketplace for latest version
-    print(f"  Querying VS Code Marketplace...")
+    print("  Querying VS Code Marketplace...")
     try:
         info = query_marketplace(ext_id)
     except RuntimeError as exc:
@@ -267,7 +265,7 @@ def acquire_server(server_name: str, force: bool = False, check: bool = False) -
         if verify_path.exists():
             print(f"  Already cached (version {cached_version})")
             if check:
-                print(f"  [dry-run] Would skip — already up to date")
+                print("  [dry-run] Would skip — already up to date")
             return True
 
     if check:
@@ -278,7 +276,7 @@ def acquire_server(server_name: str, force: bool = False, check: bool = False) -
     # Download .vsix to temp file
     with tempfile.TemporaryDirectory() as tmpdir:
         vsix_path = Path(tmpdir) / f"{server_name}.vsix"
-        print(f"  Downloading .vsix...")
+        print("  Downloading .vsix...")
         try:
             sha256 = download_vsix(download_url, vsix_path)
         except RuntimeError as exc:
@@ -292,7 +290,7 @@ def acquire_server(server_name: str, force: bool = False, check: bool = False) -
             shutil.rmtree(dest_dir)
         dest_dir.mkdir(parents=True, exist_ok=True)
 
-        print(f"  Extracting server files...")
+        print("  Extracting server files...")
         count = extract_server(vsix_path, server_name, dest_dir)
         print(f"  Extracted {count} files to {dest_dir.relative_to(SCRIPT_DIR)}/")
 
@@ -300,7 +298,7 @@ def acquire_server(server_name: str, force: bool = False, check: bool = False) -
     verify_path = dest_dir / meta["verify_file"]
     if not verify_path.exists():
         print(f"  ERROR: Expected file not found: {meta['verify_file']}")
-        print(f"  The extension format may have changed.")
+        print("  The extension format may have changed.")
         return False
 
     # Update manifest
@@ -322,7 +320,7 @@ def show_status() -> None:
     manifest = load_manifest()
     servers = manifest.get("servers", {})
 
-    print(f"\nLSP Server Cache Status")
+    print("\nLSP Server Cache Status")
     print(f"{'='*60}")
     print(f"  Cache directory: {SERVERS_DIR}")
     print(f"  Manifest:        {MANIFEST_FILE}")

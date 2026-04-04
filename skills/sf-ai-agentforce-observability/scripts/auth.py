@@ -377,7 +377,7 @@ class Data360Auth:
         Raises:
             RuntimeError: If authentication fails
         """
-        token = self.get_token()
+        self.get_token()
 
         # Test with a simple Data 360 Query API call (v66.0)
         url = f"{self.instance_url}/services/data/v66.0/ssot/query-sql"

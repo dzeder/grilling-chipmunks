@@ -575,7 +575,6 @@ def detect(
 
 if __name__ == '__main__':
     # Quick test
-    import sys
     from auth import get_sf_connection
 
     sf = get_sf_connection()

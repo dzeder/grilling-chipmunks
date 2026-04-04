@@ -48,7 +48,7 @@ ORG_ALIAS=$3
 # If API key is "-", prompt securely
 if [ "$API_KEY" = "-" ]; then
     echo -e "${YELLOW}Enter API key (input hidden):${NC}"
-    read -s API_KEY
+    read -rs API_KEY
     echo ""
 fi
 

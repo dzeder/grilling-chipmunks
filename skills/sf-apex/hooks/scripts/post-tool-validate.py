@@ -179,7 +179,7 @@ def validate_apex_with_ca(file_path: str) -> dict:
 
         except ImportError:
             pass  # Live analysis not available
-        except Exception as e:
+        except Exception:
             pass  # Don't fail validation on live plan errors
 
         # ═══════════════════════════════════════════════════════════════════
@@ -190,7 +190,6 @@ def validate_apex_with_ca(file_path: str) -> dict:
         rating = custom_rating
         rating_stars = 0
         ca_deductions = 0
-        deductions = []
 
         if ca_violations and ca_available:
             try:
@@ -208,8 +207,7 @@ def validate_apex_with_ca(file_path: str) -> dict:
                 rating = merged.rating
                 rating_stars = merged.rating_stars
                 ca_deductions = merged.ca_deductions
-                deductions = merged.deductions
-            except Exception as e:
+            except Exception:
                 # Fallback to custom score only
                 pass
 

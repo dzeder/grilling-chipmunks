@@ -8,7 +8,6 @@ from a Salesforce org.
 Useful for autocomplete, validation, and discovery.
 """
 
-from typing import Optional
 from simple_salesforce import Salesforce
 
 
@@ -230,10 +229,7 @@ def get_tabs(sf: Salesforce) -> list[dict]:
     Returns:
         List of dicts with 'name', 'label', 'url'
     """
-    # Use describe to get tabs
-    tabs = sf.describe()['tabs'] if hasattr(sf.describe(), '__getitem__') else []
-
-    # Alternative: use REST API
+    # Use REST API
     try:
         response = sf.restful('tabs')
         return [

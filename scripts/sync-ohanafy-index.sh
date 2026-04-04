@@ -198,23 +198,23 @@ if [ "$MODE" = "discover" ]; then
   done <<< "$ALL_REPOS"
 
   echo "Mapped ($mapped_count):"
-  printf "$mapped_lines"
+  printf '%s' "$mapped_lines"
   echo ""
 
   if [ "$unmapped_count" -gt 0 ]; then
     echo "Unmapped ($unmapped_count) — consider adding skills or mappings:"
-    printf "$unmapped_lines"
+    printf '%s' "$unmapped_lines"
     echo ""
   fi
 
   if [ "$skipped_count" -gt 0 ]; then
     echo "Skipped ($skipped_count):"
-    printf "$skipped_lines"
+    printf '%s' "$skipped_lines"
     echo ""
   fi
 
   echo "Non-OHFY ($non_ohfy_count):"
-  printf "$non_ohfy_lines"
+  printf '%s' "$non_ohfy_lines"
   echo ""
 
   total=$((mapped_count + unmapped_count + skipped_count + non_ohfy_count))
@@ -268,7 +268,9 @@ extract_apex_classes() {
     # Try Javadoc: first line after /**
     desc=$(sed -n '/\/\*\*/,/\*\//{ /\/\*\*/d; /\*\//d; p; }' "$f" 2>/dev/null | head -1 | sed 's/^[[:space:]]*\*[[:space:]]*//' | sed 's/[|]/-/g' | head -c 80)
     # Strip @description prefix if present
-    desc=$(echo "$desc" | sed 's/^@[Dd]escription[[:space:]]*//')
+    desc="${desc#@description}"
+    desc="${desc#@Description}"
+    desc="${desc#"${desc%%[![:space:]]*}"}"
     # Fallback: @description annotation outside Javadoc
     if [ -z "$desc" ]; then
       desc=$(grep -m1 -i '@description' "$f" 2>/dev/null | sed 's/.*@[Dd]escription[[:space:]]*//' | sed 's/[|]/-/g' | head -c 80 || true)

@@ -271,9 +271,9 @@ def step3_build_and_load_headers(vip_rows, customer_map, customer_name_map, item
 
         # Warehouse: most common across lines
         whse_counts = defaultdict(int)
-        for l in lines:
-            if l["warehouse"]:
-                whse_counts[l["warehouse"]] += 1
+        for line in lines:
+            if line["warehouse"]:
+                whse_counts[line["warehouse"]] += 1
         predominant_whse = max(whse_counts, key=whse_counts.get) if whse_counts else ""
         location_id = location_map.get(predominant_whse, "")
 
@@ -281,7 +281,7 @@ def step3_build_and_load_headers(vip_rows, customer_map, customer_name_map, item
         acct_code = first["account_code"]
         cust_name = customer_name_map.get(acct_code, acct_code)
         display_date = format_vip_date_display(first["invoice_date"])
-        subtotal = sum(float(l["line_amount"]) if l["line_amount"] else 0.0 for l in lines)
+        subtotal = sum(float(line["line_amount"]) if line["line_amount"] else 0.0 for line in lines)
         invoice_name = f"{cust_name} {display_date} - ${subtotal:,.2f}"
         if len(invoice_name) > 80:
             invoice_name = invoice_name[:80]

@@ -47,7 +47,6 @@ class TestFlowBadFile:
 
     def test_bad_flow_detects_missing_description(self):
         result = run_validator(VALIDATOR, str(FLOWS_DIR / "Bad_Flow.flow-meta.xml"), timeout=45)
-        output = result.stdout.lower()
         # The flow has no description — validator should score it lower than perfect
         if parse_score(result.stdout) is not None:
             score = parse_score(result.stdout)[0]

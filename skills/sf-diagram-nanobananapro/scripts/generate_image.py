@@ -232,7 +232,7 @@ Examples:
         # Auto-open in macOS Preview unless --no-open is specified
         if not args.no_open:
             subprocess.run(["open", output_path], check=False)
-            print(f"   📸 Opened in Preview")
+            print("   📸 Opened in Preview")
         else:
             print(f"   Open with: open {output_path}")
     except Exception as e:

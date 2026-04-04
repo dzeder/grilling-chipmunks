@@ -18,7 +18,6 @@ Output:
 
 import subprocess
 import json
-import sys
 import argparse
 from typing import Optional
 

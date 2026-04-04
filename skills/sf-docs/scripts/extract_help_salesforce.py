@@ -26,7 +26,6 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import sys
 from typing import Any, Dict, List, Tuple
 from urllib.parse import urlparse
 
@@ -34,8 +33,8 @@ from runtime_bootstrap import maybe_reexec_in_sf_docs_runtime
 
 maybe_reexec_in_sf_docs_runtime(__file__)
 
-from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError  # noqa: E402
+from playwright.sync_api import sync_playwright  # noqa: E402
 
 try:
     from playwright_stealth import Stealth

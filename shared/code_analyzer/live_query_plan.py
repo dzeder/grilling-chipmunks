@@ -25,7 +25,6 @@ Usage:
 import subprocess
 import json
 import re
-import os
 import urllib.parse
 from typing import List, Optional, Dict, Any, Tuple
 from dataclasses import dataclass, field

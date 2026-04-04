@@ -42,7 +42,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Set
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -347,7 +347,7 @@ Examples:
             iterations.append(iteration_data)
             final_status = "passed"
             if args.verbose:
-                print(f"  ✅ All scenarios passed!", file=sys.stderr)
+                print("  ✅ All scenarios passed!", file=sys.stderr)
             break
 
         # Build fix instructions

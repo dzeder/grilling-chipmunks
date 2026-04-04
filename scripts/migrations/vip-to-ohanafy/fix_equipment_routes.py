@@ -984,7 +984,6 @@ a0GWE000009lQaC2AU"""
             key = row["ohfy__Key__c"]
             wh_code = truck_warehouse.get(key, DEFAULT_WAREHOUSE)
             location_id = WAREHOUSE_MAP.get(wh_code, WAREHOUSE_MAP[DEFAULT_WAREHOUSE])
-            wh_name = {v: k for k, v in WAREHOUSE_MAP.items()}.get(location_id, "?")
 
             warehouse_stats[wh_code] = warehouse_stats.get(wh_code, 0) + 1
 

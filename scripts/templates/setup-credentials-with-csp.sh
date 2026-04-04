@@ -26,7 +26,7 @@ NC='\033[0m'
 
 # Configuration - REPLACE THESE
 SKILL_NAME="{{SkillName}}"              # e.g., "Bland.ai", "Stripe", "Twilio"
-CUSTOM_SETTING_NAME="{{SettingName}}"  # e.g., "BlandAI", "StripeAPI", "TwilioAPI"
+export CUSTOM_SETTING_NAME="{{SettingName}}"  # e.g., "BlandAI", "StripeAPI", "TwilioAPI"
 CSP_NAME="{{CSPName}}"                  # e.g., "BlandAPI", "StripeAPI", "TwilioAPI"
 API_KEY_URL="{{APIKeyURL}}"             # e.g., "https://app.bland.ai/settings/api"
 
@@ -84,7 +84,7 @@ echo -e "${CYAN}Get it from: ${API_KEY_URL}${NC}"
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo -e "${BLUE}API Key (input hidden):${NC}"
-read -s API_KEY
+read -rs API_KEY
 echo ""
 
 if [ -z "$API_KEY" ]; then

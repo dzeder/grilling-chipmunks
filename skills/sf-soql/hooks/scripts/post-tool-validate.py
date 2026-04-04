@@ -93,7 +93,7 @@ def validate_soql_file(file_path: str) -> dict:
 
         except ImportError:
             pass  # Live analysis not available
-        except Exception as e:
+        except Exception:
             pass  # Don't fail on live analysis errors
 
         # ═══════════════════════════════════════════════════════════════════
@@ -120,7 +120,7 @@ def validate_soql_file(file_path: str) -> dict:
         # Live Query Plan section
         output_parts.append("")
         if live_result and live_result.success:
-            output_parts.append(f"🌐 Live Query Plan Analysis")
+            output_parts.append("🌐 Live Query Plan Analysis")
             output_parts.append(f"   Org: {org_name}")
             output_parts.append(f"   {live_result.icon} Selective: {live_result.is_selective}")
             output_parts.append(f"   📊 Relative Cost: {live_result.relative_cost:.2f} ({live_result.selectivity_rating})")
@@ -138,7 +138,7 @@ def validate_soql_file(file_path: str) -> dict:
             output_parts.append("🌐 Live Query Plan: No org connected")
             output_parts.append("   Run 'sf org login web' to enable live analysis")
         elif live_result and not live_result.success:
-            output_parts.append(f"🌐 Live Query Plan: Error")
+            output_parts.append("🌐 Live Query Plan: Error")
             output_parts.append(f"   {live_result.error[:60]}")
 
         # Issues

@@ -253,7 +253,7 @@ class DataOperationValidator:
             self._deduct('bulk_safety', 10, 'DML operation inside for loop')
 
         # Check for single-record operations when bulk would be better
-        single_record_pattern = re.search(
+        re.search(
             r'(insert|update|delete)\s+\w+\s*;(?!\s*//\s*single)',
             content, re.IGNORECASE
         )
@@ -315,7 +315,7 @@ class DataOperationValidator:
 
         # Check for edge case handling
         edge_cases = ['null', 'empty', 'boundary', 'special character', 'unicode']
-        has_edge_cases = any(ec in content.lower() for ec in edge_cases)
+        any(ec in content.lower() for ec in edge_cases)
 
         if not has_bulk and 'bulk' not in self.file_path.stem.lower():
             self._deduct('test_patterns', 5, 'Consider testing with 200+ records for bulkification')

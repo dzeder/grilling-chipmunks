@@ -15,7 +15,6 @@ import json
 import os
 import subprocess
 import sys
-import tempfile
 import xml.etree.ElementTree as ET
 
 TEMP_PROJECT_DIR = "/tmp/ohfy-uom-retrieve"
