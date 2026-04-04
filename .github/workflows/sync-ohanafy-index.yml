@@ -29,14 +29,18 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
 
       - name: Check GitHub auth
+        id: auth
         run: |
           if [ -z "$GH_TOKEN" ]; then
-            echo "::error::OHANAFY_SYNC_TOKEN secret is not set. Add a PAT with read-only org scope."
-            exit 1
+            echo "::warning::OHANAFY_SYNC_TOKEN secret is not set. Add a PAT with read-only org scope. Skipping sync."
+            echo "authenticated=false" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
           gh auth status
+          echo "authenticated=true" >> "$GITHUB_OUTPUT"
 
       - name: Run sync script
+        if: steps.auth.outputs.authenticated == 'true'
         run: |
           REPO_ARG=""
           if [ -n "${{ github.event.inputs.repo }}" ]; then
@@ -45,6 +49,7 @@ jobs:
           bash scripts/sync-ohanafy-index.sh $REPO_ARG 2>&1 | tee /tmp/sync-output.txt
 
       - name: Check for changes
+        if: steps.auth.outputs.authenticated == 'true'
         id: changes
         run: |
           if git diff --quiet skills/ohfy-*/references/; then
@@ -61,7 +66,7 @@ jobs:
           fi
 
       - name: Create pull request
-        if: steps.changes.outputs.changed == 'true'
+        if: steps.auth.outputs.authenticated == 'true' && steps.changes.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0  # v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
