@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/fix-gstack-symlinks.sh 2>/dev/null || true",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}

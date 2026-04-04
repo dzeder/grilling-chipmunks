@@ -1,0 +1,3 @@
+#!/bin/bash
+# Auto-fix gstack symlinks after checkout (branch switch, git pull, clone)
+bash scripts/fix-gstack-symlinks.sh 2>/dev/null || true

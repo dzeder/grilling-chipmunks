@@ -1,0 +1,3 @@
+#!/bin/bash
+# Auto-fix gstack symlinks after merge (git pull, merge)
+bash scripts/fix-gstack-symlinks.sh 2>/dev/null || true
