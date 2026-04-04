@@ -1,1 +1,1 @@
-../gstack/plan-eng-review/SKILL.md
+/Users/danielzeder/conductor/workspaces/daniels-ohanafy/riyadh/.claude/skills/gstack/plan-eng-review/SKILL.md

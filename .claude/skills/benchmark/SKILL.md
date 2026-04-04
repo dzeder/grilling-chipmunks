@@ -1,1 +1,1 @@
-../gstack/benchmark/SKILL.md
+/Users/danielzeder/conductor/workspaces/daniels-ohanafy/riyadh/.claude/skills/gstack/benchmark/SKILL.md

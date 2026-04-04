@@ -1,1 +1,1 @@
-../gstack/checkpoint/SKILL.md
+/Users/danielzeder/conductor/workspaces/daniels-ohanafy/riyadh/.claude/skills/gstack/checkpoint/SKILL.md

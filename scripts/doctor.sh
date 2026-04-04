@@ -37,7 +37,6 @@ ISSUE_LABEL="doctor"
 # Issue queue — parallel arrays
 declare -a ISSUE_TITLES=()
 declare -a ISSUE_BODIES=()
-declare -a ISSUE_CREATED=()
 
 # ─────────────────────────────────────────────
 # Utilities
