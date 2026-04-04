@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> — Ohanafy Pricing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100;400;700&display=swap" rel="stylesheet">
+  <style>
+    /* === Ohanafy 2025 Brand Styles === */
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --true-black: #000000;
+      --true-white: #FFFFFF;
+      --mellow: #E4F223;
+      --cork: #F4F2F0;
+      --dark-denim: #4A5F80;
+      --light-denim: #B1C7EB;
+      --dark-grey: #545454;
+    }
+
+    body {
+      font-family: 'Geist', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.6;
+      color: var(--true-black);
+      background: var(--cork);
+    }
+
+    /* --- Header Banner --- */
+    .brand-header {
+      width: 100%;
+      background: var(--true-black);
+      padding: 2.5rem 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-header::after {
+      content: '';
+      position: absolute;
+      right: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 120px;
+      height: 120px;
+      background-image: url('https://40881726.fs1.hubspotusercontent-na1.net/hubfs/40881726/Brand%20Assets/Ohanafy%20Black%20Emblem.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0.3;
+      filter: invert(1);
+    }
+
+    .brand-header .tagline {
+      font-family: 'Geist', system-ui, sans-serif;
+      font-weight: 700;
+      font-size: 1.75rem;
+      letter-spacing: 0.02em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-header .tagline .highlight {
+      color: var(--mellow);
+    }
+
+    .brand-header .tagline .brand-name {
+      color: var(--true-white);
+    }
+
+    /* --- Main Content --- */
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+      background: var(--true-white);
+      min-height: calc(100vh - 200px);
+    }
+
+    .doc-title {
+      font-size: 36px;
+      font-weight: 100;
+      color: var(--true-black);
+      margin-bottom: 0.5rem;
+      border-bottom: 3px solid var(--dark-denim);
+      padding-bottom: 1rem;
+    }
+
+    /* --- Typography --- */
+    h1 { font-size: 24px; font-weight: 400; color: var(--true-black); margin: 2rem 0 1rem; }
+    h2 { font-size: 18px; font-weight: 700; color: var(--dark-denim); margin: 1.75rem 0 0.75rem; }
+    h3 { font-size: 16px; font-weight: 700; color: var(--dark-denim); margin: 1.5rem 0 0.5rem; }
+    p  { margin: 0 0 1rem; }
+    a  { color: var(--dark-denim); text-decoration: underline; }
+    a:hover { color: var(--true-black); }
+
+    ul, ol { margin: 0 0 1rem 1.5rem; }
+    li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Geist Mono', ui-monospace, monospace;
+      font-size: 0.9em;
+      background: var(--cork);
+      padding: 0.15em 0.4em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: var(--cork);
+      padding: 1rem 1.25rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 0 0 1rem;
+      border-left: 3px solid var(--dark-denim);
+    }
+
+    pre code { background: none; padding: 0; }
+
+    blockquote {
+      border-left: 4px solid var(--mellow);
+      padding: 0.75rem 1.25rem;
+      margin: 0 0 1rem;
+      background: var(--cork);
+      color: var(--dark-grey);
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: var(--cork);
+      margin: 2rem 0;
+    }
+
+    /* --- Tables --- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 15px;
+    }
+
+    thead th {
+      background: var(--dark-denim);
+      color: var(--true-white);
+      font-weight: 700;
+      text-align: left;
+      padding: 0.65rem 0.9rem;
+      border: 1px solid var(--dark-denim);
+    }
+
+    tbody td {
+      background: var(--cork);
+      color: var(--true-black);
+      padding: 0.55rem 0.9rem;
+      border: 1px solid var(--dark-denim);
+    }
+
+    tbody tr:hover td {
+      background: var(--light-denim);
+    }
+
+    /* --- Utility --- */
+    .time-tracking {
+      background: var(--cork);
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      border-left: 3px solid var(--dark-denim);
+    }
+
+    mark, .highlight-inline {
+      background: var(--mellow);
+      color: var(--true-black);
+      padding: 0.05em 0.25em;
+      border-radius: 2px;
+    }
+
+    /* --- Footer --- */
+    .brand-footer {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem;
+      text-align: center;
+      color: var(--dark-grey);
+      font-size: 13px;
+    }
+
+    .brand-footer hr {
+      background: var(--dark-denim);
+      margin-bottom: 1rem;
+    }
+
+    /* --- Doc Nav Bar --- */
+    .doc-nav {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--dark-denim);
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+
+    .doc-nav a {
+      color: var(--true-white);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 400;
+      padding: 0.6rem 0.85rem;
+      white-space: nowrap;
+      opacity: 0.75;
+      transition: opacity 0.15s, background 0.15s;
+      border-bottom: 2px solid transparent;
+    }
+
+    .doc-nav a:hover {
+      opacity: 1;
+      background: rgba(255,255,255,0.08);
+      color: var(--true-white);
+    }
+
+    .doc-nav a.current {
+      opacity: 1;
+      border-bottom-color: var(--mellow);
+      font-weight: 700;
+    }
+
+    .doc-nav .nav-demo {
+      font-weight: 700;
+      opacity: 1;
+      margin-right: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    /* --- Print --- */
+    @media print {
+      body { background: white; }
+      .content { box-shadow: none; padding: 0; }
+      .brand-header { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .doc-nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="brand-header">
+    <div class="tagline">
+      <span class="highlight">Modern beverage runs on</span>
+      <span class="brand-name">OHANAFY.</span>
+    </div>
+  </div>
+
+  <div class="doc-nav" id="docNav">
+    <a class="nav-demo" id="navDemo" href="#">&#8592; Demo App</a>
+    <a data-doc="promotion-pricing-model" href="#">Pricing Model</a>
+    <a data-doc="conflict-detection" href="#">Conflict Detection</a>
+    <a data-doc="duplicate-pricing-group" href="#">Duplicate Group</a>
+    <a data-doc="test-cases" href="#">Test Cases</a>
+    <a data-doc="database-design" href="#">Database Design</a>
+  </div>
+  <script>
+  (function() {
+    var path = window.location.pathname;
+    var segments = path.split('/');
+    var docsIdx = -1;
+    for (var i = segments.length - 1; i >= 0; i--) {
+      if (segments[i] === 'docs') { docsIdx = i; break; }
+    }
+    var base;
+    if (docsIdx !== -1) {
+      var depth = segments.length - docsIdx - 2;
+      base = '';
+      for (var j = 0; j <= depth; j++) base += '../';
+    } else {
+      base = '';
+    }
+    document.getElementById('navDemo').href = base + 'demo/index.html';
+    var docs = {
+      'promotion-pricing-model': 'docs/promotion-pricing-model.html',
+      'conflict-detection':      'docs/conflict-detection.html',
+      'duplicate-pricing-group': 'docs/duplicate-pricing-group.html',
+      'test-cases':              'docs/test-cases.html',
+      'database-design':         'docs/technical/database-design.html'
+    };
+    var current = path.split('/').pop().replace('.html', '');
+    var links = document.querySelectorAll('#docNav a[data-doc]');
+    for (var i = 0; i < links.length; i++) {
+      var key = links[i].getAttribute('data-doc');
+      links[i].href = base + docs[key];
+      if (key === current) links[i].classList.add('current');
+    }
+  })();
+  </script>
+
+  <div class="content">
+    <div class="doc-title"></div>
+    <h1 id="consolidated-scenario-examples">Consolidated Scenario
+    Examples</h1>
+    <p><strong>Complete End-to-End Integration Examples Using
+    Single-Script Architecture</strong></p>
+    <p>Real-world implementations showing how to consolidate complex
+    multi-workflow integrations into maintainable single Script
+    Connector solutions.</p>
+    <hr />
+    <h2 id="scenario-1-edi-document-processing-opentext-integration">🏭
+    Scenario 1: EDI Document Processing (OpenText Integration)</h2>
+    <h3 id="original-architecture-8-workflows">Original Architecture: 8
+    Workflows</h3>
+    <p>Based on the actual EDI_OpenTextTBM integration with 43,719 lines
+    of JSON configuration.</p>
+    <pre><code>05.00 Run Dates On Demand → 03.00 810 Daily Schedule → 02.00 856 Every 15 mins
+    ↓                            ↓                           ↓
+02.01 856 Process Deliveries → 03.01 810 Process Complete Invoices → 04.00 Generate Outbound UFF
+    ↓                            ↓                           ↓
+04.01 Outbound to OpenText ← 05.00 Manually re-run orders ← Error Handling</code></pre>
+    <h3 id="consolidated-architecture-single-script">Consolidated
+    Architecture: Single Script</h3>
+    <pre><code>S3 Trigger → Master EDI Script → Multiple API Operations → Results</code></pre>
+    <h3 id="complete-implementation">Complete Implementation</h3>
+    <div class="sourceCode" id="cb3"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"> * Consolidated EDI Integration Script</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"> * Replaces: 8 workflows with 22 script connectors</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"> * Handles: 810/856 EDI documents with complete business logic</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>exports<span class="op">.</span><span class="at">step</span> <span class="op">=</span> <span class="kw">async</span> <span class="kw">function</span>(input<span class="op">,</span> fileInput) {</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> config <span class="op">=</span> <span class="fu">setupEDIConfiguration</span>(input)<span class="op">;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> logger <span class="op">=</span> <span class="fu">createLogger</span>(config)<span class="op">;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">try</span> {</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    logger<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;Starting consolidated EDI processing&#39;</span><span class="op">,</span> {</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">s3Bucket</span><span class="op">:</span> config<span class="op">.</span><span class="at">s3_bucket</span><span class="op">,</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">environment</span><span class="op">:</span> config<span class="op">.</span><span class="at">environment</span><span class="op">,</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">testRun</span><span class="op">:</span> config<span class="op">.</span><span class="at">testRun</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 1: Document Discovery and Extraction</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> discoveredDocuments <span class="op">=</span> <span class="cf">await</span> <span class="fu">discoverEDIDocuments</span>(input<span class="op">,</span> config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 2: Document Processing and Validation</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> processedDocuments <span class="op">=</span> <span class="cf">await</span> <span class="fu">processEDIDocuments</span>(discoveredDocuments<span class="op">,</span> config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 3: OHFY Data Transformation</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> ohfyRecords <span class="op">=</span> <span class="cf">await</span> <span class="fu">transformEDIToOHFY</span>(processedDocuments<span class="op">,</span> config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 4: Salesforce Synchronization</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> salesforceResults <span class="op">=</span> <span class="cf">await</span> <span class="fu">syncEDIToSalesforce</span>(ohfyRecords<span class="op">,</span> config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 5: Outbound Document Generation</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> outboundDocuments <span class="op">=</span> <span class="cf">await</span> <span class="fu">generateOutboundDocuments</span>(salesforceResults<span class="op">,</span> config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 6: Results Processing and Notifications</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> finalResults <span class="op">=</span> <span class="cf">await</span> <span class="fu">processEDIResults</span>(outboundDocuments<span class="op">,</span> salesforceResults<span class="op">,</span> config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    logger<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;EDI processing completed successfully&#39;</span><span class="op">,</span> {</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>      <span class="dt">documentsProcessed</span><span class="op">:</span> discoveredDocuments<span class="op">.</span><span class="at">length</span><span class="op">,</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>      <span class="dt">salesforceRecords</span><span class="op">:</span> salesforceResults<span class="op">.</span><span class="at">totalRecords</span><span class="op">,</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>      <span class="dt">outboundGenerated</span><span class="op">:</span> outboundDocuments<span class="op">.</span><span class="at">length</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> finalResults<span class="op">;</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">catch</span> (error) {</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="cf">await</span> <span class="fu">handleEDIError</span>(error<span class="op">,</span> config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="co">// Phase 1: Document Discovery and Extraction</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">discoverEDIDocuments</span>(input<span class="op">,</span> config<span class="op">,</span> logger) {</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>  logger<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;Discovering EDI documents&#39;</span>)<span class="op">;</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Handle different trigger types</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> s3Objects <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (input<span class="op">.</span><span class="at">s3_trigger</span>) {</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>    <span class="co">// S3 bucket trigger - process specific files</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>    s3Objects <span class="op">=</span> input<span class="op">.</span><span class="at">s3_trigger</span><span class="op">.</span><span class="at">Records</span> <span class="op">||</span> []<span class="op">;</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (input<span class="op">.</span><span class="at">manual_run</span>) {</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Manual execution - discover files by date range</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> dateRange <span class="op">=</span> <span class="fu">calculateDateRange</span>(config<span class="op">.</span><span class="at">invoiceStartDate</span><span class="op">,</span> config<span class="op">.</span><span class="at">dateRange</span>)<span class="op">;</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>    s3Objects <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">aws_s3</span><span class="op">.</span><span class="fu">list_objects</span>({</span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>      <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">aws</span><span class="op">,</span></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>      <span class="dt">bucket</span><span class="op">:</span> config<span class="op">.</span><span class="at">s3_bucket</span><span class="op">,</span></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>      <span class="dt">prefix</span><span class="op">:</span> <span class="st">&quot;inbound/&quot;</span><span class="op">,</span></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a>      <span class="dt">start_after</span><span class="op">:</span> dateRange<span class="op">.</span><span class="at">start</span><span class="op">,</span></span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>      <span class="dt">end_before</span><span class="op">:</span> dateRange<span class="op">.</span><span class="at">end</span></span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (input<span class="op">.</span><span class="at">scheduled_run</span>) {</span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Scheduled execution - process new files</span></span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> lastRun <span class="op">=</span> <span class="cf">await</span> <span class="fu">getLastRunTimestamp</span>(config)<span class="op">;</span></span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a>    s3Objects <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">aws_s3</span><span class="op">.</span><span class="fu">list_objects</span>({</span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>      <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">aws</span><span class="op">,</span></span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a>      <span class="dt">bucket</span><span class="op">:</span> config<span class="op">.</span><span class="at">s3_bucket</span><span class="op">,</span></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>      <span class="dt">prefix</span><span class="op">:</span> <span class="st">&quot;inbound/&quot;</span><span class="op">,</span></span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>      <span class="dt">modified_after</span><span class="op">:</span> lastRun</span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Download and parse EDI files</span></span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> documents <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">const</span> s3Object <span class="kw">of</span> s3Objects) {</span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> {</span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> fileContent <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">aws_s3</span><span class="op">.</span><span class="fu">download_file</span>({</span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>        <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">aws</span><span class="op">,</span></span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>        <span class="dt">bucket</span><span class="op">:</span> config<span class="op">.</span><span class="at">s3_bucket</span><span class="op">,</span></span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>        <span class="dt">key</span><span class="op">:</span> s3Object<span class="op">.</span><span class="at">key</span></span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a>      })<span class="op">;</span></span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> parsedDocument <span class="op">=</span> <span class="cf">await</span> <span class="fu">parseEDIDocument</span>(fileContent<span class="op">,</span> s3Object<span class="op">.</span><span class="at">key</span><span class="op">,</span> config)<span class="op">;</span></span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>      documents<span class="op">.</span><span class="fu">push</span>(parsedDocument)<span class="op">;</span></span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">catch</span> (error) {</span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a>      logger<span class="op">.</span><span class="fu">error</span>(<span class="st">&#39;Failed to process S3 object&#39;</span><span class="op">,</span> {</span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>        <span class="dt">key</span><span class="op">:</span> s3Object<span class="op">.</span><span class="at">key</span><span class="op">,</span></span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a>        <span class="dt">error</span><span class="op">:</span> error<span class="op">.</span><span class="at">message</span></span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a>      })<span class="op">;</span></span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> documents<span class="op">;</span></span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a><span class="co">// Phase 2: Document Processing and Validation</span></span>
+<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">processEDIDocuments</span>(documents<span class="op">,</span> config<span class="op">,</span> logger) {</span>
+<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a>  logger<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;Processing EDI documents&#39;</span><span class="op">,</span> { <span class="dt">count</span><span class="op">:</span> documents<span class="op">.</span><span class="at">length</span> })<span class="op">;</span></span>
+<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> processedDocuments <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> errors <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">const</span> <span class="bu">document</span> <span class="kw">of</span> documents) {</span>
+<span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> {</span>
+<span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a>      <span class="co">// Apply document-specific processing</span></span>
+<span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a>      <span class="kw">let</span> processedDoc<span class="op">;</span></span>
+<span id="cb3-117"><a href="#cb3-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-118"><a href="#cb3-118" aria-hidden="true" tabindex="-1"></a>      <span class="cf">switch</span> (<span class="bu">document</span><span class="op">.</span><span class="at">type</span>) {</span>
+<span id="cb3-119"><a href="#cb3-119" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="st">&#39;810&#39;</span><span class="op">:</span> <span class="co">// Invoice</span></span>
+<span id="cb3-120"><a href="#cb3-120" aria-hidden="true" tabindex="-1"></a>          processedDoc <span class="op">=</span> <span class="cf">await</span> <span class="fu">process810Invoice</span>(<span class="bu">document</span><span class="op">,</span> config)<span class="op">;</span></span>
+<span id="cb3-121"><a href="#cb3-121" aria-hidden="true" tabindex="-1"></a>          <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb3-122"><a href="#cb3-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-123"><a href="#cb3-123" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="st">&#39;856&#39;</span><span class="op">:</span> <span class="co">// Advance Ship Notice</span></span>
+<span id="cb3-124"><a href="#cb3-124" aria-hidden="true" tabindex="-1"></a>          processedDoc <span class="op">=</span> <span class="cf">await</span> <span class="fu">process856Delivery</span>(<span class="bu">document</span><span class="op">,</span> config)<span class="op">;</span></span>
+<span id="cb3-125"><a href="#cb3-125" aria-hidden="true" tabindex="-1"></a>          <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb3-126"><a href="#cb3-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-127"><a href="#cb3-127" aria-hidden="true" tabindex="-1"></a>        <span class="cf">default</span><span class="op">:</span></span>
+<span id="cb3-128"><a href="#cb3-128" aria-hidden="true" tabindex="-1"></a>          <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">Error</span>(<span class="vs">`Unsupported document type: </span><span class="sc">${</span><span class="bu">document</span><span class="op">.</span><span class="at">type</span><span class="sc">}</span><span class="vs">`</span>)<span class="op">;</span></span>
+<span id="cb3-129"><a href="#cb3-129" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb3-130"><a href="#cb3-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-131"><a href="#cb3-131" aria-hidden="true" tabindex="-1"></a>      <span class="co">// Apply business validations</span></span>
+<span id="cb3-132"><a href="#cb3-132" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> validationResult <span class="op">=</span> <span class="cf">await</span> <span class="fu">validateEDIDocument</span>(processedDoc<span class="op">,</span> config)<span class="op">;</span></span>
+<span id="cb3-133"><a href="#cb3-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-134"><a href="#cb3-134" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (validationResult<span class="op">.</span><span class="at">isValid</span>) {</span>
+<span id="cb3-135"><a href="#cb3-135" aria-hidden="true" tabindex="-1"></a>        processedDocuments<span class="op">.</span><span class="fu">push</span>({</span>
+<span id="cb3-136"><a href="#cb3-136" aria-hidden="true" tabindex="-1"></a>          <span class="op">...</span>processedDoc<span class="op">,</span></span>
+<span id="cb3-137"><a href="#cb3-137" aria-hidden="true" tabindex="-1"></a>          <span class="dt">validationPassed</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb3-138"><a href="#cb3-138" aria-hidden="true" tabindex="-1"></a>          <span class="dt">validationResults</span><span class="op">:</span> validationResult</span>
+<span id="cb3-139"><a href="#cb3-139" aria-hidden="true" tabindex="-1"></a>        })<span class="op">;</span></span>
+<span id="cb3-140"><a href="#cb3-140" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb3-141"><a href="#cb3-141" aria-hidden="true" tabindex="-1"></a>        errors<span class="op">.</span><span class="fu">push</span>({</span>
+<span id="cb3-142"><a href="#cb3-142" aria-hidden="true" tabindex="-1"></a>          <span class="dt">document</span><span class="op">:</span> <span class="bu">document</span><span class="op">.</span><span class="at">id</span><span class="op">,</span></span>
+<span id="cb3-143"><a href="#cb3-143" aria-hidden="true" tabindex="-1"></a>          <span class="dt">errors</span><span class="op">:</span> validationResult<span class="op">.</span><span class="at">errors</span></span>
+<span id="cb3-144"><a href="#cb3-144" aria-hidden="true" tabindex="-1"></a>        })<span class="op">;</span></span>
+<span id="cb3-145"><a href="#cb3-145" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb3-146"><a href="#cb3-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-147"><a href="#cb3-147" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">catch</span> (error) {</span>
+<span id="cb3-148"><a href="#cb3-148" aria-hidden="true" tabindex="-1"></a>      errors<span class="op">.</span><span class="fu">push</span>({</span>
+<span id="cb3-149"><a href="#cb3-149" aria-hidden="true" tabindex="-1"></a>        <span class="dt">document</span><span class="op">:</span> <span class="bu">document</span><span class="op">.</span><span class="at">id</span><span class="op">,</span></span>
+<span id="cb3-150"><a href="#cb3-150" aria-hidden="true" tabindex="-1"></a>        <span class="dt">error</span><span class="op">:</span> error<span class="op">.</span><span class="at">message</span></span>
+<span id="cb3-151"><a href="#cb3-151" aria-hidden="true" tabindex="-1"></a>      })<span class="op">;</span></span>
+<span id="cb3-152"><a href="#cb3-152" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-153"><a href="#cb3-153" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-154"><a href="#cb3-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-155"><a href="#cb3-155" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Store validation errors for review</span></span>
+<span id="cb3-156"><a href="#cb3-156" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (errors<span class="op">.</span><span class="at">length</span> <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb3-157"><a href="#cb3-157" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> <span class="fu">storeEDIErrors</span>(errors<span class="op">,</span> config)<span class="op">;</span></span>
+<span id="cb3-158"><a href="#cb3-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-159"><a href="#cb3-159" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Send Slack notification for critical errors</span></span>
+<span id="cb3-160"><a href="#cb3-160" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> <span class="fu">sendSlackNotification</span>(config<span class="op">.</span><span class="at">channel</span><span class="op">,</span> <span class="vs">`EDI Validation Errors: </span><span class="sc">${</span>errors<span class="op">.</span><span class="at">length</span><span class="sc">}</span><span class="vs"> documents failed validation`</span><span class="op">,</span> config)<span class="op">;</span></span>
+<span id="cb3-161"><a href="#cb3-161" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-162"><a href="#cb3-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-163"><a href="#cb3-163" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> processedDocuments<span class="op">;</span></span>
+<span id="cb3-164"><a href="#cb3-164" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-165"><a href="#cb3-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-166"><a href="#cb3-166" aria-hidden="true" tabindex="-1"></a><span class="co">// Phase 3: OHFY Data Transformation</span></span>
+<span id="cb3-167"><a href="#cb3-167" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">transformEDIToOHFY</span>(documents<span class="op">,</span> config<span class="op">,</span> logger) {</span>
+<span id="cb3-168"><a href="#cb3-168" aria-hidden="true" tabindex="-1"></a>  logger<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;Transforming EDI to OHFY format&#39;</span>)<span class="op">;</span></span>
+<span id="cb3-169"><a href="#cb3-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-170"><a href="#cb3-170" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> ohfyRecords <span class="op">=</span> {</span>
+<span id="cb3-171"><a href="#cb3-171" aria-hidden="true" tabindex="-1"></a>    <span class="dt">invoices</span><span class="op">:</span> []<span class="op">,</span></span>
+<span id="cb3-172"><a href="#cb3-172" aria-hidden="true" tabindex="-1"></a>    <span class="dt">deliveries</span><span class="op">:</span> []<span class="op">,</span></span>
+<span id="cb3-173"><a href="#cb3-173" aria-hidden="true" tabindex="-1"></a>    <span class="dt">orderItems</span><span class="op">:</span> []<span class="op">,</span></span>
+<span id="cb3-174"><a href="#cb3-174" aria-hidden="true" tabindex="-1"></a>    <span class="dt">adjustments</span><span class="op">:</span> []</span>
+<span id="cb3-175"><a href="#cb3-175" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb3-176"><a href="#cb3-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-177"><a href="#cb3-177" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">const</span> <span class="bu">document</span> <span class="kw">of</span> documents) {</span>
+<span id="cb3-178"><a href="#cb3-178" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> {</span>
+<span id="cb3-179"><a href="#cb3-179" aria-hidden="true" tabindex="-1"></a>      <span class="cf">switch</span> (<span class="bu">document</span><span class="op">.</span><span class="at">type</span>) {</span>
+<span id="cb3-180"><a href="#cb3-180" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="st">&#39;810&#39;</span><span class="op">:</span></span>
+<span id="cb3-181"><a href="#cb3-181" aria-hidden="true" tabindex="-1"></a>          <span class="kw">const</span> invoiceRecords <span class="op">=</span> <span class="cf">await</span> <span class="fu">transformInvoiceEDI</span>(<span class="bu">document</span><span class="op">,</span> config)<span class="op">;</span></span>
+<span id="cb3-182"><a href="#cb3-182" aria-hidden="true" tabindex="-1"></a>          ohfyRecords<span class="op">.</span><span class="at">invoices</span><span class="op">.</span><span class="fu">push</span>(<span class="op">...</span>invoiceRecords)<span class="op">;</span></span>
+<span id="cb3-183"><a href="#cb3-183" aria-hidden="true" tabindex="-1"></a>          <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb3-184"><a href="#cb3-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-185"><a href="#cb3-185" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> <span class="st">&#39;856&#39;</span><span class="op">:</span></span>
+<span id="cb3-186"><a href="#cb3-186" aria-hidden="true" tabindex="-1"></a>          <span class="kw">const</span> deliveryRecords <span class="op">=</span> <span class="cf">await</span> <span class="fu">transformDeliveryEDI</span>(<span class="bu">document</span><span class="op">,</span> config)<span class="op">;</span></span>
+<span id="cb3-187"><a href="#cb3-187" aria-hidden="true" tabindex="-1"></a>          ohfyRecords<span class="op">.</span><span class="at">deliveries</span><span class="op">.</span><span class="fu">push</span>(<span class="op">...</span>deliveryRecords)<span class="op">;</span></span>
+<span id="cb3-188"><a href="#cb3-188" aria-hidden="true" tabindex="-1"></a>          <span class="cf">break</span><span class="op">;</span></span>
+<span id="cb3-189"><a href="#cb3-189" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb3-190"><a href="#cb3-190" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">catch</span> (error) {</span>
+<span id="cb3-191"><a href="#cb3-191" aria-hidden="true" tabindex="-1"></a>      logger<span class="op">.</span><span class="fu">error</span>(<span class="st">&#39;EDI transformation failed&#39;</span><span class="op">,</span> {</span>
+<span id="cb3-192"><a href="#cb3-192" aria-hidden="true" tabindex="-1"></a>        <span class="dt">documentId</span><span class="op">:</span> <span class="bu">document</span><span class="op">.</span><span class="at">id</span><span class="op">,</span></span>
+<span id="cb3-193"><a href="#cb3-193" aria-hidden="true" tabindex="-1"></a>        <span class="dt">error</span><span class="op">:</span> error<span class="op">.</span><span class="at">message</span></span>
+<span id="cb3-194"><a href="#cb3-194" aria-hidden="true" tabindex="-1"></a>      })<span class="op">;</span></span>
+<span id="cb3-195"><a href="#cb3-195" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-196"><a href="#cb3-196" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-197"><a href="#cb3-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-198"><a href="#cb3-198" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> ohfyRecords<span class="op">;</span></span>
+<span id="cb3-199"><a href="#cb3-199" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-200"><a href="#cb3-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-201"><a href="#cb3-201" aria-hidden="true" tabindex="-1"></a><span class="co">// Phase 4: Salesforce Synchronization</span></span>
+<span id="cb3-202"><a href="#cb3-202" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">syncEDIToSalesforce</span>(ohfyRecords<span class="op">,</span> config<span class="op">,</span> logger) {</span>
+<span id="cb3-203"><a href="#cb3-203" aria-hidden="true" tabindex="-1"></a>  logger<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;Syncing EDI data to Salesforce&#39;</span>)<span class="op">;</span></span>
+<span id="cb3-204"><a href="#cb3-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-205"><a href="#cb3-205" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> results <span class="op">=</span> {</span>
+<span id="cb3-206"><a href="#cb3-206" aria-hidden="true" tabindex="-1"></a>    <span class="dt">invoices</span><span class="op">:</span> { <span class="dt">created</span><span class="op">:</span> []<span class="op">,</span> <span class="dt">updated</span><span class="op">:</span> []<span class="op">,</span> <span class="dt">errors</span><span class="op">:</span> [] }<span class="op">,</span></span>
+<span id="cb3-207"><a href="#cb3-207" aria-hidden="true" tabindex="-1"></a>    <span class="dt">deliveries</span><span class="op">:</span> { <span class="dt">created</span><span class="op">:</span> []<span class="op">,</span> <span class="dt">updated</span><span class="op">:</span> []<span class="op">,</span> <span class="dt">errors</span><span class="op">:</span> [] }<span class="op">,</span></span>
+<span id="cb3-208"><a href="#cb3-208" aria-hidden="true" tabindex="-1"></a>    <span class="dt">totalRecords</span><span class="op">:</span> <span class="dv">0</span></span>
+<span id="cb3-209"><a href="#cb3-209" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb3-210"><a href="#cb3-210" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-211"><a href="#cb3-211" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Process invoices first (parent records)</span></span>
+<span id="cb3-212"><a href="#cb3-212" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (ohfyRecords<span class="op">.</span><span class="at">invoices</span><span class="op">.</span><span class="at">length</span> <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb3-213"><a href="#cb3-213" aria-hidden="true" tabindex="-1"></a>    results<span class="op">.</span><span class="at">invoices</span> <span class="op">=</span> <span class="cf">await</span> <span class="fu">bulkUpsertSalesforce</span>(</span>
+<span id="cb3-214"><a href="#cb3-214" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;ohfy__Invoice__c&#39;</span><span class="op">,</span></span>
+<span id="cb3-215"><a href="#cb3-215" aria-hidden="true" tabindex="-1"></a>      ohfyRecords<span class="op">.</span><span class="at">invoices</span><span class="op">,</span></span>
+<span id="cb3-216"><a href="#cb3-216" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;ohfy__External_ID__c&#39;</span><span class="op">,</span></span>
+<span id="cb3-217"><a href="#cb3-217" aria-hidden="true" tabindex="-1"></a>      config</span>
+<span id="cb3-218"><a href="#cb3-218" aria-hidden="true" tabindex="-1"></a>    )<span class="op">;</span></span>
+<span id="cb3-219"><a href="#cb3-219" aria-hidden="true" tabindex="-1"></a>    results<span class="op">.</span><span class="at">totalRecords</span> <span class="op">+=</span> results<span class="op">.</span><span class="at">invoices</span><span class="op">.</span><span class="at">created</span><span class="op">.</span><span class="at">length</span> <span class="op">+</span> results<span class="op">.</span><span class="at">invoices</span><span class="op">.</span><span class="at">updated</span><span class="op">.</span><span class="at">length</span><span class="op">;</span></span>
+<span id="cb3-220"><a href="#cb3-220" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-221"><a href="#cb3-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-222"><a href="#cb3-222" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Process deliveries</span></span>
+<span id="cb3-223"><a href="#cb3-223" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (ohfyRecords<span class="op">.</span><span class="at">deliveries</span><span class="op">.</span><span class="at">length</span> <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb3-224"><a href="#cb3-224" aria-hidden="true" tabindex="-1"></a>    results<span class="op">.</span><span class="at">deliveries</span> <span class="op">=</span> <span class="cf">await</span> <span class="fu">bulkUpsertSalesforce</span>(</span>
+<span id="cb3-225"><a href="#cb3-225" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;ohfy__Delivery__c&#39;</span><span class="op">,</span></span>
+<span id="cb3-226"><a href="#cb3-226" aria-hidden="true" tabindex="-1"></a>      ohfyRecords<span class="op">.</span><span class="at">deliveries</span><span class="op">,</span></span>
+<span id="cb3-227"><a href="#cb3-227" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;ohfy__External_ID__c&#39;</span><span class="op">,</span></span>
+<span id="cb3-228"><a href="#cb3-228" aria-hidden="true" tabindex="-1"></a>      config</span>
+<span id="cb3-229"><a href="#cb3-229" aria-hidden="true" tabindex="-1"></a>    )<span class="op">;</span></span>
+<span id="cb3-230"><a href="#cb3-230" aria-hidden="true" tabindex="-1"></a>    results<span class="op">.</span><span class="at">totalRecords</span> <span class="op">+=</span> results<span class="op">.</span><span class="at">deliveries</span><span class="op">.</span><span class="at">created</span><span class="op">.</span><span class="at">length</span> <span class="op">+</span> results<span class="op">.</span><span class="at">deliveries</span><span class="op">.</span><span class="at">updated</span><span class="op">.</span><span class="at">length</span><span class="op">;</span></span>
+<span id="cb3-231"><a href="#cb3-231" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-232"><a href="#cb3-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-233"><a href="#cb3-233" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> results<span class="op">;</span></span>
+<span id="cb3-234"><a href="#cb3-234" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-235"><a href="#cb3-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-236"><a href="#cb3-236" aria-hidden="true" tabindex="-1"></a><span class="co">// Configuration Setup</span></span>
+<span id="cb3-237"><a href="#cb3-237" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">setupEDIConfiguration</span>(input) {</span>
+<span id="cb3-238"><a href="#cb3-238" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> {</span>
+<span id="cb3-239"><a href="#cb3-239" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Environment settings</span></span>
+<span id="cb3-240"><a href="#cb3-240" aria-hidden="true" tabindex="-1"></a>    <span class="dt">environment</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">environment</span> <span class="op">||</span> <span class="st">&#39;PROD&#39;</span><span class="op">,</span></span>
+<span id="cb3-241"><a href="#cb3-241" aria-hidden="true" tabindex="-1"></a>    <span class="dt">testRun</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">testRun</span> <span class="op">||</span> <span class="kw">false</span><span class="op">,</span></span>
+<span id="cb3-242"><a href="#cb3-242" aria-hidden="true" tabindex="-1"></a>    <span class="dt">integration</span><span class="op">:</span> <span class="st">&#39;OpenText&#39;</span><span class="op">,</span></span>
+<span id="cb3-243"><a href="#cb3-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-244"><a href="#cb3-244" aria-hidden="true" tabindex="-1"></a>    <span class="co">// S3 Configuration</span></span>
+<span id="cb3-245"><a href="#cb3-245" aria-hidden="true" tabindex="-1"></a>    <span class="dt">s3_bucket</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">s3_bucket</span> <span class="op">||</span> <span class="st">&#39;edi-001px000002obiwyao-production&#39;</span><span class="op">,</span></span>
+<span id="cb3-246"><a href="#cb3-246" aria-hidden="true" tabindex="-1"></a>    <span class="dt">region</span><span class="op">:</span> <span class="st">&#39;us-east-1&#39;</span><span class="op">,</span></span>
+<span id="cb3-247"><a href="#cb3-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-248"><a href="#cb3-248" aria-hidden="true" tabindex="-1"></a>    <span class="co">// EDI Processing Configuration</span></span>
+<span id="cb3-249"><a href="#cb3-249" aria-hidden="true" tabindex="-1"></a>    <span class="dt">ediProvider</span><span class="op">:</span> <span class="st">&#39;OpenText&#39;</span><span class="op">,</span></span>
+<span id="cb3-250"><a href="#cb3-250" aria-hidden="true" tabindex="-1"></a>    <span class="dt">invoiceStartDate</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">invoiceStartDate</span> <span class="op">||</span> <span class="st">&#39;2025-03-24&#39;</span><span class="op">,</span></span>
+<span id="cb3-251"><a href="#cb3-251" aria-hidden="true" tabindex="-1"></a>    <span class="dt">dateRange</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">dateRange</span> <span class="op">||</span> <span class="st">&#39;daily&#39;</span><span class="op">,</span></span>
+<span id="cb3-252"><a href="#cb3-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-253"><a href="#cb3-253" aria-hidden="true" tabindex="-1"></a>    <span class="co">// UPC ignore list (from actual configuration)</span></span>
+<span id="cb3-254"><a href="#cb3-254" aria-hidden="true" tabindex="-1"></a>    <span class="dt">upcIgnore</span><span class="op">:</span> [</span>
+<span id="cb3-255"><a href="#cb3-255" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;754527000677&quot;</span><span class="op">,</span> <span class="st">&quot;071990170295&quot;</span><span class="op">,</span> <span class="st">&quot;840245600289&quot;</span><span class="op">,</span> <span class="st">&quot;840245600265&quot;</span><span class="op">,</span></span>
+<span id="cb3-256"><a href="#cb3-256" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;840245600425&quot;</span><span class="op">,</span> <span class="st">&quot;028000231750&quot;</span><span class="op">,</span> <span class="st">&quot;087692012283&quot;</span><span class="op">,</span> <span class="st">&quot;071990005481&quot;</span></span>
+<span id="cb3-257"><a href="#cb3-257" aria-hidden="true" tabindex="-1"></a>      <span class="co">// ... full list from original config</span></span>
+<span id="cb3-258"><a href="#cb3-258" aria-hidden="true" tabindex="-1"></a>    ]<span class="op">,</span></span>
+<span id="cb3-259"><a href="#cb3-259" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-260"><a href="#cb3-260" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Custom UPC mapping (from actual configuration)</span></span>
+<span id="cb3-261"><a href="#cb3-261" aria-hidden="true" tabindex="-1"></a>    <span class="dt">customUpcMapping</span><span class="op">:</span> {</span>
+<span id="cb3-262"><a href="#cb3-262" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;34100626396&quot;</span><span class="op">:</span> <span class="st">&quot;34100007683&quot;</span><span class="op">,</span></span>
+<span id="cb3-263"><a href="#cb3-263" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;087692011385&quot;</span><span class="op">:</span> <span class="st">&quot;087692011682&quot;</span><span class="op">,</span></span>
+<span id="cb3-264"><a href="#cb3-264" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;034100626396&quot;</span><span class="op">:</span> <span class="st">&quot;034100007683&quot;</span></span>
+<span id="cb3-265"><a href="#cb3-265" aria-hidden="true" tabindex="-1"></a>      <span class="co">// ... full mapping from original config</span></span>
+<span id="cb3-266"><a href="#cb3-266" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb3-267"><a href="#cb3-267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-268"><a href="#cb3-268" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Authentication IDs</span></span>
+<span id="cb3-269"><a href="#cb3-269" aria-hidden="true" tabindex="-1"></a>    <span class="dt">authIds</span><span class="op">:</span> {</span>
+<span id="cb3-270"><a href="#cb3-270" aria-hidden="true" tabindex="-1"></a>      <span class="dt">salesforce</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">salesforceAuthId</span><span class="op">,</span></span>
+<span id="cb3-271"><a href="#cb3-271" aria-hidden="true" tabindex="-1"></a>      <span class="dt">aws</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">awsAuthId</span><span class="op">,</span></span>
+<span id="cb3-272"><a href="#cb3-272" aria-hidden="true" tabindex="-1"></a>      <span class="dt">slack</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">slackAuthId</span></span>
+<span id="cb3-273"><a href="#cb3-273" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb3-274"><a href="#cb3-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-275"><a href="#cb3-275" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Notification settings</span></span>
+<span id="cb3-276"><a href="#cb3-276" aria-hidden="true" tabindex="-1"></a>    <span class="dt">channel</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">channel</span> <span class="op">||</span> <span class="st">&#39;C08NCGKAK27&#39;</span><span class="op">,</span></span>
+<span id="cb3-277"><a href="#cb3-277" aria-hidden="true" tabindex="-1"></a>    <span class="dt">missingDataTaskAssignees</span><span class="op">:</span> [</span>
+<span id="cb3-278"><a href="#cb3-278" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;005Hu00000RWUSlIAP&#39;</span><span class="op">,</span></span>
+<span id="cb3-279"><a href="#cb3-279" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;005Hu00000RWvb5IAD&#39;</span></span>
+<span id="cb3-280"><a href="#cb3-280" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb3-281"><a href="#cb3-281" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb3-282"><a href="#cb3-282" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-283"><a href="#cb3-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-284"><a href="#cb3-284" aria-hidden="true" tabindex="-1"></a><span class="co">// Helper Functions</span></span>
+<span id="cb3-285"><a href="#cb3-285" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">parseEDIDocument</span>(content<span class="op">,</span> filename<span class="op">,</span> config) {</span>
+<span id="cb3-286"><a href="#cb3-286" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Parse EDI X12 format</span></span>
+<span id="cb3-287"><a href="#cb3-287" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> segments <span class="op">=</span> content<span class="op">.</span><span class="fu">split</span>(<span class="st">&#39;~&#39;</span>)<span class="op">;</span></span>
+<span id="cb3-288"><a href="#cb3-288" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> documentType <span class="op">=</span> <span class="fu">extractDocumentType</span>(segments)<span class="op">;</span></span>
+<span id="cb3-289"><a href="#cb3-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-290"><a href="#cb3-290" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> {</span>
+<span id="cb3-291"><a href="#cb3-291" aria-hidden="true" tabindex="-1"></a>    <span class="dt">id</span><span class="op">:</span> <span class="fu">generateDocumentId</span>(filename)<span class="op">,</span></span>
+<span id="cb3-292"><a href="#cb3-292" aria-hidden="true" tabindex="-1"></a>    <span class="dt">type</span><span class="op">:</span> documentType<span class="op">,</span></span>
+<span id="cb3-293"><a href="#cb3-293" aria-hidden="true" tabindex="-1"></a>    <span class="dt">filename</span><span class="op">:</span> filename<span class="op">,</span></span>
+<span id="cb3-294"><a href="#cb3-294" aria-hidden="true" tabindex="-1"></a>    <span class="dt">segments</span><span class="op">:</span> segments<span class="op">,</span></span>
+<span id="cb3-295"><a href="#cb3-295" aria-hidden="true" tabindex="-1"></a>    <span class="dt">parsedData</span><span class="op">:</span> <span class="fu">parseEDISegments</span>(segments<span class="op">,</span> documentType)<span class="op">,</span></span>
+<span id="cb3-296"><a href="#cb3-296" aria-hidden="true" tabindex="-1"></a>    <span class="dt">processedAt</span><span class="op">:</span> <span class="kw">new</span> <span class="bu">Date</span>()<span class="op">.</span><span class="fu">toISOString</span>()</span>
+<span id="cb3-297"><a href="#cb3-297" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb3-298"><a href="#cb3-298" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-299"><a href="#cb3-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-300"><a href="#cb3-300" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">process810Invoice</span>(<span class="bu">document</span><span class="op">,</span> config) {</span>
+<span id="cb3-301"><a href="#cb3-301" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Process 810 invoice document</span></span>
+<span id="cb3-302"><a href="#cb3-302" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> invoice <span class="op">=</span> {</span>
+<span id="cb3-303"><a href="#cb3-303" aria-hidden="true" tabindex="-1"></a>    <span class="dt">externalId</span><span class="op">:</span> <span class="bu">document</span><span class="op">.</span><span class="at">parsedData</span><span class="op">.</span><span class="at">invoiceNumber</span><span class="op">,</span></span>
+<span id="cb3-304"><a href="#cb3-304" aria-hidden="true" tabindex="-1"></a>    <span class="dt">customerPO</span><span class="op">:</span> <span class="bu">document</span><span class="op">.</span><span class="at">parsedData</span><span class="op">.</span><span class="at">customerPO</span><span class="op">,</span></span>
+<span id="cb3-305"><a href="#cb3-305" aria-hidden="true" tabindex="-1"></a>    <span class="dt">invoiceDate</span><span class="op">:</span> <span class="bu">document</span><span class="op">.</span><span class="at">parsedData</span><span class="op">.</span><span class="at">invoiceDate</span><span class="op">,</span></span>
+<span id="cb3-306"><a href="#cb3-306" aria-hidden="true" tabindex="-1"></a>    <span class="dt">totalAmount</span><span class="op">:</span> <span class="bu">document</span><span class="op">.</span><span class="at">parsedData</span><span class="op">.</span><span class="at">totalAmount</span><span class="op">,</span></span>
+<span id="cb3-307"><a href="#cb3-307" aria-hidden="true" tabindex="-1"></a>    <span class="dt">lineItems</span><span class="op">:</span> <span class="bu">document</span><span class="op">.</span><span class="at">parsedData</span><span class="op">.</span><span class="at">lineItems</span></span>
+<span id="cb3-308"><a href="#cb3-308" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb3-309"><a href="#cb3-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-310"><a href="#cb3-310" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Apply custom UPC mapping</span></span>
+<span id="cb3-311"><a href="#cb3-311" aria-hidden="true" tabindex="-1"></a>  invoice<span class="op">.</span><span class="at">lineItems</span> <span class="op">=</span> invoice<span class="op">.</span><span class="at">lineItems</span><span class="op">.</span><span class="fu">map</span>(item <span class="kw">=&gt;</span> ({</span>
+<span id="cb3-312"><a href="#cb3-312" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span>item<span class="op">,</span></span>
+<span id="cb3-313"><a href="#cb3-313" aria-hidden="true" tabindex="-1"></a>    <span class="dt">upc</span><span class="op">:</span> config<span class="op">.</span><span class="at">customUpcMapping</span>[item<span class="op">.</span><span class="at">upc</span>] <span class="op">||</span> item<span class="op">.</span><span class="at">upc</span></span>
+<span id="cb3-314"><a href="#cb3-314" aria-hidden="true" tabindex="-1"></a>  }))<span class="op">;</span></span>
+<span id="cb3-315"><a href="#cb3-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-316"><a href="#cb3-316" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Filter ignored UPCs</span></span>
+<span id="cb3-317"><a href="#cb3-317" aria-hidden="true" tabindex="-1"></a>  invoice<span class="op">.</span><span class="at">lineItems</span> <span class="op">=</span> invoice<span class="op">.</span><span class="at">lineItems</span><span class="op">.</span><span class="fu">filter</span>(item <span class="kw">=&gt;</span></span>
+<span id="cb3-318"><a href="#cb3-318" aria-hidden="true" tabindex="-1"></a>    <span class="op">!</span>config<span class="op">.</span><span class="at">upcIgnore</span><span class="op">.</span><span class="fu">includes</span>(item<span class="op">.</span><span class="at">upc</span>)</span>
+<span id="cb3-319"><a href="#cb3-319" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb3-320"><a href="#cb3-320" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-321"><a href="#cb3-321" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> { <span class="op">...</span><span class="bu">document</span><span class="op">,</span> <span class="dt">processedInvoice</span><span class="op">:</span> invoice }<span class="op">;</span></span>
+<span id="cb3-322"><a href="#cb3-322" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-323"><a href="#cb3-323" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-324"><a href="#cb3-324" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">bulkUpsertSalesforce</span>(sobject<span class="op">,</span> records<span class="op">,</span> externalIdField<span class="op">,</span> config) {</span>
+<span id="cb3-325"><a href="#cb3-325" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> results <span class="op">=</span> { <span class="dt">created</span><span class="op">:</span> []<span class="op">,</span> <span class="dt">updated</span><span class="op">:</span> []<span class="op">,</span> <span class="dt">errors</span><span class="op">:</span> [] }<span class="op">;</span></span>
+<span id="cb3-326"><a href="#cb3-326" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-327"><a href="#cb3-327" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Process in batches of 100</span></span>
+<span id="cb3-328"><a href="#cb3-328" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> batchSize <span class="op">=</span> <span class="dv">100</span><span class="op">;</span></span>
+<span id="cb3-329"><a href="#cb3-329" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> batches <span class="op">=</span> <span class="fu">chunkArray</span>(records<span class="op">,</span> batchSize)<span class="op">;</span></span>
+<span id="cb3-330"><a href="#cb3-330" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-331"><a href="#cb3-331" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">const</span> batch <span class="kw">of</span> batches) {</span>
+<span id="cb3-332"><a href="#cb3-332" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> {</span>
+<span id="cb3-333"><a href="#cb3-333" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> batchResult <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">bulk_upsert_records</span>({</span>
+<span id="cb3-334"><a href="#cb3-334" aria-hidden="true" tabindex="-1"></a>        <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb3-335"><a href="#cb3-335" aria-hidden="true" tabindex="-1"></a>        <span class="dt">sobject</span><span class="op">:</span> sobject<span class="op">,</span></span>
+<span id="cb3-336"><a href="#cb3-336" aria-hidden="true" tabindex="-1"></a>        <span class="dt">external_id_field</span><span class="op">:</span> externalIdField<span class="op">,</span></span>
+<span id="cb3-337"><a href="#cb3-337" aria-hidden="true" tabindex="-1"></a>        <span class="dt">records</span><span class="op">:</span> batch</span>
+<span id="cb3-338"><a href="#cb3-338" aria-hidden="true" tabindex="-1"></a>      })<span class="op">;</span></span>
+<span id="cb3-339"><a href="#cb3-339" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-340"><a href="#cb3-340" aria-hidden="true" tabindex="-1"></a>      <span class="co">// Process results</span></span>
+<span id="cb3-341"><a href="#cb3-341" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (batchResult<span class="op">.</span><span class="at">success</span>) {</span>
+<span id="cb3-342"><a href="#cb3-342" aria-hidden="true" tabindex="-1"></a>        results<span class="op">.</span><span class="at">created</span><span class="op">.</span><span class="fu">push</span>(<span class="op">...</span>(batchResult<span class="op">.</span><span class="at">created</span> <span class="op">||</span> []))<span class="op">;</span></span>
+<span id="cb3-343"><a href="#cb3-343" aria-hidden="true" tabindex="-1"></a>        results<span class="op">.</span><span class="at">updated</span><span class="op">.</span><span class="fu">push</span>(<span class="op">...</span>(batchResult<span class="op">.</span><span class="at">updated</span> <span class="op">||</span> []))<span class="op">;</span></span>
+<span id="cb3-344"><a href="#cb3-344" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb3-345"><a href="#cb3-345" aria-hidden="true" tabindex="-1"></a>        results<span class="op">.</span><span class="at">errors</span><span class="op">.</span><span class="fu">push</span>(<span class="op">...</span>(batchResult<span class="op">.</span><span class="at">errors</span> <span class="op">||</span> []))<span class="op">;</span></span>
+<span id="cb3-346"><a href="#cb3-346" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb3-347"><a href="#cb3-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-348"><a href="#cb3-348" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">catch</span> (error) {</span>
+<span id="cb3-349"><a href="#cb3-349" aria-hidden="true" tabindex="-1"></a>      results<span class="op">.</span><span class="at">errors</span><span class="op">.</span><span class="fu">push</span>({</span>
+<span id="cb3-350"><a href="#cb3-350" aria-hidden="true" tabindex="-1"></a>        <span class="dt">batch</span><span class="op">:</span> batches<span class="op">.</span><span class="fu">indexOf</span>(batch)<span class="op">,</span></span>
+<span id="cb3-351"><a href="#cb3-351" aria-hidden="true" tabindex="-1"></a>        <span class="dt">error</span><span class="op">:</span> error<span class="op">.</span><span class="at">message</span></span>
+<span id="cb3-352"><a href="#cb3-352" aria-hidden="true" tabindex="-1"></a>      })<span class="op">;</span></span>
+<span id="cb3-353"><a href="#cb3-353" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-354"><a href="#cb3-354" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-355"><a href="#cb3-355" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-356"><a href="#cb3-356" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> results<span class="op">;</span></span>
+<span id="cb3-357"><a href="#cb3-357" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+    <hr />
+    <h2 id="scenario-2-quickbooks-accounting-sync">💰 Scenario 2:
+    QuickBooks Accounting Sync</h2>
+    <h3 id="original-architecture-22-workflows">Original Architecture:
+    22 Workflows</h3>
+    <p>Based on the actual Quickbooks_V6 integration.</p>
+    <h3 id="consolidated-implementation">Consolidated
+    Implementation</h3>
+    <div class="sourceCode" id="cb4"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"> * Consolidated QuickBooks Integration Script</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"> * Replaces: 22 workflows with scattered business logic</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"> * Handles: Bidirectional sync with complete accounting rules</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>exports<span class="op">.</span><span class="at">step</span> <span class="op">=</span> <span class="kw">async</span> <span class="kw">function</span>(input<span class="op">,</span> fileInput) {</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> config <span class="op">=</span> <span class="fu">setupQuickBooksConfiguration</span>(input)<span class="op">;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> logger <span class="op">=</span> <span class="fu">createLogger</span>(config)<span class="op">;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">try</span> {</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    logger<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;Starting consolidated QuickBooks sync&#39;</span><span class="op">,</span> {</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">company</span><span class="op">:</span> config<span class="op">.</span><span class="at">company</span><span class="op">,</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">syncDirection</span><span class="op">:</span> config<span class="op">.</span><span class="at">syncDirection</span><span class="op">,</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">testMode</span><span class="op">:</span> config<span class="op">.</span><span class="at">testMode</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 1: Data Extraction from Both Systems</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> sourceData <span class="op">=</span> <span class="cf">await</span> <span class="fu">extractAccountingData</span>(config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 2: Business Logic and Data Processing</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> processedData <span class="op">=</span> <span class="cf">await</span> <span class="fu">applyAccountingBusinessLogic</span>(sourceData<span class="op">,</span> config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 3: Bidirectional Synchronization</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> syncResults <span class="op">=</span> <span class="cf">await</span> <span class="fu">executeBidirectionalSync</span>(processedData<span class="op">,</span> config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 4: Reconciliation and Reporting</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> reconciliation <span class="op">=</span> <span class="cf">await</span> <span class="fu">performAccountingReconciliation</span>(syncResults<span class="op">,</span> config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 5: Notifications and Cleanup</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> notifications <span class="op">=</span> <span class="cf">await</span> <span class="fu">sendAccountingNotifications</span>(reconciliation<span class="op">,</span> config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>      <span class="dt">sourceRecords</span><span class="op">:</span> sourceData<span class="op">.</span><span class="at">totalRecords</span><span class="op">,</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>      <span class="dt">syncResults</span><span class="op">:</span> syncResults<span class="op">,</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>      <span class="dt">reconciliation</span><span class="op">:</span> reconciliation<span class="op">,</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>      <span class="dt">notifications</span><span class="op">:</span> notifications</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    }<span class="op">;</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">catch</span> (error) {</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="cf">await</span> <span class="fu">handleAccountingError</span>(error<span class="op">,</span> config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a><span class="co">// Phase 1: Data Extraction</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">extractAccountingData</span>(config<span class="op">,</span> logger) {</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>  logger<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;Extracting data from both systems&#39;</span>)<span class="op">;</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> extractionPromises <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Extract Salesforce data</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>  extractionPromises<span class="op">.</span><span class="fu">push</span>(<span class="fu">extractSalesforceAccountingData</span>(config))<span class="op">;</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Extract QuickBooks data</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>  extractionPromises<span class="op">.</span><span class="fu">push</span>(<span class="fu">extractQuickBooksData</span>(config))<span class="op">;</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [salesforceData<span class="op">,</span> quickbooksData] <span class="op">=</span> <span class="cf">await</span> <span class="bu">Promise</span><span class="op">.</span><span class="fu">all</span>(extractionPromises)<span class="op">;</span></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> {</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>    <span class="dt">salesforce</span><span class="op">:</span> salesforceData<span class="op">,</span></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>    <span class="dt">quickbooks</span><span class="op">:</span> quickbooksData<span class="op">,</span></span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>    <span class="dt">totalRecords</span><span class="op">:</span> salesforceData<span class="op">.</span><span class="at">length</span> <span class="op">+</span> quickbooksData<span class="op">.</span><span class="at">length</span></span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">extractSalesforceAccountingData</span>(config) {</span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Query invoices for sync</span></span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> invoiceQuery <span class="op">=</span> <span class="vs">`</span></span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a><span class="vs">    SELECT Id, Name, ohfy__Invoice_Number__c, ohfy__Invoice_Date__c,</span></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a><span class="vs">           ohfy__Total_Amount__c, ohfy__Customer__r.Name, ohfy__QB_ID__c,</span></span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a><span class="vs">           ohfy__Status__c, ohfy__Payment_Status__c</span></span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a><span class="vs">    FROM ohfy__Invoice__c</span></span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a><span class="vs">    WHERE ohfy__Invoice_Date__c &gt;= </span><span class="sc">${</span>config<span class="op">.</span><span class="at">startDate</span><span class="sc">}</span></span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a><span class="vs">    </span><span class="sc">${</span>config<span class="op">.</span><span class="at">invoiceQuery</span><span class="sc">}</span></span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a><span class="vs">    ORDER BY ohfy__Invoice_Date__c DESC</span></span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a><span class="vs">    LIMIT </span><span class="sc">${</span>config<span class="op">.</span><span class="at">limit</span><span class="sc">}</span></span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a><span class="vs">  `</span><span class="op">;</span></span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> invoiceResult <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">query</span>({</span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>    <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a>    <span class="dt">query</span><span class="op">:</span> invoiceQuery</span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb4-82"><a href="#cb4-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-83"><a href="#cb4-83" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Query payments for sync</span></span>
+<span id="cb4-84"><a href="#cb4-84" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> paymentQuery <span class="op">=</span> <span class="vs">`</span></span>
+<span id="cb4-85"><a href="#cb4-85" aria-hidden="true" tabindex="-1"></a><span class="vs">    SELECT Id, Name, ohfy__Amount__c, ohfy__Payment_Date__c,</span></span>
+<span id="cb4-86"><a href="#cb4-86" aria-hidden="true" tabindex="-1"></a><span class="vs">           ohfy__Invoice__r.ohfy__QB_ID__c, ohfy__QB_Payment_ID__c</span></span>
+<span id="cb4-87"><a href="#cb4-87" aria-hidden="true" tabindex="-1"></a><span class="vs">    FROM ohfy__Payment__c</span></span>
+<span id="cb4-88"><a href="#cb4-88" aria-hidden="true" tabindex="-1"></a><span class="vs">    WHERE ohfy__Payment_Date__c &gt;= </span><span class="sc">${</span>config<span class="op">.</span><span class="at">startDate</span><span class="sc">}</span></span>
+<span id="cb4-89"><a href="#cb4-89" aria-hidden="true" tabindex="-1"></a><span class="vs">    </span><span class="sc">${</span>config<span class="op">.</span><span class="at">creditQuery</span><span class="sc">}</span></span>
+<span id="cb4-90"><a href="#cb4-90" aria-hidden="true" tabindex="-1"></a><span class="vs">    ORDER BY ohfy__Payment_Date__c DESC</span></span>
+<span id="cb4-91"><a href="#cb4-91" aria-hidden="true" tabindex="-1"></a><span class="vs">    LIMIT </span><span class="sc">${</span>config<span class="op">.</span><span class="at">limit</span><span class="sc">}</span></span>
+<span id="cb4-92"><a href="#cb4-92" aria-hidden="true" tabindex="-1"></a><span class="vs">  `</span><span class="op">;</span></span>
+<span id="cb4-93"><a href="#cb4-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-94"><a href="#cb4-94" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> paymentResult <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">query</span>({</span>
+<span id="cb4-95"><a href="#cb4-95" aria-hidden="true" tabindex="-1"></a>    <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb4-96"><a href="#cb4-96" aria-hidden="true" tabindex="-1"></a>    <span class="dt">query</span><span class="op">:</span> paymentQuery</span>
+<span id="cb4-97"><a href="#cb4-97" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb4-98"><a href="#cb4-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-99"><a href="#cb4-99" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> {</span>
+<span id="cb4-100"><a href="#cb4-100" aria-hidden="true" tabindex="-1"></a>    <span class="dt">invoices</span><span class="op">:</span> invoiceResult<span class="op">.</span><span class="at">records</span> <span class="op">||</span> []<span class="op">,</span></span>
+<span id="cb4-101"><a href="#cb4-101" aria-hidden="true" tabindex="-1"></a>    <span class="dt">payments</span><span class="op">:</span> paymentResult<span class="op">.</span><span class="at">records</span> <span class="op">||</span> []</span>
+<span id="cb4-102"><a href="#cb4-102" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb4-103"><a href="#cb4-103" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-104"><a href="#cb4-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-105"><a href="#cb4-105" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">extractQuickBooksData</span>(config) {</span>
+<span id="cb4-106"><a href="#cb4-106" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Extract QuickBooks invoices</span></span>
+<span id="cb4-107"><a href="#cb4-107" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> qbInvoices <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">quickbooks</span><span class="op">.</span><span class="fu">query</span>({</span>
+<span id="cb4-108"><a href="#cb4-108" aria-hidden="true" tabindex="-1"></a>    <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">quickbooks</span><span class="op">,</span></span>
+<span id="cb4-109"><a href="#cb4-109" aria-hidden="true" tabindex="-1"></a>    <span class="dt">query</span><span class="op">:</span> <span class="vs">`</span></span>
+<span id="cb4-110"><a href="#cb4-110" aria-hidden="true" tabindex="-1"></a><span class="vs">      SELECT * FROM Invoice</span></span>
+<span id="cb4-111"><a href="#cb4-111" aria-hidden="true" tabindex="-1"></a><span class="vs">      WHERE MetaData.LastUpdatedTime &gt;= &#39;</span><span class="sc">${</span>config<span class="op">.</span><span class="at">startDate</span><span class="sc">}</span><span class="vs">&#39;</span></span>
+<span id="cb4-112"><a href="#cb4-112" aria-hidden="true" tabindex="-1"></a><span class="vs">    `</span></span>
+<span id="cb4-113"><a href="#cb4-113" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb4-114"><a href="#cb4-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-115"><a href="#cb4-115" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Extract QuickBooks payments</span></span>
+<span id="cb4-116"><a href="#cb4-116" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> qbPayments <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">quickbooks</span><span class="op">.</span><span class="fu">query</span>({</span>
+<span id="cb4-117"><a href="#cb4-117" aria-hidden="true" tabindex="-1"></a>    <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">quickbooks</span><span class="op">,</span></span>
+<span id="cb4-118"><a href="#cb4-118" aria-hidden="true" tabindex="-1"></a>    <span class="dt">query</span><span class="op">:</span> <span class="vs">`</span></span>
+<span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a><span class="vs">      SELECT * FROM Payment</span></span>
+<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a><span class="vs">      WHERE MetaData.LastUpdatedTime &gt;= &#39;</span><span class="sc">${</span>config<span class="op">.</span><span class="at">startDate</span><span class="sc">}</span><span class="vs">&#39;</span></span>
+<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a><span class="vs">    `</span></span>
+<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> {</span>
+<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a>    <span class="dt">invoices</span><span class="op">:</span> qbInvoices<span class="op">.</span><span class="at">records</span> <span class="op">||</span> []<span class="op">,</span></span>
+<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a>    <span class="dt">payments</span><span class="op">:</span> qbPayments<span class="op">.</span><span class="at">records</span> <span class="op">||</span> []</span>
+<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a><span class="co">// Phase 2: Business Logic Processing</span></span>
+<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">applyAccountingBusinessLogic</span>(sourceData<span class="op">,</span> config<span class="op">,</span> logger) {</span>
+<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a>  logger<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;Applying accounting business logic&#39;</span>)<span class="op">;</span></span>
+<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-134"><a href="#cb4-134" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Apply invoice splitting rules (from actual config)</span></span>
+<span id="cb4-135"><a href="#cb4-135" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> splitInvoices <span class="op">=</span> <span class="cf">await</span> <span class="fu">applySplitInvoiceLogic</span>(</span>
+<span id="cb4-136"><a href="#cb4-136" aria-hidden="true" tabindex="-1"></a>    sourceData<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="at">invoices</span><span class="op">,</span></span>
+<span id="cb4-137"><a href="#cb4-137" aria-hidden="true" tabindex="-1"></a>    config<span class="op">.</span><span class="at">splitInvoices</span><span class="op">,</span></span>
+<span id="cb4-138"><a href="#cb4-138" aria-hidden="true" tabindex="-1"></a>    config<span class="op">.</span><span class="at">splitArr</span><span class="op">,</span></span>
+<span id="cb4-139"><a href="#cb4-139" aria-hidden="true" tabindex="-1"></a>    config</span>
+<span id="cb4-140"><a href="#cb4-140" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb4-141"><a href="#cb4-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-142"><a href="#cb4-142" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Apply chart of accounts mapping</span></span>
+<span id="cb4-143"><a href="#cb4-143" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> mappedAccounts <span class="op">=</span> <span class="cf">await</span> <span class="fu">applyChartOfAccountsMapping</span>(</span>
+<span id="cb4-144"><a href="#cb4-144" aria-hidden="true" tabindex="-1"></a>    sourceData<span class="op">,</span></span>
+<span id="cb4-145"><a href="#cb4-145" aria-hidden="true" tabindex="-1"></a>    config<span class="op">.</span><span class="at">map</span><span class="op">,</span></span>
+<span id="cb4-146"><a href="#cb4-146" aria-hidden="true" tabindex="-1"></a>    config</span>
+<span id="cb4-147"><a href="#cb4-147" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb4-148"><a href="#cb4-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-149"><a href="#cb4-149" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Apply payment matching rules</span></span>
+<span id="cb4-150"><a href="#cb4-150" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> matchedPayments <span class="op">=</span> <span class="cf">await</span> <span class="fu">applyPaymentMatchingLogic</span>(</span>
+<span id="cb4-151"><a href="#cb4-151" aria-hidden="true" tabindex="-1"></a>    sourceData<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="at">payments</span><span class="op">,</span></span>
+<span id="cb4-152"><a href="#cb4-152" aria-hidden="true" tabindex="-1"></a>    sourceData<span class="op">.</span><span class="at">quickbooks</span><span class="op">.</span><span class="at">payments</span><span class="op">,</span></span>
+<span id="cb4-153"><a href="#cb4-153" aria-hidden="true" tabindex="-1"></a>    config</span>
+<span id="cb4-154"><a href="#cb4-154" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb4-155"><a href="#cb4-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-156"><a href="#cb4-156" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Apply customer mapping</span></span>
+<span id="cb4-157"><a href="#cb4-157" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> mappedCustomers <span class="op">=</span> <span class="cf">await</span> <span class="fu">applyCustomerMapping</span>(</span>
+<span id="cb4-158"><a href="#cb4-158" aria-hidden="true" tabindex="-1"></a>    sourceData<span class="op">,</span></span>
+<span id="cb4-159"><a href="#cb4-159" aria-hidden="true" tabindex="-1"></a>    config<span class="op">.</span><span class="at">altAccount</span><span class="op">,</span></span>
+<span id="cb4-160"><a href="#cb4-160" aria-hidden="true" tabindex="-1"></a>    config</span>
+<span id="cb4-161"><a href="#cb4-161" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb4-162"><a href="#cb4-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-163"><a href="#cb4-163" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> {</span>
+<span id="cb4-164"><a href="#cb4-164" aria-hidden="true" tabindex="-1"></a>    <span class="dt">splitInvoices</span><span class="op">:</span> splitInvoices<span class="op">,</span></span>
+<span id="cb4-165"><a href="#cb4-165" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mappedAccounts</span><span class="op">:</span> mappedAccounts<span class="op">,</span></span>
+<span id="cb4-166"><a href="#cb4-166" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matchedPayments</span><span class="op">:</span> matchedPayments<span class="op">,</span></span>
+<span id="cb4-167"><a href="#cb4-167" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mappedCustomers</span><span class="op">:</span> mappedCustomers<span class="op">,</span></span>
+<span id="cb4-168"><a href="#cb4-168" aria-hidden="true" tabindex="-1"></a>    <span class="dt">originalData</span><span class="op">:</span> sourceData</span>
+<span id="cb4-169"><a href="#cb4-169" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb4-170"><a href="#cb4-170" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-171"><a href="#cb4-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-172"><a href="#cb4-172" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">applySplitInvoiceLogic</span>(invoices<span class="op">,</span> splitInvoices<span class="op">,</span> splitArr<span class="op">,</span> config) {</span>
+<span id="cb4-173"><a href="#cb4-173" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="op">!</span>splitInvoices <span class="op">||</span> <span class="op">!</span>splitArr <span class="op">||</span> splitArr<span class="op">.</span><span class="at">length</span> <span class="op">===</span> <span class="dv">0</span>) {</span>
+<span id="cb4-174"><a href="#cb4-174" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> invoices<span class="op">;</span></span>
+<span id="cb4-175"><a href="#cb4-175" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-176"><a href="#cb4-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-177"><a href="#cb4-177" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> splitInvoiceList <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb4-178"><a href="#cb4-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-179"><a href="#cb4-179" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">const</span> invoice <span class="kw">of</span> invoices) {</span>
+<span id="cb4-180"><a href="#cb4-180" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> customerName <span class="op">=</span> invoice[<span class="st">&#39;ohfy__Customer__r&#39;</span>]<span class="op">?.</span><span class="at">Name</span><span class="op">;</span></span>
+<span id="cb4-181"><a href="#cb4-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-182"><a href="#cb4-182" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Check if this customer requires invoice splitting</span></span>
+<span id="cb4-183"><a href="#cb4-183" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (splitArr<span class="op">.</span><span class="fu">includes</span>(customerName)) {</span>
+<span id="cb4-184"><a href="#cb4-184" aria-hidden="true" tabindex="-1"></a>      <span class="co">// Apply splitting logic based on line items</span></span>
+<span id="cb4-185"><a href="#cb4-185" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> splitInvoices <span class="op">=</span> <span class="cf">await</span> <span class="fu">splitInvoiceByBrand</span>(invoice<span class="op">,</span> config)<span class="op">;</span></span>
+<span id="cb4-186"><a href="#cb4-186" aria-hidden="true" tabindex="-1"></a>      splitInvoiceList<span class="op">.</span><span class="fu">push</span>(<span class="op">...</span>splitInvoices)<span class="op">;</span></span>
+<span id="cb4-187"><a href="#cb4-187" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb4-188"><a href="#cb4-188" aria-hidden="true" tabindex="-1"></a>      splitInvoiceList<span class="op">.</span><span class="fu">push</span>(invoice)<span class="op">;</span></span>
+<span id="cb4-189"><a href="#cb4-189" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-190"><a href="#cb4-190" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-191"><a href="#cb4-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-192"><a href="#cb4-192" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> splitInvoiceList<span class="op">;</span></span>
+<span id="cb4-193"><a href="#cb4-193" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-194"><a href="#cb4-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-195"><a href="#cb4-195" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">applyPaymentMatchingLogic</span>(sfPayments<span class="op">,</span> qbPayments<span class="op">,</span> config) {</span>
+<span id="cb4-196"><a href="#cb4-196" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> matchedPayments <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb4-197"><a href="#cb4-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-198"><a href="#cb4-198" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">const</span> sfPayment <span class="kw">of</span> sfPayments) {</span>
+<span id="cb4-199"><a href="#cb4-199" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Find matching QuickBooks payment</span></span>
+<span id="cb4-200"><a href="#cb4-200" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> qbMatch <span class="op">=</span> qbPayments<span class="op">.</span><span class="fu">find</span>(qbPayment <span class="kw">=&gt;</span> {</span>
+<span id="cb4-201"><a href="#cb4-201" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> (</span>
+<span id="cb4-202"><a href="#cb4-202" aria-hidden="true" tabindex="-1"></a>        <span class="bu">Math</span><span class="op">.</span><span class="fu">abs</span>(qbPayment<span class="op">.</span><span class="at">TotalAmt</span> <span class="op">-</span> sfPayment[<span class="st">&#39;ohfy__Amount__c&#39;</span>]) <span class="op">&lt;</span> <span class="fl">0.01</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb4-203"><a href="#cb4-203" aria-hidden="true" tabindex="-1"></a>        <span class="fu">areDatesClose</span>(qbPayment<span class="op">.</span><span class="at">TxnDate</span><span class="op">,</span> sfPayment[<span class="st">&#39;ohfy__Payment_Date__c&#39;</span>])</span>
+<span id="cb4-204"><a href="#cb4-204" aria-hidden="true" tabindex="-1"></a>      )<span class="op">;</span></span>
+<span id="cb4-205"><a href="#cb4-205" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb4-206"><a href="#cb4-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-207"><a href="#cb4-207" aria-hidden="true" tabindex="-1"></a>    matchedPayments<span class="op">.</span><span class="fu">push</span>({</span>
+<span id="cb4-208"><a href="#cb4-208" aria-hidden="true" tabindex="-1"></a>      <span class="dt">salesforcePayment</span><span class="op">:</span> sfPayment<span class="op">,</span></span>
+<span id="cb4-209"><a href="#cb4-209" aria-hidden="true" tabindex="-1"></a>      <span class="dt">quickbooksPayment</span><span class="op">:</span> qbMatch<span class="op">,</span></span>
+<span id="cb4-210"><a href="#cb4-210" aria-hidden="true" tabindex="-1"></a>      <span class="dt">isMatched</span><span class="op">:</span> <span class="op">!!</span>qbMatch</span>
+<span id="cb4-211"><a href="#cb4-211" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb4-212"><a href="#cb4-212" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-213"><a href="#cb4-213" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-214"><a href="#cb4-214" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> matchedPayments<span class="op">;</span></span>
+<span id="cb4-215"><a href="#cb4-215" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-216"><a href="#cb4-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-217"><a href="#cb4-217" aria-hidden="true" tabindex="-1"></a><span class="co">// Phase 3: Bidirectional Synchronization</span></span>
+<span id="cb4-218"><a href="#cb4-218" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">executeBidirectionalSync</span>(processedData<span class="op">,</span> config<span class="op">,</span> logger) {</span>
+<span id="cb4-219"><a href="#cb4-219" aria-hidden="true" tabindex="-1"></a>  logger<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;Executing bidirectional sync&#39;</span>)<span class="op">;</span></span>
+<span id="cb4-220"><a href="#cb4-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-221"><a href="#cb4-221" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> results <span class="op">=</span> {</span>
+<span id="cb4-222"><a href="#cb4-222" aria-hidden="true" tabindex="-1"></a>    <span class="dt">salesforceToQB</span><span class="op">:</span> { <span class="dt">created</span><span class="op">:</span> []<span class="op">,</span> <span class="dt">updated</span><span class="op">:</span> []<span class="op">,</span> <span class="dt">errors</span><span class="op">:</span> [] }<span class="op">,</span></span>
+<span id="cb4-223"><a href="#cb4-223" aria-hidden="true" tabindex="-1"></a>    <span class="dt">qbToSalesforce</span><span class="op">:</span> { <span class="dt">created</span><span class="op">:</span> []<span class="op">,</span> <span class="dt">updated</span><span class="op">:</span> []<span class="op">,</span> <span class="dt">errors</span><span class="op">:</span> [] }</span>
+<span id="cb4-224"><a href="#cb4-224" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb4-225"><a href="#cb4-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-226"><a href="#cb4-226" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Sync Salesforce → QuickBooks</span></span>
+<span id="cb4-227"><a href="#cb4-227" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (config<span class="op">.</span><span class="at">syncToQuickBooks</span> <span class="op">!==</span> <span class="kw">false</span>) {</span>
+<span id="cb4-228"><a href="#cb4-228" aria-hidden="true" tabindex="-1"></a>    results<span class="op">.</span><span class="at">salesforceToQB</span> <span class="op">=</span> <span class="cf">await</span> <span class="fu">syncSalesforceToQuickBooks</span>(processedData<span class="op">,</span> config)<span class="op">;</span></span>
+<span id="cb4-229"><a href="#cb4-229" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-230"><a href="#cb4-230" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-231"><a href="#cb4-231" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Sync QuickBooks → Salesforce</span></span>
+<span id="cb4-232"><a href="#cb4-232" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (config<span class="op">.</span><span class="at">syncToSalesforce</span> <span class="op">!==</span> <span class="kw">false</span>) {</span>
+<span id="cb4-233"><a href="#cb4-233" aria-hidden="true" tabindex="-1"></a>    results<span class="op">.</span><span class="at">qbToSalesforce</span> <span class="op">=</span> <span class="cf">await</span> <span class="fu">syncQuickBooksToSalesforce</span>(processedData<span class="op">,</span> config)<span class="op">;</span></span>
+<span id="cb4-234"><a href="#cb4-234" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-235"><a href="#cb4-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-236"><a href="#cb4-236" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> results<span class="op">;</span></span>
+<span id="cb4-237"><a href="#cb4-237" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-238"><a href="#cb4-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-239"><a href="#cb4-239" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">syncSalesforceToQuickBooks</span>(processedData<span class="op">,</span> config) {</span>
+<span id="cb4-240"><a href="#cb4-240" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> results <span class="op">=</span> { <span class="dt">created</span><span class="op">:</span> []<span class="op">,</span> <span class="dt">updated</span><span class="op">:</span> []<span class="op">,</span> <span class="dt">errors</span><span class="op">:</span> [] }<span class="op">;</span></span>
+<span id="cb4-241"><a href="#cb4-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-242"><a href="#cb4-242" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Process split invoices</span></span>
+<span id="cb4-243"><a href="#cb4-243" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">const</span> invoice <span class="kw">of</span> processedData<span class="op">.</span><span class="at">splitInvoices</span>) {</span>
+<span id="cb4-244"><a href="#cb4-244" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> {</span>
+<span id="cb4-245"><a href="#cb4-245" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> qbInvoiceData <span class="op">=</span> <span class="cf">await</span> <span class="fu">transformSFToQBInvoice</span>(invoice<span class="op">,</span> config)<span class="op">;</span></span>
+<span id="cb4-246"><a href="#cb4-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-247"><a href="#cb4-247" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (invoice[<span class="st">&#39;ohfy__QB_ID__c&#39;</span>]) {</span>
+<span id="cb4-248"><a href="#cb4-248" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Update existing QuickBooks invoice</span></span>
+<span id="cb4-249"><a href="#cb4-249" aria-hidden="true" tabindex="-1"></a>        <span class="kw">const</span> updateResult <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">quickbooks</span><span class="op">.</span><span class="fu">update</span>({</span>
+<span id="cb4-250"><a href="#cb4-250" aria-hidden="true" tabindex="-1"></a>          <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">quickbooks</span><span class="op">,</span></span>
+<span id="cb4-251"><a href="#cb4-251" aria-hidden="true" tabindex="-1"></a>          <span class="dt">resource</span><span class="op">:</span> <span class="st">&#39;Invoice&#39;</span><span class="op">,</span></span>
+<span id="cb4-252"><a href="#cb4-252" aria-hidden="true" tabindex="-1"></a>          <span class="dt">id</span><span class="op">:</span> invoice[<span class="st">&#39;ohfy__QB_ID__c&#39;</span>]<span class="op">,</span></span>
+<span id="cb4-253"><a href="#cb4-253" aria-hidden="true" tabindex="-1"></a>          <span class="dt">data</span><span class="op">:</span> qbInvoiceData</span>
+<span id="cb4-254"><a href="#cb4-254" aria-hidden="true" tabindex="-1"></a>        })<span class="op">;</span></span>
+<span id="cb4-255"><a href="#cb4-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-256"><a href="#cb4-256" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (updateResult<span class="op">.</span><span class="at">success</span>) {</span>
+<span id="cb4-257"><a href="#cb4-257" aria-hidden="true" tabindex="-1"></a>          results<span class="op">.</span><span class="at">updated</span><span class="op">.</span><span class="fu">push</span>(updateResult)<span class="op">;</span></span>
+<span id="cb4-258"><a href="#cb4-258" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb4-259"><a href="#cb4-259" aria-hidden="true" tabindex="-1"></a>          results<span class="op">.</span><span class="at">errors</span><span class="op">.</span><span class="fu">push</span>({</span>
+<span id="cb4-260"><a href="#cb4-260" aria-hidden="true" tabindex="-1"></a>            <span class="dt">invoiceId</span><span class="op">:</span> invoice<span class="op">.</span><span class="at">Id</span><span class="op">,</span></span>
+<span id="cb4-261"><a href="#cb4-261" aria-hidden="true" tabindex="-1"></a>            <span class="dt">error</span><span class="op">:</span> updateResult<span class="op">.</span><span class="at">error</span></span>
+<span id="cb4-262"><a href="#cb4-262" aria-hidden="true" tabindex="-1"></a>          })<span class="op">;</span></span>
+<span id="cb4-263"><a href="#cb4-263" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb4-264"><a href="#cb4-264" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb4-265"><a href="#cb4-265" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Create new QuickBooks invoice</span></span>
+<span id="cb4-266"><a href="#cb4-266" aria-hidden="true" tabindex="-1"></a>        <span class="kw">const</span> createResult <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">quickbooks</span><span class="op">.</span><span class="fu">create</span>({</span>
+<span id="cb4-267"><a href="#cb4-267" aria-hidden="true" tabindex="-1"></a>          <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">quickbooks</span><span class="op">,</span></span>
+<span id="cb4-268"><a href="#cb4-268" aria-hidden="true" tabindex="-1"></a>          <span class="dt">resource</span><span class="op">:</span> <span class="st">&#39;Invoice&#39;</span><span class="op">,</span></span>
+<span id="cb4-269"><a href="#cb4-269" aria-hidden="true" tabindex="-1"></a>          <span class="dt">data</span><span class="op">:</span> qbInvoiceData</span>
+<span id="cb4-270"><a href="#cb4-270" aria-hidden="true" tabindex="-1"></a>        })<span class="op">;</span></span>
+<span id="cb4-271"><a href="#cb4-271" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-272"><a href="#cb4-272" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (createResult<span class="op">.</span><span class="at">success</span>) {</span>
+<span id="cb4-273"><a href="#cb4-273" aria-hidden="true" tabindex="-1"></a>          results<span class="op">.</span><span class="at">created</span><span class="op">.</span><span class="fu">push</span>(createResult)<span class="op">;</span></span>
+<span id="cb4-274"><a href="#cb4-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-275"><a href="#cb4-275" aria-hidden="true" tabindex="-1"></a>          <span class="co">// Update Salesforce with QB ID</span></span>
+<span id="cb4-276"><a href="#cb4-276" aria-hidden="true" tabindex="-1"></a>          <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">update_record</span>({</span>
+<span id="cb4-277"><a href="#cb4-277" aria-hidden="true" tabindex="-1"></a>            <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb4-278"><a href="#cb4-278" aria-hidden="true" tabindex="-1"></a>            <span class="dt">sobject</span><span class="op">:</span> <span class="st">&#39;ohfy__Invoice__c&#39;</span><span class="op">,</span></span>
+<span id="cb4-279"><a href="#cb4-279" aria-hidden="true" tabindex="-1"></a>            <span class="dt">id</span><span class="op">:</span> invoice<span class="op">.</span><span class="at">Id</span><span class="op">,</span></span>
+<span id="cb4-280"><a href="#cb4-280" aria-hidden="true" tabindex="-1"></a>            <span class="dt">fields</span><span class="op">:</span> {</span>
+<span id="cb4-281"><a href="#cb4-281" aria-hidden="true" tabindex="-1"></a>              <span class="st">&#39;ohfy__QB_ID__c&#39;</span><span class="op">:</span> createResult<span class="op">.</span><span class="at">data</span><span class="op">.</span><span class="at">Id</span></span>
+<span id="cb4-282"><a href="#cb4-282" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb4-283"><a href="#cb4-283" aria-hidden="true" tabindex="-1"></a>          })<span class="op">;</span></span>
+<span id="cb4-284"><a href="#cb4-284" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb4-285"><a href="#cb4-285" aria-hidden="true" tabindex="-1"></a>          results<span class="op">.</span><span class="at">errors</span><span class="op">.</span><span class="fu">push</span>({</span>
+<span id="cb4-286"><a href="#cb4-286" aria-hidden="true" tabindex="-1"></a>            <span class="dt">invoiceId</span><span class="op">:</span> invoice<span class="op">.</span><span class="at">Id</span><span class="op">,</span></span>
+<span id="cb4-287"><a href="#cb4-287" aria-hidden="true" tabindex="-1"></a>            <span class="dt">error</span><span class="op">:</span> createResult<span class="op">.</span><span class="at">error</span></span>
+<span id="cb4-288"><a href="#cb4-288" aria-hidden="true" tabindex="-1"></a>          })<span class="op">;</span></span>
+<span id="cb4-289"><a href="#cb4-289" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb4-290"><a href="#cb4-290" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb4-291"><a href="#cb4-291" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">catch</span> (error) {</span>
+<span id="cb4-292"><a href="#cb4-292" aria-hidden="true" tabindex="-1"></a>      results<span class="op">.</span><span class="at">errors</span><span class="op">.</span><span class="fu">push</span>({</span>
+<span id="cb4-293"><a href="#cb4-293" aria-hidden="true" tabindex="-1"></a>        <span class="dt">invoiceId</span><span class="op">:</span> invoice<span class="op">.</span><span class="at">Id</span><span class="op">,</span></span>
+<span id="cb4-294"><a href="#cb4-294" aria-hidden="true" tabindex="-1"></a>        <span class="dt">error</span><span class="op">:</span> error<span class="op">.</span><span class="at">message</span></span>
+<span id="cb4-295"><a href="#cb4-295" aria-hidden="true" tabindex="-1"></a>      })<span class="op">;</span></span>
+<span id="cb4-296"><a href="#cb4-296" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-297"><a href="#cb4-297" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-298"><a href="#cb4-298" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-299"><a href="#cb4-299" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> results<span class="op">;</span></span>
+<span id="cb4-300"><a href="#cb4-300" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-301"><a href="#cb4-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-302"><a href="#cb4-302" aria-hidden="true" tabindex="-1"></a><span class="co">// Configuration Setup</span></span>
+<span id="cb4-303"><a href="#cb4-303" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">setupQuickBooksConfiguration</span>(input) {</span>
+<span id="cb4-304"><a href="#cb4-304" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> {</span>
+<span id="cb4-305"><a href="#cb4-305" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Company configuration (from actual config)</span></span>
+<span id="cb4-306"><a href="#cb4-306" aria-hidden="true" tabindex="-1"></a>    <span class="dt">company</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">company</span> <span class="op">||</span> <span class="st">&#39;TBM&#39;</span><span class="op">,</span></span>
+<span id="cb4-307"><a href="#cb4-307" aria-hidden="true" tabindex="-1"></a>    <span class="dt">companyKey</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">companyKey</span> <span class="op">||</span> <span class="st">&#39;TBM&#39;</span><span class="op">,</span></span>
+<span id="cb4-308"><a href="#cb4-308" aria-hidden="true" tabindex="-1"></a>    <span class="dt">companyNumber</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">companyNumber</span> <span class="op">||</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb4-309"><a href="#cb4-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-310"><a href="#cb4-310" aria-hidden="true" tabindex="-1"></a>    <span class="co">// QuickBooks settings</span></span>
+<span id="cb4-311"><a href="#cb4-311" aria-hidden="true" tabindex="-1"></a>    <span class="dt">accountUrl</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">accountUrl</span> <span class="op">||</span> <span class="st">&#39;qbo.intuit.com&#39;</span><span class="op">,</span></span>
+<span id="cb4-312"><a href="#cb4-312" aria-hidden="true" tabindex="-1"></a>    <span class="dt">qboCount</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">qboCount</span> <span class="op">||</span> <span class="dv">500</span><span class="op">,</span></span>
+<span id="cb4-313"><a href="#cb4-313" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-314"><a href="#cb4-314" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Sync settings</span></span>
+<span id="cb4-315"><a href="#cb4-315" aria-hidden="true" tabindex="-1"></a>    <span class="dt">syncToQuickBooks</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">syncToQuickBooks</span> <span class="op">!==</span> <span class="kw">false</span><span class="op">,</span></span>
+<span id="cb4-316"><a href="#cb4-316" aria-hidden="true" tabindex="-1"></a>    <span class="dt">syncToSalesforce</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">syncToSalesforce</span> <span class="op">!==</span> <span class="kw">false</span><span class="op">,</span></span>
+<span id="cb4-317"><a href="#cb4-317" aria-hidden="true" tabindex="-1"></a>    <span class="dt">linkPayment</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">linkPayment</span> <span class="op">||</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb4-318"><a href="#cb4-318" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-319"><a href="#cb4-319" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Business logic settings</span></span>
+<span id="cb4-320"><a href="#cb4-320" aria-hidden="true" tabindex="-1"></a>    <span class="dt">splitInvoices</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">splitInvoices</span> <span class="op">||</span> <span class="kw">false</span><span class="op">,</span></span>
+<span id="cb4-321"><a href="#cb4-321" aria-hidden="true" tabindex="-1"></a>    <span class="dt">splitArr</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">splitArr</span> <span class="op">||</span> [<span class="st">&#39;Red Bull&#39;</span>]<span class="op">,</span></span>
+<span id="cb4-322"><a href="#cb4-322" aria-hidden="true" tabindex="-1"></a>    <span class="dt">feeLines</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">feeLines</span> <span class="op">||</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb4-323"><a href="#cb4-323" aria-hidden="true" tabindex="-1"></a>    <span class="dt">leadingZeros</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">leadingZeros</span> <span class="op">||</span> <span class="kw">false</span><span class="op">,</span></span>
+<span id="cb4-324"><a href="#cb4-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-325"><a href="#cb4-325" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Date and filtering</span></span>
+<span id="cb4-326"><a href="#cb4-326" aria-hidden="true" tabindex="-1"></a>    <span class="dt">startDate</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">startDate</span> <span class="op">||</span> <span class="st">&#39;2024-09-16 04:00&#39;</span><span class="op">,</span></span>
+<span id="cb4-327"><a href="#cb4-327" aria-hidden="true" tabindex="-1"></a>    <span class="dt">limit</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">limit</span> <span class="op">||</span> <span class="dv">5</span><span class="op">,</span></span>
+<span id="cb4-328"><a href="#cb4-328" aria-hidden="true" tabindex="-1"></a>    <span class="dt">cronSchedule</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">cronSchedule</span> <span class="op">||</span> <span class="st">&#39;0 3,9,15,21 * * *&#39;</span><span class="op">,</span></span>
+<span id="cb4-329"><a href="#cb4-329" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-330"><a href="#cb4-330" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Custom mappings (from actual config)</span></span>
+<span id="cb4-331"><a href="#cb4-331" aria-hidden="true" tabindex="-1"></a>    <span class="dt">altAccount</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">altAccount</span> <span class="op">||</span> { <span class="st">&#39;Red Bull&#39;</span><span class="op">:</span> <span class="st">&#39;114&#39;</span> }<span class="op">,</span></span>
+<span id="cb4-332"><a href="#cb4-332" aria-hidden="true" tabindex="-1"></a>    <span class="dt">map</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">map</span> <span class="op">||</span> {</span>
+<span id="cb4-333"><a href="#cb4-333" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;Bill&#39;</span><span class="op">:</span> <span class="st">&#39;BILL&#39;</span><span class="op">,</span></span>
+<span id="cb4-334"><a href="#cb4-334" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;Invoice&#39;</span><span class="op">:</span> <span class="st">&#39;INV&#39;</span><span class="op">,</span></span>
+<span id="cb4-335"><a href="#cb4-335" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;CreditMemo&#39;</span><span class="op">:</span> <span class="st">&#39;CRED&#39;</span><span class="op">,</span></span>
+<span id="cb4-336"><a href="#cb4-336" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;JournalEntry&#39;</span><span class="op">:</span> <span class="st">&#39;JE&#39;</span><span class="op">,</span></span>
+<span id="cb4-337"><a href="#cb4-337" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;AccountCredit&#39;</span><span class="op">:</span> <span class="st">&#39;ACC&#39;</span></span>
+<span id="cb4-338"><a href="#cb4-338" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb4-339"><a href="#cb4-339" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-340"><a href="#cb4-340" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Query filters</span></span>
+<span id="cb4-341"><a href="#cb4-341" aria-hidden="true" tabindex="-1"></a>    <span class="dt">invoiceQuery</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">invoiceQuery</span> <span class="op">||</span> <span class="st">&quot;and ohfy__Sales_Rep__r.Location__c = &#39;TBM&#39;&quot;</span><span class="op">,</span></span>
+<span id="cb4-342"><a href="#cb4-342" aria-hidden="true" tabindex="-1"></a>    <span class="dt">creditQuery</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">creditQuery</span> <span class="op">||</span> <span class="st">&quot;and ohfy__Invoice__r.ohfy__Sales_Rep__r.Location__c = &#39;TBM&#39;&quot;</span><span class="op">,</span></span>
+<span id="cb4-343"><a href="#cb4-343" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-344"><a href="#cb4-344" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Test settings</span></span>
+<span id="cb4-345"><a href="#cb4-345" aria-hidden="true" tabindex="-1"></a>    <span class="dt">testMode</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">testMode</span> <span class="op">||</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb4-346"><a href="#cb4-346" aria-hidden="true" tabindex="-1"></a>    <span class="dt">testRun</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">testRun</span> <span class="op">||</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb4-347"><a href="#cb4-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-348"><a href="#cb4-348" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Authentication</span></span>
+<span id="cb4-349"><a href="#cb4-349" aria-hidden="true" tabindex="-1"></a>    <span class="dt">authIds</span><span class="op">:</span> {</span>
+<span id="cb4-350"><a href="#cb4-350" aria-hidden="true" tabindex="-1"></a>      <span class="dt">salesforce</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">salesforceAuthId</span><span class="op">,</span></span>
+<span id="cb4-351"><a href="#cb4-351" aria-hidden="true" tabindex="-1"></a>      <span class="dt">quickbooks</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">quickbooksAuthId</span></span>
+<span id="cb4-352"><a href="#cb4-352" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-353"><a href="#cb4-353" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb4-354"><a href="#cb4-354" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+    <hr />
+    <h2 id="scenario-3-vip-depletions-data-pipeline">📊 Scenario 3: VIP
+    Depletions Data Pipeline</h2>
+    <h3 id="original-architecture-multiple-workflows">Original
+    Architecture: Multiple Workflows</h3>
+    <p>Based on the actual VIP_Depletions_v1 integration.</p>
+    <h3 id="consolidated-implementation-1">Consolidated
+    Implementation</h3>
+    <div class="sourceCode" id="cb5"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"> * Consolidated VIP Depletions Integration Script</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"> * Handles: Item depletion tracking with inventory management</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>exports<span class="op">.</span><span class="at">step</span> <span class="op">=</span> <span class="kw">async</span> <span class="kw">function</span>(input<span class="op">,</span> fileInput) {</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> config <span class="op">=</span> <span class="fu">setupVIPDepletionsConfiguration</span>(input)<span class="op">;</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> logger <span class="op">=</span> <span class="fu">createLogger</span>(config)<span class="op">;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">try</span> {</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    logger<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;Starting VIP depletions processing&#39;</span><span class="op">,</span> {</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>      <span class="dt">itemPrefix</span><span class="op">:</span> config<span class="op">.</span><span class="at">itm_prefix</span><span class="op">,</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">ignoredItems</span><span class="op">:</span> config<span class="op">.</span><span class="at">itemIgnoreList</span><span class="op">.</span><span class="at">length</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 1: Data Extraction and Filtering</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> sourceData <span class="op">=</span> <span class="cf">await</span> <span class="fu">extractDepletionData</span>(input<span class="op">,</span> config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 2: Item Validation and Enrichment</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> validatedData <span class="op">=</span> <span class="cf">await</span> <span class="fu">validateAndEnrichItems</span>(sourceData<span class="op">,</span> config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 3: Depletion Calculations</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> depletionData <span class="op">=</span> <span class="cf">await</span> <span class="fu">calculateDepletions</span>(validatedData<span class="op">,</span> config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 4: Salesforce Updates</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> updateResults <span class="op">=</span> <span class="cf">await</span> <span class="fu">updateSalesforceInventory</span>(depletionData<span class="op">,</span> config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Phase 5: Cleanup and Notifications</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> cleanupResults <span class="op">=</span> <span class="cf">await</span> <span class="fu">performCleanupOperations</span>(updateResults<span class="op">,</span> config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>      <span class="dt">itemsProcessed</span><span class="op">:</span> validatedData<span class="op">.</span><span class="at">length</span><span class="op">,</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>      <span class="dt">depletionsCalculated</span><span class="op">:</span> depletionData<span class="op">.</span><span class="at">length</span><span class="op">,</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>      <span class="dt">salesforceUpdates</span><span class="op">:</span> updateResults<span class="op">.</span><span class="at">successful</span><span class="op">.</span><span class="at">length</span><span class="op">,</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>      <span class="dt">errors</span><span class="op">:</span> updateResults<span class="op">.</span><span class="at">errors</span><span class="op">.</span><span class="at">length</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    }<span class="op">;</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">catch</span> (error) {</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="cf">await</span> <span class="fu">handleDepletionError</span>(error<span class="op">,</span> config<span class="op">,</span> logger)<span class="op">;</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a><span class="co">// Phase 1: Data Extraction</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">extractDepletionData</span>(input<span class="op">,</span> config<span class="op">,</span> logger) {</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>  logger<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;Extracting depletion data&#39;</span>)<span class="op">;</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> sourceData <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (input<span class="op">.</span><span class="at">csvData</span>) {</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Process CSV input</span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>    sourceData <span class="op">=</span> <span class="cf">await</span> <span class="fu">parseCSVData</span>(input<span class="op">.</span><span class="at">csvData</span><span class="op">,</span> config)<span class="op">;</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (input<span class="op">.</span><span class="at">apiData</span>) {</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Process API input</span></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>    sourceData <span class="op">=</span> input<span class="op">.</span><span class="at">apiData</span><span class="op">;</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (input<span class="op">.</span><span class="at">fileInput</span>) {</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Process file input</span></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>    sourceData <span class="op">=</span> <span class="cf">await</span> <span class="fu">parseFileInput</span>(input<span class="op">.</span><span class="at">fileInput</span><span class="op">,</span> config)<span class="op">;</span></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Filter out ignored items (from actual config)</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> filteredData <span class="op">=</span> sourceData<span class="op">.</span><span class="fu">filter</span>(item <span class="kw">=&gt;</span> {</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> itemCode <span class="op">=</span> item<span class="op">.</span><span class="at">itemCode</span> <span class="op">||</span> item[<span class="st">&#39;Item Code&#39;</span>] <span class="op">||</span> item<span class="op">.</span><span class="at">sku</span><span class="op">;</span></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">!</span>config<span class="op">.</span><span class="at">itemIgnoreList</span><span class="op">.</span><span class="fu">includes</span>(itemCode)<span class="op">;</span></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>  logger<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;Data extracted and filtered&#39;</span><span class="op">,</span> {</span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>    <span class="dt">originalCount</span><span class="op">:</span> sourceData<span class="op">.</span><span class="at">length</span><span class="op">,</span></span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>    <span class="dt">filteredCount</span><span class="op">:</span> filteredData<span class="op">.</span><span class="at">length</span><span class="op">,</span></span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>    <span class="dt">ignoredCount</span><span class="op">:</span> sourceData<span class="op">.</span><span class="at">length</span> <span class="op">-</span> filteredData<span class="op">.</span><span class="at">length</span></span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> filteredData<span class="op">;</span></span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a><span class="co">// Phase 2: Item Validation and Enrichment</span></span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">validateAndEnrichItems</span>(sourceData<span class="op">,</span> config<span class="op">,</span> logger) {</span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>  logger<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;Validating and enriching items&#39;</span>)<span class="op">;</span></span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> validatedItems <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> errors <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">const</span> item <span class="kw">of</span> sourceData) {</span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> {</span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a>      <span class="co">// Standardize item data</span></span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> standardizedItem <span class="op">=</span> {</span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a>        <span class="dt">itemCode</span><span class="op">:</span> item<span class="op">.</span><span class="at">itemCode</span> <span class="op">||</span> item[<span class="st">&#39;Item Code&#39;</span>] <span class="op">||</span> item<span class="op">.</span><span class="at">sku</span><span class="op">,</span></span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a>        <span class="dt">depletionAmount</span><span class="op">:</span> <span class="pp">parseFloat</span>(item<span class="op">.</span><span class="at">depletionAmount</span> <span class="op">||</span> item[<span class="st">&#39;Depletion Amount&#39;</span>] <span class="op">||</span> <span class="dv">0</span>)<span class="op">,</span></span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a>        <span class="dt">reportDate</span><span class="op">:</span> item<span class="op">.</span><span class="at">reportDate</span> <span class="op">||</span> item[<span class="st">&#39;Report Date&#39;</span>] <span class="op">||</span> <span class="kw">new</span> <span class="bu">Date</span>()<span class="op">.</span><span class="fu">toISOString</span>()<span class="op">.</span><span class="fu">split</span>(<span class="st">&#39;T&#39;</span>)[<span class="dv">0</span>]<span class="op">,</span></span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a>        <span class="dt">location</span><span class="op">:</span> item<span class="op">.</span><span class="at">location</span> <span class="op">||</span> item[<span class="st">&#39;Location&#39;</span>] <span class="op">||</span> <span class="st">&#39;Default&#39;</span></span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a>      }<span class="op">;</span></span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a>      <span class="co">// Apply item prefix if configured</span></span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (config<span class="op">.</span><span class="at">itm_prefix</span> <span class="op">&amp;&amp;</span> <span class="op">!</span>standardizedItem<span class="op">.</span><span class="at">itemCode</span><span class="op">.</span><span class="fu">startsWith</span>(config<span class="op">.</span><span class="at">itm_prefix</span>)) {</span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a>        standardizedItem<span class="op">.</span><span class="at">itemCode</span> <span class="op">=</span> <span class="vs">`</span><span class="sc">${</span>config<span class="op">.</span><span class="at">itm_prefix</span><span class="sc">}${</span>standardizedItem<span class="op">.</span><span class="at">itemCode</span><span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a>      <span class="co">// Validate required fields</span></span>
+<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="op">!</span>standardizedItem<span class="op">.</span><span class="at">itemCode</span> <span class="op">||</span> standardizedItem<span class="op">.</span><span class="at">depletionAmount</span> <span class="op">&lt;</span> <span class="dv">0</span>) {</span>
+<span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a>        errors<span class="op">.</span><span class="fu">push</span>({</span>
+<span id="cb5-99"><a href="#cb5-99" aria-hidden="true" tabindex="-1"></a>          <span class="dt">item</span><span class="op">:</span> standardizedItem<span class="op">,</span></span>
+<span id="cb5-100"><a href="#cb5-100" aria-hidden="true" tabindex="-1"></a>          <span class="dt">error</span><span class="op">:</span> <span class="st">&#39;Invalid item code or negative depletion amount&#39;</span></span>
+<span id="cb5-101"><a href="#cb5-101" aria-hidden="true" tabindex="-1"></a>        })<span class="op">;</span></span>
+<span id="cb5-102"><a href="#cb5-102" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span><span class="op">;</span></span>
+<span id="cb5-103"><a href="#cb5-103" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb5-104"><a href="#cb5-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-105"><a href="#cb5-105" aria-hidden="true" tabindex="-1"></a>      <span class="co">// Enrich with Salesforce item data</span></span>
+<span id="cb5-106"><a href="#cb5-106" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> enrichedItem <span class="op">=</span> <span class="cf">await</span> <span class="fu">enrichWithSalesforceData</span>(standardizedItem<span class="op">,</span> config)<span class="op">;</span></span>
+<span id="cb5-107"><a href="#cb5-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-108"><a href="#cb5-108" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (enrichedItem<span class="op">.</span><span class="at">salesforceItem</span>) {</span>
+<span id="cb5-109"><a href="#cb5-109" aria-hidden="true" tabindex="-1"></a>        validatedItems<span class="op">.</span><span class="fu">push</span>(enrichedItem)<span class="op">;</span></span>
+<span id="cb5-110"><a href="#cb5-110" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb5-111"><a href="#cb5-111" aria-hidden="true" tabindex="-1"></a>        errors<span class="op">.</span><span class="fu">push</span>({</span>
+<span id="cb5-112"><a href="#cb5-112" aria-hidden="true" tabindex="-1"></a>          <span class="dt">item</span><span class="op">:</span> standardizedItem<span class="op">,</span></span>
+<span id="cb5-113"><a href="#cb5-113" aria-hidden="true" tabindex="-1"></a>          <span class="dt">error</span><span class="op">:</span> <span class="st">&#39;Item not found in Salesforce&#39;</span></span>
+<span id="cb5-114"><a href="#cb5-114" aria-hidden="true" tabindex="-1"></a>        })<span class="op">;</span></span>
+<span id="cb5-115"><a href="#cb5-115" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb5-116"><a href="#cb5-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-117"><a href="#cb5-117" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">catch</span> (error) {</span>
+<span id="cb5-118"><a href="#cb5-118" aria-hidden="true" tabindex="-1"></a>      errors<span class="op">.</span><span class="fu">push</span>({</span>
+<span id="cb5-119"><a href="#cb5-119" aria-hidden="true" tabindex="-1"></a>        <span class="dt">item</span><span class="op">:</span> item<span class="op">,</span></span>
+<span id="cb5-120"><a href="#cb5-120" aria-hidden="true" tabindex="-1"></a>        <span class="dt">error</span><span class="op">:</span> error<span class="op">.</span><span class="at">message</span></span>
+<span id="cb5-121"><a href="#cb5-121" aria-hidden="true" tabindex="-1"></a>      })<span class="op">;</span></span>
+<span id="cb5-122"><a href="#cb5-122" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-123"><a href="#cb5-123" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-124"><a href="#cb5-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-125"><a href="#cb5-125" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Log validation results</span></span>
+<span id="cb5-126"><a href="#cb5-126" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (errors<span class="op">.</span><span class="at">length</span> <span class="op">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb5-127"><a href="#cb5-127" aria-hidden="true" tabindex="-1"></a>    logger<span class="op">.</span><span class="fu">warn</span>(<span class="st">&#39;Item validation errors&#39;</span><span class="op">,</span> { <span class="dt">errorCount</span><span class="op">:</span> errors<span class="op">.</span><span class="at">length</span> })<span class="op">;</span></span>
+<span id="cb5-128"><a href="#cb5-128" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> <span class="fu">storeValidationErrors</span>(errors<span class="op">,</span> config)<span class="op">;</span></span>
+<span id="cb5-129"><a href="#cb5-129" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-130"><a href="#cb5-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-131"><a href="#cb5-131" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> validatedItems<span class="op">;</span></span>
+<span id="cb5-132"><a href="#cb5-132" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-133"><a href="#cb5-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-134"><a href="#cb5-134" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">enrichWithSalesforceData</span>(item<span class="op">,</span> config) {</span>
+<span id="cb5-135"><a href="#cb5-135" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Find Salesforce item by SKU or external ID</span></span>
+<span id="cb5-136"><a href="#cb5-136" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> itemQuery <span class="op">=</span> <span class="vs">`</span></span>
+<span id="cb5-137"><a href="#cb5-137" aria-hidden="true" tabindex="-1"></a><span class="vs">    SELECT Id, Name, ohfy__SKU__c, ohfy__Quantity_On_Hand__c,</span></span>
+<span id="cb5-138"><a href="#cb5-138" aria-hidden="true" tabindex="-1"></a><span class="vs">           ohfy__Location__c, ohfy__Active__c</span></span>
+<span id="cb5-139"><a href="#cb5-139" aria-hidden="true" tabindex="-1"></a><span class="vs">    FROM ohfy__Item__c</span></span>
+<span id="cb5-140"><a href="#cb5-140" aria-hidden="true" tabindex="-1"></a><span class="vs">    WHERE ohfy__SKU__c = &#39;</span><span class="sc">${</span>item<span class="op">.</span><span class="at">itemCode</span><span class="sc">}</span><span class="vs">&#39;</span></span>
+<span id="cb5-141"><a href="#cb5-141" aria-hidden="true" tabindex="-1"></a><span class="vs">    AND ohfy__Active__c = true</span></span>
+<span id="cb5-142"><a href="#cb5-142" aria-hidden="true" tabindex="-1"></a><span class="vs">    LIMIT 1</span></span>
+<span id="cb5-143"><a href="#cb5-143" aria-hidden="true" tabindex="-1"></a><span class="vs">  `</span><span class="op">;</span></span>
+<span id="cb5-144"><a href="#cb5-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-145"><a href="#cb5-145" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> itemResult <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">query</span>({</span>
+<span id="cb5-146"><a href="#cb5-146" aria-hidden="true" tabindex="-1"></a>    <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb5-147"><a href="#cb5-147" aria-hidden="true" tabindex="-1"></a>    <span class="dt">query</span><span class="op">:</span> itemQuery</span>
+<span id="cb5-148"><a href="#cb5-148" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb5-149"><a href="#cb5-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-150"><a href="#cb5-150" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> {</span>
+<span id="cb5-151"><a href="#cb5-151" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span>item<span class="op">,</span></span>
+<span id="cb5-152"><a href="#cb5-152" aria-hidden="true" tabindex="-1"></a>    <span class="dt">salesforceItem</span><span class="op">:</span> itemResult<span class="op">.</span><span class="at">records</span><span class="op">?.</span>[<span class="dv">0</span>] <span class="op">||</span> <span class="kw">null</span><span class="op">,</span></span>
+<span id="cb5-153"><a href="#cb5-153" aria-hidden="true" tabindex="-1"></a>    <span class="dt">enrichedAt</span><span class="op">:</span> <span class="kw">new</span> <span class="bu">Date</span>()<span class="op">.</span><span class="fu">toISOString</span>()</span>
+<span id="cb5-154"><a href="#cb5-154" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb5-155"><a href="#cb5-155" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-156"><a href="#cb5-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-157"><a href="#cb5-157" aria-hidden="true" tabindex="-1"></a><span class="co">// Phase 3: Depletion Calculations</span></span>
+<span id="cb5-158"><a href="#cb5-158" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">calculateDepletions</span>(validatedData<span class="op">,</span> config<span class="op">,</span> logger) {</span>
+<span id="cb5-159"><a href="#cb5-159" aria-hidden="true" tabindex="-1"></a>  logger<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;Calculating depletions&#39;</span>)<span class="op">;</span></span>
+<span id="cb5-160"><a href="#cb5-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-161"><a href="#cb5-161" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> depletionCalculations <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb5-162"><a href="#cb5-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-163"><a href="#cb5-163" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">const</span> item <span class="kw">of</span> validatedData) {</span>
+<span id="cb5-164"><a href="#cb5-164" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> currentQuantity <span class="op">=</span> <span class="pp">parseFloat</span>(item<span class="op">.</span><span class="at">salesforceItem</span>[<span class="st">&#39;ohfy__Quantity_On_Hand__c&#39;</span>] <span class="op">||</span> <span class="dv">0</span>)<span class="op">;</span></span>
+<span id="cb5-165"><a href="#cb5-165" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> depletionAmount <span class="op">=</span> item<span class="op">.</span><span class="at">depletionAmount</span><span class="op">;</span></span>
+<span id="cb5-166"><a href="#cb5-166" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> newQuantity <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">max</span>(<span class="dv">0</span><span class="op">,</span> currentQuantity <span class="op">-</span> depletionAmount)<span class="op">;</span></span>
+<span id="cb5-167"><a href="#cb5-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-168"><a href="#cb5-168" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> calculation <span class="op">=</span> {</span>
+<span id="cb5-169"><a href="#cb5-169" aria-hidden="true" tabindex="-1"></a>      <span class="dt">itemId</span><span class="op">:</span> item<span class="op">.</span><span class="at">salesforceItem</span><span class="op">.</span><span class="at">Id</span><span class="op">,</span></span>
+<span id="cb5-170"><a href="#cb5-170" aria-hidden="true" tabindex="-1"></a>      <span class="dt">itemCode</span><span class="op">:</span> item<span class="op">.</span><span class="at">itemCode</span><span class="op">,</span></span>
+<span id="cb5-171"><a href="#cb5-171" aria-hidden="true" tabindex="-1"></a>      <span class="dt">currentQuantity</span><span class="op">:</span> currentQuantity<span class="op">,</span></span>
+<span id="cb5-172"><a href="#cb5-172" aria-hidden="true" tabindex="-1"></a>      <span class="dt">depletionAmount</span><span class="op">:</span> depletionAmount<span class="op">,</span></span>
+<span id="cb5-173"><a href="#cb5-173" aria-hidden="true" tabindex="-1"></a>      <span class="dt">newQuantity</span><span class="op">:</span> newQuantity<span class="op">,</span></span>
+<span id="cb5-174"><a href="#cb5-174" aria-hidden="true" tabindex="-1"></a>      <span class="dt">calculatedAt</span><span class="op">:</span> <span class="kw">new</span> <span class="bu">Date</span>()<span class="op">.</span><span class="fu">toISOString</span>()<span class="op">,</span></span>
+<span id="cb5-175"><a href="#cb5-175" aria-hidden="true" tabindex="-1"></a>      <span class="dt">needsUpdate</span><span class="op">:</span> currentQuantity <span class="op">!==</span> newQuantity</span>
+<span id="cb5-176"><a href="#cb5-176" aria-hidden="true" tabindex="-1"></a>    }<span class="op">;</span></span>
+<span id="cb5-177"><a href="#cb5-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-178"><a href="#cb5-178" aria-hidden="true" tabindex="-1"></a>    depletionCalculations<span class="op">.</span><span class="fu">push</span>(calculation)<span class="op">;</span></span>
+<span id="cb5-179"><a href="#cb5-179" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-180"><a href="#cb5-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-181"><a href="#cb5-181" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> depletionCalculations<span class="op">;</span></span>
+<span id="cb5-182"><a href="#cb5-182" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-183"><a href="#cb5-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-184"><a href="#cb5-184" aria-hidden="true" tabindex="-1"></a><span class="co">// Phase 4: Salesforce Updates</span></span>
+<span id="cb5-185"><a href="#cb5-185" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">updateSalesforceInventory</span>(depletionData<span class="op">,</span> config<span class="op">,</span> logger) {</span>
+<span id="cb5-186"><a href="#cb5-186" aria-hidden="true" tabindex="-1"></a>  logger<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;Updating Salesforce inventory&#39;</span>)<span class="op">;</span></span>
+<span id="cb5-187"><a href="#cb5-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-188"><a href="#cb5-188" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> updateRecords <span class="op">=</span> depletionData</span>
+<span id="cb5-189"><a href="#cb5-189" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">filter</span>(calc <span class="kw">=&gt;</span> calc<span class="op">.</span><span class="at">needsUpdate</span>)</span>
+<span id="cb5-190"><a href="#cb5-190" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">map</span>(calc <span class="kw">=&gt;</span> ({</span>
+<span id="cb5-191"><a href="#cb5-191" aria-hidden="true" tabindex="-1"></a>      <span class="dt">Id</span><span class="op">:</span> calc<span class="op">.</span><span class="at">itemId</span><span class="op">,</span></span>
+<span id="cb5-192"><a href="#cb5-192" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;ohfy__Quantity_On_Hand__c&#39;</span><span class="op">:</span> calc<span class="op">.</span><span class="at">newQuantity</span></span>
+<span id="cb5-193"><a href="#cb5-193" aria-hidden="true" tabindex="-1"></a>    }))<span class="op">;</span></span>
+<span id="cb5-194"><a href="#cb5-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-195"><a href="#cb5-195" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (updateRecords<span class="op">.</span><span class="at">length</span> <span class="op">===</span> <span class="dv">0</span>) {</span>
+<span id="cb5-196"><a href="#cb5-196" aria-hidden="true" tabindex="-1"></a>    logger<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;No inventory updates needed&#39;</span>)<span class="op">;</span></span>
+<span id="cb5-197"><a href="#cb5-197" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> { <span class="dt">successful</span><span class="op">:</span> []<span class="op">,</span> <span class="dt">errors</span><span class="op">:</span> [] }<span class="op">;</span></span>
+<span id="cb5-198"><a href="#cb5-198" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-199"><a href="#cb5-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-200"><a href="#cb5-200" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Process updates in batches</span></span>
+<span id="cb5-201"><a href="#cb5-201" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> results <span class="op">=</span> <span class="cf">await</span> <span class="fu">bulkUpdateSalesforce</span>(</span>
+<span id="cb5-202"><a href="#cb5-202" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;ohfy__Item__c&#39;</span><span class="op">,</span></span>
+<span id="cb5-203"><a href="#cb5-203" aria-hidden="true" tabindex="-1"></a>    updateRecords<span class="op">,</span></span>
+<span id="cb5-204"><a href="#cb5-204" aria-hidden="true" tabindex="-1"></a>    config</span>
+<span id="cb5-205"><a href="#cb5-205" aria-hidden="true" tabindex="-1"></a>  )<span class="op">;</span></span>
+<span id="cb5-206"><a href="#cb5-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-207"><a href="#cb5-207" aria-hidden="true" tabindex="-1"></a>  logger<span class="op">.</span><span class="fu">info</span>(<span class="st">&#39;Inventory updates completed&#39;</span><span class="op">,</span> {</span>
+<span id="cb5-208"><a href="#cb5-208" aria-hidden="true" tabindex="-1"></a>    <span class="dt">successful</span><span class="op">:</span> results<span class="op">.</span><span class="at">successful</span><span class="op">.</span><span class="at">length</span><span class="op">,</span></span>
+<span id="cb5-209"><a href="#cb5-209" aria-hidden="true" tabindex="-1"></a>    <span class="dt">errors</span><span class="op">:</span> results<span class="op">.</span><span class="at">errors</span><span class="op">.</span><span class="at">length</span></span>
+<span id="cb5-210"><a href="#cb5-210" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb5-211"><a href="#cb5-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-212"><a href="#cb5-212" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> results<span class="op">;</span></span>
+<span id="cb5-213"><a href="#cb5-213" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-214"><a href="#cb5-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-215"><a href="#cb5-215" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">bulkUpdateSalesforce</span>(sobject<span class="op">,</span> records<span class="op">,</span> config) {</span>
+<span id="cb5-216"><a href="#cb5-216" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> results <span class="op">=</span> { <span class="dt">successful</span><span class="op">:</span> []<span class="op">,</span> <span class="dt">errors</span><span class="op">:</span> [] }<span class="op">;</span></span>
+<span id="cb5-217"><a href="#cb5-217" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> batchSize <span class="op">=</span> <span class="dv">100</span><span class="op">;</span></span>
+<span id="cb5-218"><a href="#cb5-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-219"><a href="#cb5-219" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Process in batches</span></span>
+<span id="cb5-220"><a href="#cb5-220" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">let</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> records<span class="op">.</span><span class="at">length</span><span class="op">;</span> i <span class="op">+=</span> batchSize) {</span>
+<span id="cb5-221"><a href="#cb5-221" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> batch <span class="op">=</span> records<span class="op">.</span><span class="fu">slice</span>(i<span class="op">,</span> i <span class="op">+</span> batchSize)<span class="op">;</span></span>
+<span id="cb5-222"><a href="#cb5-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-223"><a href="#cb5-223" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> {</span>
+<span id="cb5-224"><a href="#cb5-224" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> batchResult <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">batch_update_records</span>({</span>
+<span id="cb5-225"><a href="#cb5-225" aria-hidden="true" tabindex="-1"></a>        <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb5-226"><a href="#cb5-226" aria-hidden="true" tabindex="-1"></a>        <span class="dt">sobject</span><span class="op">:</span> sobject<span class="op">,</span></span>
+<span id="cb5-227"><a href="#cb5-227" aria-hidden="true" tabindex="-1"></a>        <span class="dt">records</span><span class="op">:</span> batch</span>
+<span id="cb5-228"><a href="#cb5-228" aria-hidden="true" tabindex="-1"></a>      })<span class="op">;</span></span>
+<span id="cb5-229"><a href="#cb5-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-230"><a href="#cb5-230" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (batchResult<span class="op">.</span><span class="at">success</span>) {</span>
+<span id="cb5-231"><a href="#cb5-231" aria-hidden="true" tabindex="-1"></a>        results<span class="op">.</span><span class="at">successful</span><span class="op">.</span><span class="fu">push</span>(<span class="op">...</span>batchResult<span class="op">.</span><span class="at">records</span>)<span class="op">;</span></span>
+<span id="cb5-232"><a href="#cb5-232" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb5-233"><a href="#cb5-233" aria-hidden="true" tabindex="-1"></a>        results<span class="op">.</span><span class="at">errors</span><span class="op">.</span><span class="fu">push</span>(<span class="op">...</span>batchResult<span class="op">.</span><span class="at">errors</span>)<span class="op">;</span></span>
+<span id="cb5-234"><a href="#cb5-234" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb5-235"><a href="#cb5-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-236"><a href="#cb5-236" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">catch</span> (error) {</span>
+<span id="cb5-237"><a href="#cb5-237" aria-hidden="true" tabindex="-1"></a>      results<span class="op">.</span><span class="at">errors</span><span class="op">.</span><span class="fu">push</span>({</span>
+<span id="cb5-238"><a href="#cb5-238" aria-hidden="true" tabindex="-1"></a>        <span class="dt">batch</span><span class="op">:</span> i <span class="op">/</span> batchSize<span class="op">,</span></span>
+<span id="cb5-239"><a href="#cb5-239" aria-hidden="true" tabindex="-1"></a>        <span class="dt">error</span><span class="op">:</span> error<span class="op">.</span><span class="at">message</span><span class="op">,</span></span>
+<span id="cb5-240"><a href="#cb5-240" aria-hidden="true" tabindex="-1"></a>        <span class="dt">records</span><span class="op">:</span> batch</span>
+<span id="cb5-241"><a href="#cb5-241" aria-hidden="true" tabindex="-1"></a>      })<span class="op">;</span></span>
+<span id="cb5-242"><a href="#cb5-242" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-243"><a href="#cb5-243" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-244"><a href="#cb5-244" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-245"><a href="#cb5-245" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> results<span class="op">;</span></span>
+<span id="cb5-246"><a href="#cb5-246" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-247"><a href="#cb5-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-248"><a href="#cb5-248" aria-hidden="true" tabindex="-1"></a><span class="co">// Configuration Setup</span></span>
+<span id="cb5-249"><a href="#cb5-249" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">setupVIPDepletionsConfiguration</span>(input) {</span>
+<span id="cb5-250"><a href="#cb5-250" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> {</span>
+<span id="cb5-251"><a href="#cb5-251" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Item configuration (from actual config)</span></span>
+<span id="cb5-252"><a href="#cb5-252" aria-hidden="true" tabindex="-1"></a>    <span class="dt">itm_prefix</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">itm_prefix</span> <span class="op">||</span> <span class="st">&#39;ITM2DA&#39;</span><span class="op">,</span></span>
+<span id="cb5-253"><a href="#cb5-253" aria-hidden="true" tabindex="-1"></a>    <span class="dt">itemIgnoreList</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">itemIgnoreList</span> <span class="op">||</span> [</span>
+<span id="cb5-254"><a href="#cb5-254" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;240032&#39;</span><span class="op">,</span> <span class="st">&#39;240031&#39;</span><span class="op">,</span> <span class="st">&#39;240040&#39;</span><span class="op">,</span> <span class="st">&#39;240041&#39;</span><span class="op">,</span> <span class="st">&#39;240048&#39;</span><span class="op">,</span></span>
+<span id="cb5-255"><a href="#cb5-255" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;HONCRI6416&#39;</span><span class="op">,</span> <span class="st">&#39;CDHC64&#39;</span><span class="op">,</span> <span class="st">&#39;RASP6416&#39;</span><span class="op">,</span> <span class="st">&#39;240043&#39;</span><span class="op">,</span></span>
+<span id="cb5-256"><a href="#cb5-256" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;HON16&#39;</span><span class="op">,</span> <span class="st">&#39;240058&#39;</span><span class="op">,</span> <span class="st">&#39;240064&#39;</span><span class="op">,</span> <span class="st">&#39;RAS016&#39;</span></span>
+<span id="cb5-257"><a href="#cb5-257" aria-hidden="true" tabindex="-1"></a>      <span class="co">// ... full list from actual config</span></span>
+<span id="cb5-258"><a href="#cb5-258" aria-hidden="true" tabindex="-1"></a>    ]<span class="op">,</span></span>
+<span id="cb5-259"><a href="#cb5-259" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-260"><a href="#cb5-260" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Processing settings</span></span>
+<span id="cb5-261"><a href="#cb5-261" aria-hidden="true" tabindex="-1"></a>    <span class="dt">batchSize</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">batchSize</span> <span class="op">||</span> <span class="dv">100</span><span class="op">,</span></span>
+<span id="cb5-262"><a href="#cb5-262" aria-hidden="true" tabindex="-1"></a>    <span class="dt">validateItems</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">validateItems</span> <span class="op">!==</span> <span class="kw">false</span><span class="op">,</span></span>
+<span id="cb5-263"><a href="#cb5-263" aria-hidden="true" tabindex="-1"></a>    <span class="dt">updateInventory</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">updateInventory</span> <span class="op">!==</span> <span class="kw">false</span><span class="op">,</span></span>
+<span id="cb5-264"><a href="#cb5-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-265"><a href="#cb5-265" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Authentication</span></span>
+<span id="cb5-266"><a href="#cb5-266" aria-hidden="true" tabindex="-1"></a>    <span class="dt">authIds</span><span class="op">:</span> {</span>
+<span id="cb5-267"><a href="#cb5-267" aria-hidden="true" tabindex="-1"></a>      <span class="dt">salesforce</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">salesforceAuthId</span></span>
+<span id="cb5-268"><a href="#cb5-268" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb5-269"><a href="#cb5-269" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-270"><a href="#cb5-270" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Error handling</span></span>
+<span id="cb5-271"><a href="#cb5-271" aria-hidden="true" tabindex="-1"></a>    <span class="dt">continueOnError</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">continueOnError</span> <span class="op">!==</span> <span class="kw">false</span><span class="op">,</span></span>
+<span id="cb5-272"><a href="#cb5-272" aria-hidden="true" tabindex="-1"></a>    <span class="dt">logErrors</span><span class="op">:</span> input<span class="op">.</span><span class="at">config</span><span class="op">?.</span><span class="at">logErrors</span> <span class="op">!==</span> <span class="kw">false</span></span>
+<span id="cb5-273"><a href="#cb5-273" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb5-274"><a href="#cb5-274" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+    <hr />
+    <h2 id="benefits-demonstrated">🚀 Benefits Demonstrated</h2>
+    <h3 id="complexity-reduction">Complexity Reduction</h3>
+    <pre><code>EDI Integration:       8 workflows → 1 script connector (87.5% reduction)
+QuickBooks Sync:      22 workflows → 1 script connector (95.5% reduction)
+VIP Depletions:        6 workflows → 1 script connector (83.3% reduction)</code></pre>
+    <h3 id="maintenance-improvement">Maintenance Improvement</h3>
+    <pre><code>Before: Business logic scattered across 20+ script connectors
+After:  All logic in single, searchable, maintainable script
+
+Before: Complex workflow dependencies requiring careful sequencing
+After:  Linear execution with explicit dependencies and error handling
+
+Before: Difficult debugging across multiple workflows
+After:  Single execution context with complete visibility</code></pre>
+    <h3 id="developer-experience-enhancement">Developer Experience
+    Enhancement</h3>
+    <pre><code>Before: Multiple files to understand integration
+After:  Single file with complete business logic
+
+Before: AI development requires context across many workflows
+After:  AI has complete integration context in one place
+
+Before: Changes require coordinating across multiple workflows
+After:  Changes made in single location with unified testing</code></pre>
+    <hr />
+    <h2 id="usage-instructions">📚 Usage Instructions</h2>
+    <h3 id="choose-your-scenario">1. <strong>Choose Your
+    Scenario</strong></h3>
+    <ul>
+    <li><strong>EDI Processing</strong>: Use for document-based
+    integrations with parsing and transformation</li>
+    <li><strong>Accounting Sync</strong>: Use for bidirectional
+    financial data synchronization</li>
+    <li><strong>Data Pipeline</strong>: Use for high-volume data
+    processing with validation</li>
+    </ul>
+    <h3 id="customize-configuration">2. <strong>Customize
+    Configuration</strong></h3>
+    <ul>
+    <li>Copy the configuration setup function</li>
+    <li>Modify field mappings and business rules for your specific use
+    case</li>
+    <li>Add org-specific validation and transformation logic</li>
+    </ul>
+    <h3 id="implement-business-logic">3. <strong>Implement Business
+    Logic</strong></h3>
+    <ul>
+    <li>Copy relevant business logic modules from
+    OHFY_BUSINESS_LOGIC_LIBRARY.md</li>
+    <li>Customize validation and transformation functions</li>
+    <li>Add error handling specific to your integration
+    requirements</li>
+    </ul>
+    <h3 id="test-and-deploy">4. <strong>Test and Deploy</strong></h3>
+    <ul>
+    <li>Use Tray Script Tester for local development and testing</li>
+    <li>Deploy as single Script Connector workflow in Tray</li>
+    <li>Monitor performance and error rates</li>
+    </ul>
+    <hr />
+    <p><strong>Related Guides:</strong> - <strong><a
+    href="./SCRIPT_CONSOLIDATION_PATTERNS.md">Script Consolidation
+    Patterns</a></strong> - Base templates used in these examples -
+    <strong><a href="./OHFY_BUSINESS_LOGIC_LIBRARY.md">OHFY Business
+    Logic Library</a></strong> - Business logic modules referenced in
+    examples - <strong><a
+    href="./INTEGRATION_MIGRATION_GUIDE.md">Integration Migration
+    Guide</a></strong> - Step-by-step migration process for your own
+    integrations - <strong><a href="./TRAY_CONNECTOR_OPERATIONS.md">Tray
+    Connector Operations</a></strong> - API operations used in these
+    examples</p>
+  </div>
+
+  <div class="brand-footer">
+    <hr>
+    <p>Ohanafy — The AI-Powered Operating System for Beverage</p>
+  </div>
+</body>
+</html>

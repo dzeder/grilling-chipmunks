@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> — Ohanafy Pricing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100;400;700&display=swap" rel="stylesheet">
+  <style>
+    /* === Ohanafy 2025 Brand Styles === */
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --true-black: #000000;
+      --true-white: #FFFFFF;
+      --mellow: #E4F223;
+      --cork: #F4F2F0;
+      --dark-denim: #4A5F80;
+      --light-denim: #B1C7EB;
+      --dark-grey: #545454;
+    }
+
+    body {
+      font-family: 'Geist', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.6;
+      color: var(--true-black);
+      background: var(--cork);
+    }
+
+    /* --- Header Banner --- */
+    .brand-header {
+      width: 100%;
+      background: var(--true-black);
+      padding: 2.5rem 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-header::after {
+      content: '';
+      position: absolute;
+      right: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 120px;
+      height: 120px;
+      background-image: url('https://40881726.fs1.hubspotusercontent-na1.net/hubfs/40881726/Brand%20Assets/Ohanafy%20Black%20Emblem.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0.3;
+      filter: invert(1);
+    }
+
+    .brand-header .tagline {
+      font-family: 'Geist', system-ui, sans-serif;
+      font-weight: 700;
+      font-size: 1.75rem;
+      letter-spacing: 0.02em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-header .tagline .highlight {
+      color: var(--mellow);
+    }
+
+    .brand-header .tagline .brand-name {
+      color: var(--true-white);
+    }
+
+    /* --- Main Content --- */
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+      background: var(--true-white);
+      min-height: calc(100vh - 200px);
+    }
+
+    .doc-title {
+      font-size: 36px;
+      font-weight: 100;
+      color: var(--true-black);
+      margin-bottom: 0.5rem;
+      border-bottom: 3px solid var(--dark-denim);
+      padding-bottom: 1rem;
+    }
+
+    /* --- Typography --- */
+    h1 { font-size: 24px; font-weight: 400; color: var(--true-black); margin: 2rem 0 1rem; }
+    h2 { font-size: 18px; font-weight: 700; color: var(--dark-denim); margin: 1.75rem 0 0.75rem; }
+    h3 { font-size: 16px; font-weight: 700; color: var(--dark-denim); margin: 1.5rem 0 0.5rem; }
+    p  { margin: 0 0 1rem; }
+    a  { color: var(--dark-denim); text-decoration: underline; }
+    a:hover { color: var(--true-black); }
+
+    ul, ol { margin: 0 0 1rem 1.5rem; }
+    li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Geist Mono', ui-monospace, monospace;
+      font-size: 0.9em;
+      background: var(--cork);
+      padding: 0.15em 0.4em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: var(--cork);
+      padding: 1rem 1.25rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 0 0 1rem;
+      border-left: 3px solid var(--dark-denim);
+    }
+
+    pre code { background: none; padding: 0; }
+
+    blockquote {
+      border-left: 4px solid var(--mellow);
+      padding: 0.75rem 1.25rem;
+      margin: 0 0 1rem;
+      background: var(--cork);
+      color: var(--dark-grey);
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: var(--cork);
+      margin: 2rem 0;
+    }
+
+    /* --- Tables --- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 15px;
+    }
+
+    thead th {
+      background: var(--dark-denim);
+      color: var(--true-white);
+      font-weight: 700;
+      text-align: left;
+      padding: 0.65rem 0.9rem;
+      border: 1px solid var(--dark-denim);
+    }
+
+    tbody td {
+      background: var(--cork);
+      color: var(--true-black);
+      padding: 0.55rem 0.9rem;
+      border: 1px solid var(--dark-denim);
+    }
+
+    tbody tr:hover td {
+      background: var(--light-denim);
+    }
+
+    /* --- Utility --- */
+    .time-tracking {
+      background: var(--cork);
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      border-left: 3px solid var(--dark-denim);
+    }
+
+    mark, .highlight-inline {
+      background: var(--mellow);
+      color: var(--true-black);
+      padding: 0.05em 0.25em;
+      border-radius: 2px;
+    }
+
+    /* --- Footer --- */
+    .brand-footer {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem;
+      text-align: center;
+      color: var(--dark-grey);
+      font-size: 13px;
+    }
+
+    .brand-footer hr {
+      background: var(--dark-denim);
+      margin-bottom: 1rem;
+    }
+
+    /* --- Doc Nav Bar --- */
+    .doc-nav {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--dark-denim);
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+
+    .doc-nav a {
+      color: var(--true-white);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 400;
+      padding: 0.6rem 0.85rem;
+      white-space: nowrap;
+      opacity: 0.75;
+      transition: opacity 0.15s, background 0.15s;
+      border-bottom: 2px solid transparent;
+    }
+
+    .doc-nav a:hover {
+      opacity: 1;
+      background: rgba(255,255,255,0.08);
+      color: var(--true-white);
+    }
+
+    .doc-nav a.current {
+      opacity: 1;
+      border-bottom-color: var(--mellow);
+      font-weight: 700;
+    }
+
+    .doc-nav .nav-demo {
+      font-weight: 700;
+      opacity: 1;
+      margin-right: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    /* --- Print --- */
+    @media print {
+      body { background: white; }
+      .content { box-shadow: none; padding: 0; }
+      .brand-header { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .doc-nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="brand-header">
+    <div class="tagline">
+      <span class="highlight">Modern beverage runs on</span>
+      <span class="brand-name">OHANAFY.</span>
+    </div>
+  </div>
+
+  <div class="doc-nav" id="docNav">
+    <a class="nav-demo" id="navDemo" href="#">&#8592; Demo App</a>
+    <a data-doc="promotion-pricing-model" href="#">Pricing Model</a>
+    <a data-doc="conflict-detection" href="#">Conflict Detection</a>
+    <a data-doc="duplicate-pricing-group" href="#">Duplicate Group</a>
+    <a data-doc="test-cases" href="#">Test Cases</a>
+    <a data-doc="database-design" href="#">Database Design</a>
+  </div>
+  <script>
+  (function() {
+    var path = window.location.pathname;
+    var segments = path.split('/');
+    var docsIdx = -1;
+    for (var i = segments.length - 1; i >= 0; i--) {
+      if (segments[i] === 'docs') { docsIdx = i; break; }
+    }
+    var base;
+    if (docsIdx !== -1) {
+      var depth = segments.length - docsIdx - 2;
+      base = '';
+      for (var j = 0; j <= depth; j++) base += '../';
+    } else {
+      base = '';
+    }
+    document.getElementById('navDemo').href = base + 'demo/index.html';
+    var docs = {
+      'promotion-pricing-model': 'docs/promotion-pricing-model.html',
+      'conflict-detection':      'docs/conflict-detection.html',
+      'duplicate-pricing-group': 'docs/duplicate-pricing-group.html',
+      'test-cases':              'docs/test-cases.html',
+      'database-design':         'docs/technical/database-design.html'
+    };
+    var current = path.split('/').pop().replace('.html', '');
+    var links = document.querySelectorAll('#docNav a[data-doc]');
+    for (var i = 0; i < links.length; i++) {
+      var key = links[i].getAttribute('data-doc');
+      links[i].href = base + docs[key];
+      if (key === current) links[i].classList.add('current');
+    }
+  })();
+  </script>
+
+  <div class="content">
+    <div class="doc-title"></div>
+    <h1 id="ohfy-integration-master-guide">OHFY Integration Master
+    Guide</h1>
+    <p><strong>The Complete Guide to Building Consolidated OHFY Platform
+    Integrations</strong></p>
+    <hr />
+    <h2 id="quick-start-single-script-integration-pattern">🚀 Quick
+    Start: Single Script Integration Pattern</h2>
+    <h3 id="new-architecture-one-script-rules-all">New Architecture: One
+    Script Rules All</h3>
+    <pre><code>External Trigger → Master Script Connector → Multiple API Calls → OHFY Platform</code></pre>
+    <p><strong>Replace this complexity:</strong> - 8-22 scattered
+    workflows - 20+ script connectors with fragmented logic -
+    Cross-workflow dependencies and state management</p>
+    <p><strong>With this simplicity:</strong> - 1 comprehensive Script
+    Connector per integration - Complete business logic in one
+    maintainable place - All API orchestration and error handling
+    unified</p>
+    <hr />
+    <h2 id="integration-checklist-5-minute-setup">📋 Integration
+    Checklist (5-Minute Setup)</h2>
+    <h3 id="pre-integration-requirements">✅ Pre-Integration
+    Requirements</h3>
+    <ul class="task-list">
+    <li><label><input type="checkbox" /><strong>OHFY Org
+    Access</strong>: Salesforce org with OHFY-Core package
+    installed</label></li>
+    <li><label><input type="checkbox" /><strong>Tray
+    Authentication</strong>: AuthId configured for target Salesforce
+    org</label></li>
+    <li><label><input type="checkbox" /><strong>External
+    System</strong>: API credentials for source/destination
+    system</label></li>
+    <li><label><input type="checkbox" /><strong>Business
+    Requirements</strong>: Clear understanding of data flow and
+    transformation rules</label></li>
+    </ul>
+    <h3 id="development-resources">✅ Development Resources</h3>
+    <ul class="task-list">
+    <li><label><input type="checkbox" /><strong>Script
+    Templates</strong>: Choose from consolidated patterns (EDI,
+    Accounting, Data Sync)</label></li>
+    <li><label><input type="checkbox" /><strong>API Schemas</strong>:
+    Reference Tray connector operation schemas</label></li>
+    <li><label><input type="checkbox" /><strong>OHFY Business
+    Logic</strong>: Leverage pre-built validation and transformation
+    modules</label></li>
+    <li><label><input type="checkbox" /><strong>Field Mappings</strong>:
+    Use org-specific configuration matrices</label></li>
+    </ul>
+    <h3 id="testing-and-deployment">✅ Testing and Deployment</h3>
+    <ul class="task-list">
+    <li><label><input type="checkbox" /><strong>CAPI Testing</strong>:
+    Validate connector operations using command-line tool</label></li>
+    <li><label><input type="checkbox" /><strong>Integration
+    Testing</strong>: Test complete end-to-end flow</label></li>
+    <li><label><input type="checkbox" /><strong>Error Handling</strong>:
+    Verify all failure scenarios and recovery logic</label></li>
+    <li><label><input type="checkbox" /><strong>Performance
+    Validation</strong>: Confirm bulk operation efficiency</label></li>
+    </ul>
+    <hr />
+    <h2 id="architecture-overview">🏗️ Architecture Overview</h2>
+    <h3 id="three-layer-integration-foundation">Three-Layer Integration
+    Foundation</h3>
+    <h4 id="layer-1-tray-connector-operations"><strong>Layer 1: Tray
+    Connector Operations</strong></h4>
+    <div class="sourceCode" id="cb2"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Pure connector operations with schemas</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> salesforceResult <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">create_record</span>({</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">authId</span><span class="op">:</span> <span class="st">&quot;your-sf-auth-id&quot;</span><span class="op">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">sobject</span><span class="op">:</span> <span class="st">&quot;ohfy__Order__c&quot;</span><span class="op">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">fields</span><span class="op">:</span> transformedData</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+    <h4 id="layer-2-ohfy-business-logic"><strong>Layer 2: OHFY Business
+    Logic</strong></h4>
+    <div class="sourceCode" id="cb3"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Reusable business logic modules</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> orderData <span class="op">=</span> <span class="cf">await</span> OHFYBusinessLogic<span class="op">.</span><span class="fu">validateOrderRequirements</span>(inputData)<span class="op">;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> transformedFields <span class="op">=</span> OHFYBusinessLogic<span class="op">.</span><span class="fu">mapExternalToOHFY</span>(orderData)<span class="op">;</span></span></code></pre></div>
+    <h4 id="layer-3-org-specific-configuration"><strong>Layer 3:
+    Org-Specific Configuration</strong></h4>
+    <div class="sourceCode" id="cb4"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Environment-specific field mappings</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> fieldMapping <span class="op">=</span> OrgConfig<span class="op">.</span><span class="fu">getFieldMapping</span>(<span class="st">&#39;distro-production&#39;</span><span class="op">,</span> <span class="st">&#39;Order&#39;</span>)<span class="op">;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> picklistValues <span class="op">=</span> OrgConfig<span class="op">.</span><span class="fu">getPicklistValues</span>(<span class="st">&#39;ohfy__Status__c&#39;</span>)<span class="op">;</span></span></code></pre></div>
+    <h3 id="integration-flow-pattern">Integration Flow Pattern</h3>
+    <div class="sourceCode" id="cb5"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>exports<span class="op">.</span><span class="at">step</span> <span class="op">=</span> <span class="kw">async</span> <span class="kw">function</span>(input<span class="op">,</span> fileInput) {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">try</span> {</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 1. Extract and validate input data</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> sourceData <span class="op">=</span> <span class="cf">await</span> <span class="fu">extractSourceData</span>(input)<span class="op">;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 2. Apply OHFY business logic and validation</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> validatedData <span class="op">=</span> <span class="cf">await</span> <span class="fu">applyBusinessRules</span>(sourceData)<span class="op">;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 3. Transform to OHFY format using org config</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> ohfyRecords <span class="op">=</span> <span class="cf">await</span> <span class="fu">transformToOHFY</span>(validatedData)<span class="op">;</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 4. Execute Salesforce operations</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> results <span class="op">=</span> <span class="cf">await</span> <span class="fu">executeSalesforceOperations</span>(ohfyRecords)<span class="op">;</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 5. Handle results and cleanup</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="cf">await</span> <span class="fu">processResults</span>(results)<span class="op">;</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">catch</span> (error) {</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="cf">await</span> <span class="fu">handleIntegrationError</span>(error)<span class="op">;</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <hr />
+    <h2 id="developer-resources">📚 Developer Resources</h2>
+    <h3 id="integration-pattern-libraries">Integration Pattern
+    Libraries</h3>
+    <h4 id="core-patterns"><strong>Core Patterns</strong></h4>
+    <ul>
+    <li><strong><a href="./SCRIPT_CONSOLIDATION_PATTERNS.md">Script
+    Consolidation Patterns</a></strong> - Complete JavaScript templates
+    for common integrations</li>
+    <li><strong><a href="./TRAY_CONNECTOR_OPERATIONS.md">Tray Connector
+    Operations</a></strong> - Full connector schema reference and
+    examples</li>
+    <li><strong><a href="./OHFY_BUSINESS_LOGIC_LIBRARY.md">OHFY Business
+    Logic Library</a></strong> - Reusable validation and transformation
+    modules</li>
+    </ul>
+    <h4 id="configuration-references"><strong>Configuration
+    References</strong></h4>
+    <ul>
+    <li><strong><a href="./ORG_CONFIGURATION_MATRIX.md">Org
+    Configuration Matrix</a></strong> - Environment-specific field
+    mappings and constraints</li>
+    <li><strong><a href="./INTEGRATION_MIGRATION_GUIDE.md">Integration
+    Migration Guide</a></strong> - Convert existing multi-workflow
+    integrations</li>
+    </ul>
+    <h4 id="complete-examples"><strong>Complete Examples</strong></h4>
+    <ul>
+    <li><strong><a
+    href="./CONSOLIDATED_SCENARIO_EXAMPLES.md">Consolidated Scenario
+    Examples</a></strong> - End-to-end implementations for EDI,
+    Accounting, and Data Sync</li>
+    </ul>
+    <h3 id="command-line-tools">Command-Line Tools</h3>
+    <h4 id="capi-connector-api-tool"><strong>CAPI (Connector API)
+    Tool</strong></h4>
+    <div class="sourceCode" id="cb6"><pre
+    class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Schema discovery</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> capi.js schema salesforce create_record</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> capi.js schema quickbooks create_customer</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Live testing</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> capi.js salesforce create_record <span class="st">&#39;{&quot;sobject&quot;:&quot;ohfy__Order__c&quot;,&quot;fields&quot;:{&quot;Name&quot;:&quot;Test Order&quot;}}&#39;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Connector catalog</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> capi.js list                    <span class="co"># All available connectors</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> capi.js info salesforce         <span class="co"># Salesforce connector details</span></span></code></pre></div>
+    <h4 id="tray-script-tester"><strong>Tray Script Tester</strong></h4>
+    <div class="sourceCode" id="cb7"><pre
+    class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test script logic locally</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install                          <span class="co"># Install dependencies</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> run.js                         <span class="co"># Test script.js with input.json</span></span></code></pre></div>
+    <hr />
+    <h2 id="integration-types-and-patterns">🎯 Integration Types and
+    Patterns</h2>
+    <h3 id="edi-document-processing">1. <strong>EDI Document
+    Processing</strong></h3>
+    <p><strong>Single Script Pattern</strong>: Process 810/856 documents
+    with complete business logic</p>
+    <div class="sourceCode" id="cb8"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Handles: Document parsing → Validation → OHFY transformation → Salesforce sync</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Replaces: 8 separate workflows with 22 script connectors</span></span></code></pre></div>
+    <h3 id="accounting-system-sync">2. <strong>Accounting System
+    Sync</strong></h3>
+    <p><strong>Single Script Pattern</strong>: Complete QuickBooks ↔︎
+    Salesforce synchronization</p>
+    <div class="sourceCode" id="cb9"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Handles: Data extraction → Mapping → Validation → Bidirectional sync → Reconciliation</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Replaces: 22 workflows with scattered business logic</span></span></code></pre></div>
+    <h3 id="real-time-data-pipeline">3. <strong>Real-time Data
+    Pipeline</strong></h3>
+    <p><strong>Single Script Pattern</strong>: External system → OHFY
+    transformation → Multiple destinations</p>
+    <div class="sourceCode" id="cb10"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Handles: Webhook processing → Business rules → Parallel updates → Status reporting</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Replaces: Multiple workflows with complex dependencies</span></span></code></pre></div>
+    <h3 id="batch-data-synchronization">4. <strong>Batch Data
+    Synchronization</strong></h3>
+    <p><strong>Single Script Pattern</strong>: Scheduled bulk operations
+    with comprehensive error handling</p>
+    <div class="sourceCode" id="cb11"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Handles: Data extraction → Bulk validation → Transformation → Batch upload → Reconciliation</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Replaces: Nested loops across multiple workflows</span></span></code></pre></div>
+    <hr />
+    <h2 id="development-workflow">🛠️ Development Workflow</h2>
+    <h3 id="choose-integration-pattern">1. <strong>Choose Integration
+    Pattern</strong></h3>
+    <ul>
+    <li>Review <strong><a
+    href="./CONSOLIDATED_SCENARIO_EXAMPLES.md">Consolidated Scenario
+    Examples</a></strong> for similar use cases</li>
+    <li>Select appropriate base template from <strong><a
+    href="./SCRIPT_CONSOLIDATION_PATTERNS.md">Script Consolidation
+    Patterns</a></strong></li>
+    </ul>
+    <h3 id="configure-business-logic">2. <strong>Configure Business
+    Logic</strong></h3>
+    <ul>
+    <li>Import required modules from <strong><a
+    href="./OHFY_BUSINESS_LOGIC_LIBRARY.md">OHFY Business Logic
+    Library</a></strong></li>
+    <li>Apply org-specific configurations from <strong><a
+    href="./ORG_CONFIGURATION_MATRIX.md">Org Configuration
+    Matrix</a></strong></li>
+    </ul>
+    <h3 id="implement-and-test">3. <strong>Implement and
+    Test</strong></h3>
+    <ul>
+    <li>Use <strong>CAPI tool</strong> for connector operation
+    testing</li>
+    <li>Test complete integration flow with <strong>Tray Script
+    Tester</strong></li>
+    <li>Validate against <strong>OHFY field requirements</strong> and
+    <strong>org constraints</strong></li>
+    </ul>
+    <h3 id="deploy-and-monitor">4. <strong>Deploy and
+    Monitor</strong></h3>
+    <ul>
+    <li>Deploy single Script Connector workflow to Tray</li>
+    <li>Monitor execution through Tray dashboard</li>
+    <li>Use consolidated error handling for troubleshooting</li>
+    </ul>
+    <hr />
+    <h2 id="migration-from-existing-integrations">🔧 Migration from
+    Existing Integrations</h2>
+    <h3 id="assessment-questions">Assessment Questions</h3>
+    <ul>
+    <li><strong>How many workflows</strong> does your current
+    integration use?</li>
+    <li><strong>Where is business logic scattered</strong> across script
+    connectors?</li>
+    <li><strong>What external systems</strong> are involved in the
+    integration?</li>
+    <li><strong>What OHFY objects</strong> are created/updated in the
+    process?</li>
+    </ul>
+    <h3 id="migration-steps">Migration Steps</h3>
+    <ol type="1">
+    <li><strong>Analyze Current Integration</strong> - Map all workflows
+    and extract business logic</li>
+    <li><strong>Choose Consolidation Pattern</strong> - Select
+    appropriate single-script template</li>
+    <li><strong>Extract and Combine Logic</strong> - Merge scattered
+    scripts into unified implementation</li>
+    <li><strong>Test and Validate</strong> - Ensure all functionality is
+    preserved in consolidated form</li>
+    <li><strong>Deploy and Monitor</strong> - Replace multi-workflow
+    with single consolidated workflow</li>
+    </ol>
+    <p><strong>Detailed migration instructions</strong>: <strong><a
+    href="./INTEGRATION_MIGRATION_GUIDE.md">Integration Migration
+    Guide</a></strong></p>
+    <hr />
+    <h2 id="common-pitfalls-and-solutions">🚨 Common Pitfalls and
+    Solutions</h2>
+    <h3
+    id="pitfall-trying-to-preserve-existing-multi-workflow-structure"><strong>Pitfall</strong>:
+    Trying to preserve existing multi-workflow structure</h3>
+    <p><strong>Solution</strong>: Embrace consolidation - all logic
+    should be in one script for maintainability</p>
+    <h3
+    id="pitfall-mixing-authentication-patterns-across-connectors"><strong>Pitfall</strong>:
+    Mixing authentication patterns across connectors</h3>
+    <p><strong>Solution</strong>: Use consistent AuthId patterns from
+    <strong><a href="./TRAY_CONNECTOR_OPERATIONS.md">Tray Connector
+    Operations</a></strong></p>
+    <h3
+    id="pitfall-hardcoding-org-specific-values-in-scripts"><strong>Pitfall</strong>:
+    Hardcoding org-specific values in scripts</h3>
+    <p><strong>Solution</strong>: Use configuration matrices from
+    <strong><a href="./ORG_CONFIGURATION_MATRIX.md">Org Configuration
+    Matrix</a></strong></p>
+    <h3
+    id="pitfall-insufficient-error-handling-in-consolidated-scripts"><strong>Pitfall</strong>:
+    Insufficient error handling in consolidated scripts</h3>
+    <p><strong>Solution</strong>: Implement comprehensive error handling
+    patterns from <strong><a
+    href="./SCRIPT_CONSOLIDATION_PATTERNS.md">Script Consolidation
+    Patterns</a></strong></p>
+    <hr />
+    <h2 id="support-and-resources">📞 Support and Resources</h2>
+    <h3 id="documentation-navigation"><strong>Documentation
+    Navigation</strong></h3>
+    <ul>
+    <li><strong>New to OHFY Integration?</strong> → Start with
+    <strong><a href="./SCRIPT_CONSOLIDATION_PATTERNS.md">Script
+    Consolidation Patterns</a></strong></li>
+    <li><strong>Need API Reference?</strong> → Check <strong><a
+    href="./TRAY_CONNECTOR_OPERATIONS.md">Tray Connector
+    Operations</a></strong></li>
+    <li><strong>Looking for Business Logic?</strong> → Browse <strong><a
+    href="./OHFY_BUSINESS_LOGIC_LIBRARY.md">OHFY Business Logic
+    Library</a></strong></li>
+    <li><strong>Environment-Specific Issues?</strong> → Reference
+    <strong><a href="./ORG_CONFIGURATION_MATRIX.md">Org Configuration
+    Matrix</a></strong></li>
+    <li><strong>Migrating Existing Integration?</strong> → Follow
+    <strong><a href="./INTEGRATION_MIGRATION_GUIDE.md">Integration
+    Migration Guide</a></strong></li>
+    </ul>
+    <h3 id="testing-and-validation-tools"><strong>Testing and Validation
+    Tools</strong></h3>
+    <ul>
+    <li><strong>CAPI Tool</strong>:
+    <code>/Integrations/04-utilities/tray-connector-explorer/trayConnectorExplorer/</code></li>
+    <li><strong>Script Tester</strong>: Same directory, use for local
+    JavaScript testing</li>
+    <li><strong>Salesforce Integration Framework</strong>:
+    <code>/SalesforceIntegrationFramework/</code> for advanced
+    patterns</li>
+    </ul>
+    <h3 id="example-code-and-templates"><strong>Example Code and
+    Templates</strong></h3>
+    <ul>
+    <li><strong>Working Integrations</strong>:
+    <code>/Integrations/01-tray/Embedded/</code> for reference
+    (multi-workflow examples)</li>
+    <li><strong>OHFY-Core Source</strong>:
+    <code>/github-repos/OHFY-Core/</code> for business logic
+    understanding</li>
+    <li><strong>Consolidated Examples</strong>: <strong><a
+    href="./CONSOLIDATED_SCENARIO_EXAMPLES.md">Consolidated Scenario
+    Examples</a></strong> for complete implementations</li>
+    </ul>
+    <hr />
+    <p><strong>🎯 Goal</strong>: Transform complex, distributed
+    integration architectures into streamlined, maintainable
+    single-script solutions that retain all functionality while
+    dramatically simplifying development, testing, and maintenance.</p>
+    <p><strong>Next Step</strong>: Choose your integration type and dive
+    into <strong><a href="./SCRIPT_CONSOLIDATION_PATTERNS.md">Script
+    Consolidation Patterns</a></strong> to get started!</p>
+  </div>
+
+  <div class="brand-footer">
+    <hr>
+    <p>Ohanafy — The AI-Powered Operating System for Beverage</p>
+  </div>
+</body>
+</html>

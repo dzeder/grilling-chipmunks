@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> — Ohanafy Pricing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100;400;700&display=swap" rel="stylesheet">
+  <style>
+    /* === Ohanafy 2025 Brand Styles === */
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --true-black: #000000;
+      --true-white: #FFFFFF;
+      --mellow: #E4F223;
+      --cork: #F4F2F0;
+      --dark-denim: #4A5F80;
+      --light-denim: #B1C7EB;
+      --dark-grey: #545454;
+    }
+
+    body {
+      font-family: 'Geist', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.6;
+      color: var(--true-black);
+      background: var(--cork);
+    }
+
+    /* --- Header Banner --- */
+    .brand-header {
+      width: 100%;
+      background: var(--true-black);
+      padding: 2.5rem 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-header::after {
+      content: '';
+      position: absolute;
+      right: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 120px;
+      height: 120px;
+      background-image: url('https://40881726.fs1.hubspotusercontent-na1.net/hubfs/40881726/Brand%20Assets/Ohanafy%20Black%20Emblem.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0.3;
+      filter: invert(1);
+    }
+
+    .brand-header .tagline {
+      font-family: 'Geist', system-ui, sans-serif;
+      font-weight: 700;
+      font-size: 1.75rem;
+      letter-spacing: 0.02em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-header .tagline .highlight {
+      color: var(--mellow);
+    }
+
+    .brand-header .tagline .brand-name {
+      color: var(--true-white);
+    }
+
+    /* --- Main Content --- */
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+      background: var(--true-white);
+      min-height: calc(100vh - 200px);
+    }
+
+    .doc-title {
+      font-size: 36px;
+      font-weight: 100;
+      color: var(--true-black);
+      margin-bottom: 0.5rem;
+      border-bottom: 3px solid var(--dark-denim);
+      padding-bottom: 1rem;
+    }
+
+    /* --- Typography --- */
+    h1 { font-size: 24px; font-weight: 400; color: var(--true-black); margin: 2rem 0 1rem; }
+    h2 { font-size: 18px; font-weight: 700; color: var(--dark-denim); margin: 1.75rem 0 0.75rem; }
+    h3 { font-size: 16px; font-weight: 700; color: var(--dark-denim); margin: 1.5rem 0 0.5rem; }
+    p  { margin: 0 0 1rem; }
+    a  { color: var(--dark-denim); text-decoration: underline; }
+    a:hover { color: var(--true-black); }
+
+    ul, ol { margin: 0 0 1rem 1.5rem; }
+    li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Geist Mono', ui-monospace, monospace;
+      font-size: 0.9em;
+      background: var(--cork);
+      padding: 0.15em 0.4em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: var(--cork);
+      padding: 1rem 1.25rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 0 0 1rem;
+      border-left: 3px solid var(--dark-denim);
+    }
+
+    pre code { background: none; padding: 0; }
+
+    blockquote {
+      border-left: 4px solid var(--mellow);
+      padding: 0.75rem 1.25rem;
+      margin: 0 0 1rem;
+      background: var(--cork);
+      color: var(--dark-grey);
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: var(--cork);
+      margin: 2rem 0;
+    }
+
+    /* --- Tables --- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 15px;
+    }
+
+    thead th {
+      background: var(--dark-denim);
+      color: var(--true-white);
+      font-weight: 700;
+      text-align: left;
+      padding: 0.65rem 0.9rem;
+      border: 1px solid var(--dark-denim);
+    }
+
+    tbody td {
+      background: var(--cork);
+      color: var(--true-black);
+      padding: 0.55rem 0.9rem;
+      border: 1px solid var(--dark-denim);
+    }
+
+    tbody tr:hover td {
+      background: var(--light-denim);
+    }
+
+    /* --- Utility --- */
+    .time-tracking {
+      background: var(--cork);
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      border-left: 3px solid var(--dark-denim);
+    }
+
+    mark, .highlight-inline {
+      background: var(--mellow);
+      color: var(--true-black);
+      padding: 0.05em 0.25em;
+      border-radius: 2px;
+    }
+
+    /* --- Footer --- */
+    .brand-footer {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem;
+      text-align: center;
+      color: var(--dark-grey);
+      font-size: 13px;
+    }
+
+    .brand-footer hr {
+      background: var(--dark-denim);
+      margin-bottom: 1rem;
+    }
+
+    /* --- Doc Nav Bar --- */
+    .doc-nav {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--dark-denim);
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+
+    .doc-nav a {
+      color: var(--true-white);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 400;
+      padding: 0.6rem 0.85rem;
+      white-space: nowrap;
+      opacity: 0.75;
+      transition: opacity 0.15s, background 0.15s;
+      border-bottom: 2px solid transparent;
+    }
+
+    .doc-nav a:hover {
+      opacity: 1;
+      background: rgba(255,255,255,0.08);
+      color: var(--true-white);
+    }
+
+    .doc-nav a.current {
+      opacity: 1;
+      border-bottom-color: var(--mellow);
+      font-weight: 700;
+    }
+
+    .doc-nav .nav-demo {
+      font-weight: 700;
+      opacity: 1;
+      margin-right: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    /* --- Print --- */
+    @media print {
+      body { background: white; }
+      .content { box-shadow: none; padding: 0; }
+      .brand-header { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .doc-nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="brand-header">
+    <div class="tagline">
+      <span class="highlight">Modern beverage runs on</span>
+      <span class="brand-name">OHANAFY.</span>
+    </div>
+  </div>
+
+  <div class="doc-nav" id="docNav">
+    <a class="nav-demo" id="navDemo" href="#">&#8592; Demo App</a>
+    <a data-doc="promotion-pricing-model" href="#">Pricing Model</a>
+    <a data-doc="conflict-detection" href="#">Conflict Detection</a>
+    <a data-doc="duplicate-pricing-group" href="#">Duplicate Group</a>
+    <a data-doc="test-cases" href="#">Test Cases</a>
+    <a data-doc="database-design" href="#">Database Design</a>
+  </div>
+  <script>
+  (function() {
+    var path = window.location.pathname;
+    var segments = path.split('/');
+    var docsIdx = -1;
+    for (var i = segments.length - 1; i >= 0; i--) {
+      if (segments[i] === 'docs') { docsIdx = i; break; }
+    }
+    var base;
+    if (docsIdx !== -1) {
+      var depth = segments.length - docsIdx - 2;
+      base = '';
+      for (var j = 0; j <= depth; j++) base += '../';
+    } else {
+      base = '';
+    }
+    document.getElementById('navDemo').href = base + 'demo/index.html';
+    var docs = {
+      'promotion-pricing-model': 'docs/promotion-pricing-model.html',
+      'conflict-detection':      'docs/conflict-detection.html',
+      'duplicate-pricing-group': 'docs/duplicate-pricing-group.html',
+      'test-cases':              'docs/test-cases.html',
+      'database-design':         'docs/technical/database-design.html'
+    };
+    var current = path.split('/').pop().replace('.html', '');
+    var links = document.querySelectorAll('#docNav a[data-doc]');
+    for (var i = 0; i < links.length; i++) {
+      var key = links[i].getAttribute('data-doc');
+      links[i].href = base + docs[key];
+      if (key === current) links[i].classList.add('current');
+    }
+  })();
+  </script>
+
+  <div class="content">
+    <div class="doc-title"></div>
+    <h1 id="tray-connector-operations-reference">Tray Connector
+    Operations Reference</h1>
+    <p><strong>Complete Salesforce and External System Connector Schemas
+    for OHFY Integrations</strong></p>
+    <hr />
+    <h2 id="salesforce-connector-v8.6">🔧 Salesforce Connector
+    (v8.6)</h2>
+    <h3 id="authentication-configuration">Authentication
+    Configuration</h3>
+    <div class="sourceCode" id="cb1"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// AuthId is managed by Tray - reference in connector calls</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> authConfig <span class="op">=</span> {</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">authId</span><span class="op">:</span> <span class="st">&quot;your-salesforce-auth-id&quot;</span><span class="op">,</span> <span class="co">// Configured in Tray dashboard</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">// No manual authentication handling required</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <h3 id="core-crud-operations">Core CRUD Operations</h3>
+    <h4 id="create-record"><strong>Create Record</strong></h4>
+    <div class="sourceCode" id="cb2"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Operation: create_record</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> result <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">create_record</span>({</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">sobject</span><span class="op">:</span> <span class="st">&quot;ohfy__Order__c&quot;</span><span class="op">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">fields</span><span class="op">:</span> {</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Customer__c&quot;</span><span class="op">:</span> <span class="st">&quot;003XX000004TMM2&quot;</span><span class="op">,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Order_Date__c&quot;</span><span class="op">:</span> <span class="st">&quot;2024-01-15&quot;</span><span class="op">,</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Status__c&quot;</span><span class="op">:</span> <span class="st">&quot;New&quot;</span><span class="op">,</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Sales_Rep__c&quot;</span><span class="op">:</span> <span class="st">&quot;005XX000001ABC1&quot;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">// Response Format:</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">// {</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">//   id: &quot;a01XX000007ABC1&quot;,</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">//   success: true,</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">//   errors: []</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">// }</span></span></code></pre></div>
+    <h4 id="update-record"><strong>Update Record</strong></h4>
+    <div class="sourceCode" id="cb3"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Operation: update_record</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> result <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">update_record</span>({</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">sobject</span><span class="op">:</span> <span class="st">&quot;ohfy__Order__c&quot;</span><span class="op">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">id</span><span class="op">:</span> <span class="st">&quot;a01XX000007ABC1&quot;</span><span class="op">,</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">fields</span><span class="op">:</span> {</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Status__c&quot;</span><span class="op">:</span> <span class="st">&quot;In Progress&quot;</span><span class="op">,</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Delivery_Date__c&quot;</span><span class="op">:</span> <span class="st">&quot;2024-01-20&quot;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+    <h4 id="upsert-record-createupdate"><strong>Upsert Record
+    (Create/Update)</strong></h4>
+    <div class="sourceCode" id="cb4"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Operation: upsert_record</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> result <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">upsert_record</span>({</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">sobject</span><span class="op">:</span> <span class="st">&quot;ohfy__Order__c&quot;</span><span class="op">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">external_id_field</span><span class="op">:</span> <span class="st">&quot;ohfy__External_ID__c&quot;</span><span class="op">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">external_id_value</span><span class="op">:</span> <span class="st">&quot;EXT-ORDER-12345&quot;</span><span class="op">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">fields</span><span class="op">:</span> {</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Customer__c&quot;</span><span class="op">:</span> <span class="st">&quot;003XX000004TMM2&quot;</span><span class="op">,</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Order_Date__c&quot;</span><span class="op">:</span> <span class="st">&quot;2024-01-15&quot;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+    <h4 id="find-records-query"><strong>Find Records
+    (Query)</strong></h4>
+    <div class="sourceCode" id="cb5"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Operation: find_records</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> result <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">find_records</span>({</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">sobject</span><span class="op">:</span> <span class="st">&quot;ohfy__Order__c&quot;</span><span class="op">,</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">criteria</span><span class="op">:</span> {</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Status__c&quot;</span><span class="op">:</span> <span class="st">&quot;New&quot;</span><span class="op">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Order_Date__c&quot;</span><span class="op">:</span> <span class="st">&quot;THIS_WEEK&quot;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">fields</span><span class="op">:</span> [<span class="st">&quot;Id&quot;</span><span class="op">,</span> <span class="st">&quot;Name&quot;</span><span class="op">,</span> <span class="st">&quot;ohfy__Customer__c&quot;</span><span class="op">,</span> <span class="st">&quot;ohfy__Status__c&quot;</span>]</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">// Response Format:</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">// {</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">//   records: [</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co">//     {</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">//       Id: &quot;a01XX000007ABC1&quot;,</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">//       Name: &quot;ORDER-001234&quot;,</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">//       ohfy__Customer__c: &quot;003XX000004TMM2&quot;,</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co">//       ohfy__Status__c: &quot;New&quot;</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co">//     }</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co">//   ],</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="co">//   totalSize: 1</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="co">// }</span></span></code></pre></div>
+    <h4 id="soql-query-advanced"><strong>SOQL Query
+    (Advanced)</strong></h4>
+    <div class="sourceCode" id="cb6"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Operation: query</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> result <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">query</span>({</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">query</span><span class="op">:</span> <span class="vs">`</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="vs">    SELECT Id, Name, ohfy__Customer__r.Name, ohfy__Status__c</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="vs">    FROM ohfy__Order__c</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="vs">    WHERE ohfy__Order_Date__c = TODAY</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="vs">    AND ohfy__Status__c IN (&#39;New&#39;, &#39;Scheduled&#39;)</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="vs">    ORDER BY CreatedDate DESC</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="vs">    LIMIT 100</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="vs">  `</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+    <h3 id="bulk-operations-high-volume">Bulk Operations (High
+    Volume)</h3>
+    <h4 id="batch-create-records-max-200"><strong>Batch Create Records
+    (Max 200)</strong></h4>
+    <div class="sourceCode" id="cb7"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Operation: batch_create_records</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> result <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">batch_create_records</span>({</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">sobject</span><span class="op">:</span> <span class="st">&quot;ohfy__Order_Item__c&quot;</span><span class="op">,</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">records</span><span class="op">:</span> [</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Order__c&quot;</span><span class="op">:</span> <span class="st">&quot;a01XX000007ABC1&quot;</span><span class="op">,</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Item__c&quot;</span><span class="op">:</span> <span class="st">&quot;a02XX000008DEF2&quot;</span><span class="op">,</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Quantity__c&quot;</span><span class="op">:</span> <span class="dv">10</span><span class="op">,</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Unit_Price__c&quot;</span><span class="op">:</span> <span class="fl">25.50</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Order__c&quot;</span><span class="op">:</span> <span class="st">&quot;a01XX000007ABC1&quot;</span><span class="op">,</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Item__c&quot;</span><span class="op">:</span> <span class="st">&quot;a02XX000008DEF3&quot;</span><span class="op">,</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Quantity__c&quot;</span><span class="op">:</span> <span class="dv">5</span><span class="op">,</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Unit_Price__c&quot;</span><span class="op">:</span> <span class="fl">15.75</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+    <h4 id="bulk-upsert-records-csv-format"><strong>Bulk Upsert Records
+    (CSV Format)</strong></h4>
+    <div class="sourceCode" id="cb8"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Operation: bulk_upsert_records</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> csvData <span class="op">=</span> <span class="vs">`ohfy__External_ID__c,ohfy__Customer__c,ohfy__Status__c</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="vs">EXT-001,003XX000004TMM2,New</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="vs">EXT-002,003XX000004TMM3,Scheduled`</span><span class="op">;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> result <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">bulk_upsert_records</span>({</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">sobject</span><span class="op">:</span> <span class="st">&quot;ohfy__Order__c&quot;</span><span class="op">,</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">external_id_field</span><span class="op">:</span> <span class="st">&quot;ohfy__External_ID__c&quot;</span><span class="op">,</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">data</span><span class="op">:</span> csvData<span class="op">,</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">operation</span><span class="op">:</span> <span class="st">&quot;upsert&quot;</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">// Returns job ID for monitoring</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">// {</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co">//   id: &quot;7504P00000hLI8xQAG&quot;,</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co">//   object: &quot;ohfy__Order__c&quot;,</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co">//   state: &quot;JobInProgress&quot;</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co">// }</span></span></code></pre></div>
+    <h4 id="monitor-bulk-job-status"><strong>Monitor Bulk Job
+    Status</strong></h4>
+    <div class="sourceCode" id="cb9"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Operation: get_job_info</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> jobStatus <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">get_job_info</span>({</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">job_id</span><span class="op">:</span> <span class="st">&quot;7504P00000hLI8xQAG&quot;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Response includes job state: JobInProgress, JobComplete, Failed</span></span></code></pre></div>
+    <h3 id="object-metadata-operations">Object Metadata Operations</h3>
+    <h4 id="describe-object-structure"><strong>Describe Object
+    Structure</strong></h4>
+    <div class="sourceCode" id="cb10"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Operation: so_object_describe</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> objectInfo <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">so_object_describe</span>({</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">sobject</span><span class="op">:</span> <span class="st">&quot;ohfy__Order__c&quot;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Returns complete field definitions, relationships, permissions</span></span></code></pre></div>
+    <h4 id="get-picklist-values"><strong>Get Picklist
+    Values</strong></h4>
+    <div class="sourceCode" id="cb11"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Operation: get_picklist_item_details</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> picklistValues <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">get_picklist_item_details</span>({</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">sobject</span><span class="op">:</span> <span class="st">&quot;ohfy__Order__c&quot;</span><span class="op">,</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">field_name</span><span class="op">:</span> <span class="st">&quot;ohfy__Status__c&quot;</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+    <hr />
+    <h2 id="quickbooks-connector">📊 QuickBooks Connector</h2>
+    <h3 id="basic-operations">Basic Operations</h3>
+    <div class="sourceCode" id="cb12"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Create Customer</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> customer <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">quickbooks</span><span class="op">.</span><span class="fu">create_customer</span>({</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">quickbooks</span><span class="op">,</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">customer</span><span class="op">:</span> {</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Name</span><span class="op">:</span> <span class="st">&quot;ACME Corporation&quot;</span><span class="op">,</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">CompanyName</span><span class="op">:</span> <span class="st">&quot;ACME Corp&quot;</span><span class="op">,</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">BillAddr</span><span class="op">:</span> {</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">Line1</span><span class="op">:</span> <span class="st">&quot;123 Main St&quot;</span><span class="op">,</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">City</span><span class="op">:</span> <span class="st">&quot;Anytown&quot;</span><span class="op">,</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">CountrySubDivisionCode</span><span class="op">:</span> <span class="st">&quot;CA&quot;</span><span class="op">,</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>      <span class="dt">PostalCode</span><span class="op">:</span> <span class="st">&quot;90210&quot;</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="co">// Create Invoice</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> invoice <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">quickbooks</span><span class="op">.</span><span class="fu">create_invoice</span>({</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">quickbooks</span><span class="op">,</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">invoice</span><span class="op">:</span> {</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    <span class="dt">CustomerRef</span><span class="op">:</span> { <span class="dt">value</span><span class="op">:</span> customer<span class="op">.</span><span class="at">id</span> }<span class="op">,</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Line</span><span class="op">:</span> [</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>      {</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Amount</span><span class="op">:</span> <span class="fl">100.00</span><span class="op">,</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>        <span class="dt">DetailType</span><span class="op">:</span> <span class="st">&quot;SalesItemLineDetail&quot;</span><span class="op">,</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>        <span class="dt">SalesItemLineDetail</span><span class="op">:</span> {</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>          <span class="dt">ItemRef</span><span class="op">:</span> { <span class="dt">value</span><span class="op">:</span> <span class="st">&quot;1&quot;</span> }</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+    <hr />
+    <h2 id="file-and-storage-connectors">📁 File and Storage
+    Connectors</h2>
+    <h3 id="aws-s3-operations">AWS S3 Operations</h3>
+    <div class="sourceCode" id="cb13"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">// List files</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> files <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">aws_s3</span><span class="op">.</span><span class="fu">list_objects</span>({</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">aws</span><span class="op">,</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bucket</span><span class="op">:</span> <span class="st">&quot;edi-001px000002obiwyao-production&quot;</span><span class="op">,</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">prefix</span><span class="op">:</span> <span class="st">&quot;inbound/810/&quot;</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Download file</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> fileContent <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">aws_s3</span><span class="op">.</span><span class="fu">download_file</span>({</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">aws</span><span class="op">,</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bucket</span><span class="op">:</span> <span class="st">&quot;edi-001px000002obiwyao-production&quot;</span><span class="op">,</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">key</span><span class="op">:</span> <span class="st">&quot;inbound/810/invoice-12345.edi&quot;</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+    <h3 id="google-sheets-operations">Google Sheets Operations</h3>
+    <div class="sourceCode" id="cb14"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Read spreadsheet data</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> sheetData <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">sheets</span><span class="op">.</span><span class="fu">read_values</span>({</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">google</span><span class="op">,</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">spreadsheet_id</span><span class="op">:</span> <span class="st">&quot;1xOXYf4BpsWg7wrCGr0PG2Wj0HTlGsKr8MgiMPZmovHA&quot;</span><span class="op">,</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">range</span><span class="op">:</span> <span class="st">&quot;Sheet1!A1:Z1000&quot;</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Write data to sheet</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> writeResult <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">sheets</span><span class="op">.</span><span class="fu">append_values</span>({</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">google</span><span class="op">,</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">spreadsheet_id</span><span class="op">:</span> <span class="st">&quot;1xOXYf4BpsWg7wrCGr0PG2Wj0HTlGsKr8MgiMPZmovHA&quot;</span><span class="op">,</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">range</span><span class="op">:</span> <span class="st">&quot;Sheet1!A1&quot;</span><span class="op">,</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">values</span><span class="op">:</span> [</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    [<span class="st">&quot;Order ID&quot;</span><span class="op">,</span> <span class="st">&quot;Customer&quot;</span><span class="op">,</span> <span class="st">&quot;Status&quot;</span><span class="op">,</span> <span class="st">&quot;Amount&quot;</span>]<span class="op">,</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    [<span class="st">&quot;ORD-001&quot;</span><span class="op">,</span> <span class="st">&quot;ACME Corp&quot;</span><span class="op">,</span> <span class="st">&quot;New&quot;</span><span class="op">,</span> <span class="st">&quot;1250.00&quot;</span>]</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+    <hr />
+    <h2 id="http-client-connector">🔗 HTTP Client Connector</h2>
+    <h3 id="external-api-calls">External API Calls</h3>
+    <div class="sourceCode" id="cb15"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Generic HTTP request</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> apiResponse <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">http_client</span><span class="op">.</span><span class="fu">make_request</span>({</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">url</span><span class="op">:</span> <span class="st">&quot;https://api.external-system.com/v1/orders&quot;</span><span class="op">,</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">method</span><span class="op">:</span> <span class="st">&quot;POST&quot;</span><span class="op">,</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">headers</span><span class="op">:</span> {</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Authorization&quot;</span><span class="op">:</span> <span class="st">&quot;Bearer &quot;</span> <span class="op">+</span> config<span class="op">.</span><span class="at">externalApiToken</span><span class="op">,</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Content-Type&quot;</span><span class="op">:</span> <span class="st">&quot;application/json&quot;</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">body</span><span class="op">:</span> <span class="bu">JSON</span><span class="op">.</span><span class="fu">stringify</span>({</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">order_id</span><span class="op">:</span> <span class="st">&quot;EXT-12345&quot;</span><span class="op">,</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">customer_id</span><span class="op">:</span> <span class="st">&quot;CUST-001&quot;</span><span class="op">,</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">items</span><span class="op">:</span> orderItems</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+    <hr />
+    <h2 id="utility-connectors">🛠️ Utility Connectors</h2>
+    <h3 id="script-connector">Script Connector</h3>
+    <div class="sourceCode" id="cb16"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Already implemented in consolidation patterns</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">// See SCRIPT_CONSOLIDATION_PATTERNS.md for complete examples</span></span></code></pre></div>
+    <h3 id="storage-connector-session-data">Storage Connector (Session
+    Data)</h3>
+    <div class="sourceCode" id="cb17"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Store temporary data</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> connectors<span class="op">.</span><span class="at">storage</span><span class="op">.</span><span class="fu">set</span>({</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">key</span><span class="op">:</span> <span class="st">&quot;processing_batch_&quot;</span> <span class="op">+</span> batchId<span class="op">,</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">value</span><span class="op">:</span> {</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">startTime</span><span class="op">:</span> <span class="bu">Date</span><span class="op">.</span><span class="fu">now</span>()<span class="op">,</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">recordCount</span><span class="op">:</span> records<span class="op">.</span><span class="at">length</span><span class="op">,</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">status</span><span class="op">:</span> <span class="st">&quot;processing&quot;</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">ttl</span><span class="op">:</span> <span class="dv">3600</span> <span class="co">// 1 hour expiration</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co">// Retrieve stored data</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> batchInfo <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">storage</span><span class="op">.</span><span class="fu">get</span>({</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">key</span><span class="op">:</span> <span class="st">&quot;processing_batch_&quot;</span> <span class="op">+</span> batchId</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span></code></pre></div>
+    <h3 id="loop-connector-iteration">Loop Connector (Iteration)</h3>
+    <div class="sourceCode" id="cb18"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Note: In consolidated scripts, use JavaScript loops instead</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="co">// This is only for traditional multi-step workflows</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (<span class="kw">const</span> record <span class="kw">of</span> records) {</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Process each record in consolidated script</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">await</span> <span class="fu">processRecord</span>(record)<span class="op">;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+    <h3 id="boolean-condition-conditional-logic">Boolean Condition
+    (Conditional Logic)</h3>
+    <div class="sourceCode" id="cb19"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Note: In consolidated scripts, use JavaScript conditionals instead</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co">// This is only for traditional multi-step workflows</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (record<span class="op">.</span><span class="at">status</span> <span class="op">===</span> <span class="st">&quot;New&quot;</span> <span class="op">&amp;&amp;</span> record<span class="op">.</span><span class="at">amount</span> <span class="op">&gt;</span> <span class="dv">1000</span>) {</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">await</span> <span class="fu">processHighValueOrder</span>(record)<span class="op">;</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">await</span> <span class="fu">processStandardOrder</span>(record)<span class="op">;</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+    <hr />
+    <h2 id="common-connector-usage-patterns">📋 Common Connector Usage
+    Patterns</h2>
+    <h3 id="error-handling-in-connector-calls">Error Handling in
+    Connector Calls</h3>
+    <div class="sourceCode" id="cb20"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">safeSalesforceOperation</span>(operation<span class="op">,</span> params) {</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">try</span> {</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> result <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span>[operation](params)<span class="op">;</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (result<span class="op">.</span><span class="at">success</span> <span class="op">===</span> <span class="kw">false</span>) {</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>      <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">Error</span>(<span class="vs">`Salesforce operation failed: </span><span class="sc">${</span>result<span class="op">.</span><span class="at">errors</span><span class="op">.</span><span class="fu">join</span>(<span class="st">&#39;, &#39;</span>)<span class="sc">}</span><span class="vs">`</span>)<span class="op">;</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> result<span class="op">;</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">catch</span> (error) {</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    logger<span class="op">.</span><span class="fu">error</span>(<span class="vs">`Salesforce </span><span class="sc">${</span>operation<span class="sc">}</span><span class="vs"> failed`</span><span class="op">,</span> {</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">params</span><span class="op">:</span> params<span class="op">,</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">error</span><span class="op">:</span> error<span class="op">.</span><span class="at">message</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Handle specific error types</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (error<span class="op">.</span><span class="at">message</span><span class="op">.</span><span class="fu">includes</span>(<span class="st">&#39;DUPLICATE_VALUE&#39;</span>)) {</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> <span class="cf">await</span> <span class="fu">handleDuplicateError</span>(operation<span class="op">,</span> params)<span class="op">;</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> <span class="cf">if</span> (error<span class="op">.</span><span class="at">message</span><span class="op">.</span><span class="fu">includes</span>(<span class="st">&#39;REQUIRED_FIELD_MISSING&#39;</span>)) {</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> <span class="cf">await</span> <span class="fu">handleMissingFieldError</span>(operation<span class="op">,</span> params)<span class="op">;</span></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">throw</span> error<span class="op">;</span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+    <h3 id="batch-processing-pattern">Batch Processing Pattern</h3>
+    <div class="sourceCode" id="cb21"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">processBatchWithConnector</span>(records<span class="op">,</span> batchSize <span class="op">=</span> <span class="dv">100</span>) {</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> batches <span class="op">=</span> <span class="fu">chunkArray</span>(records<span class="op">,</span> batchSize)<span class="op">;</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> results <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">const</span> batch <span class="kw">of</span> batches) {</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> {</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> batchResult <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">batch_create_records</span>({</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">sobject</span><span class="op">:</span> <span class="st">&quot;ohfy__Order__c&quot;</span><span class="op">,</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">records</span><span class="op">:</span> batch</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>      })<span class="op">;</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>      results<span class="op">.</span><span class="fu">push</span>(<span class="op">...</span>batchResult)<span class="op">;</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>      <span class="co">// Rate limiting</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>      <span class="cf">await</span> <span class="fu">sleep</span>(<span class="dv">1000</span>)<span class="op">;</span> <span class="co">// 1 second between batches</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">catch</span> (error) {</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>      logger<span class="op">.</span><span class="fu">error</span>(<span class="vs">`Batch processing failed`</span><span class="op">,</span> {</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>        <span class="dt">batchIndex</span><span class="op">:</span> batches<span class="op">.</span><span class="fu">indexOf</span>(batch)<span class="op">,</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>        <span class="dt">error</span><span class="op">:</span> error<span class="op">.</span><span class="at">message</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>      })<span class="op">;</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>      <span class="co">// Process individual records in failed batch</span></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (<span class="kw">const</span> record <span class="kw">of</span> batch) {</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span> {</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>          <span class="kw">const</span> singleResult <span class="op">=</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">create_record</span>({</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>            <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>            <span class="dt">sobject</span><span class="op">:</span> <span class="st">&quot;ohfy__Order__c&quot;</span><span class="op">,</span></span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>            <span class="dt">fields</span><span class="op">:</span> record</span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>          })<span class="op">;</span></span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>          results<span class="op">.</span><span class="fu">push</span>(singleResult)<span class="op">;</span></span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">catch</span> (singleError) {</span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>          results<span class="op">.</span><span class="fu">push</span>({ <span class="dt">error</span><span class="op">:</span> singleError<span class="op">.</span><span class="at">message</span><span class="op">,</span> <span class="dt">record</span><span class="op">:</span> record })<span class="op">;</span></span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> results<span class="op">;</span></span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+    <h3 id="parallel-connector-operations">Parallel Connector
+    Operations</h3>
+    <div class="sourceCode" id="cb22"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">executeParallelOperations</span>(data) {</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Execute multiple connector operations in parallel</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [salesforceResult<span class="op">,</span> quickbooksResult<span class="op">,</span> sheetsResult] <span class="op">=</span> <span class="cf">await</span> <span class="bu">Promise</span><span class="op">.</span><span class="fu">allSettled</span>([</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">create_record</span>({</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">sobject</span><span class="op">:</span> <span class="st">&quot;ohfy__Order__c&quot;</span><span class="op">,</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fields</span><span class="op">:</span> data<span class="op">.</span><span class="at">salesforceOrder</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    connectors<span class="op">.</span><span class="at">quickbooks</span><span class="op">.</span><span class="fu">create_invoice</span>({</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>      <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">quickbooks</span><span class="op">,</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">invoice</span><span class="op">:</span> data<span class="op">.</span><span class="at">quickbooksInvoice</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    connectors<span class="op">.</span><span class="at">sheets</span><span class="op">.</span><span class="fu">append_values</span>({</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>      <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">google</span><span class="op">,</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>      <span class="dt">spreadsheet_id</span><span class="op">:</span> config<span class="op">.</span><span class="at">auditSpreadsheetId</span><span class="op">,</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>      <span class="dt">range</span><span class="op">:</span> <span class="st">&quot;Audit!A1&quot;</span><span class="op">,</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>      <span class="dt">values</span><span class="op">:</span> [data<span class="op">.</span><span class="at">auditRow</span>]</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>  ])<span class="op">;</span></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> {</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>    <span class="dt">salesforce</span><span class="op">:</span> salesforceResult<span class="op">.</span><span class="at">status</span> <span class="op">===</span> <span class="st">&#39;fulfilled&#39;</span> <span class="op">?</span> salesforceResult<span class="op">.</span><span class="at">value</span> <span class="op">:</span> salesforceResult<span class="op">.</span><span class="at">reason</span><span class="op">,</span></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>    <span class="dt">quickbooks</span><span class="op">:</span> quickbooksResult<span class="op">.</span><span class="at">status</span> <span class="op">===</span> <span class="st">&#39;fulfilled&#39;</span> <span class="op">?</span> quickbooksResult<span class="op">.</span><span class="at">value</span> <span class="op">:</span> quickbooksResult<span class="op">.</span><span class="at">reason</span><span class="op">,</span></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>    <span class="dt">audit</span><span class="op">:</span> sheetsResult<span class="op">.</span><span class="at">status</span> <span class="op">===</span> <span class="st">&#39;fulfilled&#39;</span> <span class="op">?</span> sheetsResult<span class="op">.</span><span class="at">value</span> <span class="op">:</span> sheetsResult<span class="op">.</span><span class="at">reason</span></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+    <hr />
+    <h2 id="integration-specific-connector-combinations">🎯
+    Integration-Specific Connector Combinations</h2>
+    <h3 id="edi-processing-stack">EDI Processing Stack</h3>
+    <div class="sourceCode" id="cb23"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Typical EDI integration connector sequence</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> ediProcessingStack <span class="op">=</span> {</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span><span class="op">:</span> <span class="st">&quot;aws_s3&quot;</span><span class="op">,</span>           <span class="co">// Download EDI files</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">processing</span><span class="op">:</span> <span class="st">&quot;script&quot;</span><span class="op">,</span>      <span class="co">// Parse and transform EDI</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">validation</span><span class="op">:</span> <span class="st">&quot;script&quot;</span><span class="op">,</span>      <span class="co">// Business rule validation</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">destination</span><span class="op">:</span> <span class="st">&quot;salesforce&quot;</span><span class="op">,</span> <span class="co">// Create OHFY records</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">output</span><span class="op">:</span> <span class="st">&quot;aws_s3&quot;</span><span class="op">,</span>         <span class="co">// Upload response documents</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">notification</span><span class="op">:</span> <span class="st">&quot;slack&quot;</span>      <span class="co">// Status notifications</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <h3 id="accounting-sync-stack">Accounting Sync Stack</h3>
+    <div class="sourceCode" id="cb24"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Typical accounting integration connector sequence</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> accountingSyncStack <span class="op">=</span> {</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">extraction</span><span class="op">:</span> [<span class="st">&quot;salesforce&quot;</span><span class="op">,</span> <span class="st">&quot;quickbooks&quot;</span>]<span class="op">,</span> <span class="co">// Parallel data extraction</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">processing</span><span class="op">:</span> <span class="st">&quot;script&quot;</span><span class="op">,</span>                     <span class="co">// Business logic and mapping</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">sync</span><span class="op">:</span> [<span class="st">&quot;salesforce&quot;</span><span class="op">,</span> <span class="st">&quot;quickbooks&quot;</span>]<span class="op">,</span>       <span class="co">// Bidirectional updates</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">reconciliation</span><span class="op">:</span> <span class="st">&quot;script&quot;</span><span class="op">,</span>                 <span class="co">// Verify consistency</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">reporting</span><span class="op">:</span> <span class="st">&quot;sheets&quot;</span>                       <span class="co">// Generate reports</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <h3 id="real-time-pipeline-stack">Real-time Pipeline Stack</h3>
+    <div class="sourceCode" id="cb25"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Typical real-time integration connector sequence</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> realtimePipelineStack <span class="op">=</span> {</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">trigger</span><span class="op">:</span> <span class="st">&quot;webhook&quot;</span><span class="op">,</span>                    <span class="co">// External system trigger</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">processing</span><span class="op">:</span> <span class="st">&quot;script&quot;</span><span class="op">,</span>                  <span class="co">// Validation and transformation</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">destinations</span><span class="op">:</span> [<span class="st">&quot;salesforce&quot;</span><span class="op">,</span> <span class="st">&quot;external&quot;</span>]<span class="op">,</span> <span class="co">// Multiple target systems</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">storage</span><span class="op">:</span> <span class="st">&quot;storage&quot;</span><span class="op">,</span>                    <span class="co">// Session data management</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">notification</span><span class="op">:</span> <span class="st">&quot;slack&quot;</span>                  <span class="co">// Success/failure alerts</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <hr />
+    <h2 id="testing-connector-operations">📚 Testing Connector
+    Operations</h2>
+    <h3 id="using-capi-tool-for-testing">Using CAPI Tool for
+    Testing</h3>
+    <div class="sourceCode" id="cb26"><pre
+    class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test Salesforce operations directly</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /path/to/tray-connector-explorer/trayConnectorExplorer</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co"># List available connectors</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> capi.js list</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Get connector information</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> capi.js info salesforce</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Test create operation</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> capi.js salesforce create_record <span class="st">&#39;{</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="st">  &quot;sobject&quot;: &quot;Account&quot;,</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="st">  &quot;fields&quot;: {</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;Name&quot;: &quot;Test Company&quot;,</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="st">    &quot;Type&quot;: &quot;Customer&quot;</span></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="st">}&#39;</span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Test query operation</span></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> capi.js salesforce find_records <span class="st">&#39;{</span></span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a><span class="st">  &quot;sobject&quot;: &quot;Account&quot;,</span></span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a><span class="st">  &quot;criteria&quot;: {&quot;Type&quot;: &quot;Customer&quot;},</span></span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a><span class="st">  &quot;fields&quot;: [&quot;Id&quot;, &quot;Name&quot;, &quot;Type&quot;]</span></span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a><span class="st">}&#39;</span></span></code></pre></div>
+    <h3 id="using-script-tester-for-integration-testing">Using Script
+    Tester for Integration Testing</h3>
+    <div class="sourceCode" id="cb27"><pre
+    class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test complete integration logic</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /path/to/tray-connector-explorer/trayConnectorExplorer</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Set up test data in input.json</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Add your script logic to script.js</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Run integration test</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> run.js</span></code></pre></div>
+    <hr />
+    <h2 id="connector-configuration-best-practices">🔧 Connector
+    Configuration Best Practices</h2>
+    <h3 id="authid-management">1. <strong>AuthId
+    Management</strong></h3>
+    <ul>
+    <li>Use environment-specific AuthIds (dev, staging, production)</li>
+    <li>Store AuthIds in Tray configuration, not hardcoded in
+    scripts</li>
+    <li>Validate AuthId availability before executing operations</li>
+    </ul>
+    <h3 id="error-handling">2. <strong>Error Handling</strong></h3>
+    <ul>
+    <li>Always wrap connector calls in try-catch blocks</li>
+    <li>Implement specific handling for common Salesforce errors</li>
+    <li>Log sufficient detail for troubleshooting without exposing
+    sensitive data</li>
+    </ul>
+    <h3 id="performance-optimization">3. <strong>Performance
+    Optimization</strong></h3>
+    <ul>
+    <li>Use batch operations for high-volume processing</li>
+    <li>Implement rate limiting between API calls</li>
+    <li>Use parallel operations where possible (Promise.allSettled)</li>
+    </ul>
+    <h3 id="data-validation">4. <strong>Data Validation</strong></h3>
+    <ul>
+    <li>Validate data before sending to connectors</li>
+    <li>Use object describe operations to understand field
+    requirements</li>
+    <li>Implement fallback values for optional fields</li>
+    </ul>
+    <h3 id="monitoring-and-logging">5. <strong>Monitoring and
+    Logging</strong></h3>
+    <ul>
+    <li>Log all connector operations with sufficient detail</li>
+    <li>Track success/failure rates for monitoring</li>
+    <li>Implement alerting for critical operation failures</li>
+    </ul>
+    <hr />
+    <p><strong>Related Guides:</strong> - <strong><a
+    href="./SCRIPT_CONSOLIDATION_PATTERNS.md">Script Consolidation
+    Patterns</a></strong> - Complete JavaScript implementation examples
+    - <strong><a href="./OHFY_BUSINESS_LOGIC_LIBRARY.md">OHFY Business
+    Logic Library</a></strong> - Business rule implementations -
+    <strong><a href="./CONSOLIDATED_SCENARIO_EXAMPLES.md">Consolidated
+    Scenario Examples</a></strong> - End-to-end integration examples</p>
+  </div>
+
+  <div class="brand-footer">
+    <hr>
+    <p>Ohanafy — The AI-Powered Operating System for Beverage</p>
+  </div>
+</body>
+</html>

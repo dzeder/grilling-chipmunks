@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> — Ohanafy Pricing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100;400;700&display=swap" rel="stylesheet">
+  <style>
+    /* === Ohanafy 2025 Brand Styles === */
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --true-black: #000000;
+      --true-white: #FFFFFF;
+      --mellow: #E4F223;
+      --cork: #F4F2F0;
+      --dark-denim: #4A5F80;
+      --light-denim: #B1C7EB;
+      --dark-grey: #545454;
+    }
+
+    body {
+      font-family: 'Geist', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.6;
+      color: var(--true-black);
+      background: var(--cork);
+    }
+
+    /* --- Header Banner --- */
+    .brand-header {
+      width: 100%;
+      background: var(--true-black);
+      padding: 2.5rem 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-header::after {
+      content: '';
+      position: absolute;
+      right: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 120px;
+      height: 120px;
+      background-image: url('https://40881726.fs1.hubspotusercontent-na1.net/hubfs/40881726/Brand%20Assets/Ohanafy%20Black%20Emblem.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0.3;
+      filter: invert(1);
+    }
+
+    .brand-header .tagline {
+      font-family: 'Geist', system-ui, sans-serif;
+      font-weight: 700;
+      font-size: 1.75rem;
+      letter-spacing: 0.02em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-header .tagline .highlight {
+      color: var(--mellow);
+    }
+
+    .brand-header .tagline .brand-name {
+      color: var(--true-white);
+    }
+
+    /* --- Main Content --- */
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+      background: var(--true-white);
+      min-height: calc(100vh - 200px);
+    }
+
+    .doc-title {
+      font-size: 36px;
+      font-weight: 100;
+      color: var(--true-black);
+      margin-bottom: 0.5rem;
+      border-bottom: 3px solid var(--dark-denim);
+      padding-bottom: 1rem;
+    }
+
+    /* --- Typography --- */
+    h1 { font-size: 24px; font-weight: 400; color: var(--true-black); margin: 2rem 0 1rem; }
+    h2 { font-size: 18px; font-weight: 700; color: var(--dark-denim); margin: 1.75rem 0 0.75rem; }
+    h3 { font-size: 16px; font-weight: 700; color: var(--dark-denim); margin: 1.5rem 0 0.5rem; }
+    p  { margin: 0 0 1rem; }
+    a  { color: var(--dark-denim); text-decoration: underline; }
+    a:hover { color: var(--true-black); }
+
+    ul, ol { margin: 0 0 1rem 1.5rem; }
+    li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Geist Mono', ui-monospace, monospace;
+      font-size: 0.9em;
+      background: var(--cork);
+      padding: 0.15em 0.4em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: var(--cork);
+      padding: 1rem 1.25rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 0 0 1rem;
+      border-left: 3px solid var(--dark-denim);
+    }
+
+    pre code { background: none; padding: 0; }
+
+    blockquote {
+      border-left: 4px solid var(--mellow);
+      padding: 0.75rem 1.25rem;
+      margin: 0 0 1rem;
+      background: var(--cork);
+      color: var(--dark-grey);
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: var(--cork);
+      margin: 2rem 0;
+    }
+
+    /* --- Tables --- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 15px;
+    }
+
+    thead th {
+      background: var(--dark-denim);
+      color: var(--true-white);
+      font-weight: 700;
+      text-align: left;
+      padding: 0.65rem 0.9rem;
+      border: 1px solid var(--dark-denim);
+    }
+
+    tbody td {
+      background: var(--cork);
+      color: var(--true-black);
+      padding: 0.55rem 0.9rem;
+      border: 1px solid var(--dark-denim);
+    }
+
+    tbody tr:hover td {
+      background: var(--light-denim);
+    }
+
+    /* --- Utility --- */
+    .time-tracking {
+      background: var(--cork);
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      border-left: 3px solid var(--dark-denim);
+    }
+
+    mark, .highlight-inline {
+      background: var(--mellow);
+      color: var(--true-black);
+      padding: 0.05em 0.25em;
+      border-radius: 2px;
+    }
+
+    /* --- Footer --- */
+    .brand-footer {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem;
+      text-align: center;
+      color: var(--dark-grey);
+      font-size: 13px;
+    }
+
+    .brand-footer hr {
+      background: var(--dark-denim);
+      margin-bottom: 1rem;
+    }
+
+    /* --- Doc Nav Bar --- */
+    .doc-nav {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--dark-denim);
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+
+    .doc-nav a {
+      color: var(--true-white);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 400;
+      padding: 0.6rem 0.85rem;
+      white-space: nowrap;
+      opacity: 0.75;
+      transition: opacity 0.15s, background 0.15s;
+      border-bottom: 2px solid transparent;
+    }
+
+    .doc-nav a:hover {
+      opacity: 1;
+      background: rgba(255,255,255,0.08);
+      color: var(--true-white);
+    }
+
+    .doc-nav a.current {
+      opacity: 1;
+      border-bottom-color: var(--mellow);
+      font-weight: 700;
+    }
+
+    .doc-nav .nav-demo {
+      font-weight: 700;
+      opacity: 1;
+      margin-right: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    /* --- Print --- */
+    @media print {
+      body { background: white; }
+      .content { box-shadow: none; padding: 0; }
+      .brand-header { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .doc-nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="brand-header">
+    <div class="tagline">
+      <span class="highlight">Modern beverage runs on</span>
+      <span class="brand-name">OHANAFY.</span>
+    </div>
+  </div>
+
+  <div class="doc-nav" id="docNav">
+    <a class="nav-demo" id="navDemo" href="#">&#8592; Demo App</a>
+    <a data-doc="promotion-pricing-model" href="#">Pricing Model</a>
+    <a data-doc="conflict-detection" href="#">Conflict Detection</a>
+    <a data-doc="duplicate-pricing-group" href="#">Duplicate Group</a>
+    <a data-doc="test-cases" href="#">Test Cases</a>
+    <a data-doc="database-design" href="#">Database Design</a>
+  </div>
+  <script>
+  (function() {
+    var path = window.location.pathname;
+    var segments = path.split('/');
+    var docsIdx = -1;
+    for (var i = segments.length - 1; i >= 0; i--) {
+      if (segments[i] === 'docs') { docsIdx = i; break; }
+    }
+    var base;
+    if (docsIdx !== -1) {
+      var depth = segments.length - docsIdx - 2;
+      base = '';
+      for (var j = 0; j <= depth; j++) base += '../';
+    } else {
+      base = '';
+    }
+    document.getElementById('navDemo').href = base + 'demo/index.html';
+    var docs = {
+      'promotion-pricing-model': 'docs/promotion-pricing-model.html',
+      'conflict-detection':      'docs/conflict-detection.html',
+      'duplicate-pricing-group': 'docs/duplicate-pricing-group.html',
+      'test-cases':              'docs/test-cases.html',
+      'database-design':         'docs/technical/database-design.html'
+    };
+    var current = path.split('/').pop().replace('.html', '');
+    var links = document.querySelectorAll('#docNav a[data-doc]');
+    for (var i = 0; i < links.length; i++) {
+      var key = links[i].getAttribute('data-doc');
+      links[i].href = base + docs[key];
+      if (key === current) links[i].classList.add('current');
+    }
+  })();
+  </script>
+
+  <div class="content">
+    <div class="doc-title"></div>
+    <h1
+    id="tray.ai-project-json-structure-guide-for-llm-analysis">Tray.ai
+    Project JSON Structure Guide for LLM Analysis</h1>
+    <h2 id="overview">Overview</h2>
+    <p>This document provides a comprehensive guide for Large Language
+    Models (LLMs) to deeply understand and analyze Tray.ai project JSON
+    exports. Tray.ai is an integration platform as a service (iPaaS)
+    that allows users to create complex automation workflows between
+    various applications and services.</p>
+    <h2 id="high-level-project-structure">High-Level Project
+    Structure</h2>
+    <p>Every Tray.ai project JSON export follows this top-level
+    structure:</p>
+    <div class="sourceCode" id="cb1"><pre
+    class="sourceCode json"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;tray_export_version&quot;</span><span class="fu">:</span> <span class="dv">4</span><span class="fu">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;export_type&quot;</span><span class="fu">:</span> <span class="st">&quot;project&quot;</span><span class="fu">,</span> </span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;workflows&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="er">...</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;solution&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="er">...</span><span class="fu">}</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+    <h3 id="core-components">Core Components</h3>
+    <ol type="1">
+    <li><strong><code>tray_export_version</code></strong>: Integer
+    indicating the export format version (currently 4)</li>
+    <li><strong><code>export_type</code></strong>: String, always
+    “project” for project exports</li>
+    <li><strong><code>workflows</code></strong>: Array of workflow
+    objects that contain the actual automation logic</li>
+    <li><strong><code>solution</code></strong> (optional): Embedded
+    solution configuration for packaged deployments</li>
+    </ol>
+    <hr />
+    <h2 id="workflow-structure">Workflow Structure</h2>
+    <h3 id="workflow-object-schema">Workflow Object Schema</h3>
+    <div class="sourceCode" id="cb2"><pre
+    class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid&quot;</span><span class="fu">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;created&quot;</span><span class="fu">:</span> <span class="st">&quot;ISO8601-timestamp&quot;</span><span class="fu">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;workspace_id&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid&quot;</span><span class="fu">,</span> </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;project_id&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid&quot;</span><span class="fu">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;group&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid&quot;</span><span class="fu">,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;creator&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid&quot;</span><span class="fu">,</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;version&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid&quot;</span><span class="fu">,</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;created&quot;</span><span class="fu">:</span> <span class="st">&quot;ISO8601-timestamp&quot;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;Human readable workflow name&quot;</span><span class="fu">,</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;enabled&quot;</span><span class="fu">:</span> <span class="er">boolean</span><span class="fu">,</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;tags&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;array&quot;</span><span class="ot">,</span> <span class="st">&quot;of&quot;</span><span class="ot">,</span> <span class="st">&quot;strings&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;settings&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;config&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="er">...</span><span class="fu">},</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;input_schema&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="er">...</span><span class="fu">},</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;output_schema&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="er">...</span><span class="fu">}</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;steps_structure&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="er">...</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;steps&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="er">...</span><span class="fu">}</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+    <h3 id="key-workflow-properties">Key Workflow Properties</h3>
+    <ul>
+    <li><strong><code>id</code></strong>: Unique identifier for the
+    workflow</li>
+    <li><strong><code>title</code></strong>: Human-readable name
+    describing the workflow’s purpose</li>
+    <li><strong><code>enabled</code></strong>: Boolean indicating if the
+    workflow is active</li>
+    <li><strong><code>version</code></strong>: Current active version of
+    the workflow and all its components</li>
+    <li><strong><code>settings.config</code></strong>: Project-level
+    configuration variables and parameters</li>
+    <li><strong><code>steps_structure</code></strong>: Hierarchical
+    representation of workflow execution flow</li>
+    <li><strong><code>steps</code></strong>: Detailed configuration for
+    each step/connector in the workflow</li>
+    </ul>
+    <hr />
+    <h2 id="steps-structure-analysis">Steps Structure Analysis</h2>
+    <p>The <code>steps_structure</code> array defines the execution flow
+    and control logic:</p>
+    <h3 id="step-types">Step Types</h3>
+    <ol type="1">
+    <li><strong><code>normal</code></strong>: Standard connector step
+    (API calls, transformations, etc.)</li>
+    <li><strong><code>loop</code></strong>: Iteration over
+    arrays/collections</li>
+    <li><strong><code>branch</code></strong>: Conditional logic
+    (if/else)</li>
+    <li><strong><code>break</code></strong>: Flow control to exit
+    loops</li>
+    <li><strong><code>trigger</code></strong>: Workflow entry point</li>
+    </ol>
+    <h3 id="flow-control-patterns">Flow Control Patterns</h3>
+    <div class="sourceCode" id="cb3"><pre
+    class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;loop-1&quot;</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;loop&quot;</span><span class="fu">,</span> </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;content&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;_loop&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;salesforce-1&quot;</span><span class="fu">,</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;normal&quot;</span><span class="fu">,</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;content&quot;</span><span class="fu">:</span> <span class="fu">{}</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;boolean-condition-1&quot;</span><span class="fu">,</span> </span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;branch&quot;</span><span class="fu">,</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;content&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;true&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="fu">{</span><span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;break-loop-1&quot;</span><span class="fu">,</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;break&quot;</span><span class="fu">}</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;false&quot;</span><span class="fu">:</span> <span class="ot">[]</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+    <h3 id="common-flow-patterns-to-recognize">Common Flow Patterns to
+    Recognize</h3>
+    <ul>
+    <li><strong>Data Processing Loops</strong>: <code>loop</code> →
+    <code>connector</code> → <code>condition</code> →
+    <code>break/continue</code></li>
+    <li><strong>Error Handling</strong>: <code>branch</code> conditions
+    checking API responses</li>
+    <li><strong>Batch Processing</strong>: Nested loops for handling
+    large datasets</li>
+    <li><strong>Parallel Processing</strong>: Multiple branches with
+    independent logic paths</li>
+    </ul>
+    <hr />
+    <h2 id="steps-configuration-deep-dive">Steps Configuration Deep
+    Dive</h2>
+    <p>The <code>steps</code> object contains detailed configuration for
+    each named step from <code>steps_structure</code>:</p>
+    <h3 id="universal-step-properties">Universal Step Properties</h3>
+    <div class="sourceCode" id="cb4"><pre
+    class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;step-name&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;title&quot;</span><span class="fu">:</span> <span class="st">&quot;Human readable step name&quot;</span><span class="fu">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;connector&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;connector-type&quot;</span><span class="fu">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;version&quot;</span><span class="fu">:</span> <span class="st">&quot;semantic-version&quot;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;operation&quot;</span><span class="fu">:</span> <span class="st">&quot;specific-operation-name&quot;</span><span class="fu">,</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;output_schema&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="er">...</span><span class="fu">},</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;error_handling&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="er">...</span><span class="fu">},</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span><span class="er">...</span><span class="fu">}</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+    <h3 id="connector-types-and-operations">Connector Types and
+    Operations</h3>
+    <h4 id="script-connector-name-script">1. <strong>Script
+    Connector</strong> (<code>name: "script"</code>)</h4>
+    <ul>
+    <li><strong>Purpose</strong>: Custom JavaScript/Python code
+    execution</li>
+    <li><strong>Key Properties</strong>:
+    <ul>
+    <li><code>variables</code>: Array of input variables with JSONPath
+    references</li>
+    <li><code>script</code>: String containing the actual code</li>
+    <li><code>file_output</code>: Boolean for file generation
+    capability</li>
+    </ul></li>
+    </ul>
+    <p><strong>Example Script Structure</strong>:</p>
+    <div class="sourceCode" id="cb5"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>exports<span class="op">.</span><span class="at">step</span> <span class="op">=</span> <span class="kw">function</span>(input<span class="op">,</span> fileInput) {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Access input variables: input.variableName</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// fileInput parameter exists but is not commonly used</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Custom business logic here</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> result<span class="op">;</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <h4 id="boolean-condition-name-boolean-condition">2. <strong>Boolean
+    Condition</strong> (<code>name: "boolean-condition"</code>)</h4>
+    <ul>
+    <li><strong>Purpose</strong>: Conditional logic and decision
+    making</li>
+    <li><strong>Key Properties</strong>:
+    <ul>
+    <li><code>conditions</code>: Array of comparison objects</li>
+    <li><code>strictness</code>: “All” (AND) or “Any” (OR) logic</li>
+    </ul></li>
+    </ul>
+    <h4 id="loop-connector-name-loop">3. <strong>Loop Connector</strong>
+    (<code>name: "loop"</code>)</h4>
+    <ul>
+    <li><strong>Purpose</strong>: Iteration over arrays and
+    collections</li>
+    <li><strong>Key Properties</strong>:
+    <ul>
+    <li><code>array</code>: JSONPath to the array to iterate</li>
+    <li><code>concurrent</code>: Boolean for parallel processing</li>
+    </ul></li>
+    </ul>
+    <h4 id="api-connectors-salesforce-quickbooks-etc.">4. <strong>API
+    Connectors</strong> (Salesforce, QuickBooks, etc.)</h4>
+    <ul>
+    <li><strong>Purpose</strong>: Integration with external
+    services</li>
+    <li><strong>Key Properties</strong>:
+    <ul>
+    <li><code>operation</code>: Specific API operation (create, update,
+    query, etc.)</li>
+    <li><strong>Authentication</strong>: Handled separately by Tray
+    platform (not visible in project JSON)</li>
+    <li>Request/response mapping via JSONPath</li>
+    </ul></li>
+    </ul>
+    <h4 id="storage-connector-name-storage">5. <strong>Storage
+    Connector</strong> (<code>name: "storage"</code>)</h4>
+    <ul>
+    <li><strong>Purpose</strong>: Temporary data storage and
+    retrieval</li>
+    <li><strong>Operations</strong>: <code>set</code>, <code>get</code>,
+    <code>atomic_increment</code>, etc.</li>
+    </ul>
+    <h4 id="trigger-connectors">6. <strong>Trigger
+    Connectors</strong></h4>
+    <ul>
+    <li><strong>Scheduled</strong> (<code>name: "scheduled"</code>):
+    Cron-based time triggers</li>
+    <li><strong>Webhook</strong> (<code>name: "webhook"</code>): HTTP
+    endpoint triggers (no special security patterns required)</li>
+    <li><strong>Manual</strong> (<code>name: "manual"</code>):
+    User-initiated triggers via Tray UI</li>
+    </ul>
+    <h3 id="jsonpath-usage-patterns">JSONPath Usage Patterns</h3>
+    <p>Tray.ai extensively uses JSONPath for data mapping:</p>
+    <ul>
+    <li><strong>Step References</strong>:
+    <code>$.steps.step-name.response.body.field</code></li>
+    <li><strong>Config References</strong>:
+    <code>$.config.configKey</code></li>
+    <li><strong>Loop Context</strong>:
+    <code>$.steps.loop-name.value.field</code></li>
+    <li><strong>Trigger Data</strong>:
+    <code>$.steps.trigger.data.field</code></li>
+    </ul>
+    <hr />
+    <h2 id="project-configuration-analysis">Project Configuration
+    Analysis</h2>
+    <p>The <code>settings.config</code> object contains project-level
+    configuration:</p>
+    <h3 id="common-configuration-patterns">Common Configuration
+    Patterns</h3>
+    <div class="sourceCode" id="cb6"><pre
+    class="sourceCode json"><code class="sourceCode json"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;config&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;dev&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;testMode&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;company&quot;</span><span class="fu">:</span> <span class="st">&quot;CompanyCode&quot;</span><span class="fu">,</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;accountUrl&quot;</span><span class="fu">:</span> <span class="st">&quot;api.service.com&quot;</span><span class="fu">,</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;customFields&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="er">...</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;queryFilters&quot;</span><span class="fu">:</span> <span class="st">&quot;SOQL/API filters&quot;</span><span class="fu">,</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;cronSchedule&quot;</span><span class="fu">:</span> <span class="st">&quot;0 3,9,15,21 * * *&quot;</span><span class="fu">,</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;limits&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;qboCount&quot;</span><span class="fu">:</span> <span class="dv">500</span><span class="fu">,</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;limit&quot;</span><span class="fu">:</span> <span class="dv">5</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+    <h3 id="configuration-categories">Configuration Categories</h3>
+    <ol type="1">
+    <li><strong>Environment Settings</strong>: <code>dev</code>,
+    <code>testMode</code>, <code>testRun</code></li>
+    <li><strong>Integration Parameters</strong>: API URLs, company
+    codes, account mappings</li>
+    <li><strong>Business Logic</strong>: Custom fields, query filters,
+    processing rules</li>
+    <li><strong>Performance Settings</strong>: Batch sizes, rate limits,
+    concurrency</li>
+    <li><strong>Scheduling</strong>: Cron expressions, frequency
+    settings</li>
+    </ol>
+    <hr />
+    <h2 id="embedded-solution-structure">Embedded Solution
+    Structure</h2>
+    <p>For packaged integrations, the <code>solution</code> object
+    provides deployment configuration:</p>
+    <div class="sourceCode" id="cb7"><pre
+    class="sourceCode json"><code class="sourceCode json"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;solution&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid&quot;</span><span class="fu">,</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;Solution Name&quot;</span><span class="fu">,</span> </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Every six hours syncs your...&quot;</span><span class="fu">,</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;project_id&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid&quot;</span><span class="fu">,</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;tags&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;admin&quot;</span><span class="ot">,</span> <span class="st">&quot;quickbooks&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;custom_fields&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;image&quot;</span><span class="fu">:</span> <span class="st">&quot;https://cdn.logo.svg&quot;</span><span class="fu">,</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;documentation&quot;</span><span class="fu">:</span> <span class="st">&quot;https://docs.url&quot;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;view_schema&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;version&quot;</span><span class="fu">:</span> <span class="dv">6</span><span class="fu">,</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;screens&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="er">...</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;slots&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="er">...</span><span class="ot">]</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+    <h3 id="configuration-schema-components">Configuration Schema
+    Components</h3>
+    <ol type="1">
+    <li><strong>Screens</strong>: UI configuration for user setup</li>
+    <li><strong>Slots</strong>: Configuration parameters with types and
+    validation</li>
+    <li><strong>Usage Tracking</strong>: References to which workflows
+    use which config values</li>
+    <li><strong>External IDs</strong>: Mappings for configuration
+    deployment</li>
+    </ol>
+    <hr />
+    <h2 id="analysis-strategies-for-llms">Analysis Strategies for
+    LLMs</h2>
+    <h3 id="identify-integration-purpose">1. <strong>Identify
+    Integration Purpose</strong></h3>
+    <ul>
+    <li>Read workflow titles and descriptions</li>
+    <li>Analyze config object for business context</li>
+    <li>Look for API connector types to identify integrated systems</li>
+    </ul>
+    <h3 id="map-data-flow">2. <strong>Map Data Flow</strong></h3>
+    <ul>
+    <li>Trace JSONPath references between steps</li>
+    <li>Identify source and destination systems</li>
+    <li>Document transformation logic in script steps</li>
+    </ul>
+    <h3 id="understand-business-logic">3. <strong>Understand Business
+    Logic</strong></h3>
+    <ul>
+    <li>Analyze boolean conditions for decision points</li>
+    <li>Review script steps for custom processing</li>
+    <li>Identify error handling patterns</li>
+    </ul>
+    <h3 id="document-architecture">4. <strong>Document
+    Architecture</strong></h3>
+    <ul>
+    <li>Count and categorize connectors</li>
+    <li>Map workflow dependencies (call-workflow steps)</li>
+    <li>Identify parallel vs sequential processing</li>
+    </ul>
+    <h3 id="extract-configuration-requirements">5. <strong>Extract
+    Configuration Requirements</strong></h3>
+    <ul>
+    <li>List all config object properties</li>
+    <li>Identify required vs optional settings</li>
+    <li>Document external system requirements</li>
+    </ul>
+    <h3 id="performance-analysis">6. <strong>Performance
+    Analysis</strong></h3>
+    <ul>
+    <li>Identify loops and potential bottlenecks</li>
+    <li>Check for concurrent processing capabilities</li>
+    <li>Review rate limiting and batch size configurations</li>
+    </ul>
+    <hr />
+    <h2 id="common-integration-patterns">Common Integration
+    Patterns</h2>
+    <h3 id="scheduled-data-sync">1. <strong>Scheduled Data
+    Sync</strong></h3>
+    <pre><code>Trigger (scheduled) → Query Source → Transform → Update Destination → Handle Errors</code></pre>
+    <h3 id="webhook-processing">2. <strong>Webhook
+    Processing</strong></h3>
+    <pre><code>Trigger (webhook) → Validate Payload → Process Data → Multiple Destinations</code></pre>
+    <h3 id="batch-processing">3. <strong>Batch Processing</strong></h3>
+    <pre><code>Query Data → Loop (Items) → Process Each → Conditional Logic → Error Storage</code></pre>
+    <h3 id="real-time-sync">4. <strong>Real-time Sync</strong></h3>
+    <pre><code>Trigger → Immediate Processing → Bidirectional Updates → Status Reporting</code></pre>
+    <hr />
+    <h2 id="script-extraction-and-analysis">Script Extraction and
+    Analysis</h2>
+    <h3 id="javascript-function-pattern">JavaScript Function
+    Pattern</h3>
+    <p>All Tray.ai scripts follow this pattern:</p>
+    <div class="sourceCode" id="cb12"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">/** </span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="an">@param</span><span class="co"> </span><span class="cv">{Input}</span><span class="co"> input Value comes from the &quot;Variables&quot; field </span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="an">@param</span><span class="co"> </span><span class="cv">{Array.&lt;FileInput&gt;}</span><span class="co"> fileInput Value comes from the &quot;Files&quot; field (rarely used)</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>exports<span class="op">.</span><span class="at">step</span> <span class="op">=</span> <span class="kw">function</span>(input<span class="op">,</span> fileInput) {</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Access input variables: input.variableName</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">// fileInput parameter exists but is typically unused</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Process business logic</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Return result object</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> result<span class="op">;</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <h3 id="common-script-purposes">Common Script Purposes</h3>
+    <ol type="1">
+    <li><strong>Data Transformation</strong>: Converting formats,
+    calculating values</li>
+    <li><strong>Business Logic</strong>: Custom rules and
+    validation</li>
+    <li><strong>API Body Building</strong>: Constructing complex API
+    requests<br />
+    </li>
+    <li><strong>Conditional Processing</strong>: Complex decision
+    logic</li>
+    <li><strong>Error Handling</strong>: Custom error processing and
+    logging</li>
+    </ol>
+    <hr />
+    <h2 id="error-handling-patterns">Error Handling Patterns</h2>
+    <h3 id="standard-error-configuration">Standard Error
+    Configuration</h3>
+    <div class="sourceCode" id="cb13"><pre
+    class="sourceCode json"><code class="sourceCode json"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;error_handling&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;continue_on_error&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;max_retries&quot;</span><span class="fu">:</span> <span class="dv">3</span><span class="fu">,</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;retry_delay&quot;</span><span class="fu">:</span> <span class="dv">1000</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+    <h3 id="error-handling-in-tray">Error Handling in Tray</h3>
+    <ul>
+    <li><strong>Platform-Level</strong>: Tray automatically handles
+    retries and rate limiting errors</li>
+    <li><strong>Workflow-Level</strong>: Custom error handling can be
+    configured per step</li>
+    <li><strong>Common Strategies</strong>:
+    <ol type="1">
+    <li><strong>Continue on Error</strong>: Process next item if current
+    fails</li>
+    <li><strong>Error Storage</strong>: Log failures to storage
+    connector for later review</li>
+    <li><strong>Custom Error Logic</strong>: Use boolean conditions to
+    handle specific error types</li>
+    <li><strong>Graceful Termination</strong>: Break loops or workflows
+    when critical errors occur</li>
+    </ol></li>
+    </ul>
+    <hr />
+    <h2 id="testing-and-validation-patterns">Testing and Validation
+    Patterns</h2>
+    <h3 id="test-workflows">Test Workflows</h3>
+    <p>Test workflows in Tray projects are <strong>standalone
+    workflows</strong> designed for:</p>
+    <ol type="1">
+    <li><strong>Connector Testing</strong>: Testing individual API
+    connectors and their configurations</li>
+    <li><strong>Step Pattern Validation</strong>: Validating small
+    sequences of steps before integrating into main workflows</li>
+    <li><strong>Data Transformation Testing</strong>: Testing script
+    logic and data mapping</li>
+    <li><strong>Configuration Validation</strong>: Ensuring config
+    parameters work correctly across environments</li>
+    </ol>
+    <h3 id="identifying-test-workflows">Identifying Test Workflows</h3>
+    <p>Look for workflows with titles containing: - “Test” - “Debug” -
+    “Dev” - “Validation” - “Sandbox”</p>
+    <h3 id="test-workflow-characteristics">Test Workflow
+    Characteristics</h3>
+    <ul>
+    <li><strong>Simplified Flow</strong>: Usually linear execution
+    without complex loops</li>
+    <li><strong>Manual Triggers</strong>: Typically use manual triggers
+    for on-demand testing</li>
+    <li><strong>Development Mode</strong>: Often have
+    <code>dev: true</code> or <code>testMode: true</code> in config</li>
+    <li><strong>Isolated Logic</strong>: Test specific functionality
+    without side effects</li>
+    <li><strong>Debug Output</strong>: May include extra logging or
+    storage steps for debugging</li>
+    </ul>
+    <h3 id="testing-strategy-in-tray">Testing Strategy in Tray</h3>
+    <ul>
+    <li><strong>No Native Test Framework</strong>: Tray doesn’t have
+    automated testing capabilities</li>
+    <li><strong>Manual Execution</strong>: Tests are run using the “test
+    run” button in Tray UI<br />
+    </li>
+    <li><strong>Individual Workflow Testing</strong>: Each workflow can
+    be tested independently</li>
+    <li><strong>Environment Isolation</strong>: Test workflows should
+    use sandbox/dev environments</li>
+    </ul>
+    <hr />
+    <h2 id="questions-to-guide-analysis">Questions to Guide
+    Analysis</h2>
+    <p>When analyzing a Tray.ai project JSON, consider these
+    questions:</p>
+    <h3 id="business-context">Business Context</h3>
+    <ul>
+    <li>What business problem does this integration solve?</li>
+    <li>Which systems are being integrated?</li>
+    <li>What data is being synchronized?</li>
+    <li>How frequently does synchronization occur?</li>
+    </ul>
+    <h3 id="technical-implementation">Technical Implementation</h3>
+    <ul>
+    <li>What triggers initiate the workflows?</li>
+    <li>How is data transformed between systems?</li>
+    <li>What error handling strategies are employed?</li>
+    <li>Are there performance optimization techniques used?</li>
+    </ul>
+    <h3 id="configuration-management">Configuration Management</h3>
+    <ul>
+    <li>What parameters can be configured by end users?</li>
+    <li>Are there environment-specific settings (dev/prod)?</li>
+    <li>How are API credentials and authentication handled?</li>
+    <li>What customization options are available?</li>
+    </ul>
+    <h3 id="dependencies-and-requirements">Dependencies and
+    Requirements</h3>
+    <ul>
+    <li>What external systems are required?</li>
+    <li>Are there API rate limits or quotas to consider?</li>
+    <li>What permissions or access levels are needed?</li>
+    <li>Are there data volume or processing time constraints?</li>
+    </ul>
+    <hr />
+    <h2 id="best-practices-for-llm-analysis">Best Practices for LLM
+    Analysis</h2>
+    <ol type="1">
+    <li><strong>Start with High-Level Structure</strong>: Understand the
+    project purpose before diving into details</li>
+    <li><strong>Follow Data Flow</strong>: Trace data from trigger
+    through transformation to destination<br />
+    </li>
+    <li><strong>Identify Key Components</strong>: Focus on scripts,
+    conditions, and API connectors first</li>
+    <li><strong>Separate Production from Testing</strong>: Distinguish
+    between production workflows and test/debug workflows</li>
+    <li><strong>Understand Platform Capabilities</strong>: Remember that
+    Tray handles authentication, rate limiting, and retries
+    automatically</li>
+    <li><strong>Document Dependencies</strong>: Note all external system
+    requirements and configurations</li>
+    <li><strong>Consider Scale</strong>: Analyze for performance
+    implications and bottlenecks</li>
+    <li><strong>Extract Business Rules</strong>: Document the business
+    logic embedded in conditions and scripts</li>
+    <li><strong>Map Configuration</strong>: Understand what can be
+    customized vs hardcoded values</li>
+    <li><strong>Version Context</strong>: The version object represents
+    the current active state of all workflow components</li>
+    </ol>
+    <hr />
+    <h2 id="extracting-business-logic-for-documentation">Extracting
+    Business Logic for Documentation</h2>
+    <p>When creating documentation and architectural diagrams, focus on
+    these key areas:</p>
+    <h3 id="business-process-flow">1. <strong>Business Process
+    Flow</strong></h3>
+    <ul>
+    <li><strong>Entry Points</strong>: Identify all trigger types and
+    their purposes</li>
+    <li><strong>Data Sources</strong>: Map where data originates (which
+    APIs, databases, files)</li>
+    <li><strong>Transformations</strong>: Document how data is modified
+    in script steps</li>
+    <li><strong>Destinations</strong>: Identify where processed data is
+    sent</li>
+    <li><strong>Decision Points</strong>: Map all boolean conditions and
+    their business logic</li>
+    </ul>
+    <h3 id="configuration-dependencies">2. <strong>Configuration
+    Dependencies</strong></h3>
+    <ul>
+    <li><strong>Environment Settings</strong>: Document dev vs
+    production configurations</li>
+    <li><strong>Business Parameters</strong>: Extract business rules
+    from config objects</li>
+    <li><strong>Integration Settings</strong>: Document API endpoints,
+    query filters, batch sizes</li>
+    <li><strong>Customization Points</strong>: Identify what end-users
+    can configure</li>
+    </ul>
+    <h3 id="error-handling-strategy">3. <strong>Error Handling
+    Strategy</strong></h3>
+    <ul>
+    <li><strong>Failure Points</strong>: Identify where errors are most
+    likely to occur</li>
+    <li><strong>Recovery Logic</strong>: Document how the system handles
+    different error types</li>
+    <li><strong>Business Impact</strong>: Understand what happens when
+    specific steps fail</li>
+    <li><strong>Monitoring</strong>: Identify logging and storage
+    patterns for failed operations</li>
+    </ul>
+    <h3 id="performance-characteristics">4. <strong>Performance
+    Characteristics</strong></h3>
+    <ul>
+    <li><strong>Batch Processing</strong>: Document loop patterns and
+    batch sizes</li>
+    <li><strong>Scheduling</strong>: Extract timing information from
+    cron expressions</li>
+    <li><strong>Concurrency</strong>: Identify parallel processing
+    capabilities</li>
+    <li><strong>Rate Limiting</strong>: Understand throughput
+    constraints</li>
+    </ul>
+    <h3 id="security-and-compliance">5. <strong>Security and
+    Compliance</strong></h3>
+    <ul>
+    <li><strong>Data Handling</strong>: Document sensitive data
+    processing patterns</li>
+    <li><strong>Environment Isolation</strong>: Understand test vs
+    production data separation</li>
+    <li><strong>Audit Trail</strong>: Identify logging and tracking
+    mechanisms</li>
+    </ul>
+    <p>This guide provides the foundation for deep analysis of any
+    Tray.ai project JSON structure. Use it as a reference to understand
+    the relationships between components and extract meaningful insights
+    about integration architecture and business logic.</p>
+  </div>
+
+  <div class="brand-footer">
+    <hr>
+    <p>Ohanafy — The AI-Powered Operating System for Beverage</p>
+  </div>
+</body>
+</html>

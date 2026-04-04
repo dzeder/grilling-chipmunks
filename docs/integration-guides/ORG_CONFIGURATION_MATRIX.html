@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> — Ohanafy Pricing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100;400;700&display=swap" rel="stylesheet">
+  <style>
+    /* === Ohanafy 2025 Brand Styles === */
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --true-black: #000000;
+      --true-white: #FFFFFF;
+      --mellow: #E4F223;
+      --cork: #F4F2F0;
+      --dark-denim: #4A5F80;
+      --light-denim: #B1C7EB;
+      --dark-grey: #545454;
+    }
+
+    body {
+      font-family: 'Geist', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.6;
+      color: var(--true-black);
+      background: var(--cork);
+    }
+
+    /* --- Header Banner --- */
+    .brand-header {
+      width: 100%;
+      background: var(--true-black);
+      padding: 2.5rem 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-header::after {
+      content: '';
+      position: absolute;
+      right: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 120px;
+      height: 120px;
+      background-image: url('https://40881726.fs1.hubspotusercontent-na1.net/hubfs/40881726/Brand%20Assets/Ohanafy%20Black%20Emblem.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0.3;
+      filter: invert(1);
+    }
+
+    .brand-header .tagline {
+      font-family: 'Geist', system-ui, sans-serif;
+      font-weight: 700;
+      font-size: 1.75rem;
+      letter-spacing: 0.02em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-header .tagline .highlight {
+      color: var(--mellow);
+    }
+
+    .brand-header .tagline .brand-name {
+      color: var(--true-white);
+    }
+
+    /* --- Main Content --- */
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+      background: var(--true-white);
+      min-height: calc(100vh - 200px);
+    }
+
+    .doc-title {
+      font-size: 36px;
+      font-weight: 100;
+      color: var(--true-black);
+      margin-bottom: 0.5rem;
+      border-bottom: 3px solid var(--dark-denim);
+      padding-bottom: 1rem;
+    }
+
+    /* --- Typography --- */
+    h1 { font-size: 24px; font-weight: 400; color: var(--true-black); margin: 2rem 0 1rem; }
+    h2 { font-size: 18px; font-weight: 700; color: var(--dark-denim); margin: 1.75rem 0 0.75rem; }
+    h3 { font-size: 16px; font-weight: 700; color: var(--dark-denim); margin: 1.5rem 0 0.5rem; }
+    p  { margin: 0 0 1rem; }
+    a  { color: var(--dark-denim); text-decoration: underline; }
+    a:hover { color: var(--true-black); }
+
+    ul, ol { margin: 0 0 1rem 1.5rem; }
+    li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Geist Mono', ui-monospace, monospace;
+      font-size: 0.9em;
+      background: var(--cork);
+      padding: 0.15em 0.4em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: var(--cork);
+      padding: 1rem 1.25rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 0 0 1rem;
+      border-left: 3px solid var(--dark-denim);
+    }
+
+    pre code { background: none; padding: 0; }
+
+    blockquote {
+      border-left: 4px solid var(--mellow);
+      padding: 0.75rem 1.25rem;
+      margin: 0 0 1rem;
+      background: var(--cork);
+      color: var(--dark-grey);
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: var(--cork);
+      margin: 2rem 0;
+    }
+
+    /* --- Tables --- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 15px;
+    }
+
+    thead th {
+      background: var(--dark-denim);
+      color: var(--true-white);
+      font-weight: 700;
+      text-align: left;
+      padding: 0.65rem 0.9rem;
+      border: 1px solid var(--dark-denim);
+    }
+
+    tbody td {
+      background: var(--cork);
+      color: var(--true-black);
+      padding: 0.55rem 0.9rem;
+      border: 1px solid var(--dark-denim);
+    }
+
+    tbody tr:hover td {
+      background: var(--light-denim);
+    }
+
+    /* --- Utility --- */
+    .time-tracking {
+      background: var(--cork);
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      border-left: 3px solid var(--dark-denim);
+    }
+
+    mark, .highlight-inline {
+      background: var(--mellow);
+      color: var(--true-black);
+      padding: 0.05em 0.25em;
+      border-radius: 2px;
+    }
+
+    /* --- Footer --- */
+    .brand-footer {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem;
+      text-align: center;
+      color: var(--dark-grey);
+      font-size: 13px;
+    }
+
+    .brand-footer hr {
+      background: var(--dark-denim);
+      margin-bottom: 1rem;
+    }
+
+    /* --- Doc Nav Bar --- */
+    .doc-nav {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--dark-denim);
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+
+    .doc-nav a {
+      color: var(--true-white);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 400;
+      padding: 0.6rem 0.85rem;
+      white-space: nowrap;
+      opacity: 0.75;
+      transition: opacity 0.15s, background 0.15s;
+      border-bottom: 2px solid transparent;
+    }
+
+    .doc-nav a:hover {
+      opacity: 1;
+      background: rgba(255,255,255,0.08);
+      color: var(--true-white);
+    }
+
+    .doc-nav a.current {
+      opacity: 1;
+      border-bottom-color: var(--mellow);
+      font-weight: 700;
+    }
+
+    .doc-nav .nav-demo {
+      font-weight: 700;
+      opacity: 1;
+      margin-right: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    /* --- Print --- */
+    @media print {
+      body { background: white; }
+      .content { box-shadow: none; padding: 0; }
+      .brand-header { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .doc-nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="brand-header">
+    <div class="tagline">
+      <span class="highlight">Modern beverage runs on</span>
+      <span class="brand-name">OHANAFY.</span>
+    </div>
+  </div>
+
+  <div class="doc-nav" id="docNav">
+    <a class="nav-demo" id="navDemo" href="#">&#8592; Demo App</a>
+    <a data-doc="promotion-pricing-model" href="#">Pricing Model</a>
+    <a data-doc="conflict-detection" href="#">Conflict Detection</a>
+    <a data-doc="duplicate-pricing-group" href="#">Duplicate Group</a>
+    <a data-doc="test-cases" href="#">Test Cases</a>
+    <a data-doc="database-design" href="#">Database Design</a>
+  </div>
+  <script>
+  (function() {
+    var path = window.location.pathname;
+    var segments = path.split('/');
+    var docsIdx = -1;
+    for (var i = segments.length - 1; i >= 0; i--) {
+      if (segments[i] === 'docs') { docsIdx = i; break; }
+    }
+    var base;
+    if (docsIdx !== -1) {
+      var depth = segments.length - docsIdx - 2;
+      base = '';
+      for (var j = 0; j <= depth; j++) base += '../';
+    } else {
+      base = '';
+    }
+    document.getElementById('navDemo').href = base + 'demo/index.html';
+    var docs = {
+      'promotion-pricing-model': 'docs/promotion-pricing-model.html',
+      'conflict-detection':      'docs/conflict-detection.html',
+      'duplicate-pricing-group': 'docs/duplicate-pricing-group.html',
+      'test-cases':              'docs/test-cases.html',
+      'database-design':         'docs/technical/database-design.html'
+    };
+    var current = path.split('/').pop().replace('.html', '');
+    var links = document.querySelectorAll('#docNav a[data-doc]');
+    for (var i = 0; i < links.length; i++) {
+      var key = links[i].getAttribute('data-doc');
+      links[i].href = base + docs[key];
+      if (key === current) links[i].classList.add('current');
+    }
+  })();
+  </script>
+
+  <div class="content">
+    <div class="doc-title"></div>
+    <h1 id="org-configuration-matrix">Org Configuration Matrix</h1>
+    <p><strong>Environment-Specific Field Mappings and Constraints for
+    OHFY Integrations</strong></p>
+    <p>Document org-specific configurations, field mappings, and
+    constraints for the Distro production environment and other OHFY
+    deployments.</p>
+    <hr />
+    <h2 id="distro-production-environment">🏢 Distro Production
+    Environment</h2>
+    <h3 id="environment-overview">Environment Overview</h3>
+    <ul>
+    <li><strong>Org Type</strong>: Production Salesforce org with
+    OHFY-Core package</li>
+    <li><strong>API Version</strong>: 59.0</li>
+    <li><strong>OHFY Package Version</strong>: 1.90+</li>
+    <li><strong>Total Custom Objects</strong>: 180 (140 from OHFY-Core +
+    40 org-specific)</li>
+    <li><strong>Managed Packages</strong>: Maps, Geocoding, and
+    additional third-party packages</li>
+    <li><strong>Custom Apex Classes</strong>: 3 unmanaged
+    (B_Maps_RouteBuilder, B_Maps_RouteBuilder_T,
+    WalkthroughController)</li>
+    </ul>
+    <h3 id="core-ohfy-objects-configuration">Core OHFY Objects
+    Configuration</h3>
+    <h4 id="ohfy__order__c">**ohfy__Order__c**</h4>
+    <div class="sourceCode" id="cb1"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> OrderConfiguration <span class="op">=</span> {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">object</span><span class="op">:</span> <span class="st">&quot;ohfy__Order__c&quot;</span><span class="op">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Required fields for integration</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">requiredFields</span><span class="op">:</span> [</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__External_ID__c&quot;</span><span class="op">,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Customer__c&quot;</span><span class="op">,</span>        <span class="co">// Master-Detail(Account)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Order_Date__c&quot;</span><span class="op">,</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Status__c&quot;</span><span class="op">,</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Sales_Rep__c&quot;</span><span class="op">,</span>       <span class="co">// Lookup(User)</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Delivery_Pickup_Date__c&quot;</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  ]<span class="op">,</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Status picklist values (exact values from org)</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">statusPicklistValues</span><span class="op">:</span> [</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;New&quot;</span><span class="op">,</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Scheduled&quot;</span><span class="op">,</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;In Progress&quot;</span><span class="op">,</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Picking&quot;</span><span class="op">,</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Loaded&quot;</span><span class="op">,</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Out For Delivery&quot;</span><span class="op">,</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Delivered&quot;</span><span class="op">,</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Complete&quot;</span><span class="op">,</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Cancelled&quot;</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  ]<span class="op">,</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Read-only fields (calculated by Salesforce)</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="dt">readOnlyFields</span><span class="op">:</span> [</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Order_Total__c&quot;</span><span class="op">,</span>      <span class="co">// Formula field</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Sub_Total__c&quot;</span><span class="op">,</span>        <span class="co">// Rollup from Order Items</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Sales_Tax__c&quot;</span><span class="op">,</span>        <span class="co">// Calculated field</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Order_Number__c&quot;</span><span class="op">,</span>     <span class="co">// Auto-number</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Name&quot;</span><span class="op">,</span>                      <span class="co">// Auto-generated</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;CreatedDate&quot;</span><span class="op">,</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;LastModifiedDate&quot;</span><span class="op">,</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;SystemModstamp&quot;</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  ]<span class="op">,</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Field mappings for common external systems</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="dt">externalMappings</span><span class="op">:</span> {</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    <span class="dt">edi</span><span class="op">:</span> {</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__External_ID__c&quot;</span><span class="op">:</span> <span class="st">&quot;document_number&quot;</span><span class="op">,</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Order_Date__c&quot;</span><span class="op">:</span> <span class="st">&quot;order_date&quot;</span><span class="op">,</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Customer_Reference__c&quot;</span><span class="op">:</span> <span class="st">&quot;customer_po_number&quot;</span><span class="op">,</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Delivery_Instructions__c&quot;</span><span class="op">:</span> <span class="st">&quot;delivery_notes&quot;</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    <span class="dt">quickbooks</span><span class="op">:</span> {</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__External_ID__c&quot;</span><span class="op">:</span> <span class="st">&quot;qb_transaction_id&quot;</span><span class="op">,</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Order_Date__c&quot;</span><span class="op">:</span> <span class="st">&quot;txn_date&quot;</span><span class="op">,</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__QB_Sync_Status__c&quot;</span><span class="op">:</span> <span class="st">&quot;sync_status&quot;</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    <span class="dt">erp</span><span class="op">:</span> {</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__External_ID__c&quot;</span><span class="op">:</span> <span class="st">&quot;erp_order_id&quot;</span><span class="op">,</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__ERP_System_ID__c&quot;</span><span class="op">:</span> <span class="st">&quot;system_identifier&quot;</span><span class="op">,</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Warehouse_Location__c&quot;</span><span class="op">:</span> <span class="st">&quot;fulfillment_location&quot;</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Validation rules that affect integrations</span></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>  <span class="dt">validationRules</span><span class="op">:</span> [</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>      <span class="dt">name</span><span class="op">:</span> <span class="st">&quot;Order_Date_Not_Future&quot;</span><span class="op">,</span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>      <span class="dt">condition</span><span class="op">:</span> <span class="st">&quot;ohfy__Order_Date__c &gt; TODAY()&quot;</span><span class="op">,</span></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>      <span class="dt">message</span><span class="op">:</span> <span class="st">&quot;Order date cannot be in the future&quot;</span></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>      <span class="dt">name</span><span class="op">:</span> <span class="st">&quot;Required_Customer&quot;</span><span class="op">,</span></span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>      <span class="dt">condition</span><span class="op">:</span> <span class="st">&quot;ISBLANK(ohfy__Customer__c)&quot;</span><span class="op">,</span></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>      <span class="dt">message</span><span class="op">:</span> <span class="st">&quot;Customer is required&quot;</span></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>  ]<span class="op">,</span></span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Automation that triggers on record creation/update</span></span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a>  <span class="dt">automationTriggers</span><span class="op">:</span> [</span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;TA_Order_AI_GoalInvoiceCreator&quot;</span><span class="op">,</span>    <span class="co">// Goal tracking and invoice generation</span></span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;TA_Order_AU_NameSetter&quot;</span><span class="op">,</span>            <span class="co">// Order name auto-generation</span></span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;TA_Order_AI_DeliveryAssociator&quot;</span>     <span class="co">// Delivery relationship logic</span></span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <h4 id="ohfy__order_item__c">**ohfy__Order_Item__c**</h4>
+    <div class="sourceCode" id="cb2"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> OrderItemConfiguration <span class="op">=</span> {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">object</span><span class="op">:</span> <span class="st">&quot;ohfy__Order_Item__c&quot;</span><span class="op">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Required fields for integration</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">requiredFields</span><span class="op">:</span> [</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__External_ID__c&quot;</span><span class="op">,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Order__c&quot;</span><span class="op">,</span>           <span class="co">// Master-Detail(ohfy__Order__c)</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Item__c&quot;</span><span class="op">,</span>            <span class="co">// Lookup(ohfy__Item__c)</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Ordered_Quantity__c&quot;</span><span class="op">,</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Unit_Price__c&quot;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  ]<span class="op">,</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Auto-calculated fields</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">calculatedFields</span><span class="op">:</span> {</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Sub_Total__c&quot;</span><span class="op">:</span> <span class="st">&quot;ohfy__Ordered_Quantity__c * ohfy__Unit_Price__c&quot;</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Read-only fields</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">readOnlyFields</span><span class="op">:</span> [</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Order_Item_Number__c&quot;</span><span class="op">,</span>  <span class="co">// Auto-number</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Outstanding_Quantity__c&quot;</span><span class="op">,</span> <span class="co">// Formula</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Name&quot;</span><span class="op">,</span>                        <span class="co">// Auto-generated</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;CreatedDate&quot;</span><span class="op">,</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;LastModifiedDate&quot;</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  ]<span class="op">,</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Item validation constraints</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="dt">itemConstraints</span><span class="op">:</span> {</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="dt">activeItemsOnly</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="dt">excludeTypes</span><span class="op">:</span> [<span class="st">&quot;Keg Shell&quot;</span>]<span class="op">,</span>    <span class="co">// From U_Order_Items.cls logic</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="dt">inventoryCheck</span><span class="op">:</span> <span class="kw">true</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>  <span class="co">// External system mappings</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>  <span class="dt">externalMappings</span><span class="op">:</span> {</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    <span class="dt">edi</span><span class="op">:</span> {</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__External_ID__c&quot;</span><span class="op">:</span> <span class="st">&quot;line_item_id&quot;</span><span class="op">,</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__UPC_Code__c&quot;</span><span class="op">:</span> <span class="st">&quot;product_upc&quot;</span><span class="op">,</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Ordered_Quantity__c&quot;</span><span class="op">:</span> <span class="st">&quot;quantity_ordered&quot;</span><span class="op">,</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Unit_Price__c&quot;</span><span class="op">:</span> <span class="st">&quot;unit_price&quot;</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    <span class="dt">inventory</span><span class="op">:</span> {</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Item_SKU__c&quot;</span><span class="op">:</span> <span class="st">&quot;sku&quot;</span><span class="op">,</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Warehouse_Location__c&quot;</span><span class="op">:</span> <span class="st">&quot;location_code&quot;</span><span class="op">,</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Lot_Number__c&quot;</span><span class="op">:</span> <span class="st">&quot;batch_id&quot;</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <h4 id="ohfy__credit__c">**ohfy__Credit__c**</h4>
+    <div class="sourceCode" id="cb3"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> CreditConfiguration <span class="op">=</span> {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">object</span><span class="op">:</span> <span class="st">&quot;ohfy__Credit__c&quot;</span><span class="op">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Required fields for integration</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">requiredFields</span><span class="op">:</span> [</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__External_ID__c&quot;</span><span class="op">,</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Account__c&quot;</span><span class="op">,</span>         <span class="co">// Master-Detail(Account)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Amount__c&quot;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  ]<span class="op">,</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Amount validation</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">amountConstraints</span><span class="op">:</span> {</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">minimumAmount</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span>           <span class="co">// Must be non-negative</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">maximumAmount</span><span class="op">:</span> <span class="kw">null</span><span class="op">,</span>        <span class="co">// No upper limit</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">decimalPlaces</span><span class="op">:</span> <span class="dv">2</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Credit type picklist values</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">creditTypeValues</span><span class="op">:</span> [</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Payment&quot;</span><span class="op">,</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Refund&quot;</span><span class="op">,</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Adjustment&quot;</span><span class="op">,</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Discount&quot;</span><span class="op">,</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Write-off&quot;</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  ]<span class="op">,</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  <span class="co">// External system mappings</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  <span class="dt">externalMappings</span><span class="op">:</span> {</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="dt">accounting</span><span class="op">:</span> {</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__External_ID__c&quot;</span><span class="op">:</span> <span class="st">&quot;payment_id&quot;</span><span class="op">,</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Credit_Type__c&quot;</span><span class="op">:</span> <span class="st">&quot;payment_type&quot;</span><span class="op">,</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;ohfy__Reference_Number__c&quot;</span><span class="op">:</span> <span class="st">&quot;check_number&quot;</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <h3 id="extended-objects-org-specific">Extended Objects
+    (Org-Specific)</h3>
+    <h4 id="maps-integration-objects"><strong>Maps Integration
+    Objects</strong></h4>
+    <div class="sourceCode" id="cb4"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> MapsConfiguration <span class="op">=</span> {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// B_Maps custom classes for route optimization</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">customClasses</span><span class="op">:</span> [</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;B_Maps_RouteBuilder&quot;</span><span class="op">,</span>      <span class="co">// Route optimization logic</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;B_Maps_RouteBuilder_T&quot;</span>     <span class="co">// Test class for route builder</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  ]<span class="op">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Maps package integration</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">mapsObjects</span><span class="op">:</span> [</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;maps__LiveAsset__c&quot;</span><span class="op">,</span>       <span class="co">// Live tracking assets</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;maps__Route__c&quot;</span><span class="op">,</span>           <span class="co">// Delivery routes</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;maps__Stop__c&quot;</span>             <span class="co">// Route stops</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  ]<span class="op">,</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Integration points with OHFY orders</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">integrationFields</span><span class="op">:</span> {</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Order__c&quot;</span><span class="op">:</span> {</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;maps__Route__c&quot;</span><span class="op">:</span> <span class="st">&quot;Route_Assignment__c&quot;</span><span class="op">,</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;maps__Stop_Sequence__c&quot;</span><span class="op">:</span> <span class="st">&quot;Delivery_Sequence__c&quot;</span><span class="op">,</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;maps__Estimated_Arrival__c&quot;</span><span class="op">:</span> <span class="st">&quot;ETA__c&quot;</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <h3 id="payment-and-finance-configuration">Payment and Finance
+    Configuration</h3>
+    <h4 id="payment-methods"><strong>Payment Methods</strong></h4>
+    <div class="sourceCode" id="cb5"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> PaymentConfiguration <span class="op">=</span> {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Valid payment method picklist values</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">paymentMethods</span><span class="op">:</span> [</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Check&quot;</span><span class="op">,</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Cash&quot;</span><span class="op">,</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;EFT&quot;</span><span class="op">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Quickbooks Electronic Invoice&quot;</span><span class="op">,</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Ohanafy&quot;</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  ]<span class="op">,</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Valid payment terms</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">paymentTerms</span><span class="op">:</span> [</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Due on Receipt&quot;</span><span class="op">,</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;10 Days&quot;</span><span class="op">,</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;15 Days&quot;</span><span class="op">,</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;20 Days&quot;</span><span class="op">,</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;30 Days&quot;</span><span class="op">,</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;60 Days&quot;</span><span class="op">,</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;90 Days&quot;</span><span class="op">,</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Custom&quot;</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  ]<span class="op">,</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="co">// QuickBooks integration mappings</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  <span class="dt">quickbooksMapping</span><span class="op">:</span> {</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Check&quot;</span><span class="op">:</span> <span class="st">&quot;Check&quot;</span><span class="op">,</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Cash&quot;</span><span class="op">:</span> <span class="st">&quot;Cash&quot;</span><span class="op">,</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;EFT&quot;</span><span class="op">:</span> <span class="st">&quot;Electronic Bank Transfer&quot;</span><span class="op">,</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Quickbooks Electronic Invoice&quot;</span><span class="op">:</span> <span class="st">&quot;Electronic Invoice&quot;</span><span class="op">,</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Ohanafy&quot;</span><span class="op">:</span> <span class="st">&quot;Other&quot;</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <hr />
+    <h2 id="environment-specific-configurations">🔧 Environment-Specific
+    Configurations</h2>
+    <h3 id="development-environment">Development Environment</h3>
+    <div class="sourceCode" id="cb6"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> DevEnvironmentConfig <span class="op">=</span> {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">environment</span><span class="op">:</span> <span class="st">&quot;development&quot;</span><span class="op">,</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Modified picklist values for testing</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">testStatusValues</span><span class="op">:</span> [</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Test - New&quot;</span><span class="op">,</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Test - In Progress&quot;</span><span class="op">,</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Test - Complete&quot;</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  ]<span class="op">,</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Test data prefixes</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">externalIdPrefix</span><span class="op">:</span> <span class="st">&quot;DEV-&quot;</span><span class="op">,</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Relaxed validation rules</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">skipValidation</span><span class="op">:</span> [</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Order_Date_Not_Future&quot;</span><span class="op">,</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Required_Delivery_Date&quot;</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  ]<span class="op">,</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Test user assignments</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">defaultSalesRep</span><span class="op">:</span> <span class="st">&quot;005XX000001TEST&quot;</span><span class="op">,</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  <span class="dt">defaultCustomer</span><span class="op">:</span> <span class="st">&quot;003XX000004TEST&quot;</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <h3 id="staging-environment">Staging Environment</h3>
+    <div class="sourceCode" id="cb7"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> StagingEnvironmentConfig <span class="op">=</span> {</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">environment</span><span class="op">:</span> <span class="st">&quot;staging&quot;</span><span class="op">,</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Production-like configuration for final testing</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">enforceAllValidation</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Staging-specific external ID prefix</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">externalIdPrefix</span><span class="op">:</span> <span class="st">&quot;STG-&quot;</span><span class="op">,</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Limited user set for testing</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">allowedUsers</span><span class="op">:</span> [</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;005XX000001STAG1&quot;</span><span class="op">,</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;005XX000001STAG2&quot;</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <hr />
+    <h2 id="field-type-reference">📊 Field Type Reference</h2>
+    <h3 id="data-type-mappings">Data Type Mappings</h3>
+    <div class="sourceCode" id="cb8"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> FieldTypeMapping <span class="op">=</span> {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Salesforce to JavaScript type conversion</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Text&quot;</span><span class="op">:</span> <span class="st">&quot;string&quot;</span><span class="op">,</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Text Area&quot;</span><span class="op">:</span> <span class="st">&quot;string&quot;</span><span class="op">,</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Rich Text Area&quot;</span><span class="op">:</span> <span class="st">&quot;string&quot;</span><span class="op">,</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Number&quot;</span><span class="op">:</span> <span class="st">&quot;number&quot;</span><span class="op">,</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Currency&quot;</span><span class="op">:</span> <span class="st">&quot;number&quot;</span><span class="op">,</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Percent&quot;</span><span class="op">:</span> <span class="st">&quot;number&quot;</span><span class="op">,</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Date&quot;</span><span class="op">:</span> <span class="st">&quot;string&quot;</span><span class="op">,</span>          <span class="co">// YYYY-MM-DD format</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Date/Time&quot;</span><span class="op">:</span> <span class="st">&quot;string&quot;</span><span class="op">,</span>     <span class="co">// ISO 8601 format</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Checkbox&quot;</span><span class="op">:</span> <span class="st">&quot;boolean&quot;</span><span class="op">,</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Picklist&quot;</span><span class="op">:</span> <span class="st">&quot;string&quot;</span><span class="op">,</span>      <span class="co">// Must match exact values</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Multi-Select Picklist&quot;</span><span class="op">:</span> <span class="st">&quot;string&quot;</span><span class="op">,</span> <span class="co">// Semicolon-separated</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Lookup&quot;</span><span class="op">:</span> <span class="st">&quot;string&quot;</span><span class="op">,</span>        <span class="co">// Salesforce ID (18 chars)</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Master-Detail&quot;</span><span class="op">:</span> <span class="st">&quot;string&quot;</span><span class="op">,</span> <span class="co">// Salesforce ID (18 chars)</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Formula&quot;</span><span class="op">:</span> <span class="kw">null</span><span class="op">,</span>           <span class="co">// Read-only, cannot be set</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Rollup Summary&quot;</span><span class="op">:</span> <span class="kw">null</span><span class="op">,</span>    <span class="co">// Read-only, cannot be set</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Auto Number&quot;</span><span class="op">:</span> <span class="kw">null</span>        <span class="co">// Read-only, system-generated</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <h3 id="field-length-limits">Field Length Limits</h3>
+    <div class="sourceCode" id="cb9"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> FieldLengthLimits <span class="op">=</span> {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;ohfy__External_ID__c&quot;</span><span class="op">:</span> <span class="dv">255</span><span class="op">,</span>      <span class="co">// Standard external ID field</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Name&quot;</span><span class="op">:</span> <span class="dv">80</span><span class="op">,</span>                       <span class="co">// Standard name field</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;ohfy__Description__c&quot;</span><span class="op">:</span> <span class="dv">32000</span><span class="op">,</span>    <span class="co">// Long text area</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;ohfy__Notes__c&quot;</span><span class="op">:</span> <span class="dv">1000</span><span class="op">,</span>           <span class="co">// Standard text area</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;ohfy__Customer_Reference__c&quot;</span><span class="op">:</span> <span class="dv">100</span> <span class="co">// Customer PO numbers, etc.</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <hr />
+    <h2 id="integration-constraints">🚨 Integration Constraints</h2>
+    <h3 id="api-limits-and-considerations">API Limits and
+    Considerations</h3>
+    <div class="sourceCode" id="cb10"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> APIConstraints <span class="op">=</span> {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Salesforce API limits</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">dailyAPILimit</span><span class="op">:</span> <span class="dv">15000</span><span class="op">,</span>           <span class="co">// Typical org limit</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bulkAPIBatchSize</span><span class="op">:</span> <span class="dv">10000</span><span class="op">,</span>        <span class="co">// Maximum records per batch</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">restAPIBatchSize</span><span class="op">:</span> <span class="dv">200</span><span class="op">,</span>          <span class="co">// Maximum records per REST call</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">// SOQL query limits</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">maxSOQLResults</span><span class="op">:</span> <span class="dv">50000</span><span class="op">,</span>          <span class="co">// Standard SOQL limit</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">maxSOQLComplexity</span><span class="op">:</span> <span class="dv">20</span><span class="op">,</span>          <span class="co">// Maximum relationship depth</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Governor limits in automation</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">maxDMLOperations</span><span class="op">:</span> <span class="dv">150</span><span class="op">,</span>          <span class="co">// Per transaction</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">maxSOQLQueries</span><span class="op">:</span> <span class="dv">100</span><span class="op">,</span>            <span class="co">// Per transaction</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">maxCPUTime</span><span class="op">:</span> <span class="dv">10000</span>              <span class="co">// Milliseconds</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <h3 id="bulk-operation-configuration">Bulk Operation
+    Configuration</h3>
+    <div class="sourceCode" id="cb11"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> BulkOperationConfig <span class="op">=</span> {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Recommended batch sizes by object</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">batchSizes</span><span class="op">:</span> {</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Order__c&quot;</span><span class="op">:</span> <span class="dv">100</span><span class="op">,</span>        <span class="co">// Conservative due to automation</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Order_Item__c&quot;</span><span class="op">:</span> <span class="dv">200</span><span class="op">,</span>   <span class="co">// Simpler object, larger batches</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ohfy__Credit__c&quot;</span><span class="op">:</span> <span class="dv">500</span><span class="op">,</span>       <span class="co">// Simple object, largest batches</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Account&quot;</span><span class="op">:</span> <span class="dv">50</span>                 <span class="co">// Complex standard object</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Retry configuration</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">retryConfig</span><span class="op">:</span> {</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">maxRetries</span><span class="op">:</span> <span class="dv">3</span><span class="op">,</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">retryDelay</span><span class="op">:</span> <span class="dv">1000</span><span class="op">,</span>             <span class="co">// Milliseconds</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">backoffMultiplier</span><span class="op">:</span> <span class="dv">2</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Error handling</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">continueOnError</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span>          <span class="co">// Process remaining records on partial failure</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">storeFailedRecords</span><span class="op">:</span> <span class="kw">true</span>        <span class="co">// Keep failed records for retry</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <hr />
+    <h2 id="org-specific-business-rules">🔍 Org-Specific Business
+    Rules</h2>
+    <h3 id="distro-production-business-rules">Distro Production Business
+    Rules</h3>
+    <div class="sourceCode" id="cb12"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> DistroBusinessRules <span class="op">=</span> {</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Order processing rules</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">orderRules</span><span class="op">:</span> {</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">requireDeliveryDate</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">allowBackorders</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">autoAssignSalesRep</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">generateInvoiceOnComplete</span><span class="op">:</span> <span class="kw">true</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Inventory management</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">inventoryRules</span><span class="op">:</span> {</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">checkAvailability</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">reserveOnOrder</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">allowPartialShipments</span><span class="op">:</span> <span class="kw">false</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Customer-specific rules</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">customerRules</span><span class="op">:</span> {</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    <span class="dt">requireAccountSetup</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    <span class="dt">validateCreditLimit</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    <span class="dt">enforcePricingTiers</span><span class="op">:</span> <span class="kw">true</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Integration-specific rules</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>  <span class="dt">integrationRules</span><span class="op">:</span> {</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    <span class="dt">requireExternalID</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    <span class="dt">validateDuplicates</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    <span class="dt">logAllChanges</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    <span class="dt">notifyOnFailure</span><span class="op">:</span> <span class="kw">true</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <h3 id="custom-validation-rules">Custom Validation Rules</h3>
+    <div class="sourceCode" id="cb13"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> CustomValidationRules <span class="op">=</span> {</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Order validation</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Order_Date_Required&quot;</span><span class="op">:</span> {</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">object</span><span class="op">:</span> <span class="st">&quot;ohfy__Order__c&quot;</span><span class="op">,</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">condition</span><span class="op">:</span> <span class="st">&quot;ISBLANK(ohfy__Order_Date__c)&quot;</span><span class="op">,</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">message</span><span class="op">:</span> <span class="st">&quot;Order Date is required&quot;</span><span class="op">,</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bypassProfiles</span><span class="op">:</span> [<span class="st">&quot;System Administrator&quot;</span>]</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Order Item validation</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Positive_Quantity_Required&quot;</span><span class="op">:</span> {</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">object</span><span class="op">:</span> <span class="st">&quot;ohfy__Order_Item__c&quot;</span><span class="op">,</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">condition</span><span class="op">:</span> <span class="st">&quot;ohfy__Ordered_Quantity__c &lt;= 0&quot;</span><span class="op">,</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">message</span><span class="op">:</span> <span class="st">&quot;Ordered quantity must be greater than zero&quot;</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Credit validation</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Positive_Credit_Amount&quot;</span><span class="op">:</span> {</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="dt">object</span><span class="op">:</span> <span class="st">&quot;ohfy__Credit__c&quot;</span><span class="op">,</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    <span class="dt">condition</span><span class="op">:</span> <span class="st">&quot;ohfy__Amount__c &lt; 0&quot;</span><span class="op">,</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    <span class="dt">message</span><span class="op">:</span> <span class="st">&quot;Credit amount must be positive&quot;</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+    <hr />
+    <h2 id="usage-in-integration-scripts">🛠️ Usage in Integration
+    Scripts</h2>
+    <h3 id="loading-org-configuration">Loading Org Configuration</h3>
+    <div class="sourceCode" id="cb14"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">// In your consolidated Script Connector</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">loadOrgConfiguration</span>(environment <span class="op">=</span> <span class="st">&#39;production&#39;</span>) {</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> configs <span class="op">=</span> {</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">production</span><span class="op">:</span> {</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">orders</span><span class="op">:</span> OrderConfiguration<span class="op">,</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">orderItems</span><span class="op">:</span> OrderItemConfiguration<span class="op">,</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">credits</span><span class="op">:</span> CreditConfiguration<span class="op">,</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">payments</span><span class="op">:</span> PaymentConfiguration<span class="op">,</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">businessRules</span><span class="op">:</span> DistroBusinessRules<span class="op">,</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">apiConstraints</span><span class="op">:</span> APIConstraints</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">development</span><span class="op">:</span> {</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>      <span class="op">...</span>ProductionConfig<span class="op">,</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>      <span class="op">...</span>DevEnvironmentConfig</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">staging</span><span class="op">:</span> {</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>      <span class="op">...</span>ProductionConfig<span class="op">,</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>      <span class="op">...</span>StagingEnvironmentConfig</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> configs[environment] <span class="op">||</span> configs<span class="op">.</span><span class="at">production</span><span class="op">;</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="co">// Usage in script</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> orgConfig <span class="op">=</span> <span class="fu">loadOrgConfiguration</span>(input<span class="op">.</span><span class="at">config</span><span class="op">.</span><span class="at">environment</span>)<span class="op">;</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="co">// Validate against org-specific picklist values</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="op">!</span>orgConfig<span class="op">.</span><span class="at">orders</span><span class="op">.</span><span class="at">statusPicklistValues</span><span class="op">.</span><span class="fu">includes</span>(orderData[<span class="st">&#39;ohfy__Status__c&#39;</span>])) {</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">Error</span>(<span class="vs">`Invalid status: </span><span class="sc">${</span>orderData[<span class="st">&#39;ohfy__Status__c&#39;</span>]<span class="sc">}</span><span class="vs">`</span>)<span class="op">;</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+    <h3 id="dynamic-field-validation">Dynamic Field Validation</h3>
+    <div class="sourceCode" id="cb15"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">validateFieldConstraints</span>(sobject<span class="op">,</span> fieldData<span class="op">,</span> orgConfig) {</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> objectConfig <span class="op">=</span> orgConfig[sobject<span class="op">.</span><span class="fu">toLowerCase</span>()<span class="op">.</span><span class="fu">replace</span>(<span class="st">&#39;ohfy__&#39;</span><span class="op">,</span> <span class="st">&#39;&#39;</span>)<span class="op">.</span><span class="fu">replace</span>(<span class="st">&#39;__c&#39;</span><span class="op">,</span> <span class="st">&#39;&#39;</span>)]<span class="op">;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> errors <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Check required fields</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">const</span> requiredField <span class="kw">of</span> objectConfig<span class="op">.</span><span class="at">requiredFields</span>) {</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="op">!</span>fieldData[requiredField] <span class="op">&amp;&amp;</span> fieldData[requiredField] <span class="op">!==</span> <span class="dv">0</span>) {</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>      errors<span class="op">.</span><span class="fu">push</span>(<span class="vs">`Missing required field: </span><span class="sc">${</span>requiredField<span class="sc">}</span><span class="vs">`</span>)<span class="op">;</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Check read-only fields</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">const</span> readOnlyField <span class="kw">of</span> objectConfig<span class="op">.</span><span class="at">readOnlyFields</span>) {</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (fieldData<span class="op">.</span><span class="fu">hasOwnProperty</span>(readOnlyField)) {</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>      errors<span class="op">.</span><span class="fu">push</span>(<span class="vs">`Cannot set read-only field: </span><span class="sc">${</span>readOnlyField<span class="sc">}</span><span class="vs">`</span>)<span class="op">;</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Check picklist values</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (sobject <span class="op">===</span> <span class="st">&#39;ohfy__Order__c&#39;</span> <span class="op">&amp;&amp;</span> fieldData[<span class="st">&#39;ohfy__Status__c&#39;</span>]) {</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="op">!</span>objectConfig<span class="op">.</span><span class="at">statusPicklistValues</span><span class="op">.</span><span class="fu">includes</span>(fieldData[<span class="st">&#39;ohfy__Status__c&#39;</span>])) {</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>      errors<span class="op">.</span><span class="fu">push</span>(<span class="vs">`Invalid status: </span><span class="sc">${</span>fieldData[<span class="st">&#39;ohfy__Status__c&#39;</span>]<span class="sc">}</span><span class="vs">`</span>)<span class="op">;</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> {</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    <span class="dt">isValid</span><span class="op">:</span> errors<span class="op">.</span><span class="at">length</span> <span class="op">===</span> <span class="dv">0</span><span class="op">,</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>    <span class="dt">errors</span><span class="op">:</span> errors</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+    <h3 id="environment-specific-processing">Environment-Specific
+    Processing</h3>
+    <div class="sourceCode" id="cb16"><pre
+    class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">processWithOrgConstraints</span>(records<span class="op">,</span> orgConfig) {</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> batchSize <span class="op">=</span> orgConfig<span class="op">.</span><span class="at">apiConstraints</span><span class="op">.</span><span class="at">restAPIBatchSize</span><span class="op">;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> batches <span class="op">=</span> <span class="fu">chunkArray</span>(records<span class="op">,</span> batchSize)<span class="op">;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">Promise</span><span class="op">.</span><span class="fu">all</span>(batches<span class="op">.</span><span class="fu">map</span>(<span class="kw">async</span> (batch) <span class="kw">=&gt;</span> {</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Apply org-specific business rules</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> processedBatch <span class="op">=</span> batch<span class="op">.</span><span class="fu">map</span>(record <span class="kw">=&gt;</span> {</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (orgConfig<span class="op">.</span><span class="at">businessRules</span><span class="op">.</span><span class="at">requireExternalID</span>) {</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>        record[<span class="st">&#39;ohfy__External_ID__c&#39;</span>] <span class="op">=</span> record[<span class="st">&#39;ohfy__External_ID__c&#39;</span>] <span class="op">||</span> <span class="fu">generateExternalId</span>()<span class="op">;</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> record<span class="op">;</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="cf">await</span> connectors<span class="op">.</span><span class="at">salesforce</span><span class="op">.</span><span class="fu">batch_create_records</span>({</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>      <span class="dt">authId</span><span class="op">:</span> config<span class="op">.</span><span class="at">authIds</span><span class="op">.</span><span class="at">salesforce</span><span class="op">,</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>      <span class="dt">sobject</span><span class="op">:</span> <span class="st">&#39;ohfy__Order__c&#39;</span><span class="op">,</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>      <span class="dt">records</span><span class="op">:</span> processedBatch</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>  }))<span class="op">;</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+    <hr />
+    <p><strong>Related Guides:</strong> - <strong><a
+    href="./OHFY_BUSINESS_LOGIC_LIBRARY.md">OHFY Business Logic
+    Library</a></strong> - Business logic that uses these configurations
+    - <strong><a href="./SCRIPT_CONSOLIDATION_PATTERNS.md">Script
+    Consolidation Patterns</a></strong> - Implementation patterns using
+    org configurations - <strong><a
+    href="./TRAY_CONNECTOR_OPERATIONS.md">Tray Connector
+    Operations</a></strong> - API operations with org-specific
+    parameters</p>
+  </div>
+
+  <div class="brand-footer">
+    <hr>
+    <p>Ohanafy — The AI-Powered Operating System for Beverage</p>
+  </div>
+</body>
+</html>
