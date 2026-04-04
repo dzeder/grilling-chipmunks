@@ -1,7 +1,7 @@
 #!/bin/bash
 # Unified health check for the monorepo
 # Usage:
-#   bash scripts/doctor.sh                   # full check (all 7 sections)
+#   bash scripts/doctor.sh                   # full check (all 10 sections)
 #   bash scripts/doctor.sh --quick           # fast check (prereqs, symlinks, agents, GH Actions)
 #   bash scripts/doctor.sh --create-issues   # full check + file GitHub issues for failures
 
@@ -77,14 +77,47 @@ check_prerequisites() {
         local gh_ver
         gh_ver=$(gh --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown")
         local gh_user
-        gh_user=$(gh auth status 2>&1 | grep -oE 'Logged in to github.com as [^ ]+' | awk '{print $NF}' || true)
+        # Parse gh auth status — pick the active account only
+        local gh_status
+        gh_status=$(gh auth status 2>&1 || true)
+        gh_user=$(echo "$gh_status" | grep -E 'Active account: true' -B5 | grep -oE 'Logged in to github.com (as|account) [^ ]+' | head -1 | awk '{print $NF}' || true)
+        # Strip trailing parenthetical if present (e.g. "(keyring)" or "(GH_TOKEN)")
+        gh_user="${gh_user%(*}"
+        gh_user="${gh_user% }"
+
         if [ -n "$gh_user" ]; then
             echo "   ✅ gh ${gh_ver} (authenticated as ${gh_user})"
+        elif [ -n "${GH_TOKEN:-}" ]; then
+            echo "   ✅ gh ${gh_ver} (authenticated via GH_TOKEN)"
         else
             echo "   ⚠️  gh ${gh_ver} (not authenticated — run 'gh auth login')"
             GH_AUTH_OK=false
             issues=$((issues + 1))
             missing+="- \`gh\` installed but not authenticated\n"
+        fi
+
+        # Token scope validation (only if authenticated)
+        if $GH_AUTH_OK; then
+            # Extract scopes for the active account (appears after "Active account: true")
+            local scopes
+            scopes=$(echo "$gh_status" | awk '/Active account: true/{found=1} found && /Token scopes:/{print; exit}' | sed "s/.*Token scopes: '//;s/'$//" || true)
+            if [ -n "$scopes" ]; then
+                local required_scopes=("repo")
+                local missing_scopes=""
+                for scope in "${required_scopes[@]}"; do
+                    if ! echo "$scopes" | grep -qw "$scope"; then
+                        missing_scopes+="${scope}, "
+                    fi
+                done
+                if [ -n "$missing_scopes" ]; then
+                    echo "   ⚠️  Token missing scopes: ${missing_scopes%, }"
+                    issues=$((issues + 1))
+                else
+                    local scope_count
+                    scope_count=$(echo "$scopes" | tr ',' '\n' | wc -l | tr -d ' ')
+                    echo "   ✅ Token scopes OK (${scope_count} scopes)"
+                fi
+            fi
         fi
     else
         echo "   ❌ gh not installed"
@@ -422,11 +455,340 @@ except Exception as e:
 }
 
 # ─────────────────────────────────────────────
-# Section 7: Install Health (delegated)
+# Section 7: GitHub Security
+# ─────────────────────────────────────────────
+
+check_github_security() {
+    section 7 "GitHub Security"
+
+    if ! $GH_AUTH_OK; then
+        echo "   ⏭️  Skipped (gh not authenticated)"
+        return
+    fi
+
+    local sub_issues=0
+
+    # Dependabot alerts
+    local exit_code=0
+    local alerts
+    alerts=$(gh api repos/{owner}/{repo}/dependabot/alerts --jq '[.[] | select(.state == "open")] | length' 2>&1) || exit_code=$?
+
+    if [ "$exit_code" -ne 0 ]; then
+        # Dependabot might not be enabled or token lacks security_events scope
+        if echo "$alerts" | grep -qi "not enabled\|disabled\|404\|403"; then
+            echo "   ℹ️  Dependabot alerts not enabled"
+        else
+            echo "   ⚠️  Could not fetch Dependabot alerts"
+        fi
+    elif [ "$alerts" -eq 0 ] 2>/dev/null; then
+        echo "   ✅ No open Dependabot alerts"
+    else
+        echo "   ⚠️  ${alerts} open Dependabot alert(s)"
+        sub_issues=$((sub_issues + 1))
+
+        # Show severity breakdown
+        local severity_breakdown
+        severity_breakdown=$(gh api repos/{owner}/{repo}/dependabot/alerts \
+            --jq '[.[] | select(.state == "open")] | group_by(.security_advisory.severity) | map({severity: .[0].security_advisory.severity, count: length}) | sort_by(.count) | reverse | .[] | "      \(.severity): \(.count)"' 2>/dev/null || true)
+        if [ -n "$severity_breakdown" ]; then
+            echo "$severity_breakdown"
+        fi
+    fi
+
+    # Secret scanning alerts
+    exit_code=0
+    local secrets
+    secrets=$(gh api repos/{owner}/{repo}/secret-scanning/alerts --jq '[.[] | select(.state == "open")] | length' 2>&1) || exit_code=$?
+
+    if [ "$exit_code" -ne 0 ]; then
+        if echo "$secrets" | grep -qi "not enabled\|disabled\|404\|403"; then
+            echo "   ℹ️  Secret scanning not enabled"
+        else
+            echo "   ⚠️  Could not fetch secret scanning alerts"
+        fi
+    elif [ "$secrets" -eq 0 ] 2>/dev/null; then
+        echo "   ✅ No open secret scanning alerts"
+    else
+        echo "   ❌ ${secrets} open secret scanning alert(s) — fix immediately"
+        sub_issues=$((sub_issues + 1))
+    fi
+
+    if [ "$sub_issues" -eq 0 ]; then
+        record_pass
+    else
+        record_warn
+        queue_issue \
+            "Doctor: GitHub security alerts require attention" \
+            "$(printf "Security alerts found in the repository.\n\nRun \`gh api repos/{owner}/{repo}/dependabot/alerts\` and \`gh api repos/{owner}/{repo}/secret-scanning/alerts\` for details.")"
+    fi
+}
+
+# ─────────────────────────────────────────────
+# Section 8: GitHub Repo Health
+# ─────────────────────────────────────────────
+
+check_github_repo_health() {
+    section 8 "GitHub Repo Health"
+
+    if ! $GH_AUTH_OK; then
+        echo "   ⏭️  Skipped (gh not authenticated)"
+        return
+    fi
+
+    local sub_issues=0
+
+    # Branch protection on default branch
+    local default_branch
+    default_branch=$(gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name' 2>/dev/null || echo "main")
+
+    local exit_code=0
+    local protection
+    protection=$(gh api "repos/{owner}/{repo}/branches/${default_branch}/protection" 2>&1) || exit_code=$?
+
+    if [ "$exit_code" -ne 0 ]; then
+        if echo "$protection" | grep -q "Branch not protected"; then
+            echo "   ⚠️  Branch protection not enabled on ${default_branch}"
+            sub_issues=$((sub_issues + 1))
+        else
+            echo "   ℹ️  Could not check branch protection (may require admin scope)"
+        fi
+    else
+        local pr_required
+        pr_required=$(echo "$protection" | python3 -c "
+import json, sys
+try:
+    p = json.loads(sys.stdin.read())
+    pr = p.get('required_pull_request_reviews')
+    print('yes' if pr else 'no')
+except:
+    print('unknown')
+" 2>/dev/null || echo "unknown")
+        if [ "$pr_required" = "yes" ]; then
+            echo "   ✅ Branch protection on ${default_branch} (PRs required)"
+        elif [ "$pr_required" = "no" ]; then
+            echo "   ⚠️  Branch protection on ${default_branch} (PRs not required)"
+            sub_issues=$((sub_issues + 1))
+        else
+            echo "   ✅ Branch protection on ${default_branch}"
+        fi
+    fi
+
+    # Open PRs health
+    local pr_data
+    pr_data=$(gh pr list --state open --json number,title,mergeable,updatedAt,headRefName,statusCheckRollup --limit 20 2>/dev/null || echo "[]")
+
+    local pr_result
+    pr_result=$(echo "$pr_data" | python3 -c "
+import json, sys
+from datetime import datetime, timezone
+try:
+    prs = json.loads(sys.stdin.read())
+    total = len(prs)
+    conflicted = []
+    stale = []
+    failing = []
+    now = datetime.now(timezone.utc)
+    for pr in prs:
+        num = pr.get('number', '?')
+        title = pr.get('title', 'unknown')[:40]
+        mergeable = pr.get('mergeable', '')
+        updated = pr.get('updatedAt', '')
+        checks = pr.get('statusCheckRollup', []) or []
+
+        if mergeable == 'CONFLICTING':
+            conflicted.append(f'#{num} {title}')
+
+        if updated:
+            try:
+                updated_dt = datetime.fromisoformat(updated.replace('Z', '+00:00'))
+                days_old = (now - updated_dt).days
+                if days_old > 14:
+                    stale.append(f'#{num} {title} ({days_old}d)')
+            except:
+                pass
+
+        check_states = [c.get('conclusion') or c.get('status') for c in checks]
+        if any(s in ('FAILURE', 'ERROR', 'ACTION_REQUIRED') for s in check_states):
+            failing.append(f'#{num} {title}')
+
+    print(f'TOTAL:{total}')
+    for c in conflicted:
+        print(f'CONFLICT:{c}')
+    for s in stale:
+        print(f'STALE:{s}')
+    for f in failing:
+        print(f'FAILING:{f}')
+except Exception as e:
+    print(f'ERROR:{e}')
+" 2>&1)
+
+    local pr_total=0
+    local pr_conflicts=""
+    local pr_stale=""
+    local pr_failing=""
+    local conflict_count=0
+    local stale_count=0
+    local failing_count=0
+
+    while IFS= read -r line; do
+        case "$line" in
+            TOTAL:*) pr_total="${line#TOTAL:}" ;;
+            CONFLICT:*)
+                pr_conflicts+="      ⚠️  ${line#CONFLICT:}\n"
+                conflict_count=$((conflict_count + 1))
+                ;;
+            STALE:*)
+                pr_stale+="      💤 ${line#STALE:}\n"
+                stale_count=$((stale_count + 1))
+                ;;
+            FAILING:*)
+                pr_failing+="      ❌ ${line#FAILING:}\n"
+                failing_count=$((failing_count + 1))
+                ;;
+            ERROR:*)
+                echo "   ⚠️  PR parse error: ${line#ERROR:}"
+                ;;
+        esac
+    done <<< "$pr_result"
+
+    if [ "$pr_total" -eq 0 ]; then
+        echo "   ✅ No open PRs"
+    else
+        local pr_issues=$((conflict_count + stale_count + failing_count))
+        if [ "$pr_issues" -eq 0 ]; then
+            echo "   ✅ ${pr_total} open PR(s), all healthy"
+        else
+            echo "   ⚠️  ${pr_total} open PR(s):"
+            [ "$conflict_count" -gt 0 ] && echo -e "      Merge conflicts (${conflict_count}):\n${pr_conflicts}"
+            [ "$failing_count" -gt 0 ] && echo -e "      Failing checks (${failing_count}):\n${pr_failing}"
+            [ "$stale_count" -gt 0 ] && echo -e "      Stale >14d (${stale_count}):\n${pr_stale}"
+            sub_issues=$((sub_issues + pr_issues))
+        fi
+    fi
+
+    # Stale branches (no commits in 30+ days, excluding default branch)
+    local stale_branches
+    stale_branches=$(gh api repos/{owner}/{repo}/branches --paginate --jq '.[].name' 2>/dev/null | while read -r branch; do
+        [ "$branch" = "$default_branch" ] && continue
+        local last_commit_date
+        last_commit_date=$(gh api "repos/{owner}/{repo}/branches/${branch}" --jq '.commit.commit.committer.date' 2>/dev/null || true)
+        if [ -n "$last_commit_date" ]; then
+            local days_old
+            days_old=$(python3 -c "
+from datetime import datetime, timezone
+try:
+    d = datetime.fromisoformat('${last_commit_date}'.replace('Z', '+00:00'))
+    print((datetime.now(timezone.utc) - d).days)
+except:
+    print(0)
+" 2>/dev/null || echo "0")
+            if [ "$days_old" -gt 30 ]; then
+                echo "${branch} (${days_old}d)"
+            fi
+        fi
+    done 2>/dev/null || true)
+
+    if [ -z "$stale_branches" ]; then
+        echo "   ✅ No stale branches (>30 days)"
+    else
+        local stale_branch_count
+        stale_branch_count=$(echo "$stale_branches" | wc -l | tr -d ' ')
+        echo "   ⚠️  ${stale_branch_count} stale branch(es) (>30 days):"
+        echo "$stale_branches" | while read -r b; do echo "      💤 ${b}"; done
+        sub_issues=$((sub_issues + 1))
+    fi
+
+    if [ "$sub_issues" -eq 0 ]; then
+        record_pass
+    else
+        record_warn
+    fi
+}
+
+# ─────────────────────────────────────────────
+# Section 9: GitHub Actions (detailed)
+# ─────────────────────────────────────────────
+
+check_github_actions_detailed() {
+    section 9 "GitHub Actions (detailed)"
+
+    if ! $GH_AUTH_OK; then
+        echo "   ⏭️  Skipped (gh not authenticated)"
+        return
+    fi
+
+    # Check for disabled workflows
+    local exit_code=0
+    local workflows
+    workflows=$(gh api repos/{owner}/{repo}/actions/workflows --jq '.workflows[] | "\(.state)|\(.name)"' 2>&1) || exit_code=$?
+
+    if [ "$exit_code" -ne 0 ]; then
+        echo "   ⚠️  Could not fetch workflows"
+        record_warn
+        return
+    fi
+
+    local disabled_count=0
+    local disabled_list=""
+    local total_workflows=0
+
+    while IFS= read -r line; do
+        [ -z "$line" ] && continue
+        total_workflows=$((total_workflows + 1))
+        local state="${line%%|*}"
+        local name="${line#*|}"
+        if [ "$state" != "active" ]; then
+            disabled_count=$((disabled_count + 1))
+            disabled_list+="      ⏸️  ${name} (${state})\n"
+        fi
+    done <<< "$workflows"
+
+    local active=$((total_workflows - disabled_count))
+    if [ "$disabled_count" -eq 0 ]; then
+        echo "   ✅ ${total_workflows} workflow(s), all active"
+    else
+        echo "   ℹ️  ${active}/${total_workflows} active, ${disabled_count} disabled:"
+        echo -e "$disabled_list"
+    fi
+
+    # Check for workflows with high failure rate (last 10 runs each)
+    local failing_workflows=""
+    local fw_count=0
+
+    while IFS= read -r line; do
+        [ -z "$line" ] && continue
+        local state="${line%%|*}"
+        local name="${line#*|}"
+        [ "$state" != "active" ] && continue
+
+        local run_stats
+        run_stats=$(gh run list --workflow "$name" --limit 10 --json conclusion --jq '[.[] | .conclusion] | {total: length, failures: [.[] | select(. == "failure")] | length} | "\(.failures)/\(.total)"' 2>/dev/null || echo "0/0")
+
+        local failures="${run_stats%%/*}"
+        local run_total="${run_stats##*/}"
+
+        if [ "$failures" -ge 3 ] 2>/dev/null && [ "$run_total" -gt 0 ] 2>/dev/null; then
+            failing_workflows+="      ⚠️  ${name}: ${failures}/${run_total} recent runs failed\n"
+            fw_count=$((fw_count + 1))
+        fi
+    done <<< "$workflows"
+
+    if [ "$fw_count" -gt 0 ]; then
+        echo "   ⚠️  ${fw_count} workflow(s) with high failure rate:"
+        echo -e "$failing_workflows"
+        record_warn
+    else
+        echo "   ✅ No workflows with high failure rate"
+        record_pass
+    fi
+}
+
+# ─────────────────────────────────────────────
+# Section 10: Install Health (delegated)
 # ─────────────────────────────────────────────
 
 check_install_health() {
-    section 7 "Install Health"
+    section 10 "Install Health"
 
     if [ ! -f tools/install.py ]; then
         echo "   ❌ tools/install.py not found"
@@ -527,14 +889,20 @@ fi
 check_github_actions
 
 if $QUICK; then
-    skip_section 7 "Install Health"
+    skip_section 7 "GitHub Security"
+    skip_section 8 "GitHub Repo Health"
+    skip_section 9 "GitHub Actions (detailed)"
+    skip_section 10 "Install Health"
 else
+    check_github_security
+    check_github_repo_health
+    check_github_actions_detailed
     check_install_health
 fi
 
 # Create issues for failures if requested
 if $CREATE_ISSUES; then
-    section 8 "Issue Tracking"
+    section 11 "Issue Tracking"
     if [ "${#ISSUE_TITLES[@]}" -gt 0 ]; then
         create_issues
     else

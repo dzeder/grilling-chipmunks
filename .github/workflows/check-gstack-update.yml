@@ -3,7 +3,10 @@ name: Check gstack upstream updates
 on:
   schedule:
     - cron: '0 8 * * 1'  # Every Monday at 8am UTC
-  workflow_dispatch:       # Manual trigger
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/check-gstack-update.yml'
 
 concurrency:
   group: gstack-check
@@ -50,6 +53,8 @@ jobs:
           UPSTREAM_VER: ${{ steps.check.outputs.upstream }}
           LOCAL_VER: ${{ steps.check.outputs.local }}
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           BRANCH="chore/update-gstack-${UPSTREAM_VER}"
           git checkout -b "$BRANCH"
           git add .claude/skills/gstack/

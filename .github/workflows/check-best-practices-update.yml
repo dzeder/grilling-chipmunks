@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '0 10 * * 3'  # Wednesdays at 10am UTC
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/check-best-practices-update.yml'
 
 concurrency:
   group: best-practices-check

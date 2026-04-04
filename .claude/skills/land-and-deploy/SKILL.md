@@ -1,1 +1,1 @@
-../gstack/land-and-deploy/SKILL.md
+/Users/danielzeder/conductor/workspaces/daniels-ohanafy/saskatoon-v1/.claude/skills/gstack/land-and-deploy/SKILL.md

@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '0 10 * * 5'  # Fridays at 10am UTC
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/check-sf-skills-update.yml'
 
 concurrency:
   group: sf-skills-check
