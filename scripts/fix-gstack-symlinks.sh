@@ -74,9 +74,10 @@ for skill_dir in .claude/skills/*/; do
     fi
 done
 
-# ── Part 2: Ensure skills/ discovery directory has entries for all gstack skills ──
+# ── Part 2: Ensure skills/ discovery directory has real copies of gstack skills ──
 # Claude Code discovers skills from skills/ at the repo root.
-# Without entries there, gstack slash commands (/ship, /browse, etc.) won't work.
+# IMPORTANT: Claude Code does NOT follow symlinks for skill discovery.
+# We must copy real files, not symlink them.
 
 for gstack_skill_dir in .claude/skills/gstack/*/; do
     [ -d "$gstack_skill_dir" ] || continue
@@ -87,19 +88,53 @@ for gstack_skill_dir in .claude/skills/gstack/*/; do
     discovery_dir="skills/${skill_name}"
     discovery_file="${discovery_dir}/SKILL.md"
 
-    # Skip if already exists and is valid
-    if [ -f "$discovery_file" ]; then
+    # Create directory if missing
+    if [ ! -d "$discovery_dir" ]; then
+        if $CHECK_ONLY; then
+            echo "NEEDS FIX: skills/${skill_name}/ missing (skill not discoverable)"
+            BROKEN=$((BROKEN + 1))
+            continue
+        fi
+        mkdir -p "$discovery_dir"
+    fi
+
+    # Replace symlinks with real copies (Claude Code won't follow symlinks)
+    if [ -L "$discovery_file" ]; then
+        if $CHECK_ONLY; then
+            echo "NEEDS FIX: skills/${skill_name}/SKILL.md is a symlink (must be a real file)"
+            BROKEN=$((BROKEN + 1))
+            continue
+        fi
+        rm "$discovery_file"
+        cp "$gstack_skill_file" "$discovery_file"
+        FIXED=$((FIXED + 1))
+        echo "  ✅ skills/${skill_name}/ (copied)"
         continue
     fi
 
-    if $CHECK_ONLY; then
-        echo "NEEDS FIX: skills/${skill_name}/ missing (skill not discoverable)"
-        BROKEN=$((BROKEN + 1))
-    else
-        mkdir -p "$discovery_dir"
-        ln -s "../../.claude/skills/gstack/${skill_name}/SKILL.md" "$discovery_file"
-        FIXED=$((FIXED + 1))
-        echo "  ✅ skills/${skill_name}/ (discoverable)"
+    # Create if missing
+    if [ ! -f "$discovery_file" ]; then
+        if $CHECK_ONLY; then
+            echo "NEEDS FIX: skills/${skill_name}/ missing (skill not discoverable)"
+            BROKEN=$((BROKEN + 1))
+        else
+            cp "$gstack_skill_file" "$discovery_file"
+            FIXED=$((FIXED + 1))
+            echo "  ✅ skills/${skill_name}/ (copied)"
+        fi
+        continue
+    fi
+
+    # Refresh if gstack source is newer than the copy
+    if [ "$gstack_skill_file" -nt "$discovery_file" ]; then
+        if $CHECK_ONLY; then
+            echo "NEEDS FIX: skills/${skill_name}/SKILL.md is stale"
+            BROKEN=$((BROKEN + 1))
+        else
+            cp "$gstack_skill_file" "$discovery_file"
+            FIXED=$((FIXED + 1))
+            echo "  ✅ skills/${skill_name}/ (refreshed)"
+        fi
     fi
 done
 
