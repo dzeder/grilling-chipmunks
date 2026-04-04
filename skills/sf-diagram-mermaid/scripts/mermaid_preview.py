@@ -37,7 +37,6 @@ import sys
 import threading
 import time
 import webbrowser
-from pathlib import Path
 from typing import Optional, Set
 from urllib.parse import urlparse
 
@@ -425,7 +424,7 @@ def run_server_foreground(file_path: str, port: int, pid_file: str):
     try:
         with open(f"{pid_file}.info", "w") as f:
             f.write(f"PID: {os.getpid()}\nPort: {port}\nFile: {_watched_file}\n")
-    except:
+    except Exception:
         pass
 
     # Ignore SIGHUP so we survive terminal close
@@ -504,7 +503,7 @@ def start_server(file_path: str, port: int, no_browser: bool, pid_file: str):
     # Use nohup-like approach: redirect all IO to /dev/null, start new session
     with open("/dev/null", "r") as devnull_in, \
          open("/dev/null", "w") as devnull_out:
-        process = subprocess.Popen(
+        subprocess.Popen(
             cmd,
             stdin=devnull_in,
             stdout=devnull_out,
@@ -520,7 +519,7 @@ def start_server(file_path: str, port: int, no_browser: bool, pid_file: str):
     if os.path.exists(pid_file):
         with open(pid_file, "r") as f:
             daemon_pid = f.read().strip()
-        print(f"Mermaid Preview Server started!")
+        print("Mermaid Preview Server started!")
         print(f"  URL:     http://localhost:{port}")
         print(f"  File:    {abs_file_path}")
         print(f"  PID:     {daemon_pid}")

@@ -38,7 +38,6 @@ import json
 import os
 import re
 import sys
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 try:
@@ -750,7 +749,7 @@ Examples:
                         help="Output YAML scenario file path")
     parser.add_argument("--patterns", nargs="+", default=ALL_PATTERNS,
                         choices=ALL_PATTERNS,
-                        help=f"Test patterns to generate (default: all)")
+                        help="Test patterns to generate (default: all)")
     parser.add_argument("--categorized", action="store_true",
                         help="Output separate YAML files per category into --output directory")
     parser.add_argument("--scenarios-per-topic", type=int, default=2,

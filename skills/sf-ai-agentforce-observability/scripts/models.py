@@ -20,8 +20,7 @@ Usage:
     schema = SCHEMAS["sessions"]
 """
 
-from datetime import datetime
-from typing import Optional, List, Literal
+from typing import Optional, List
 from pydantic import BaseModel, Field
 
 import pyarrow as pa

@@ -15,7 +15,7 @@ Source: https://salesforcediaries.com/2026/01/16/llm-mistakes-in-apex-lwc-salesf
 
 import re
 import os
-from typing import Dict, List, Tuple, Set
+from typing import Dict
 
 
 class LLMPatternValidator:
@@ -270,7 +270,7 @@ class LLMPatternValidator:
                 following_lines = '\n'.join(self.lines[query_line:min(query_line + 20, len(self.lines))])
 
                 # Count distinct field accesses that look like sobject.Field
-                field_access_pattern = rf"\.([A-Z][a-zA-Z0-9_]+)(?:\s*[;,\)\]\}}=]|\s*!=|\s*==)"
+                field_access_pattern = r"\.([A-Z][a-zA-Z0-9_]+)(?:\s*[;,\)\]\}=]|\s*!=|\s*==)"
                 accessed_fields = set(re.findall(field_access_pattern, following_lines))
 
                 # If accessing many more fields than queried, warn
@@ -347,7 +347,6 @@ def format_output(results: Dict) -> str:
 
 if __name__ == "__main__":
     import sys
-    import json
 
     if len(sys.argv) < 2:
         print("Usage: python llm_pattern_validator.py <file.cls|file.trigger>")

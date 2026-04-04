@@ -18,7 +18,6 @@ Usage:
 
 import argparse
 import sys
-from typing import Optional
 
 # Import our modules
 from auth import get_sf_connection

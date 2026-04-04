@@ -27,8 +27,8 @@ Usage:
 """
 
 import re
-from typing import List, Dict, Any, Optional
-from dataclasses import dataclass, field
+from typing import List, Dict, Any
+from dataclasses import dataclass
 from enum import Enum
 
 

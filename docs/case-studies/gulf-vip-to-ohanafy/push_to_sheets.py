@@ -116,7 +116,6 @@ def push_tab(gc, sh, wb, tab_name):
         cell_range = f"A{start_row}"
         gs_ws.update(batch, cell_range, value_input_option='USER_ENTERED')
 
-        pushed = end
         print(f"    Pushed rows {start + 1}-{end} of {total_rows}")
 
         # Rate limit pause between batches
@@ -152,7 +151,7 @@ def main():
             time.sleep(3)
         except gspread.exceptions.APIError as e:
             if "429" in str(e) or "Quota" in str(e):
-                print(f"    Rate limited. Waiting 60s...")
+                print("    Rate limited. Waiting 60s...")
                 time.sleep(60)
                 if push_tab(gc, sh, wb, tab):
                     success += 1

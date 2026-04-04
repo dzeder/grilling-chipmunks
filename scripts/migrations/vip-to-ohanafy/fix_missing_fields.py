@@ -83,7 +83,7 @@ def run_sf_query_all(soql):
         if not next_url:
             break
         # Extract the query locator from the URL
-        locator = next_url.split("/")[-1]
+        next_url.split("/")[-1]
         result = subprocess.run(
             ["sf", "api", "request", "rest", next_url, "--target-org", TARGET_ORG, "--json"],
             capture_output=True,
@@ -272,8 +272,8 @@ def fix_location_code():
         writer.writeheader()
         for r in records:
             key = r.get("ohfy__Key__c", "") or ""
-            loc_type = r.get("ohfy__Type__c", "") or ""
-            name = r.get("Name", "") or ""
+            r.get("ohfy__Type__c", "") or ""
+            r.get("Name", "") or ""
             parent = r.get("ohfy__Parent_Location__c")
 
             # Derive Location_Code from Key__c

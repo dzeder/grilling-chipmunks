@@ -36,8 +36,8 @@ from runtime_bootstrap import maybe_reexec_in_sf_docs_runtime
 
 maybe_reexec_in_sf_docs_runtime(__file__)
 
-from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError  # noqa: E402
+from playwright.sync_api import sync_playwright  # noqa: E402
 
 try:
     from playwright_stealth import Stealth
@@ -49,7 +49,7 @@ try:
 except ImportError:
     stealth_sync = None
 
-from extract_help_salesforce import extract as extract_help_salesforce
+from extract_help_salesforce import extract as extract_help_salesforce  # noqa: E402
 
 
 USER_AGENT = (

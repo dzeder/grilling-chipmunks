@@ -19,7 +19,7 @@ import sys
 import json
 import re
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 
 
 def validate_parquet_file(file_path: str) -> Dict[str, Any]:

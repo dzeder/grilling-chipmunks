@@ -144,7 +144,7 @@ def format_diagnostics_for_claude(
 
     # Header
     lines.append("=" * 60)
-    lines.append(f"🔍 AGENT SCRIPT LSP VALIDATION RESULTS")
+    lines.append("🔍 AGENT SCRIPT LSP VALIDATION RESULTS")
     lines.append(f"   File: {file_path}")
     lines.append(f"   Attempt: {current_attempt}/{max_attempts}")
     lines.append("=" * 60)

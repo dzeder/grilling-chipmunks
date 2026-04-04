@@ -165,7 +165,8 @@ create_git_tag() {
     fi
 
     # Create annotated tag with message
-    local tag_message="Release $version
+    local tag_message
+    tag_message="Release $version
 
 Changes since v$current_version:
 - $commit_count commits

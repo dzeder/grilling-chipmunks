@@ -408,7 +408,7 @@ class NamingValidator:
         else:
             report.append("   ℹ️  ADVISORY: Doesn't follow naming convention")
             if results['suggested_names']:
-                report.append(f"\n   💡 Suggested names:")
+                report.append("\n   💡 Suggested names:")
                 for name in results['suggested_names'][:3]:
                     report.append(f"      - {name}")
 
@@ -432,7 +432,7 @@ class NamingValidator:
 
         # Suggestions
         if results['suggestions']:
-            report.append(f"\n💡 Suggestions for Improvement:")
+            report.append("\n💡 Suggestions for Improvement:")
             for i, suggestion in enumerate(results['suggestions'][:5], 1):
                 report.append(f"   {i}. {suggestion}")
 

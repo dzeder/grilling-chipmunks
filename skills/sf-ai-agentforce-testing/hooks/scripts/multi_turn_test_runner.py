@@ -64,12 +64,12 @@ import threading
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional
 
 # Import sibling module
 sys.path.insert(0, str(Path(__file__).parent))
 from agent_api_client import (
-    AgentAPIClient, AgentSession, TurnResult, AgentAPIError, parse_variables,
+    AgentAPIClient, TurnResult, AgentAPIError, parse_variables,
 )
 
 # YAML import with helpful error
@@ -85,12 +85,12 @@ except ImportError:
 
 # Rich library (optional — graceful fallback to legacy Unicode formatting)
 try:
-    from rich.console import Console, Group
-    from rich.panel import Panel
-    from rich.table import Table
-    from rich.text import Text
-    from rich.rule import Rule
-    from rich import box
+    from rich.console import Console, Group  # noqa: F401
+    from rich.panel import Panel  # noqa: F401
+    from rich.table import Table  # noqa: F401
+    from rich.text import Text  # noqa: F401
+    from rich.rule import Rule  # noqa: F401
+    from rich import box  # noqa: F401
     HAS_RICH = True
 except ImportError:
     HAS_RICH = False
@@ -167,7 +167,7 @@ class StreamingConsole:
             if self._codeblock:
                 W = self._width
                 print("━" * W, flush=True)
-                print(f"  🧪 Agentforce Multi-Turn Test", flush=True)
+                print("  🧪 Agentforce Multi-Turn Test", flush=True)
                 print(f"  Running {total} scenario{'s' if total != 1 else ''} [{mode}]", flush=True)
                 print(f"  File: {file}", flush=True)
                 print("━" * W, flush=True)
@@ -819,7 +819,7 @@ def _run_check(
             missing = [str(v) for v in expected if str(v).lower() not in text]
             check["actual"] = found_all
             check["passed"] = found_all
-            check["detail"] = f"All references found" if found_all else f"Missing: {missing}"
+            check["detail"] = "All references found" if found_all else f"Missing: {missing}"
 
         elif name == "context_retained":
             # Soft check: the response is non-empty and doesn't indicate confusion
@@ -1409,7 +1409,7 @@ def format_results(results: Dict[str, Any]) -> str:
 
         for scenario_name, t in failed_turns:
             failed_checks = [c for c in t["evaluation"]["checks"] if not c["passed"]]
-            lines.append(f"")
+            lines.append("")
             lines.append(f"❌ {scenario_name} → Turn {t['turn_number']}")
             lines.append(f"   Input:    \"{t['user_message'][:70]}\"")
             if t.get("agent_text"):
@@ -1738,7 +1738,7 @@ Environment Variables:
     # Machine-readable output for fix loop integration
     if failed_scenarios > 0 or error_scenarios > 0:
         print("---BEGIN_MACHINE_READABLE---")
-        print(f"FIX_NEEDED: true")
+        print("FIX_NEEDED: true")
         print(f"SCENARIOS_TOTAL: {len(scenario_results)}")
         print(f"SCENARIOS_PASSED: {passed_scenarios}")
         print(f"SCENARIOS_FAILED: {failed_scenarios}")

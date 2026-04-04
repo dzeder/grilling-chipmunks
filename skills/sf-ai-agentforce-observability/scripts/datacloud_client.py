@@ -587,19 +587,19 @@ class Data360Client:
         columns = {field.name: [] for field in schema}
 
         for record in records:
-            for field in schema:
-                value = record.get(field.name)
+            for schema_field in schema:
+                value = record.get(schema_field.name)
 
                 # Serialize complex types
                 if isinstance(value, (dict, list)):
                     value = json.dumps(value)
 
-                columns[field.name].append(value)
+                columns[schema_field.name].append(value)
 
         # Create arrays
         arrays = []
-        for field in schema:
-            arr = pa.array(columns[field.name], type=field.type)
+        for schema_field in schema:
+            arr = pa.array(columns[schema_field.name], type=schema_field.type)
             arrays.append(arr)
 
         return pa.Table.from_arrays(arrays, schema=schema)

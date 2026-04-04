@@ -50,8 +50,8 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PLUGIN_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))  # sf-flow/
 SHARED_SCRIPTS = os.path.join(os.path.expanduser("~"), ".claude", "hooks", "scripts")
 sys.path.insert(0, SHARED_SCRIPTS)
-from naming_validator import NamingValidator
-from security_validator import SecurityValidator
+from naming_validator import NamingValidator  # noqa: E402
+from security_validator import SecurityValidator  # noqa: E402
 
 
 class EnhancedFlowValidator:
@@ -141,7 +141,7 @@ class EnhancedFlowValidator:
             score -= 5
             advisory.append({
                 'category': 'Naming',
-                'message': f"Flow name doesn't follow convention",
+                'message': "Flow name doesn't follow convention",
                 'suggestion': naming_results['suggested_names'][0] if naming_results['suggested_names'] else 'Use standard prefix'
             })
 

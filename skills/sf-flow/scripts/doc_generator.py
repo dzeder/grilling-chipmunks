@@ -11,9 +11,8 @@ Usage:
 
 import xml.etree.ElementTree as ET
 import os
-import re
 from datetime import datetime
-from typing import Dict, List, Tuple
+from typing import Dict
 
 class FlowDocGenerator:
     """Generates documentation from flow XML."""
@@ -548,7 +547,7 @@ if __name__ == "__main__":
 
     try:
         doc = generate_documentation(flow_path, output_path)
-        print(f"\n✅ Documentation generated successfully!")
+        print("\n✅ Documentation generated successfully!")
         print(f"   File: {output_path}")
         print(f"   Lines: {len(doc.splitlines())}")
     except Exception as e:

@@ -17,9 +17,6 @@ import json
 import os
 import sys
 import re
-from pathlib import Path
-from datetime import datetime
-from typing import Optional
 
 # Only process sf agent test commands
 def should_process() -> bool:
@@ -224,7 +221,7 @@ def categorize_failure(failure: dict) -> dict:
             analysis['root_cause'] = f"Wrong topic selected: expected '{expected}' but got '{actual}'"
             analysis['suggested_fix'] = "Improve topic scope descriptions to better match the utterance intent"
         else:
-            analysis['root_cause'] = f"No topic matched for utterance"
+            analysis['root_cause'] = "No topic matched for utterance"
             analysis['suggested_fix'] = "Add topic scope examples or adjust classificationDescription"
 
         analysis['fix_location'] = f"Agent Script: {failure.get('name', '')}"
@@ -363,7 +360,7 @@ def format_output(results: dict) -> str:
                 lines.append(f"      Suggested Fix: {analysis['suggested_fix']}")
 
                 if analysis['auto_fixable']:
-                    lines.append(f"      AUTO-FIXABLE: Yes - sf-ai-agentforce skill can attempt fix")
+                    lines.append("      AUTO-FIXABLE: Yes - sf-ai-agentforce skill can attempt fix")
 
         lines.append("")
         lines.append("=" * 65)
@@ -427,7 +424,7 @@ def main():
         if results['summary']['total'] > 0 or results['failures']:
             formatted = format_output(results)
             print(formatted)
-    except Exception as e:
+    except Exception:
         # Silently fail - don't block on parsing errors
         sys.exit(0)
 

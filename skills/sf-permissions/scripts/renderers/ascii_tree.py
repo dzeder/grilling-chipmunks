@@ -6,15 +6,14 @@ Creates beautiful trees, tables, and panels for displaying
 permission data in the terminal.
 """
 
-from typing import Optional
 
 try:
-    from rich.console import Console
-    from rich.tree import Tree
-    from rich.table import Table
-    from rich.panel import Panel
-    from rich.text import Text
-    from rich import box
+    from rich.console import Console  # noqa: F401
+    from rich.tree import Tree  # noqa: F401
+    from rich.table import Table  # noqa: F401
+    from rich.panel import Panel  # noqa: F401
+    from rich.text import Text  # noqa: F401
+    from rich import box  # noqa: F401
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False
@@ -79,7 +78,7 @@ def _render_hierarchy_fallback(hierarchy) -> None:
     print("\n📦 ORG PERMISSION HIERARCHY")
     print("═" * 50)
 
-    print(f"\n📊 Summary:")
+    print("\n📊 Summary:")
     print(f"   Permission Set Groups: {hierarchy.total_psg_count}")
     print(f"   Total Permission Sets: {hierarchy.total_ps_count}")
     print(f"   Standalone PS: {len(hierarchy.standalone_permission_sets)}")

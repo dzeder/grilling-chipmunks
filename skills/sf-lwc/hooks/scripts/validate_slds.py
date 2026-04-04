@@ -18,7 +18,7 @@ import os
 import re
 import json
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 
 # Script directory for loading data files
 SCRIPT_DIR = Path(__file__).parent
@@ -337,7 +337,7 @@ class SLDSValidator:
                             'category': 'dark_mode',
                             'message': f'Hardcoded {color_type} ({match}) may break dark mode',
                             'line': i,
-                            'fix': f'Consider using var(--slds-g-color-*) instead'
+                            'fix': 'Consider using var(--slds-g-color-*) instead'
                         })
 
     def _check_styling_hooks(self, scores: Dict[str, int], issues: List[Dict]):
@@ -373,7 +373,7 @@ class SLDSValidator:
     def _check_slds_migration(self, scores: Dict[str, int], issues: List[Dict]):
         """Check for deprecated SLDS 1 patterns."""
         deprecated_tokens = self.deprecated_patterns.get('tokens', {})
-        deprecated_classes = self.deprecated_patterns.get('classes', {})
+        self.deprecated_patterns.get('classes', {})
 
         for i, line in enumerate(self.lines, 1):
             # Check deprecated Sass tokens
@@ -414,7 +414,6 @@ class SLDSValidator:
                 })
 
         # Check for overly deep selectors (> 3 levels)
-        selector_pattern = r'^[^{]+{'
         for i, line in enumerate(self.lines, 1):
             if '{' in line:
                 # Count selector depth

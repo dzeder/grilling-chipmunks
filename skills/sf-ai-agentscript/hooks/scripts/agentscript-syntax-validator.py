@@ -1985,7 +1985,7 @@ class AgentScriptValidator:
         for i, line in enumerate(self.lines, 1):
             stripped = line.strip()
             for pattern in platform_guardrail_patterns:
-                if f"@topic." in stripped and pattern in stripped.lower() and "transition" in stripped.lower():
+                if "@topic." in stripped and pattern in stripped.lower() and "transition" in stripped.lower():
                     guardrail_transitions.append((i, stripped))
 
         if conflicting_topics:

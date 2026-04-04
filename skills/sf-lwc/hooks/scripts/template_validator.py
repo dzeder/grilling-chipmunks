@@ -17,7 +17,7 @@ Source: https://salesforcediaries.com/2026/01/16/llm-mistakes-in-apex-lwc-salesf
 
 import re
 import os
-from typing import Dict, List, Set
+from typing import Dict, List
 
 
 class LWCTemplateValidator:

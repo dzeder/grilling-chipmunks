@@ -168,7 +168,7 @@ echo "Detecting installed Ohanafy packages..."
 PACKAGES_FOUND=()
 
 # Check for ohfy__ namespace classes
-if find force-app -name "*.cls" 2>/dev/null | xargs grep -l "ohfy__" 2>/dev/null | head -1 | grep -q .; then
+if find force-app -name "*.cls" -print0 2>/dev/null | xargs -0 grep -l "ohfy__" 2>/dev/null | head -1 | grep -q .; then
   echo "  Found ohfy__ namespace references"
 fi
 
@@ -188,7 +188,7 @@ SKU_PATTERNS=(
 idx=0
 for sku in "${SKU_NAMES[@]}"; do
   pattern="${SKU_PATTERNS[$idx]}"
-  if find force-app -name "*.cls" -o -name "*.trigger" 2>/dev/null | xargs grep -l "$pattern" 2>/dev/null | head -1 | grep -q .; then
+  if find force-app \( -name "*.cls" -o -name "*.trigger" \) -print0 2>/dev/null | xargs -0 grep -l "$pattern" 2>/dev/null | head -1 | grep -q .; then
     PACKAGES_FOUND+=("$sku")
     echo "  Detected: OHFY-${sku}"
   fi
@@ -234,7 +234,7 @@ cat > "$SNAPSHOT_FILE" << SNAPSHOT
 
 ## Ohanafy Objects
 
-$(find force-app -name "*.object-meta.xml" 2>/dev/null | sed 's|.*/||; s|\.object-meta\.xml||' | sort | while read obj; do
+$(find force-app -name "*.object-meta.xml" 2>/dev/null | sed 's|.*/||; s|\.object-meta\.xml||' | sort | while read -r obj; do
   fields=$(find "force-app/main/default/objects/${obj}/fields" -name "*.field-meta.xml" 2>/dev/null | wc -l | tr -d ' ')
   validations=$(find "force-app/main/default/objects/${obj}/validationRules" -name "*.validationRule-meta.xml" 2>/dev/null | wc -l | tr -d ' ')
   if [ "$fields" -gt 0 ] || [ "$validations" -gt 0 ]; then
@@ -244,11 +244,11 @@ done)
 
 ## Apex Triggers
 
-$(find force-app -name "*.trigger" 2>/dev/null | sed 's|.*/||; s|\.trigger||' | sort | while read t; do echo "- ${t}"; done)
+$(find force-app -name "*.trigger" 2>/dev/null | sed 's|.*/||; s|\.trigger||' | sort | while read -r t; do echo "- ${t}"; done)
 
 ## Flows
 
-$(find force-app -name "*.flow-meta.xml" 2>/dev/null | sed 's|.*/||; s|\.flow-meta\.xml||' | sort | while read f; do echo "- ${f}"; done)
+$(find force-app -name "*.flow-meta.xml" 2>/dev/null | sed 's|.*/||; s|\.flow-meta\.xml||' | sort | while read -r f; do echo "- ${f}"; done)
 
 ## Quick Commands
 

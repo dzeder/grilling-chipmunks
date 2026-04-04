@@ -17,7 +17,6 @@ Categories:
 import sys
 import re
 import os
-from pathlib import Path
 
 # Scoring configuration
 MAX_SCORE = 120

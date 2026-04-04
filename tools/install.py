@@ -2965,7 +2965,7 @@ def cmd_install(dry_run: bool = False, force: bool = False,
 
             # Copy code_analyzer (Python wrapper for sf code-analyzer CLI)
             ca_source = source_dir / "shared" / "code_analyzer"
-            ca_count = copy_code_analyzer(ca_source, CODE_ANALYZER_DIR)
+            copy_code_analyzer(ca_source, CODE_ANALYZER_DIR)
 
             # Auto-acquire LSP servers if no VS Code and no cached servers
             _auto_acquire_lsp_servers(LSP_DIR)
@@ -3503,29 +3503,29 @@ def cmd_status() -> int:
 
     if state == InstallState.FRESH:
         print(f"Status:      {c('❌ NOT INSTALLED', Colors.RED)}")
-        print(f"\nTo install:")
+        print("\nTo install:")
         print(f"  curl -sSL https://raw.githubusercontent.com/{GITHUB_OWNER}/{GITHUB_REPO}/main/tools/install.py | python3")
         return 1
 
     if state == InstallState.NPX:
         print(f"Status:      {c('⚠️ NPX INSTALL (skills only)', Colors.YELLOW)}")
-        print(f"Method:      npx skills add (no hooks, agents, or LSP)")
-        print(f"\nTo upgrade to full experience:")
+        print("Method:      npx skills add (no hooks, agents, or LSP)")
+        print("\nTo upgrade to full experience:")
         print(f"  curl -sSL https://raw.githubusercontent.com/{GITHUB_OWNER}/{GITHUB_REPO}/main/tools/install.sh | bash")
         return 0
 
     if state == InstallState.UNIFIED:
         print(f"Status:      {c('✅ INSTALLED', Colors.GREEN)}")
-        print(f"Method:      Unified installer (native layout)")
+        print("Method:      Unified installer (native layout)")
     elif state == InstallState.LEGACY:
         print(f"Status:      {c('⚠️ LEGACY INSTALL', Colors.YELLOW)}")
-        print(f"Method:      Old hooks-only install")
+        print("Method:      Old hooks-only install")
     elif state == InstallState.MARKETPLACE:
         print(f"Status:      {c('⚠️ MARKETPLACE INSTALL', Colors.YELLOW)}")
-        print(f"Method:      Marketplace (deprecated)")
+        print("Method:      Marketplace (deprecated)")
     elif state == InstallState.CORRUPTED:
         print(f"Status:      {c('❌ CORRUPTED', Colors.RED)}")
-        print(f"Action:      Run installer to repair")
+        print("Action:      Run installer to repair")
 
     print(f"Version:     {current_version or 'unknown'}")
 
@@ -3625,7 +3625,7 @@ def cmd_status() -> int:
         print_warning(f"Update available: v{current_version} → v{details['remote_version']}")
         print_info("Run with --update to apply")
     elif reason == UPDATE_REASON_CONTENT_CHANGED:
-        print_warning(f"Content updated (same version, new commit)")
+        print_warning("Content updated (same version, new commit)")
         if details.get("local_sha") and details.get("remote_sha"):
             print_info(f"Commit: {details['local_sha'][:8]}... → {details['remote_sha'][:8]}...")
         print_info("Run with --update to apply")
@@ -3699,7 +3699,7 @@ def cmd_diagnose() -> int:
                     print(f"   {c('✅', Colors.GREEN)} Auth fields present: {', '.join(present)}")
                 if missing:
                     print(f"   {c('⚠️', Colors.YELLOW)} Auth fields missing: {', '.join(missing)}")
-                    print(f"      (Not all are required — depends on your Claude Code setup)")
+                    print("      (Not all are required — depends on your Claude Code setup)")
             else:
                 # Unknown environment — generic check
                 auth_fields = ["forceLoginMethod", "env", "model"]
@@ -3891,7 +3891,7 @@ def cmd_diagnose() -> int:
         print(f"{c('✅ All checks passed', Colors.GREEN)}")
     else:
         print(f"{c(f'❌ {issues} issue(s) found', Colors.RED)}")
-        print(f"\nRemediation:")
+        print("\nRemediation:")
         print(f"  • Restore settings: python3 {INSTALLER_FILE} --restore-settings")
         print(f"  • Reinstall:        python3 {INSTALLER_FILE} --force-update")
     print()

@@ -54,7 +54,7 @@ import urllib.parse
 import os
 import time
 import sys
-from typing import Optional, List, Dict, Any, Tuple
+from typing import Optional, List, Dict, Any
 from dataclasses import dataclass, field
 
 
@@ -730,10 +730,10 @@ def main():
             elif result.is_error:
                 print(f"❌ Message failed: {result.error}")
             else:
-                print(f"⚠️  Message sent but no text response")
+                print("⚠️  Message sent but no text response")
                 print(f"   Types: {result.message_types}")
 
-        print(f"✅ Session ended cleanly")
+        print("✅ Session ended cleanly")
     except AgentAPIError as e:
         print(f"❌ API error: {e}")
         sys.exit(1)

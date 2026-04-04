@@ -22,7 +22,6 @@ Prerequisites:
 
 import argparse
 import json
-import os
 import subprocess
 import sys
 import tempfile
@@ -35,7 +34,7 @@ SCRIPT_DIR = Path(__file__).parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
 try:
-    from generate_test_spec import parse_agent_file, generate_test_spec, generate_test_cases
+    from generate_test_spec import parse_agent_file, generate_test_spec, generate_test_cases  # noqa: F401
 except ImportError:
     # Fallback if module import fails
     generate_test_spec = None
@@ -228,7 +227,7 @@ def run_tests(test_name: str, target_org: str, wait_minutes: int = 10) -> Tuple[
         print("   Tests completed")
         return True, stdout
 
-    print(f"   Tests may have failed or timed out")
+    print("   Tests may have failed or timed out")
     print(f"   Exit code: {exit_code}")
 
     # Return whatever output we got for parsing

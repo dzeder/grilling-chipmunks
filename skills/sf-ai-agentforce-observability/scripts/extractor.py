@@ -25,12 +25,11 @@ Usage:
 import json
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 from dataclasses import dataclass, field
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
 from .datacloud_client import DataCloudClient
@@ -38,9 +37,6 @@ from .models import (
     SCHEMAS,
     DMO_NAMES,
     build_select_clause,
-    GENERATION_SCHEMA,
-    CONTENT_QUALITY_SCHEMA,
-    CONTENT_CATEGORY_SCHEMA,
 )
 
 

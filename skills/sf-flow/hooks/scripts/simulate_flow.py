@@ -19,8 +19,7 @@ Usage:
 import sys
 import xml.etree.ElementTree as ET
 import argparse
-import json
-from typing import Dict, List, Tuple
+from typing import Dict
 from dataclasses import dataclass
 
 @dataclass
@@ -436,17 +435,17 @@ class FlowSimulator:
         print("\n" + "━" * 70)
         print("Flow Simulation Report")
         print("━" * 70)
-        print(f"\nTest Configuration:")
+        print("\nTest Configuration:")
         print(f"  Records Processed: {self.num_records}")
         print(f"  Flow: {self.xml_path.split('/')[-1]}")
         print(f"  Flow Type: {self.flow_type}")
 
         if self._is_record_triggered():
-            print(f"\n📋 Note: Record-triggered flows use $Record context.")
-            print(f"   Platform handles bulk batching automatically (API 60.0+).")
-            print(f"   Limits below are PER TRANSACTION, not per record.")
+            print("\n📋 Note: Record-triggered flows use $Record context.")
+            print("   Platform handles bulk batching automatically (API 60.0+).")
+            print("   Limits below are PER TRANSACTION, not per record.")
 
-        print(f"\n📊 Resource Usage (per transaction):")
+        print("\n📊 Resource Usage (per transaction):")
         print(f"  SOQL Queries:    {self.metrics.soql_queries:4d} / {self.limits.SOQL_QUERIES} "
               f"({self._percentage(self.metrics.soql_queries, self.limits.SOQL_QUERIES)}%)")
         print(f"  SOQL Records:    {self.metrics.soql_records:4d} / {self.limits.SOQL_RECORDS} "
@@ -464,7 +463,7 @@ class FlowSimulator:
             for error in self.errors:
                 print(f"  {error}")
         else:
-            print(f"\n✓ No governor limit errors detected")
+            print("\n✓ No governor limit errors detected")
 
         # Warnings
         if self.warnings:

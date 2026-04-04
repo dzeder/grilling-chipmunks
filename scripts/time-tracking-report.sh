@@ -14,7 +14,7 @@ if [ ! -f "$CSV" ]; then
   exit 1
 fi
 
-LINES=$(tail -n +2 "$CSV" | grep -v '^$' | wc -l | tr -d ' ')
+LINES=$(tail -n +2 "$CSV" | grep -vc '^$' || true)
 
 if [ "$LINES" -eq 0 ]; then
   echo "No time tracking entries yet."

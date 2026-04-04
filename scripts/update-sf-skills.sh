@@ -107,13 +107,13 @@ for upstream_skill_dir in "$TMP_DIR"/skills/sf-*/; do
     fi
     if [ -n "$NEW_FILES" ]; then
         echo "$NEW_FILES" | while read -r line; do
-            fname=$(echo "$line" | sed "s|.*: ||")
+            fname="${line##*: }"
             echo "      new upstream: ${fname}"
         done
     fi
     if [ -n "$REMOVED_FILES" ]; then
         echo "$REMOVED_FILES" | while read -r line; do
-            fname=$(echo "$line" | sed "s|.*: ||")
+            fname="${line##*: }"
             echo "      local only: ${fname}"
         done
     fi

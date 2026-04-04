@@ -19,12 +19,9 @@ Output includes:
 import argparse
 import json
 from pathlib import Path
-from datetime import datetime
 
 import polars as pl
 from rich.console import Console
-from rich.panel import Panel
-from rich.text import Text
 
 console = Console()
 
@@ -184,14 +181,14 @@ def print_timeline(session_info: dict, timeline: list, verbose: bool = False):
                 try:
                     input_data = json.loads(event["input"])
                     console.print(f"            Input: {json.dumps(input_data, indent=2)[:200]}")
-                except:
+                except Exception:
                     console.print(f"            Input: {event['input'][:200]}")
 
             if event.get("output") and verbose:
                 try:
                     output_data = json.loads(event["output"])
                     console.print(f"            Output: {json.dumps(output_data, indent=2)[:200]}")
-                except:
+                except Exception:
                     console.print(f"            Output: {event['output'][:200]}")
 
             console.print()
@@ -240,7 +237,7 @@ def main():
             icon = "🔄" if end_type == "Escalated" else "❌"
             console.print(f"  {icon} {session_id} | {agent} | {end_type} | {start}")
 
-        console.print(f"\nTo debug a session, run:")
+        console.print("\nTo debug a session, run:")
         console.print(f"  python3 message-timeline.py --data-dir {args.data_dir} --session-id <ID>")
         return 0
 

@@ -10,4 +10,4 @@ Inspired by PSLab (github.com/OumArbani/PSLab)
 __version__ = "1.0.0"
 __author__ = "Jag Valaiyapathy"
 
-from .auth import get_sf_connection
+from .auth import get_sf_connection  # noqa: F401

@@ -20,7 +20,8 @@ REPORT=""
 
 lint_skill() {
     local skill_dir="$1"
-    local skill_name=$(basename "$skill_dir")
+    local skill_name
+    skill_name=$(basename "$skill_dir")
     local skill_file="${skill_dir}/SKILL.md"
     local checks_passed=0
     local checks_warned=0
@@ -94,7 +95,8 @@ lint_skill() {
         # Check staleness of source index
         local last_synced="${skill_dir}/references/last-synced.txt"
         if [ -f "$last_synced" ]; then
-            local sync_date=$(head -1 "$last_synced" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' || echo "")
+            local sync_date
+            sync_date=$(head -1 "$last_synced" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' || echo "")
             if [ -n "$sync_date" ]; then
                 local days_old=$(( ($(date +%s) - $(date -j -f "%Y-%m-%d" "$sync_date" +%s 2>/dev/null || date -d "$sync_date" +%s 2>/dev/null || echo "0")) / 86400 ))
                 if [ "$days_old" -gt 14 ]; then

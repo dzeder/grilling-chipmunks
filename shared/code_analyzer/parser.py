@@ -19,7 +19,7 @@ Usage:
     by_file = group_by_file(violations)
 """
 
-from typing import Dict, List, Any, Optional, Callable
+from typing import Dict, List, Any, Callable
 from dataclasses import dataclass
 from collections import defaultdict
 

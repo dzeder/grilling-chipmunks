@@ -3681,7 +3681,6 @@ def transform_allocations_customer(rows):
         desc = safe_str(r.get("alloc_desc", "")) or alloc_id
         customer = safe_str(r.get("customer_code", ""))
         item = safe_str(r.get("item_code", ""))
-        key = f"{alloc_id}-{customer}-{item}"
 
         result.append(
             [
@@ -3962,8 +3961,8 @@ def write_tab(spreadsheet, tab_name, headers, data_rows, retries=3):
     for i in range(0, len(all_data), batch_size):
         batch = all_data[i : i + batch_size]
         start_row = i + 1
-        end_row = start_row + len(batch) - 1
-        end_col = chr(ord("A") + len(headers) - 1) if len(headers) <= 26 else "Z"
+        start_row + len(batch) - 1
+        chr(ord("A") + len(headers) - 1) if len(headers) <= 26 else "Z"
 
         for attempt in range(retries):
             try:

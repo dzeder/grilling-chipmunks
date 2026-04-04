@@ -23,7 +23,6 @@ import os
 import sys
 import argparse
 import xml.etree.ElementTree as ET
-from pathlib import Path
 from typing import List, Dict, Tuple
 
 
@@ -170,7 +169,7 @@ def generate_permission_set_xml(object_name: str, included_fields: List[Dict]) -
 
     # Create label from object name (remove __c, add spaces)
     label_name = object_name.replace('__c', '').replace('_', ' ')
-    perm_set_name = object_name.replace('__c', '') + '_Access'
+    object_name.replace('__c', '') + '_Access'
 
     xml_content = f'''<?xml version="1.0" encoding="UTF-8"?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
@@ -296,9 +295,9 @@ def main():
     with open(output_path, 'w') as f:
         f.write(xml_content)
 
-    print(f"\n✅ Permission Set generated successfully!")
+    print("\n✅ Permission Set generated successfully!")
     print(f"   📁 Location: {output_path}")
-    print(f"\n💡 Next steps:")
+    print("\n💡 Next steps:")
     print(f"   1. Deploy: sf project deploy start --source-dir {os.path.dirname(output_path)} --target-org <alias>")
     print(f"   2. Assign: sf org assign permset --name {object_name.replace('__c', '')}_Access --target-org <alias>")
 

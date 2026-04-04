@@ -346,12 +346,12 @@ if __name__ == '__main__':
     print("Building org permission hierarchy...")
     hierarchy = get_org_permission_hierarchy(sf)
 
-    print(f"\n📊 Summary:")
+    print("\n📊 Summary:")
     print(f"   Permission Set Groups: {hierarchy.total_psg_count}")
     print(f"   Total Permission Sets: {hierarchy.total_ps_count}")
     print(f"   Standalone PS: {len(hierarchy.standalone_permission_sets)}")
 
-    print(f"\n📁 Permission Set Groups:")
+    print("\n📁 Permission Set Groups:")
     for psg in hierarchy.permission_set_groups:
         status_icon = "✅" if psg.status == "Active" else "⚠️"
         print(f"   {status_icon} {psg.master_label} ({len(psg.permission_sets)} PS, {psg.assigned_user_count} users)")

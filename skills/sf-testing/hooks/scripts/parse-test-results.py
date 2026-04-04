@@ -17,8 +17,6 @@ import json
 import os
 import sys
 import re
-from pathlib import Path
-from datetime import datetime
 
 # Only process sf apex run test commands
 def should_process():
@@ -356,7 +354,7 @@ def main():
         if results['summary']['total'] > 0 or results['failures']:
             formatted = format_output(results)
             print(formatted)
-    except Exception as e:
+    except Exception:
         # Silently fail - don't block on parsing errors
         sys.exit(0)
 

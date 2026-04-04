@@ -46,7 +46,7 @@ import os
 import re
 import sys
 import xml.etree.ElementTree as ET
-from typing import Dict, List, Tuple, Optional
+from typing import Dict
 
 
 class MetadataValidator:
@@ -295,7 +295,7 @@ class MetadataValidator:
             if re.search(pattern, combined_text, re.IGNORECASE):
                 self._add_issue(
                     'security_fls', 'CRITICAL',
-                    f'Potential sensitive data field detected. Ensure proper FLS and encryption.', 10
+                    'Potential sensitive data field detected. Ensure proper FLS and encryption.', 10
                 )
                 break
 

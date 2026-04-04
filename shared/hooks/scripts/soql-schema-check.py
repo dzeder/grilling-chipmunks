@@ -20,7 +20,6 @@ No cache. Always fresh. One targeted describe per query (~2s).
 
 import difflib
 import json
-import os
 import re
 import subprocess
 import sys

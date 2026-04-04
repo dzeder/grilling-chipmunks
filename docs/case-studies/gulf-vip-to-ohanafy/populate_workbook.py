@@ -20,7 +20,6 @@ import psycopg2
 import openpyxl
 from openpyxl.styles import PatternFill, Font, Alignment
 from dotenv import load_dotenv
-from copy import copy
 
 # ---------------------------------------------------------------------------
 # Config
@@ -589,7 +588,6 @@ def populate_product(conn, wb):
         print("  Inserted 6 new columns (AG-AL)")
 
     # Record Number is now col AM (39)
-    REC_NUM_COL = 39
 
     # -- Build brand lookup: brand_code → (brand_name, supplier_code) --
     brands = query(conn, """
@@ -605,7 +603,7 @@ def populate_product(conn, wb):
         SELECT TRIM("SUPPLIER") AS code, TRIM("SUPPLIER_NAME") AS name
         FROM analytics."SUPPLIERT"
     """)
-    supplier_map = {s["code"]: s["name"] for s in suppliers}
+    {s["code"]: s["name"] for s in suppliers}
 
     # -- Build item type lookup: product_type_pointer → description --
     item_types = query(conn, """
@@ -614,7 +612,7 @@ def populate_product(conn, wb):
         FROM analytics."HDRITYPET"
         WHERE import_is_deleted = false
     """)
-    itype_map = {t["id"]: t for t in item_types}
+    {t["id"]: t for t in item_types}
 
     # -- Query all active + seasonal items --
     items = query(conn, """
@@ -646,7 +644,7 @@ def populate_product(conn, wb):
     # -- Determine Ohanafy type from VIP data --
     def get_ohanafy_type(item):
         desc = (item["pkg_desc"] or "").upper()
-        ct = item["container_type"] or ""
+        item["container_type"] or ""
         ptp = item["prod_type_ptr"] or ""
         pclass = item["product_class"] or ""
 
@@ -886,7 +884,6 @@ def populate_customer(conn, wb):
         print("  Inserted 6 new columns (AL-AQ): VIP reference fields")
 
     # Record Number is now col AR (44)
-    REC_NUM_COL = 44
 
     # -- Build lookup tables --
 
@@ -1098,9 +1095,9 @@ def populate_customer(conn, wb):
         addr = addr_map.get(acct, {})
         on_off = str(c["on_off"] or "").strip()
         rep_name = rep_map.get((c["salesman"] or "").upper())
-        term_desc = terms_map.get(c["term"])
+        terms_map.get(c["term"])
         county_name = county_map.get(c["county"])
-        chain_desc = chain_map.get(c["chain"])
+        chain_map.get(c["chain"])
         pricelist_name = price_code_to_name.get(c["price_code"])
 
         # Phone formatting
@@ -1918,7 +1915,7 @@ def populate_route(conn, wb):
         driver_display = flip_name(driver_name_raw)
 
         # Determine if route looks like a real driver route or a special route
-        is_sample = any(kw in (desc or "").upper() for kw in
+        any(kw in (desc or "").upper() for kw in
                         ["SAMPLE", "OPEN RT", "OVERFLOW", "LOADS FOR", "DRAFT"])
         route_name = f"{code} - {desc}" if desc else code
 
@@ -2439,10 +2436,10 @@ def populate_promotions(conn, wb):
         methods[m] = methods.get(m, 0) + 1
     print(f"  Distinct promotions: {len(promo_counts)}")
     print(f"  Economics enrichment: {econ_pct:.1f}%")
-    print(f"  Methods:")
+    print("  Methods:")
     for m, cnt in sorted(methods.items(), key=lambda x: -x[1]):
         print(f"    {m}: {cnt}")
-    print(f"  Deal types:")
+    print("  Deal types:")
     for dt, cnt in sorted(deal_types.items(), key=lambda x: -x[1]):
         print(f"    {dt}: {cnt}")
     print(f"  ✓ Promotions tab: {len(output)} rows written")
@@ -2489,7 +2486,7 @@ def main():
 
     conn.close()
 
-    print(f"\nSaving workbook...")
+    print("\nSaving workbook...")
     wb.save(WORKBOOK_PATH)
     print(f"Done! Saved to {WORKBOOK_PATH}")
 
