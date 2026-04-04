@@ -1,7 +1,8 @@
 #!/bin/bash
-# Normalize gstack skill symlinks to use relative paths.
-# Fixes breakage caused by gstack's setup/gstack-relink scripts which
-# create absolute symlinks (designed for ~/.claude installs, not vendored repos).
+# Normalize gstack skill symlinks and ensure skills/ discovery directory is populated.
+# Fixes two issues:
+#   1. gstack's setup/gstack-relink scripts create absolute symlinks
+#   2. gstack skills missing from skills/ (where Claude Code discovers them)
 #
 # Usage:
 #   bash scripts/fix-gstack-symlinks.sh           # fix and report
@@ -23,6 +24,8 @@ FIXED=0
 BROKEN=0
 SKIPPED=0
 
+# ── Part 1: Fix .claude/skills/ symlinks (absolute → relative) ──
+
 for skill_dir in .claude/skills/*/; do
     [ -d "$skill_dir" ] || continue
     skill_name=$(basename "$skill_dir")
@@ -40,13 +43,13 @@ for skill_dir in .claude/skills/*/; do
     if [[ "$target" == /* ]] && [[ "$target" == *"/gstack/"* ]]; then
         if [ -f ".claude/skills/gstack/${skill_name}/SKILL.md" ]; then
             if $CHECK_ONLY; then
-                echo "NEEDS FIX: ${skill_name} → ${target}"
+                echo "NEEDS FIX: .claude/skills/${skill_name} → ${target}"
                 BROKEN=$((BROKEN + 1))
             else
                 rm "$skill_file"
                 ln -s "../gstack/${skill_name}/SKILL.md" "$skill_file"
                 FIXED=$((FIXED + 1))
-                echo "  ✅ ${skill_name}"
+                echo "  ✅ .claude/skills/${skill_name}"
             fi
         else
             echo "  ⚠️  ${skill_name}: no gstack source found, skipping"
@@ -56,17 +59,86 @@ for skill_dir in .claude/skills/*/; do
     elif [ ! -e "$skill_file" ] && [[ "$target" == *"/gstack/"* ]]; then
         if [ -f ".claude/skills/gstack/${skill_name}/SKILL.md" ]; then
             if $CHECK_ONLY; then
-                echo "NEEDS FIX: ${skill_name} → ${target} (broken)"
+                echo "NEEDS FIX: .claude/skills/${skill_name} → ${target} (broken)"
                 BROKEN=$((BROKEN + 1))
             else
                 rm "$skill_file"
                 ln -s "../gstack/${skill_name}/SKILL.md" "$skill_file"
                 FIXED=$((FIXED + 1))
-                echo "  ✅ ${skill_name}"
+                echo "  ✅ .claude/skills/${skill_name}"
             fi
         else
             echo "  ⚠️  ${skill_name}: no gstack source found, skipping"
             SKIPPED=$((SKIPPED + 1))
+        fi
+    fi
+done
+
+# ── Part 2: Ensure skills/ has frontmatter stubs for all gstack skills ──
+# Claude Code discovers skills from skills/ at the repo root.
+# IMPORTANT: Only the YAML frontmatter is needed for discovery (name + description).
+# Full content lives in .claude/skills/gstack/ and is loaded on invocation.
+# Stubs must be real files — Claude Code does NOT follow symlinks.
+
+extract_frontmatter() {
+    awk '/^---$/{c++; if(c==2){print; exit}} {print}' "$1"
+}
+
+for gstack_skill_dir in .claude/skills/gstack/*/; do
+    [ -d "$gstack_skill_dir" ] || continue
+    skill_name=$(basename "$gstack_skill_dir")
+    gstack_skill_file="${gstack_skill_dir}SKILL.md"
+    [ -f "$gstack_skill_file" ] || continue
+
+    discovery_dir="skills/${skill_name}"
+    discovery_file="${discovery_dir}/SKILL.md"
+
+    # Create directory if missing
+    if [ ! -d "$discovery_dir" ]; then
+        if $CHECK_ONLY; then
+            echo "NEEDS FIX: skills/${skill_name}/ missing (skill not discoverable)"
+            BROKEN=$((BROKEN + 1))
+            continue
+        fi
+        mkdir -p "$discovery_dir"
+    fi
+
+    # Replace symlinks with real stubs (Claude Code won't follow symlinks)
+    if [ -L "$discovery_file" ]; then
+        if $CHECK_ONLY; then
+            echo "NEEDS FIX: skills/${skill_name}/SKILL.md is a symlink (must be a real file)"
+            BROKEN=$((BROKEN + 1))
+            continue
+        fi
+        rm "$discovery_file"
+        extract_frontmatter "$gstack_skill_file" > "$discovery_file"
+        FIXED=$((FIXED + 1))
+        echo "  ✅ skills/${skill_name}/ (stub created)"
+        continue
+    fi
+
+    # Create if missing
+    if [ ! -f "$discovery_file" ]; then
+        if $CHECK_ONLY; then
+            echo "NEEDS FIX: skills/${skill_name}/ missing (skill not discoverable)"
+            BROKEN=$((BROKEN + 1))
+        else
+            extract_frontmatter "$gstack_skill_file" > "$discovery_file"
+            FIXED=$((FIXED + 1))
+            echo "  ✅ skills/${skill_name}/ (stub created)"
+        fi
+        continue
+    fi
+
+    # Refresh if gstack source is newer than the stub
+    if [ "$gstack_skill_file" -nt "$discovery_file" ]; then
+        if $CHECK_ONLY; then
+            echo "NEEDS FIX: skills/${skill_name}/SKILL.md is stale"
+            BROKEN=$((BROKEN + 1))
+        else
+            extract_frontmatter "$gstack_skill_file" > "$discovery_file"
+            FIXED=$((FIXED + 1))
+            echo "  ✅ skills/${skill_name}/ (stub refreshed)"
         fi
     fi
 done
@@ -76,18 +148,18 @@ if $CHECK_ONLY; then
         echo "${BROKEN} symlink(s) need fixing. Run: bash scripts/fix-gstack-symlinks.sh"
         exit 1
     else
-        echo "All gstack symlinks are relative."
+        echo "All gstack symlinks are relative and discoverable."
         exit 0
     fi
 fi
 
 echo ""
 if [ "$FIXED" -gt 0 ]; then
-    echo "Fixed ${FIXED} symlink(s) to use relative paths."
+    echo "Fixed ${FIXED} symlink(s)."
 fi
 if [ "$SKIPPED" -gt 0 ]; then
     echo "Skipped ${SKIPPED} (no gstack source)."
 fi
 if [ "$FIXED" -eq 0 ] && [ "$SKIPPED" -eq 0 ]; then
-    echo "All gstack symlinks already use relative paths."
+    echo "All gstack symlinks already correct and discoverable."
 fi

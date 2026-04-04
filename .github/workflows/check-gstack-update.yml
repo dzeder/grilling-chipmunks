@@ -46,7 +46,11 @@ jobs:
             --exclude='gstack-global-discover' \
             /tmp/gstack-upstream/ .claude/skills/gstack/
 
-      - name: Create PR
+      - name: Normalize gstack symlinks
+        if: steps.check.outputs.needs_update == 'true'
+        run: bash scripts/fix-gstack-symlinks.sh
+
+      - name: Create or update PR
         if: steps.check.outputs.needs_update == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -56,8 +60,24 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           BRANCH="chore/update-gstack-${UPSTREAM_VER}"
+
+          # If a PR already exists for this version, force-update it
+          EXISTING_PR=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number' 2>/dev/null || echo "")
+          if [ -n "$EXISTING_PR" ]; then
+            echo "PR #${EXISTING_PR} already exists for ${BRANCH}, updating..."
+            git checkout -b "$BRANCH"
+            git add .claude/skills/gstack/ .claude/skills/*/SKILL.md
+            git commit -m "chore: update gstack from ${LOCAL_VER} to ${UPSTREAM_VER}"
+            git push origin "$BRANCH" --force
+            echo "Updated existing PR #${EXISTING_PR}"
+            exit 0
+          fi
+
+          # Delete stale remote branch if it exists without a PR
+          git push origin --delete "$BRANCH" 2>/dev/null || true
+
           git checkout -b "$BRANCH"
-          git add .claude/skills/gstack/
+          git add .claude/skills/gstack/ .claude/skills/*/SKILL.md
           git commit -m "chore: update gstack from ${LOCAL_VER} to ${UPSTREAM_VER}"
           git push origin "$BRANCH"
           {
@@ -67,12 +87,17 @@ jobs:
             echo ""
             echo "## Review"
             echo "- Check the diff for breaking changes to skills you use"
-            echo "- After merging, run \`cd .claude/skills/gstack && ./setup\` to rebuild the browser binary"
+            echo ""
+            echo "## After merging"
+            echo '```bash'
+            echo "cd .claude/skills/gstack && ./setup && cd -"
+            echo "bash scripts/fix-gstack-symlinks.sh  # setup creates absolute paths, this fixes them"
+            echo '```'
             echo ""
             echo "## Test plan"
             echo "- [ ] Review CHANGELOG for breaking changes"
             echo "- [ ] Verify skill names haven't changed"
-            echo "- [ ] Rebuild browser binary after merge"
+            echo "- [ ] Rebuild browser binary and normalize symlinks after merge"
           } > /tmp/pr-body.md
           gh pr create \
             --title "Update gstack to ${UPSTREAM_VER}" \
