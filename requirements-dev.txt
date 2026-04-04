@@ -18,7 +18,7 @@ execnet==2.1.2
     # via pytest-xdist
 iniconfig==2.3.0
     # via pytest
-isort==5.13.2
+isort==8.0.1
     # via sf-skills (pyproject.toml)
 librt==0.8.1
     # via mypy
@@ -57,7 +57,7 @@ pytest==9.0.2
     #   pytest-cov
     #   pytest-xdist
     #   sf-skills (pyproject.toml)
-pytest-cov==6.3.0
+pytest-cov==7.1.0
     # via sf-skills (pyproject.toml)
 pytest-xdist==3.8.0
     # via sf-skills (pyproject.toml)
