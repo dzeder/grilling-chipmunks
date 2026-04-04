@@ -1,1 +1,1 @@
-/Users/danielzeder/conductor/workspaces/daniels-ohanafy/saskatoon-v1/.claude/skills/gstack/design-html/SKILL.md
+../gstack/design-html/SKILL.md

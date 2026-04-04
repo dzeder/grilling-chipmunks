@@ -21,7 +21,15 @@ Available gstack skills: `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`
 
 ## Ohanafy SKU expert skills (product layer)
 
-Each SKU skill has a pre-built source index (`references/source-index.md`) with classes, triggers, methods, fields, and LWC components. Check `references/last-synced.txt` — if stale (>7 days), refresh with `bash scripts/sync-ohanafy-index.sh --repo REPO`. Clone-on-demand remains as a deep dive fallback. Use `--discover` to find new repos in the Ohanafy org.
+Each SKU skill has a pre-built source index (`references/source-index.md`) with:
+- Apex classes, triggers, service methods, custom objects & fields, LWC components
+- **Trigger → Handler Map** (which triggers fire on which objects, what handlers they call)
+- **Service Layer Graph** (one level deep, direct calls/instantiations)
+- **Cross-Object Relationships** (lookup and master-detail relationships)
+- **Common Patterns** (trigger bypass, service locator, batch/schedulable, queueable, platform events)
+- **Test Coverage Summary** (production vs test class ratio, untested classes)
+
+Check `references/last-synced.txt` — if stale (>7 days), refresh with `bash scripts/sync-ohanafy-index.sh --repo REPO`. Clone-on-demand remains as a deep dive fallback. Use `--discover` to find new repos in the Ohanafy org.
 
 | Skill | Ohanafy Repo(s) | Domain |
 |-------|-----------------|--------|
@@ -216,6 +224,45 @@ cat customers/gulf/orgs/production/org-snapshot.md  # Deployed metadata state
 5. Cross-reference with `ohfy-*-expert` skills for expected behavior
 6. Write customer-specific learnings to `customers/<name>/notes.md`
 7. Refresh metadata if stale (`sf project retrieve start`)
+
+## Context Loading Protocol
+
+Before starting any task, determine what context to pre-load. This ensures agents have the right knowledge without being told.
+
+### 1. Customer context (branch or task mentions a customer)
+
+Parse the branch name: if it matches `dzeder/<customer>-*`, match the segment after the slash prefix against known customer directory names in `customers/`.
+
+If a customer is identified (from branch name or task description):
+- Read `customers/<customer>/profile.md` for org topology, SKUs, external systems
+- Read `customers/<customer>/orgs/<env>/org-snapshot.md` if it exists (deployed metadata state)
+- Check `customers/<customer>/notes.md` and `customers/<customer>/known-issues.md` for prior learnings
+
+Known customers: check `ls customers/` for current list (exclude `_template`).
+
+### 2. Package context (task mentions an Ohanafy package)
+
+If the task mentions OMS, WMS, REX, EDI, Ecom, Payments, Configure, Platform, Core, or Data Model:
+- Read `skills/ohfy-<package>-expert/references/source-index.md` for code intelligence
+- Check `references/last-synced.txt` — if >7 days stale, suggest: "Source index is stale, want me to refresh with `bash scripts/sync-ohanafy-index.sh --repo OHFY-<Package>`?"
+
+### 3. Integration context (task mentions Tray, connector, sync, mapping)
+
+- Read `integrations/patterns/README.md` for available pattern modules
+- Read relevant pattern files (e.g., `batch-processing.js`, `data-mapping.js`)
+- Read `docs/integration-guides/OHFY_INTEGRATION_MASTER_GUIDE.md` for methodology
+
+### 4. Debugging context (task mentions error, bug, failing, broken)
+
+Load BOTH customer profile AND package source index for the affected area. The source index includes:
+- Trigger → Handler Map (which triggers fire on which objects)
+- Service Layer Graph (which services call which services)
+- Common Patterns (bypass mechanisms, batch chains, queueable usage)
+- Cross-Object Relationships
+
+### 5. No match
+
+If no keywords match any of the above, proceed without pre-loading. The agent will discover context as needed.
 
 ## Skill routing
 

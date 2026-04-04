@@ -1,1 +1,1 @@
-/Users/danielzeder/conductor/workspaces/daniels-ohanafy/saskatoon-v1/.claude/skills/gstack/plan-ceo-review/SKILL.md
+../gstack/plan-ceo-review/SKILL.md

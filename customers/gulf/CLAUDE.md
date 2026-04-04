@@ -1,9 +1,14 @@
 # Customer: Gulf Distributing
 
-## How to use this directory
+## Context loading order
 
-This directory captures everything specific to Gulf Distributing's Salesforce/Ohanafy instance.
-Agents should read `profile.md` first for context, then check `orgs/` for environment-specific metadata.
+When working on Gulf, read files in this order:
+
+1. **`profile.md`** — Org topology (3 envs), 9 installed SKUs, VIP migration context
+2. **`orgs/<env>/org-snapshot.md`** — Deployed metadata state (packages, objects, flows, validation rules)
+3. **`integrations.md`** — VIP staging DB, GP Analytics via Tray
+4. **`known-issues.md`** — Open issues, workarounds, recurring patterns
+5. **`notes.md`** — Running notes from debugging sessions
 
 ## Connected orgs
 
@@ -20,13 +25,21 @@ bash scripts/connect-org.sh gulf-cam --sandbox --type sandbox
 
 After connecting, read `orgs/<env>/org-snapshot.md` for metadata counts and quick commands.
 
-## What belongs here
+## Gulf-specific context
 
-- `profile.md` — Customer overview, org topology, installed SKUs, key contacts
-- `orgs/<env>/` — Per-environment metadata retrieved by connect-org.sh
-- `customizations.md` — Custom fields, picklist values, validation rules that differ from standard OHFY
-- `integrations.md` — What systems they connect to, credentials, sync patterns
-- `notes.md` — Running notes from debugging sessions, design decisions, gotchas
+- **Migrating from VIP (AS400/DB2)** — migration artifacts in `docs/case-studies/gulf-vip-to-ohanafy/`
+- **~8,743 items and ~927 brands** migrated from VIP
+- **GP Analytics integration** via Tray.io for placements and depletions
+- **VIP staging DB** at `gulfstream-db2-data.postgres.database.azure.com:5432`
+
+## Cross-referencing
+
+Gulf uses 9 Ohanafy SKUs. When debugging, load the relevant source indexes:
+- OMS: `skills/ohfy-oms-expert/references/source-index.md`
+- WMS: `skills/ohfy-wms-expert/references/source-index.md`
+- REX: `skills/ohfy-rex-expert/references/source-index.md`
+- Core: `skills/ohfy-core-expert/references/source-index.md`
+- EDI: `skills/ohfy-edi-expert/references/source-index.md`
 
 ## What does NOT belong here
 
