@@ -1,1 +1,1 @@
-/Users/danielzeder/conductor/workspaces/daniels-ohanafy/saskatoon-v1/.claude/skills/gstack/benchmark/SKILL.md
+../gstack/benchmark/SKILL.md

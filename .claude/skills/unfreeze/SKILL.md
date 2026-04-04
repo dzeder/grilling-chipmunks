@@ -1,1 +1,1 @@
-/Users/danielzeder/conductor/workspaces/daniels-ohanafy/saskatoon-v1/.claude/skills/gstack/unfreeze/SKILL.md
+../gstack/unfreeze/SKILL.md
