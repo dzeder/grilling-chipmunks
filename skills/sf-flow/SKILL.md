@@ -33,6 +33,12 @@ Delegate elsewhere when the user is:
 
 ---
 
+## Examples
+
+- "Build a before-save record-triggered flow on Opportunity that sets the Region field based on Account billing state"
+- "Create a screen flow for case intake that collects customer info and creates both a Case and Contact"
+- "Fix a flow that times out on bulk updates — it has a Get Records inside a loop"
+
 ## Required Context to Gather First
 
 Ask for or infer:

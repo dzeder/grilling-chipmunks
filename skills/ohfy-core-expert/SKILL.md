@@ -8,6 +8,8 @@ description: |
   - Understanding object relationships and field mappings
   - Implementing bypass patterns for bulk operations
   - Mapping external system data to Salesforce fields
+  TRIGGER when: user asks about OHFY-Core objects, triggers, bypass patterns,
+  external IDs, or integration errors against the Ohanafy Salesforce package.
   Covers: 143 objects, 37 triggers, bypass patterns, status validations,
   external ID patterns, and common integration error resolutions.
 ---
@@ -53,6 +55,21 @@ Key paths:
 - Apex triggers: `/tmp/ohfy-core/force-app/main/default/triggers/`
 - Custom objects: `/tmp/ohfy-core/force-app/main/default/objects/`
 - Custom metadata: `/tmp/ohfy-core/force-app/main/default/customMetadata/`
+
+## Delegates To
+
+- **ohfy-data-model-expert** — For object schemas and field definitions
+- **ohfy-platform-expert** — For shared platform services
+- **sf-apex** — For general Apex coding patterns
+- **sf-metadata** — For custom metadata type patterns
+- **tray-expert** — For Tray.io workflow architecture
+
+## Workflow
+
+### 1. Identify the object or trigger involved in the user's question
+### 2. Check the source index for relevant classes, triggers, or fields
+### 3. Review bypass patterns if the issue involves trigger or validation errors
+### 4. Reference integration patterns for safe bulk operation guidance
 
 ## Curated References
 

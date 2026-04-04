@@ -1,6 +1,10 @@
 ---
 name: tray-diagrams
-description: Mermaid diagram generation for Tray.io workflows — flow direction standards, arrow styles, node naming conventions, architecture diagrams, and sequence diagrams.
+description: >
+  Mermaid diagram generation for Tray.io workflows — flow direction standards,
+  arrow styles, node naming conventions, architecture diagrams, and sequence diagrams.
+  TRIGGER when: user asks for a Tray workflow diagram, Mermaid visualization,
+  flowchart of an integration, or visual documentation of Tray workflows.
 ---
 
 # Tray.io Mermaid Diagram Expert
@@ -45,3 +49,11 @@ Examples:
 ### Storage Locations
 - Project diagrams: `versions/current/diagrams/`
 - Documentation: `versions/current/documentation/README.md`
+
+## Delegation
+
+Do not trigger this skill for:
+- General Tray.io questions or workflow design -- delegate to `tray-expert`
+- Salesforce-specific Mermaid diagrams (ERDs, flow charts) -- delegate to `sf-diagram-mermaid`
+- Tray script generation or debugging -- delegate to `tray-script-generator` or `tray-errors`
+- Tray usage metrics and analytics -- delegate to `tray-insights`

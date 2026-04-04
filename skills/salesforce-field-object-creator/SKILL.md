@@ -1,6 +1,12 @@
 ---
 name: salesforce-field-object-creator
-description: Generate production-ready Tray workflow scripts for creating Salesforce custom objects and fields from CSV specifications. Supports all 28 Salesforce field types with interactive setup for complex fields (Formula, Lookup, MasterDetail, Summary, Picklist). Based on MCBC Salsify and MCBC Shelf Execution production patterns. Use when you need to create Salesforce metadata via Tray.io workflows from CSV field specifications.
+description: >
+  Generate production-ready Tray workflow scripts for creating Salesforce custom objects and fields
+  from CSV specifications. Supports all 28 Salesforce field types with interactive setup for complex
+  fields (Formula, Lookup, MasterDetail, Summary, Picklist). Based on MCBC Salsify and MCBC Shelf
+  Execution production patterns. TRIGGER when: user provides a CSV with field specs and asks to
+  generate Tray scripts, needs to automate SF custom object/field creation via Tray.io, or
+  references MCBC Salsify/Shelf Execution metadata patterns.
 ---
 
 # Salesforce Field & Object Creator Skill
@@ -20,6 +26,14 @@ Use this skill when the user:
 - Says something like "create Salesforce fields from this CSV" or "generate metadata scripts"
 - Needs to automate Salesforce custom object or field creation via Tray.io workflows
 - References MCBC Salsify, MCBC Shelf Execution, or similar SF metadata patterns
+
+## Delegation
+
+- **sf-metadata** — For creating metadata XML directly (without Tray workflow scripts)
+- **sf-deploy** — For deploying the generated metadata to Salesforce orgs
+- **tray-expert** — For general Tray.io workflow design questions beyond field/object creation
+- **salesforce-composite** — For composite API-based metadata operations
+- Do not trigger for manual Salesforce Setup UI field creation or Apex-based schema changes
 
 ## Core Capabilities
 

@@ -1,6 +1,10 @@
 ---
 name: security
-description: Security and secret management — token rotation, .env protection, credential handling, emergency response protocols, and secure integration patterns.
+description: >
+  Security and secret management — token rotation, .env protection, credential handling,
+  emergency response protocols, and secure integration patterns.
+  TRIGGER when: user manages API tokens, credentials, or .env files, asks about secret rotation,
+  reports a leaked secret, or needs security audit guidance for integrations.
 ---
 
 # Security & Secret Management Expert
@@ -17,6 +21,27 @@ Invoke this skill when:
 - Access control and token permissions
 - Automated secret protection setup
 - Keywords: "token", "secret", ".env", "credentials", "rotation", "security", "API key"
+
+## Delegation
+
+- **tray-expert** — For Tray.io-specific token configuration and workspace credential management
+- **sf-deploy** — For Salesforce Named Credential and Connected App security setup
+- **org-connect** — For authenticating to Salesforce orgs securely
+- Do not trigger for general Salesforce permission/profile configuration (use sf-metadata)
+
+## Workflow
+
+### 1. Assess the security context
+Identify what type of secret or credential is involved (Tray token, SF Named Credential, API key, .env variable) and the environment (dev, staging, production).
+
+### 2. Check current state
+Verify .gitignore coverage, review existing secret storage, and confirm no credentials are committed to version control.
+
+### 3. Apply the appropriate protocol
+Follow the token rotation schedule, set up environment-specific tokens, or execute emergency response steps for leaked secrets.
+
+### 4. Verify and document
+Confirm the secret is properly stored, rotated, and scoped. Document the rotation in the security log.
 
 ## Reference Files
 - `security-protocols.md` - Complete security documentation

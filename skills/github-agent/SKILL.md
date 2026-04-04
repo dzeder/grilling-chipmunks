@@ -34,6 +34,12 @@ Delegate elsewhere when the user is:
 - checking code quality (linting, tests, dead code) -> `/health`
 - reviewing a PR diff -> `/review`
 
+## Examples
+
+- "Our CI is failing on the main branch" -- run discovery, diagnose workflow failures, suggest fixes
+- "Audit our GitHub repo configuration" -- full 100-point audit across security, correctness, efficiency, config, maintainability
+- "Are our GitHub Actions following best practices?" -- analyze workflow YAML files for anti-patterns and improvements
+
 ---
 
 ## Required Context to Gather First

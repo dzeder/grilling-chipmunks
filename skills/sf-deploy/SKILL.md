@@ -33,6 +33,12 @@ Delegate elsewhere when the user is:
 
 ---
 
+## Examples
+
+- "Validate and deploy the force-app directory to the Gulf sandbox with RunLocalTests"
+- "Quick-deploy using the validation job ID from this morning's dry run"
+- "Troubleshoot why the permission set deploy fails with INVALID_CROSS_REFERENCE_KEY on the new custom field"
+
 ## Critical Operating Rules
 
 - Use **`sf` CLI v2 only**.

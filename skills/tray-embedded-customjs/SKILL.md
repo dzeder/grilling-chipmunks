@@ -1,6 +1,13 @@
 ---
 name: tray-embedded-customjs
-description: "Generate production-ready Custom JavaScript code for Tray.ai Embedded solution config wizards. Use when the user wants to: create Custom JS for a Tray Embedded config slot, build dynamic dropdowns using callConnector, render array-of-objects forms via JSON Schema, show/hide slots based on dependencies, validate config slot input data, toggle config wizard screen visibility, customize data mapping with dynamic lookups, or any task involving Tray Embedded solution config wizard behavior controlled by JavaScript. Triggers include mentions of: Tray.ai Custom JS, config wizard customization, Embedded solution slots, callConnector, CONFIG_SLOT_MOUNT, CONFIG_SLOT_VALUE_CHANGED, Tray solution editor, config slot JSON Schema, partner__ CSS classes, or Tray Embedded advanced config wizard."
+description: >
+  Generate production-ready Custom JavaScript code for Tray.ai Embedded solution
+  config wizards. TRIGGER when: user wants to create Custom JS for a Tray Embedded
+  config slot, build dynamic dropdowns using callConnector, render array-of-objects
+  forms via JSON Schema, show/hide slots based on dependencies, validate config slot
+  input data, toggle config wizard screen visibility, customize data mapping with
+  dynamic lookups, or any task involving CONFIG_SLOT_MOUNT, CONFIG_SLOT_VALUE_CHANGED,
+  Tray solution editor, config slot JSON Schema, or partner__ CSS classes.
 ---
 
 # Tray Embedded Custom JS Skill
@@ -166,6 +173,14 @@ tray.emit("TOGGLE_SCREENS_VISIBILITY", [
 Tray uses a closed set of `partner__` prefixed CSS classes. Do NOT invent class names.
 
 Available classes: `partner__screen`, `partner__screen--first`, `partner__screen--last`, `partner__screen__header`, `partner__screen__header__title`, `partner__screen__header__description`, `partner__screen__items`, `partner__item__title`, `partner__item--auth`, `partner__item--config`, `partner__item--public-url`, `partner__message--error`, `partner__field__checkbox`, `partner__field__radio`, `partner__button--cancel`, `partner__button--previous`, `partner__button--finish`, `partner__button--next`, `partner__button--add`, `partner__footer`, `partner__footer__button-group`, `partner__footer__step-indicator`, `partner__footer__step-indicator__dot`, `partner__footer__step-indicator__dot--active`
+
+## Delegation
+
+Do not trigger this skill for:
+- General Tray.io workflow design or Q&A -- delegate to `tray-expert`
+- Tray exports.step script generation (non-Embedded) -- delegate to `tray-script-generator`
+- Tray error handling patterns -- delegate to `tray-errors`
+- Mermaid diagrams for Tray workflows -- delegate to `tray-diagrams`
 
 CSS constraints:
 - Only simple styling (colors, fonts, border-radius, borders) — layout changes may break

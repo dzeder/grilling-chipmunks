@@ -35,6 +35,12 @@ Delegate elsewhere when the user is:
 
 ---
 
+## Examples
+
+- "Set up an activation target for Marketing Cloud to receive the High-Value Customers segment"
+- "Create a data action that pushes unified profile updates to an external loyalty platform"
+- "List all activation targets and verify which segments are actively delivering downstream"
+
 ## Required Context to Gather First
 
 Ask for or infer:

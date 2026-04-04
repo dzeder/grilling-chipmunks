@@ -57,6 +57,12 @@ bash scripts/update-best-practices.sh --apply
 
 Weekly GitHub Action also checks automatically and opens a PR if upstream has changes.
 
+## Examples
+
+- "I want to create a new skill for Tray error handling" -- consult skill authoring patterns before writing
+- "How should I structure subagents for the FDE team?" -- review subagent design and monorepo organization
+- "Is our CLAUDE.md following best practices?" -- compare against memory vs CLAUDE.md tradeoffs guidance
+
 ## When to Consult
 
 Before creating a new skill or agent, read:

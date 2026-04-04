@@ -1,6 +1,10 @@
 ---
 name: salesforce-composite
-description: Salesforce Composite API patterns — URL encoding for external IDs, field rules for composite requests, External_ID__c object patterns, and batch upsert workflows.
+description: >
+  Salesforce Composite API patterns — URL encoding for external IDs, field rules for composite requests,
+  External_ID__c object patterns, and batch upsert workflows.
+  TRIGGER when: user builds composite or batch API requests, works with external ID upserts,
+  needs URL encoding for special characters in SF API calls, or asks about composite request field rules.
 ---
 
 # Salesforce Composite API Expert
@@ -16,6 +20,27 @@ Invoke this skill when:
 - Questions about composite request field rules
 - External_ID__c object record structure
 - Keywords: "salesforce", "composite", "upsert", "external id", "url encoding", "encodeURIComponent"
+
+## Delegation
+
+- **salesforce-integration-architect** — For broader integration architecture decisions beyond composite API mechanics
+- **sf-apex** — For Apex-side composite request handling (HttpRequest, named credentials)
+- **tray-expert** — For Tray.io workflow steps that call SF Composite API
+- Do not trigger for general Salesforce REST API questions that do not involve composite/batch patterns
+
+## Workflow
+
+### 1. Identify the operation type
+Determine whether the user needs composite request, composite batch, or single-record upsert with external ID.
+
+### 2. Build the request structure
+Construct the URL with proper `encodeURIComponent()` encoding, ensure external ID fields are not duplicated in the body, and set correct API version.
+
+### 3. Handle batching
+For bulk operations, chunk records into groups of 200 (composite batch limit) and structure subrequests with proper referenceId values.
+
+### 4. Validate and test
+Verify URL encoding for special characters, confirm field rules (upsert key not in body), and test with a single record before bulk execution.
 
 ## Reference Files
 - `salesforce-api-patterns.md` - Complete Salesforce API documentation

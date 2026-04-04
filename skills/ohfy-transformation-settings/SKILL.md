@@ -7,6 +7,9 @@ description: >
   sub-types or UOM combinations. Triggers on: "create transformation settings",
   "generate transformation settings CSV", "add transformation settings for [product]",
   "new product UOM settings", "onboard [sub-type] in Ohanafy".
+  TRIGGER when: user asks to create, generate, or import transformation settings,
+  onboard new product sub-types or UOM combinations, or produce net-new
+  ohfy__Transformation_Setting__c CSV records.
 ---
 
 # Ohanafy Transformation Settings Builder — SFDX Interactive Workflow
@@ -216,6 +219,20 @@ Claude-orchestrated checklist before handing off the CSV:
 
 - **`references/uom-conversions.md`** — UOM → fl oz and lb equivalents, measurement system
 - **`references/sfdx-commands.md`** — All `sf` CLI commands used in this workflow
+
+## Delegation
+
+- **ohfy-data-model-expert** — For questions about the `ohfy__Transformation_Setting__c` object schema or related objects
+- **ohfy-core-expert** — For trigger framework behavior when records are inserted
+- **org-connect** — For connecting to the target Salesforce org if not already authenticated
+- **sf-deploy** — For deploying metadata changes (e.g., new GlobalValueSet values via metadata API)
+- Do not trigger this skill for general UOM questions that do not involve creating transformation setting records
+
+## Examples
+
+- "Create transformation settings for Beer sub-type with Case - 12x1 - 12oz - Can UOMs"
+- "Generate a net-new transformation settings CSV for the Wine sub-type on the Gulf production org"
+- "Onboard Spirits UOMs — we need volume and weight conversions for all new case sizes"
 
 ## Prerequisites
 

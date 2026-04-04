@@ -26,6 +26,12 @@ Use `sf-integration` when the work involves:
 - Platform Events, CDC, and event-driven architecture
 - choosing sync vs async integration patterns
 
+### Examples
+
+- "Set up a Named Credential for our UKG API callout" -- design the Named Credential + External Credential pair and Apex callout pattern
+- "We need to publish a Platform Event when an Order ships" -- design the event schema, publisher trigger, and subscriber architecture
+- "Register this OpenAPI spec as an External Service in Salesforce" -- walk through External Service setup, auth binding, and invocable action generation
+
 Delegate elsewhere when the user is:
 - configuring the OAuth app itself → [sf-connected-apps](../sf-connected-apps/SKILL.md)
 - writing Apex-only business logic → [sf-apex](../sf-apex/SKILL.md)

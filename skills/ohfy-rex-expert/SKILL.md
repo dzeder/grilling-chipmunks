@@ -7,6 +7,8 @@ description: |
   - Developing REX-specific LWC components
   - Integrating retail data with Ohanafy platform
   - Understanding retail workflows, route accounting, and field operations
+  TRIGGER when: user asks about retail execution, POS operations, display
+  management, route accounting, or REX-specific Apex/LWC components.
   Covers: Point of sale, retail execution, display management, equipment tracking,
   route operations, and retail-specific business logic.
 ---
@@ -45,6 +47,12 @@ fi
 Key paths:
 - Apex classes: `/tmp/ohfy-rex/force-app/main/default/classes/`
 - LWC components: `/tmp/ohfy-rex-ui/force-app/main/default/lwc/`
+
+## Examples
+
+- "How are display runs tracked in Ohanafy?" -- explain Display, Display_Run objects and retail execution workflows
+- "Build an LWC component for route accounting" -- reference REX-UI components and Account_Route data model
+- "Debug a planogram compliance trigger error" -- check trigger actions, field validations, and bypass patterns
 
 ## Domain Coverage
 

@@ -5,8 +5,8 @@ description: |
   API endpoints, authentication, scheduling, timekeeping, time-off, and accruals.
   Reads the expert reference doc and responds with concrete details — exact
   endpoint paths, field names, JSON examples, auth flows.
-  Use when asked "how does UKG work", "what UKG endpoint", "UKG field mapping",
-  "explain UKG scheduling", "UKG auth flow", or any UKG-specific question.
+  TRIGGER when: user asks "how does UKG work", "what UKG endpoint", "UKG field
+  mapping", "explain UKG scheduling", "UKG auth flow", or any UKG-specific question.
   Proactively invoke this skill when the user asks about UKG concepts,
   API details, or admin workflows.
 allowed-tools:
@@ -75,3 +75,11 @@ Structure your response as:
 **For our integration:** [How this applies to the UKG → Ohanafy sync, if relevant]
 
 **Caveat:** [Anything that depends on which UKG product Gulf uses, or other unknowns]
+
+## Delegation
+
+Do not trigger this skill for:
+- Debugging UKG API errors (401, 429, timeouts, sync failures) -- delegate to `ukg-api-debug`
+- Building or validating UKG-to-Salesforce field mappings -- delegate to `ukg-field-mapper`
+- Tray.io workflow design for UKG integrations -- delegate to `tray-expert`
+- Salesforce data model or metadata questions -- delegate to `sf-metadata`
