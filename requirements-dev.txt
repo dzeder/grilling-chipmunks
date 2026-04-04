@@ -57,7 +57,7 @@ pytest==8.4.2
     #   pytest-cov
     #   pytest-xdist
     #   sf-skills (pyproject.toml)
-pytest-cov==6.3.0
+pytest-cov==7.1.0
     # via sf-skills (pyproject.toml)
 pytest-xdist==3.8.0
     # via sf-skills (pyproject.toml)
