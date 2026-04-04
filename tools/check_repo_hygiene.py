@@ -28,7 +28,12 @@ FORBIDDEN_PATTERNS = {
     "legacy_marketplace_path": r"~/.claude/plugins/marketplaces/sf-skills",
 }
 
-EXCLUDE_PREFIXES = ("docs/", ".clinerules/")
+EXCLUDE_PREFIXES = (
+    "docs/",
+    ".clinerules/",
+    ".claude/skills/",              # installed/vendored skill content (sf-skills, gstack)
+    "references/claude-code-best-practices/",  # vendored upstream docs
+)
 
 LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.*)$")
@@ -63,7 +68,12 @@ def collect_anchors(files: Iterable[str]) -> dict[str, set[str]]:
     for rel in files:
         path = ROOT / rel
         aset: set[str] = set()
-        for line in path.read_text(errors="ignore").splitlines():
+        try:
+            text = path.read_text(errors="ignore")
+        except (OSError, FileNotFoundError):
+            anchors[rel] = aset
+            continue
+        for line in text.splitlines():
             m = ANCHOR_RE.search(line)
             if m:
                 aset.add(m.group(1))
@@ -91,7 +101,10 @@ def strip_fenced_code_blocks(text: str) -> str:
 def check_forbidden_patterns(files: Iterable[str]) -> list[str]:
     issues: list[str] = []
     for rel in files:
-        text = (ROOT / rel).read_text(errors="ignore")
+        try:
+            text = (ROOT / rel).read_text(errors="ignore")
+        except (OSError, FileNotFoundError):
+            continue
         for name, pattern in FORBIDDEN_PATTERNS.items():
             regex = re.compile(pattern)
             for i, line in enumerate(text.splitlines(), 1):
@@ -104,7 +117,10 @@ def check_local_links(files: list[str], anchors: dict[str, set[str]]) -> list[st
     issues: list[str] = []
     for rel in files:
         path = ROOT / rel
-        text = strip_fenced_code_blocks(path.read_text(errors="ignore"))
+        try:
+            text = strip_fenced_code_blocks(path.read_text(errors="ignore"))
+        except (OSError, FileNotFoundError):
+            continue
         base = path.parent
         for i, line in enumerate(text.splitlines(), 1):
             for raw in LINK_RE.findall(line):

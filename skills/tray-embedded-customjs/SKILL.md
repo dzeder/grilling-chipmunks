@@ -43,14 +43,14 @@ Based on use case, ask:
 
 After identifying the use case, read the corresponding reference file before generating code:
 
-- **Dynamic dropdown** (fetch options from API) → See [references/dynamic-dropdown.md](references/dynamic-dropdown.md)
-- **Array of objects** (repeatable form rows with add/remove) → See [references/array-of-objects.md](references/array-of-objects.md)
-- **Show/hide dependency** (toggle slot visibility based on another slot) → See [references/show-hide-dependency.md](references/show-hide-dependency.md)
-- **Input validation** (email, regex, required field checks) → See [references/input-validation.md](references/input-validation.md)
-- **Screen visibility toggle** (show/hide entire wizard screens) → See [references/screen-visibility.md](references/screen-visibility.md)
-- **Connector-based validation** (verify data via API call) → See [references/connector-validation.md](references/connector-validation.md)
-- **Dependent dropdown** (options change based on another slot's value) → See [references/dependent-dropdown.md](references/dependent-dropdown.md)
-- **JSON Schema rendering** (quick reference for all schema types) → See [references/json-schema-reference.md](references/json-schema-reference.md)
+- **Dynamic dropdown** — fetch options from API
+- **Array of objects** — repeatable form rows with add/remove
+- **Show/hide dependency** — toggle slot visibility based on another slot
+- **Input validation** — email, regex, required field checks
+- **Screen visibility toggle** — show/hide entire wizard screens
+- **Connector-based validation** — verify data via API call
+- **Dependent dropdown** — options change based on another slot's value
+- **JSON Schema rendering** — quick reference for all schema types
 
 For combined use cases (e.g. array-of-objects with dropdown fields populated via callConnector), read both relevant files.
 
