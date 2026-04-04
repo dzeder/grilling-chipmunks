@@ -1,1 +1,1 @@
-../gstack/canary/SKILL.md
+/Users/danielzeder/conductor/workspaces/daniels-ohanafy/riyadh/.claude/skills/gstack/canary/SKILL.md

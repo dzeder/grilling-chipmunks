@@ -1,1 +1,1 @@
-../gstack/connect-chrome/SKILL.md
+/Users/danielzeder/conductor/workspaces/daniels-ohanafy/riyadh/.claude/skills/gstack/connect-chrome/SKILL.md

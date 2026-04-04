@@ -1,1 +1,1 @@
-../gstack/cso/SKILL.md
+/Users/danielzeder/conductor/workspaces/daniels-ohanafy/riyadh/.claude/skills/gstack/cso/SKILL.md
