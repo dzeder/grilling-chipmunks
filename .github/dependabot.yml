@@ -6,3 +6,11 @@ updates:
       interval: "weekly"
     labels:
       - "dependencies"
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+    allow:
+      - dependency-type: "direct"
