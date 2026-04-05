@@ -3,7 +3,77 @@ version: "1.0"
 # Sources added via onboarding interview (Section 13, Item 4)
 # or: python -m skills.content_watcher.commands.add_source
 
-sources: []
+sources:
+  # --- beverage_industry ---
+  - name: "Brewbound Podcast"
+    type: podcast
+    url: "https://feeds.simplecast.com/LqSiRd3s"
+    category: beverage_industry
+
+  - name: "Beer Business Daily"
+    type: web
+    url: "https://www.beerbusinessdaily.com/feed/"
+    category: beverage_industry
+
+  # --- product_strategy ---
+  - name: "Lenny's Podcast"
+    type: youtube
+    url: "https://www.youtube.com/@LennysPodcast"
+    category: product_strategy
+
+  - name: "SaaStr"
+    type: youtube
+    url: "https://www.youtube.com/@SaaStr"
+    category: product_strategy
+
+  # --- salesforce ---
+  - name: "Salesforce Developers"
+    type: youtube
+    url: "https://www.youtube.com/@SalesforceDevelopers"
+    category: salesforce
+
+  - name: "Salesforce Admins Podcast"
+    type: podcast
+    url: "https://admin.salesforce.com/feed/podcast"
+    category: salesforce
+
+  # --- ai_dev_tools ---
+  - name: "Anthropic"
+    type: youtube
+    url: "https://www.youtube.com/@AnthropicAI"
+    category: ai_dev_tools
+
+  - name: "Latent Space Podcast"
+    type: podcast
+    url: "https://feeds.buzzsprout.com/2004620.rss"
+    category: ai_dev_tools
+
+  - name: "AI Engineering"
+    type: youtube
+    url: "https://www.youtube.com/@aiaboratory"
+    category: ai_dev_tools
+
+  # --- reddit ---
+  - name: "r/salesforce"
+    type: reddit
+    url: "https://www.reddit.com/r/salesforce/.rss"
+    category: salesforce
+
+  - name: "r/supplychain"
+    type: reddit
+    url: "https://www.reddit.com/r/supplychain/.rss"
+    category: beverage_industry
+
+  # --- web / blogs ---
+  - name: "Tray.io Blog"
+    type: web
+    url: "https://tray.io/blog/rss.xml"
+    category: tray_platform
+
+  - name: "Anthropic News"
+    type: web
+    url: "https://www.anthropic.com/news/rss"
+    category: ai_dev_tools
 
 categories:
   beverage_industry:
@@ -23,6 +93,16 @@ categories:
   ai_dev_tools:
     relevance_targets: [skills/claude, agents, watchers/adoption-queue]
     issue_labels: [content-insight, ai]
+
+  tray_platform:
+    relevance_targets: [skills/tray, knowledge-base/tray]
+    issue_labels: [content-insight, tray]
+    note: "Tray.io platform updates, connector releases, best practices"
+
+  integration:
+    relevance_targets: [integrations/patterns, skills/tray, knowledge-base/tray]
+    issue_labels: [content-insight, integration]
+    note: "iPaaS patterns, API design, middleware trends"
 
 monitor_job:
   schedule: "0 6 * * *"

@@ -16,8 +16,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install -r requirements.txt
-      - run: python -m agents.content.agent
+      - run: pip install anthropic feedparser httpx pyyaml google-api-python-client beautifulsoup4 requests
+      - run: python -m skills.content_watcher.monitor.fetch_content
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

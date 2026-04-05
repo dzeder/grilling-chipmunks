@@ -1,9 +1,13 @@
 """
-Add a content source (podcast or YouTube channel) to monitoring.
+Add a content source (podcast, YouTube, web, or Reddit) to monitoring.
 
-Usage: python -m skills.content_watcher.commands.add_source
+Usage: python -m skills.content_watcher.commands.add_source <url> <category> [name]
 """
 
+import re
+from urllib.parse import urlparse
+
+import feedparser
 import yaml
 from pathlib import Path
 
@@ -14,6 +18,8 @@ VALID_CATEGORIES = [
     "product_strategy",
     "salesforce",
     "ai_dev_tools",
+    "tray_platform",
+    "integration",
 ]
 
 
@@ -21,21 +27,71 @@ def resolve_source(url: str) -> dict:
     """Resolve a URL to a monitorable source entry.
 
     Handles: YouTube channel/playlist URLs, RSS feeds,
-    Apple Podcast URLs, Spotify URLs.
+    Apple Podcast URLs, Spotify URLs, Reddit RSS, web/blog RSS.
+
+    Returns dict with: url, type, and any resolved metadata.
     """
-    # TODO: Implement URL resolution
-    # - YouTube → extract channel ID via Data API v3
-    # - Apple → resolve to RSS via Podcast Index API
-    # - Spotify → resolve to RSS via Podcast Index API
-    # - RSS → validate and store directly
-    raise NotImplementedError("Source resolution not yet implemented")
+    parsed = urlparse(url)
+    hostname = parsed.hostname or ""
+
+    # YouTube channel or playlist
+    if "youtube.com" in hostname or "youtu.be" in hostname:
+        return {"url": url, "type": "youtube"}
+
+    # Reddit RSS feed
+    if "reddit.com" in hostname:
+        # Ensure it ends with .rss
+        if not url.endswith(".rss"):
+            url = url.rstrip("/") + "/.rss"
+        return {"url": url, "type": "reddit"}
+
+    # Apple Podcasts — resolve to RSS via Podcast Index API
+    if "podcasts.apple.com" in hostname:
+        # Extract podcast ID from URL like /podcast/name/id123456
+        match = re.search(r"/id(\d+)", parsed.path)
+        if match:
+            return {
+                "url": url,
+                "type": "podcast",
+                "apple_id": match.group(1),
+                "note": "Resolved via Podcast Index API at runtime",
+            }
+        return {"url": url, "type": "podcast"}
+
+    # Spotify
+    if "open.spotify.com" in hostname:
+        return {
+            "url": url,
+            "type": "podcast",
+            "note": "Resolved via Podcast Index API at runtime (~80% success)",
+        }
+
+    # Try to detect RSS feed
+    try:
+        feed = feedparser.parse(url)
+        if feed.entries:
+            # Check if it has audio enclosures (podcast)
+            has_audio = any(
+                enc.get("type", "").startswith("audio/")
+                for entry in feed.entries[:3]
+                for enc in entry.get("enclosures", [])
+            )
+            if has_audio:
+                return {"url": url, "type": "podcast"}
+            else:
+                return {"url": url, "type": "web"}
+    except Exception:
+        pass
+
+    # Default to web type for unrecognized URLs
+    return {"url": url, "type": "web"}
 
 
 def add_source(url: str, category: str, name: str | None = None) -> dict:
     """Add a source to content-sources.yaml.
 
     Args:
-        url: Source URL (YouTube, RSS, Apple, Spotify)
+        url: Source URL (YouTube, RSS, Apple, Spotify, Reddit, web)
         category: One of VALID_CATEGORIES
         name: Optional display name
 
