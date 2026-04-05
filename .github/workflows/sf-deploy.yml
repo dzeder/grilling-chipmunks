@@ -1,5 +1,6 @@
-# Trigger: push with scope salesforce, or manual
+# Trigger: push to salesforce metadata, or manual
 # Jobs: scratch org → deploy → Apex tests (75% gate) → delta deploy
+# Requires SF_CLIENT_ID and SF_DEVHUB_USERNAME secrets to be configured
 
 name: Salesforce Deploy
 
@@ -7,12 +8,12 @@ on:
   push:
     paths:
       - 'skills/salesforce/**'
-      - 'knowledge-base/salesforce/**'
   workflow_dispatch:
 
 jobs:
   scratch-org-test:
     runs-on: ubuntu-latest
+    if: ${{ secrets.SF_CLIENT_ID != '' }}
     steps:
       - uses: actions/checkout@v4
       - name: Install SF CLI
