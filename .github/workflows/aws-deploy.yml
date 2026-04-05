@@ -1,28 +1,46 @@
-# Trigger: push with scope aws, or manual
+# Trigger: push with scope aws/cdk, or manual
 # Jobs: CDK synth → Checkov → diff comment → staging → approval → prod
+# Requires: skills/aws/cdk/package.json to exist (skips gracefully if CDK not initialized)
 
 name: AWS Deploy
 
 on:
   push:
     paths:
-      - 'skills/aws/**'
+      - 'skills/aws/cdk/**'
   workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: skills/aws/cdk
 
 jobs:
   cdk-synth:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Check CDK project exists
+        id: check
+        run: |
+          if [ ! -f package.json ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::No package.json in skills/aws/cdk/ — CDK project not initialized yet. Skipping."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/setup-node@v4
+        if: steps.check.outputs.skip != 'true'
         with:
           node-version: '20'
       - run: npm ci
+        if: steps.check.outputs.skip != 'true'
       - run: npx cdk synth
+        if: steps.check.outputs.skip != 'true'
       - uses: actions/upload-artifact@v4
+        if: steps.check.outputs.skip != 'true'
         with:
           name: cdk-output
-          path: cdk.out/
+          path: skills/aws/cdk/cdk.out/
 
   security-scan:
     needs: cdk-synth
@@ -33,7 +51,9 @@ jobs:
         with:
           name: cdk-output
           path: cdk.out/
+        continue-on-error: true
       - uses: bridgecrewio/checkov-action@master
+        if: hashFiles('cdk.out/') != ''
         with:
           directory: cdk.out/
 
@@ -43,11 +63,17 @@ jobs:
     environment: staging
     steps:
       - uses: actions/checkout@v4
+      - name: Check CDK project exists
+        id: check
+        run: test -f package.json && echo "skip=false" >> "$GITHUB_OUTPUT" || echo "skip=true" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v4
+        if: steps.check.outputs.skip != 'true'
         with:
           node-version: '20'
       - run: npm ci
+        if: steps.check.outputs.skip != 'true'
       - run: npx cdk deploy --all --require-approval never
+        if: steps.check.outputs.skip != 'true'
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -59,11 +85,17 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v4
+      - name: Check CDK project exists
+        id: check
+        run: test -f package.json && echo "skip=false" >> "$GITHUB_OUTPUT" || echo "skip=true" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v4
+        if: steps.check.outputs.skip != 'true'
         with:
           node-version: '20'
       - run: npm ci
+        if: steps.check.outputs.skip != 'true'
       - run: npx cdk deploy --all --require-approval never
+        if: steps.check.outputs.skip != 'true'
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_PROD_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_PROD_SECRET_ACCESS_KEY }}
