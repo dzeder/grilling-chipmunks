@@ -1,0 +1,54 @@
+version: "1.0"
+
+# Populated by: python -m skills.tray_ai.discovery.commands.run_discovery
+# or: agents/tray-discovery/agent.py
+
+connectors: []
+
+categories:
+  crm:
+    relevance_targets: [skills/salesforce, skills/tray-ai/connector]
+    issue_labels: [tray-discovery, crm]
+    note: "CRM connectors — Salesforce competitors/complements"
+
+  erp_accounting:
+    relevance_targets: [skills/ohanafy, knowledge-base/integration-guides]
+    issue_labels: [tray-discovery, erp]
+    note: "ERP, accounting, invoicing systems relevant to beverage supply chain"
+
+  edi_supply_chain:
+    relevance_targets: [skills/ohanafy, knowledge-base/beverage-supply-chain]
+    issue_labels: [tray-discovery, edi, supply-chain]
+    note: "EDI, logistics, supply chain, warehouse management"
+
+  ecommerce:
+    relevance_targets: [skills/ohanafy/ecom]
+    issue_labels: [tray-discovery, ecommerce]
+    note: "Shopify, ecommerce platforms, payment processors"
+
+  communication:
+    relevance_targets: [skills/tray-ai/webhook-handler]
+    issue_labels: [tray-discovery, communication]
+    note: "Slack, email, SMS, notification services"
+
+  storage_data:
+    relevance_targets: [skills/aws]
+    issue_labels: [tray-discovery, data]
+    note: "Cloud storage, databases, data warehouses"
+
+  developer_tools:
+    relevance_targets: [agents, skills/claude]
+    issue_labels: [tray-discovery, devtools]
+    note: "GitHub, CI/CD, monitoring, logging"
+
+  other:
+    relevance_targets: [knowledge-base/industry-insights]
+    issue_labels: [tray-discovery]
+    note: "Connectors that don't fit standard categories"
+
+discovery_job:
+  schedule: "0 3 * * 1"  # Monday 3am — weekly, separate from content watcher (daily 6am)
+  github_repo: "ohanafy/ai-ops"
+  min_relevance_score: 0.65
+  auto_knowledge_threshold: 0.85
+  triage_note: "Created by Tray Discovery. Team decides: integrate, defer, or close."

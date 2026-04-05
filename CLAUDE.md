@@ -95,13 +95,15 @@ Source sync roadmap: `docs/ohanafy-source-sync-roadmap.md`
 
 ### Integration skills (Tray / Ohanafy platform)
 
-13 integration-specific skills in `skills/tray/`:
+15 integration-specific skills in `skills/tray/`:
 - **tray-expert** — Tray.io platform expert (Q&A, workflow design, integration audit, architecture)
 - **tray-embedded-customjs** — Custom JS patterns for Tray Embedded config wizards
 - **tray-errors** — Tray error handling protocols
 - **tray-diagrams** — Workflow visualization with Mermaid
 - **tray-insights** — Project usage metrics and analytics
 - **tray-script-generator** — Script scaffolding from production patterns
+- **tray-discovery** — Automated Tray connector discovery pipeline (Claude-scored, registry-backed)
+- **tray-webhook-handler** — HMAC-SHA256 webhook validation, payload parsing, event routing
 - **csv-output** — CSV formatting patterns
 - **salesforce-composite** — SF Composite API patterns (in `skills/salesforce/`)
 - **salesforce-field-object-creator** — Field/object definition utilities (in `skills/salesforce/`)
@@ -154,7 +156,7 @@ In `skills/utility/`:
 
 ## Agents
 
-17 specialist agents in `agents/`:
+19 specialist agents in `agents/`:
 
 **Salesforce / FDE Team:**
 - **fde-strategist** — Planning and delegation (read-only, spawns other agents)
@@ -172,9 +174,11 @@ In `skills/utility/`:
 - **edi-processing-specialist** — EDI X12 (850/810/856), OpenText, Transcepta
 - **tray-script-generator** — Tray script creation from patterns
 - **tray-script-tester** — Tray script validation and testing
+- **tray-discovery** — Automated Tray connector discovery with Claude scoring
 - **ohanafy-data-model** — Ohanafy object model, relationships, field usage
 - **domain-specialist-designer** — Domain-specific integration design
 - **progressive-disclosure-executor** — Phased implementation approach
+- **content** — Content pipeline orchestrator (drives content-watcher skill)
 
 **Domain:**
 - **beverage-erp-expert** — Beverage distribution (VIP, Encompass, DSD, three-tier)

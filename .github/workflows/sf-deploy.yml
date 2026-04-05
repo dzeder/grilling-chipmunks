@@ -1,0 +1,45 @@
+# Trigger: push with scope salesforce, or manual
+# Jobs: scratch org → deploy → Apex tests (75% gate) → delta deploy
+
+name: Salesforce Deploy
+
+on:
+  push:
+    paths:
+      - 'skills/salesforce/**'
+      - 'knowledge-base/salesforce/**'
+  workflow_dispatch:
+
+jobs:
+  scratch-org-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SF CLI
+        run: npm install -g @salesforce/cli
+      - name: Authenticate to DevHub
+        run: sf org login jwt --client-id ${{ secrets.SF_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SF_DEVHUB_USERNAME }}
+      - name: Create scratch org
+        run: sf org create scratch -f config/project-scratch-def.json -a ci-scratch -d 1
+      - name: Deploy source
+        run: sf project deploy start --target-org ci-scratch
+      - name: Run Apex tests
+        run: sf apex run test --target-org ci-scratch --code-coverage --result-format human --wait 10
+      - name: Check coverage (75% gate)
+        run: sf apex get test --target-org ci-scratch --code-coverage | grep -E "Org Wide Coverage.*[7-9][5-9]|[8-9][0-9]|100"
+      - name: Delete scratch org
+        if: always()
+        run: sf org delete scratch --target-org ci-scratch --no-prompt
+
+  delta-deploy:
+    needs: scratch-org-test
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install SF CLI
+        run: npm install -g @salesforce/cli
+      - name: Deploy delta to staging
+        run: echo "Delta deploy — implement with sfdx-git-delta"

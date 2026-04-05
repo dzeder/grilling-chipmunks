@@ -1,0 +1,43 @@
+name: "content"
+version: "1.0.0"
+description: "Monitors content sources for insights relevant to Ohanafy's beverage supply chain"
+
+model:
+  default: "claude-sonnet-4-20250514"
+  eval: "claude-opus-4-20250514"
+  routing: "claude-haiku-4-5-20251001"
+
+context:
+  max_tokens: 8192
+  system_prompt: "prompts/system.md"
+
+schedule:
+  cron: "0 6 * * *"  # Daily at 6 AM UTC
+  pipeline: "ci-cd/pipelines/content-watcher.yml"
+
+thresholds:
+  auto_issue: 0.85    # Score >= 0.85 → auto-create GitHub issue
+  team_triage: 0.65   # Score >= 0.65 → create issue, team triages
+  log_only: 0.0       # Score < 0.65 → log but don't create issue
+
+sources:
+  registry: "registry/content-sources.yaml"
+  supported_types:
+    - rss
+    - reddit
+    # Future:
+    # - youtube (requires YOUTUBE_API_KEY)
+    # - web_page
+    # - podcast (via RSS with transcript tag)
+
+escalation:
+  confidence_threshold: 0.75
+  always_escalate:
+    - "compliance"
+    - "regulatory"
+  notify_channel: "#ai-ops-updates"
+
+retry:
+  max_attempts: 3
+  backoff_base: 2
+  backoff_max: 30

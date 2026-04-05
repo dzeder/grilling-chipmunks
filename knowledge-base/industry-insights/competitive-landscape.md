@@ -1,94 +1,165 @@
+---
+title: "Competitive Landscape — Beverage Supply Chain Software"
+last_updated: "2026-04-05"
+next_review: "2026-07-05"
+confidence: medium
+sources:
+  - "Encompass Technologies — encompasstech.com"
+  - "Andavi Solutions / GreatVines — andavisolutions.com, greatvines.com"
+  - "GoSpotCheck by FORM — form.com, gospotcheck.com"
+  - "SimplyDepo — simplydepo.com/industry/beverage-distribution-software"
+  - "Gitnux — gitnux.org/best/beverage-distribution-software"
+  - "PitchBook — pitchbook.com (GreatVines profile)"
+  - "Brewbound, VinePair, Shanken News Daily"
+maintained_by: content-watcher
+ohanafy_relevance:
+  - skills/ohanafy/core
+  - skills/ohanafy/oms
+  - skills/ohanafy/ecom
+  - agents/support
+---
+
 # Competitive Landscape
 
-<!-- Populated by Content Watcher insights, beverage-erp-expert knowledge, and team input -->
+## Direct Competitors
 
-## ERP Tier Map
+Beverage-specific SaaS platforms competing for the same mid-market supplier/distributor segment.
 
-### Tier 1: Enterprise
+### GreatVines / Andavi Solutions
 
-| System | Owner | Strength | Weakness | Target Market |
-|--------|-------|----------|----------|---------------|
-| SAP S/4HANA | SAP | Multi-entity, international, deep financials | Extreme cost ($M+), 12-18mo rollout, no beverage DSD modules | >$500M revenue |
-| Oracle NetSuite | Oracle | Cloud-native financials, multi-entity | Limited DSD, expensive licensing | Conglomerate subsidiaries |
-| Encompass | Roper (Rutherford & Associates) | Purpose-built for beer distribution, dominant market share | Progress/OpenEdge legacy, limited APIs, closed ecosystem | 1-10M case/year beer distributors |
+- **Category:** Sales execution + trade promotion management
+- **Platform:** Salesforce AppExchange (Salesforce-native)
+- **Target market:** Beverage alcohol suppliers, distributors, promotional agencies
+- **Annual revenue:** ~$15M (2025 estimate)
+- **Key differentiators:**
+  - Enterprise-level sales execution analytics on Salesforce
+  - 3-tier account relationship management
+  - Trade spend monitoring and marketing program tracking
+  - Mobile app (iOS, Android) for field reps
+- **Recent moves:** Acquired by Andavi Solutions (March 2021). Andavi is building a broader beverage alcohol technology platform through acquisitions. GreatVines is the sales execution pillar; Andavi also offers data analytics and collaboration tools.
+- **Pricing:** Starting at $90/user/month
+- **Ohanafy overlap:** Direct competitor on Salesforce. GreatVines focuses on sales execution and trade spend; Ohanafy offers a broader suite (OMS + WMS + REX + Ecom + Payments). GreatVines has deeper trade promotion analytics; Ohanafy has deeper operational coverage.
 
-### Tier 2: Mid-Market and Specialized
+### Encompass Technologies
 
-| System | Owner | Strength | Weakness | Target Market |
-|--------|-------|----------|----------|---------------|
-| VIP | Roper | Purpose-built for wine/spirits, large SKU handling | Legacy platform (same corporate owner as Encompass) | Wine/spirits distributors |
-| GreatVines | GreatVines | Salesforce-native, mobile-first DSD, modern UX | Narrower than Encompass on operational depth | SF-invested distributors |
-| 3x/BluJay/E2open | Various | Route optimization, logistics focus | Not full ERP, overlay on existing systems | 50+ route operations |
+- **Category:** Full-suite ERP for beverage distributors
+- **Platform:** Cloud-native (Encompass Distribution Cloud)
+- **Target market:** Mid-to-large beverage distributors and wholesalers
+- **Key differentiators:**
+  - End-to-end distributor operations: portfolio management, sales, warehouse, routing, logistics, finance
+  - eCommerce execution for distributor-to-retailer ordering
+  - Strong supplier collaboration tools
+  - Comprehensive reporting and business intelligence
+- **Recent moves:** Market leader in distributor-side ERP. Actively expanding warehouse management and delivery logistics capabilities.
+- **Ohanafy overlap:** Encompass serves distributors; Ohanafy primarily serves suppliers. They coexist in the same ecosystem — Ohanafy customers (suppliers) send orders to Encompass customers (distributors). Integration between platforms is a common requirement.
 
-### Tier 3: Emerging and Niche
+### Diver Solutions / DataDive
 
-| System | Owner | Strength | Weakness | Target Market |
-|--------|-------|----------|----------|---------------|
-| Ohanafy | Ohanafy | Salesforce platform, operational planning, CRM, extensible | Not a full ERP (no route accounting, warehouse, invoicing) | Any SF-invested distributor |
-| Diver (DataDive) | DataDive | BI/analytics on top of ERP data | Not operational, analytics only | Any distributor needing reporting |
-| GoSpotCheck | GoSpotCheck | In-market surveys, shelf audits, display compliance | Narrow scope, requires CRM/BI integration | Field execution teams |
+- **Category:** Depletion data analytics and business intelligence
+- **Target market:** Beverage alcohol suppliers needing distributor depletion analysis
+- **Key differentiators:**
+  - Depletion data aggregation across multiple distributors
+  - Territory and account-level performance analytics
+  - Competitive set benchmarking
+- **Ohanafy overlap:** Diver competes with Ohanafy's analytics layer. Ohanafy's `Depletion__c` object tracks the same data natively in Salesforce, but Diver has deeper multi-distributor aggregation. Some Ohanafy customers use both.
 
-## Ohanafy's Positioning
-
-Ohanafy is **not** trying to replace Encompass, VIP, or SAP. It is positioned as the
-**operational planning and CRM layer** that sits alongside the existing ERP:
-
-- **ERP handles**: route accounting, warehouse management, invoicing, inventory
-- **Ohanafy handles**: who does what, when, how do we plan it, how do we track it
-
-### Why This Positioning Works
-
-1. No distributor wants to rip out their ERP (12-18 month migrations, millions in cost)
-2. The operational planning gap is real (most distributors use spreadsheets and whiteboards)
-3. Salesforce platform provides unmatched extensibility (Lightning, Flow, Apex, API ecosystem)
-4. Integration-first architecture — Ohanafy can connect to any ERP via Tray.io/MuleSoft
-
-### Differentiators vs. GreatVines
-
-GreatVines is the primary Salesforce-native competitor:
-
-| Dimension | GreatVines | Ohanafy |
-|-----------|-----------|---------|
-| Focus | DSD execution (orders, deliveries, route) | Operational planning, task management, workforce |
-| Depth | Deeper on transactional DSD | Broader on planning and coordination |
-| Mobile | Strong mobile DSD app | Mobile task and activity management |
-| Workforce | No workforce availability feature | UKG integration, availability grid |
-| Relationship | Could be competitor, complement, or sequential adoption | |
-
-The UKG workforce availability integration is uniquely Ohanafy's territory — a clear differentiator.
+---
 
 ## Adjacent Solutions
 
-### Middleware / iPaaS
+Platforms not beverage-specific but commonly found in the same buying decisions.
 
-| Platform | Fit for Ohanafy | Notes |
-|----------|----------------|-------|
-| Tray.io | Primary choice | Ohanafy's chosen iPaaS, Salesforce-centric, workflow-based |
-| MuleSoft | Enterprise alternative | Salesforce-owned, more powerful but more expensive |
-| Dell Boomi | Mid-market alternative | Good connectors, reasonable pricing |
-| Custom P2P | Legacy reality | Most existing integrations are fragile, poorly documented custom builds |
+### Enterprise ERP
 
-### HCM
+| Vendor | Product | Target Market | Ohanafy Relationship |
+|--------|---------|---------------|---------------------|
+| SAP | S/4HANA (Beverage module) | Large distributors and global suppliers | Ohanafy displaces SAP at mid-market; integrates with SAP at enterprise |
+| Oracle | JD Edwards EnterpriseOne | Mid-to-large distributors | Legacy ERP; Ohanafy modernizes operations that JDE handles |
+| Microsoft | Dynamics 365 | Mid-market general | GreatVines integrates with D365; Ohanafy is Salesforce-only |
 
-| Platform | Market Share | Notes |
-|----------|-------------|-------|
-| UKG Pro + WFM | Dominant | Primary HCM for mid-to-large distributors |
-| ADP | #2 | Sometimes paired with UKG (ADP payroll + UKG scheduling) |
-| Paycom/Paylocity | Emerging | Lower-cost, sub-200 employee distributors |
+Enterprise ERPs serve the largest distributors and multi-national suppliers. Ohanafy wins at mid-market where ERP is overkill — smaller team, faster deployment, Salesforce-native experience.
 
-### Analytics
+### DSD / Route Accounting Systems
 
-| Platform | Use Case | Notes |
-|----------|---------|-------|
-| Diver (DataDive) | Sales analysis, goal tracking, territory performance | Industry standard |
-| Power BI | Modern analytics, dashboard-heavy | Growing adoption |
-| Tableau | Visual analytics | Less common in beverage |
+| Vendor | Product | Focus |
+|--------|---------|-------|
+| Korber (HighJump) | Supply chain suite | Large distributor warehouse + route |
+| eoStar | Route accounting | Mid-market DSD operations |
+| LaceUp Solutions | Route accounting | DSD pre-sell and delivery |
+| Prism Visual Software | DSD distribution | Beverage-specific DSD |
+| Verial | Cloud ERP | DSD operations, mobile route sales |
 
-## Market Dynamics
+These overlap with Ohanafy's REX (retail execution) and WMS modules. Ohanafy differentiates by being Salesforce-native — the DSD/route tools are standalone systems that don't connect to CRM without middleware.
 
-- Distributor count declining (~3,000 from ~4,700 in 2000)
-- Top 10 distributors control ~40% of volume
-- Craft beer growth slowing but still driving SKU proliferation
-- Non-alcoholic beverage category growing fastest
-- Digital ordering platforms (Provi, LibDib) disrupting order intake
-- Every major system vendor is adding API capabilities (slowly)
+---
+
+## Emerging Competitors
+
+Newer entrants or adjacent platforms expanding into beverage.
+
+### GoSpotCheck by FORM (+ Trax merger)
+
+- **Category:** Mobile field execution + image recognition
+- **Target market:** CPG and beverage field teams
+- **Recent moves:**
+  - Merged with Trax Retail (2026) to combine field execution with shelf image recognition
+  - Launched in-app AI Agent (Q2 2025) for on-shelf performance analysis from photos
+  - Won Odom Corporation (major distributor), Suja Life (10K grocery locations), Arterra Wines Canada
+  - Available on Salesforce AppExchange
+- **Threat level:** Medium. Competes with Ohanafy's REX Display objects for share-of-shelf tracking. The FORM+Trax merger creates a powerful retail execution + computer vision platform. Integration opportunity more than head-to-head competitor.
+
+### Handshake (Shopify B2B)
+
+- **Category:** B2B ordering platform
+- **Target market:** Wholesale ordering for consumer brands
+- **Recent moves:** Acquired by Shopify. Now powers Shopify's B2B wholesale channel.
+- **Threat level:** Low-medium. Relevant to Ohanafy's ecom module. Shopify B2B competes for the digital ordering layer but lacks beverage-specific features (3-tier compliance, depletion tracking, DSD workflows).
+
+### SimplyDepo
+
+- **Category:** Wholesale ordering and inventory management
+- **Target market:** Small-to-mid beverage distributors
+- **Threat level:** Low. Simpler tool targeting smaller distributors. Not a threat at Ohanafy's mid-market tier.
+
+### BevRoute / Mixpoint / ProspectMX
+
+- **Category:** Beverage-specific ERP / DSD platforms
+- **Target market:** Various — small to mid distributor
+- **Threat level:** Low. Fragmented market of smaller players. No Salesforce integration.
+
+---
+
+## Market Position
+
+### Ohanafy Differentiators
+
+1. **Salesforce-native:** Full suite built on the Salesforce platform. No middleware needed for CRM integration. Leverages Salesforce ecosystem (Flows, Agentforce, Data Cloud, AppExchange).
+2. **Full suite coverage:** OMS + WMS + REX + Ecom + EDI + Payments in one platform. Competitors typically cover 1-2 of these.
+3. **Mid-market focus:** Purpose-built for suppliers with 10-500 employees. Not the enterprise complexity of SAP, not the limitations of spreadsheets.
+4. **3-tier native:** Data model designed around the supplier → distributor → retailer relationship from day one. Not a general CRM adapted for beverage.
+5. **Managed package architecture:** 2GP managed packages allow independent deployment and versioning per module (Core, OMS, WMS, etc.).
+
+### Known Gaps vs. Competitors
+
+| Gap | Competitor Advantage | Ohanafy Status |
+|-----|---------------------|----------------|
+| Trade spend analytics depth | GreatVines/Andavi | Promotion__c exists but less mature analytics |
+| Multi-distributor depletion aggregation | Diver/DataDive | Depletion__c handles single-source; aggregation is manual |
+| Computer vision shelf audit | GoSpotCheck/FORM+Trax | No CV capability; Display objects are manual entry |
+| DTC shipping compliance | Sovos ShipCompliant | Not enforced in Ecom module |
+| AI demand forecasting | General ML platforms | Data exists (Depletion__c, Order__c) but no ML layer |
+
+### Win/Loss Patterns
+
+- **Win against GreatVines:** When customer needs OMS/WMS/Payments beyond sales execution
+- **Win against Encompass:** When customer is a supplier, not a distributor
+- **Win against ERP:** When mid-market customer wants faster deployment and Salesforce integration
+- **Lose to GreatVines:** When customer only needs sales execution and trade spend
+- **Lose to Encompass:** When customer is a distributor wanting a full distributor ERP
+- **Lose to spreadsheets:** When customer is too small or not ready for a platform investment
+
+---
+
+## Market Size Context
+
+The beverage route accounting software market was valued at $1.72 billion in 2024, projected to reach $4.23 billion by 2033 (10.6% CAGR). Growth driven by automation demand, real-time tracking needs, and cloud adoption across the distribution tier.
