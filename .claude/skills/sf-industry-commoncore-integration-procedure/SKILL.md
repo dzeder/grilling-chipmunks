@@ -1,1 +1,1 @@
-../../../skills/sf-industry-commoncore-integration-procedure/SKILL.md
+../../../skills/salesforce/sf-industry-commoncore-integration-procedure/SKILL.md

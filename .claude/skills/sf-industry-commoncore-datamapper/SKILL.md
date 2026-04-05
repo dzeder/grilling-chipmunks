@@ -1,1 +1,1 @@
-../../../skills/sf-industry-commoncore-datamapper/SKILL.md
+../../../skills/salesforce/sf-industry-commoncore-datamapper/SKILL.md

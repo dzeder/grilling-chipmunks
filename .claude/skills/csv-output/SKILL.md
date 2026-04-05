@@ -1,1 +1,1 @@
-../../../skills/csv-output/SKILL.md
+../../../skills/tray/csv-output/SKILL.md

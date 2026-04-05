@@ -1,0 +1,1 @@
+../../../skills/content-watcher/SKILL.md

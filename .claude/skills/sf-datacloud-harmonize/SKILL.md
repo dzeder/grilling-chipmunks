@@ -1,1 +1,1 @@
-../../../skills/sf-datacloud-harmonize/SKILL.md
+../../../skills/salesforce/sf-datacloud-harmonize/SKILL.md

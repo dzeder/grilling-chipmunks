@@ -1,0 +1,24 @@
+# Reusable workflow template for Slack notifications
+
+on:
+  workflow_call:
+    inputs:
+      channel:
+        type: string
+        required: true
+      message:
+        type: string
+        required: true
+    secrets:
+      SLACK_WEBHOOK_URL:
+        required: true
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack notification
+        run: |
+          curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+            -H 'Content-Type: application/json' \
+            -d "{\"channel\": \"${{ inputs.channel }}\", \"text\": \"${{ inputs.message }}\"}"

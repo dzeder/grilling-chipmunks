@@ -30,10 +30,12 @@ yarn-error.log*
 
 # Secrets
 .env
-.env.*
+.env.local
+.env.*.local
 credentials.json
 *.key
 *.pem
+!.env.example
 
 # gstack runtime
 .claude/skills/gstack/browse/dist/

@@ -1,1 +1,1 @@
-../../../skills/sf-metadata/SKILL.md
+../../../skills/salesforce/sf-metadata/SKILL.md

@@ -1,1 +1,1 @@
-../../../skills/sf-flow/SKILL.md
+../../../skills/salesforce/sf-flow/SKILL.md

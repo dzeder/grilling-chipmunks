@@ -1,1 +1,1 @@
-../../../skills/test-script/SKILL.md
+../../../skills/gstack/test-script/SKILL.md

@@ -1,1 +1,1 @@
-../../../skills/sf-debug/SKILL.md
+../../../skills/salesforce/sf-debug/SKILL.md

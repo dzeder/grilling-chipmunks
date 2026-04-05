@@ -1,1 +1,1 @@
-../../../skills/ohfy-payments-expert/SKILL.md
+../../../skills/ohanafy/ohfy-payments-expert/SKILL.md

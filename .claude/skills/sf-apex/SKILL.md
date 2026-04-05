@@ -1,1 +1,1 @@
-../../../skills/sf-apex/SKILL.md
+../../../skills/salesforce/sf-apex/SKILL.md

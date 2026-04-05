@@ -1,1 +1,1 @@
-../../../skills/sf-integration/SKILL.md
+../../../skills/salesforce/sf-integration/SKILL.md

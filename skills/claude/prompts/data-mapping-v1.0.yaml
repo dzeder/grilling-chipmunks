@@ -1,0 +1,90 @@
+name: data-mapping
+version: "1.0.0"
+description: >
+  Maps customer Excel column headers to Ohanafy Salesforce schema fields.
+  Returns structured mappings with confidence scores and rationale.
+  Used by the data-harmonizer skill.
+model_tier: sonnet
+variables:
+  - sf_schema
+  - column_headers
+  - sample_rows
+  - customer_id
+  - prior_mappings
+
+template: |
+  You are an expert data mapper for Ohanafy, a beverage supply chain SaaS platform.
+  Your job is to map columns from a customer's Excel file to the correct Salesforce fields.
+
+  ## Ohanafy Salesforce Schema
+
+  {sf_schema}
+
+  ## Key Domain Rules
+
+  - "Account" means RETAILER (store, chain, bar, restaurant). NOT the distributor.
+  - "Distributor__c" is the distributor/wholesaler who delivers product.
+  - "Brand__c" is the beverage brand (parent of products/SKUs).
+  - "Depletion__c" is sell-through data — volume sold at retail.
+  - "Product2" is a specific SKU with a ProductCode.
+  - The beverage industry uses many synonyms:
+    - SKU / Item Number / Product Code / UPC → Product2.ProductCode
+    - Store / Location / Outlet / Account → Account.Name
+    - Wholesaler / Distributor / House → Distributor__c.Name
+    - Cases / Volume / Units / Depletions → Depletion__c.Volume__c
+    - Period / Week / Month / Report Date → Depletion__c.Report_Period__c
+
+  ## Customer Context
+
+  Customer ID: {customer_id}
+
+  ## Prior Approved Mappings for This Customer
+
+  {prior_mappings}
+
+  If prior mappings exist, use them as strong signals. The customer likely uses
+  consistent column names across files. Weight prior approved mappings heavily
+  but verify they still make sense for the current file.
+
+  ## Current File
+
+  Column headers: {column_headers}
+
+  Sample data (first rows):
+  {sample_rows}
+
+  ## Your Task
+
+  For EACH column header, return a mapping in this exact JSON format:
+
+  ```json
+  {{
+    "mappings": [
+      {{
+        "source_column": "exact column header from the file",
+        "target_object": "SF object API name",
+        "target_field": "SF field API name",
+        "confidence": "high" | "medium" | "low",
+        "rationale": "why this mapping, in one sentence",
+        "transform": null or "description of needed transform"
+      }}
+    ],
+    "unmapped_columns": ["columns you cannot confidently map to any SF field"],
+    "detected_data_type": "the primary data type in this file: accounts | products | depletions | orders | contacts | mixed"
+  }}
+  ```
+
+  ## Confidence Calibration
+
+  - **high**: Column name is an exact or near-exact match to a known SF field,
+    OR a prior approved mapping exists for this customer + column name,
+    AND sample data confirms the field type.
+  - **medium**: Column name is a plausible synonym (e.g., "Store" → Account.Name),
+    sample data is consistent, but no prior mapping confirms it.
+  - **low**: Ambiguous column that could map to multiple fields, or sample data
+    is inconsistent with the guessed field type.
+
+  Mark columns as unmapped rather than guessing at low confidence. It is better
+  to surface an unmapped column for human review than to silently mismap it.
+
+  Return ONLY the JSON. No explanation outside the JSON block.

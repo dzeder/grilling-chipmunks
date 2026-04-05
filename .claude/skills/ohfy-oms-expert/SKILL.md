@@ -1,1 +1,1 @@
-../../../skills/ohfy-oms-expert/SKILL.md
+../../../skills/ohanafy/ohfy-oms-expert/SKILL.md

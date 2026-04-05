@@ -44,12 +44,26 @@ def make_hook_input(
     return hook_input
 
 
+def _resolve_validator(validator_rel_path: str) -> Path:
+    """Resolve a validator path, searching pillar subdirectories if needed."""
+    direct = SKILLS_ROOT / validator_rel_path
+    if direct.exists():
+        return direct
+    # Search pillar subdirectories (e.g. salesforce/sf-apex/hooks/...)
+    for pillar in SKILLS_ROOT.iterdir():
+        if pillar.is_dir():
+            candidate = pillar / validator_rel_path
+            if candidate.exists():
+                return candidate
+    return direct  # Fall back to original path for error messaging
+
+
 def _build_env(validator_rel_path: str) -> dict:
     """Build environment with PYTHONPATH for validator imports."""
     env = os.environ.copy()
 
     # The validator's own script directory (for sibling imports like validate_apex)
-    validator_abs = SKILLS_ROOT / validator_rel_path
+    validator_abs = _resolve_validator(validator_rel_path)
     validator_dir = str(validator_abs.parent)
 
     # Build PYTHONPATH: validator dir + shared hooks scripts + shared root
@@ -87,7 +101,7 @@ def run_validator(
     Returns:
         CompletedProcess with stdout/stderr/returncode.
     """
-    validator_abs = SKILLS_ROOT / validator_rel_path
+    validator_abs = _resolve_validator(validator_rel_path)
     hook_input = make_hook_input(file_path, tool_response)
 
     return subprocess.run(

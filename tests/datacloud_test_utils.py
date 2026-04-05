@@ -257,7 +257,17 @@ def read_text(relative_path: str) -> str:
 
 
 def skill_text(skill: str) -> str:
-    return read_text(f"skills/{skill}/SKILL.md")
+    # Skills are organized into pillar subdirectories
+    direct = ROOT / "skills" / skill / "SKILL.md"
+    if direct.exists():
+        return direct.read_text()
+    # Search pillar subdirectories
+    for pillar in (ROOT / "skills").iterdir():
+        if pillar.is_dir():
+            candidate = pillar / skill / "SKILL.md"
+            if candidate.exists():
+                return candidate.read_text()
+    raise FileNotFoundError(f"SKILL.md not found for {skill}")
 
 
 def split_frontmatter(text: str) -> tuple[str, str]:

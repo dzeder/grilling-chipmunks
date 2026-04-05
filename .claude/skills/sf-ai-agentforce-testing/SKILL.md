@@ -1,1 +1,1 @@
-../../../skills/sf-ai-agentforce-testing/SKILL.md
+../../../skills/salesforce/sf-ai-agentforce-testing/SKILL.md

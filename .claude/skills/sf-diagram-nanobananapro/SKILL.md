@@ -1,1 +1,1 @@
-../../../skills/sf-diagram-nanobananapro/SKILL.md
+../../../skills/salesforce/sf-diagram-nanobananapro/SKILL.md

@@ -1974,6 +1974,467 @@
       "description": "Reference guide for Claude Code best practices \u2014 skill authoring, subagent patterns, memory management, MCP configuration, and multi-agent orchestration",
       "triggerWhen": "user creates or improves skills/agents/commands, designs multi-agent orchestration, or reviews CLAUDE.md patterns",
       "doNotTriggerWhen": "user works on Salesforce code (use sf-* skills), integration code (use tray-*/ohfy-* skills), or debugs live org issues (use org-connect)"
+    },
+    "github-agent": {
+      "keywords": [
+        "github actions",
+        "github workflow",
+        "CI/CD",
+        "pipeline health",
+        "workflow failure",
+        "github actions audit",
+        "workflow optimization",
+        "repo configuration",
+        "branch protection",
+        "dependabot",
+        "action version pinning",
+        "workflow YAML",
+        "concurrency",
+        "github caching",
+        "path filters"
+      ],
+      "intentPatterns": [
+        "github.*actions.*health",
+        "audit.*github.*workflow",
+        "ci.*cd.*health",
+        "workflow.*failure",
+        "fix.*github.*action",
+        "optimize.*workflow",
+        "repo.*configuration.*audit",
+        "branch.*protection.*review",
+        "debug.*github.*action"
+      ],
+      "priority": "medium",
+      "description": "GitHub Actions health audit, CI/CD best practices validation, and repo configuration review with 100-point scoring",
+      "triggerWhen": "user asks about CI/CD health, GitHub Actions failures, workflow optimization, repo configuration audit, or mentions 'github', 'workflow', 'actions', 'CI failures', 'pipeline health'",
+      "doNotTriggerWhen": "deploying Salesforce metadata (use sf-deploy), running Apex tests (use sf-testing), managing secrets (use security), or checking code quality (use health)"
+    },
+    "data-harmonizer": {
+      "keywords": [
+        "data harmonizer",
+        "data harmonization",
+        "customer Excel",
+        "customer CSV",
+        "data import mapping",
+        "schema mapping",
+        "data quality",
+        "data cleansing",
+        "Excel to Salesforce",
+        "CSV to Salesforce",
+        "customer data onboarding",
+        "data staging",
+        "column mapping"
+      ],
+      "intentPatterns": [
+        "map.*customer.*data",
+        "import.*excel.*salesforce",
+        "import.*csv.*salesforce",
+        "harmonize.*data",
+        "clean.*customer.*data",
+        "map.*columns.*salesforce",
+        "onboard.*customer.*data",
+        "validate.*data.*quality"
+      ],
+      "priority": "medium",
+      "description": "Map customer Excel/CSV files to Ohanafy's Salesforce schema using Claude Sonnet, validate data quality, and stage cleaned records for human review before import",
+      "triggerWhen": "user sends a customer Excel or CSV file for Salesforce import, onboards a new customer's data, performs periodic distributor/retailer data imports, or checks data quality before manual import",
+      "doNotTriggerWhen": "user asks about Ohanafy object schemas only (use ohfy-data-model-expert), bulk Salesforce data operations (use sf-data), or transformation settings configuration (use ohfy-transformation-settings)"
+    },
+    "content-watcher": {
+      "keywords": [
+        "content watcher",
+        "content monitor",
+        "podcast monitor",
+        "youtube monitor",
+        "transcript",
+        "add source",
+        "list sources",
+        "delete source",
+        "RSS feed",
+        "podcast transcript",
+        "YouTube channel monitor",
+        "relevance scoring",
+        "content insights"
+      ],
+      "intentPatterns": [
+        "add.*podcast.*source",
+        "monitor.*youtube",
+        "monitor.*podcast",
+        "list.*monitored.*sources",
+        "watch.*content",
+        "content.*insights",
+        "add.*source.*monitor",
+        "check.*new.*content"
+      ],
+      "priority": "low",
+      "description": "Monitor podcast and YouTube sources, fetch transcripts, score relevance, and create GitHub issues for insights worth acting on",
+      "triggerWhen": "user adds a podcast or YouTube channel to monitor, asks about monitored sources, or wants to check for new content insights",
+      "doNotTriggerWhen": "user asks general media questions, works with Salesforce data (use sf-data), or creates documentation (use docs skills)"
+    },
+    "cdk-deploy": {
+      "keywords": [
+        "cdk",
+        "cdk deploy",
+        "cdk synth",
+        "cdk diff",
+        "cloudformation",
+        "aws cdk",
+        "infrastructure as code",
+        "checkov",
+        "cdk stack",
+        "cdk v2",
+        "aws infrastructure",
+        "stack deployment"
+      ],
+      "intentPatterns": [
+        "deploy.*cdk.*stack",
+        "cdk.*synth",
+        "cdk.*diff",
+        "deploy.*infrastructure",
+        "create.*cdk.*stack",
+        "aws.*infrastructure.*deploy",
+        "checkov.*scan",
+        "cdk.*deploy"
+      ],
+      "priority": "medium",
+      "description": "Synthesize and deploy AWS CDK stacks with mandatory Checkov security scanning \u2014 CDK v2 only, with approval gates and diff logging",
+      "triggerWhen": "user deploys CDK stacks, runs cdk synth/diff/deploy, needs Checkov scans on CloudFormation templates, or manages AWS infrastructure as code",
+      "doNotTriggerWhen": "user deploys Lambda functions specifically (use lambda-deploy), manages S3 buckets (use s3-manager), or deploys Salesforce metadata (use sf-deploy)"
+    },
+    "iam-audit": {
+      "keywords": [
+        "iam audit",
+        "iam policy",
+        "iam role",
+        "iam user",
+        "overly permissive",
+        "wildcard action",
+        "least privilege",
+        "cross account trust",
+        "unused credentials",
+        "admin access",
+        "iam security",
+        "access audit"
+      ],
+      "intentPatterns": [
+        "audit.*iam",
+        "iam.*security",
+        "check.*iam.*policy",
+        "overly.*permissive",
+        "wildcard.*action",
+        "cross.*account.*trust",
+        "unused.*credentials",
+        "iam.*role.*audit"
+      ],
+      "priority": "medium",
+      "description": "Audit IAM policies, roles, and users for overly permissive access patterns \u2014 read-only, detects wildcards, admin access, unused credentials, and cross-account trust",
+      "triggerWhen": "user audits IAM policies, checks for overly permissive roles, reviews cross-account trust policies, or identifies unused IAM credentials",
+      "doNotTriggerWhen": "user deploys CDK stacks (use cdk-deploy), manages secrets (use secrets-manager), or works with Salesforce permissions (use sf-permissions)"
+    },
+    "lambda-deploy": {
+      "keywords": [
+        "lambda",
+        "aws lambda",
+        "lambda function",
+        "lambda deploy",
+        "lambda powertools",
+        "lambda layer",
+        "serverless function",
+        "lambda runtime",
+        "lambda timeout",
+        "lambda memory"
+      ],
+      "intentPatterns": [
+        "deploy.*lambda",
+        "create.*lambda.*function",
+        "lambda.*deploy",
+        "lambda.*powertools",
+        "configure.*lambda",
+        "aws.*lambda.*deploy"
+      ],
+      "priority": "medium",
+      "description": "Deploy AWS Lambda functions via CDK with mandatory Lambda Powertools for structured logging, tracing, and metrics",
+      "triggerWhen": "user deploys Lambda functions, configures Lambda runtime/memory/timeout, adds Lambda Powertools, or manages Lambda Layers",
+      "doNotTriggerWhen": "user deploys general CDK stacks (use cdk-deploy), queries RDS databases (use rds-query), or manages secrets (use secrets-manager)"
+    },
+    "rds-query": {
+      "keywords": [
+        "rds",
+        "rds query",
+        "amazon rds",
+        "read replica",
+        "database query",
+        "sql query",
+        "describe table",
+        "explain query",
+        "rds database",
+        "postgres query",
+        "mysql query"
+      ],
+      "intentPatterns": [
+        "query.*rds",
+        "rds.*query",
+        "read.*replica.*query",
+        "describe.*table",
+        "explain.*query",
+        "list.*tables",
+        "run.*sql.*query"
+      ],
+      "priority": "medium",
+      "description": "Query Amazon RDS databases safely via read replicas \u2014 enforces query timeouts, result limits, no DDL/DML, and credential security",
+      "triggerWhen": "user queries RDS databases, runs SELECT queries, describes table schemas, or analyzes query performance with EXPLAIN",
+      "doNotTriggerWhen": "user deploys infrastructure (use cdk-deploy), manages secrets (use secrets-manager), or writes Salesforce SOQL (use sf-soql)"
+    },
+    "s3-manager": {
+      "keywords": [
+        "s3",
+        "s3 bucket",
+        "s3 upload",
+        "s3 download",
+        "s3 lifecycle",
+        "aws s3",
+        "bucket policy",
+        "s3 encryption",
+        "s3 versioning",
+        "object storage"
+      ],
+      "intentPatterns": [
+        "create.*s3.*bucket",
+        "upload.*s3",
+        "download.*s3",
+        "s3.*lifecycle",
+        "manage.*s3.*bucket",
+        "list.*s3.*objects",
+        "s3.*encryption"
+      ],
+      "priority": "medium",
+      "description": "Manage S3 buckets and objects following Ohanafy naming conventions and security policies \u2014 no public access, KMS encryption, versioning, and lifecycle rules",
+      "triggerWhen": "user creates or manages S3 buckets, uploads/downloads objects, configures lifecycle rules, or reviews bucket security settings",
+      "doNotTriggerWhen": "user deploys CDK stacks (use cdk-deploy), manages secrets (use secrets-manager), or works with Salesforce data (use sf-data)"
+    },
+    "secrets-manager": {
+      "keywords": [
+        "secrets manager",
+        "aws secrets",
+        "secret rotation",
+        "credential storage",
+        "api key storage",
+        "secret versioning",
+        "aws kms",
+        "secret naming",
+        "credential management aws"
+      ],
+      "intentPatterns": [
+        "create.*secret",
+        "rotate.*secret",
+        "manage.*secret.*aws",
+        "store.*credential",
+        "retrieve.*secret",
+        "secrets.*manager",
+        "aws.*secret"
+      ],
+      "priority": "medium",
+      "description": "Manage secrets in AWS Secrets Manager \u2014 all credentials, API keys, and sensitive configuration stored with KMS encryption, rotation, and versioning",
+      "triggerWhen": "user stores, retrieves, rotates, or manages secrets in AWS Secrets Manager, or needs credential management for AWS services",
+      "doNotTriggerWhen": "user manages Salesforce credentials (use sf-connected-apps), Tray.io tokens (use security), or IAM policies (use iam-audit)"
+    },
+    "context-manager": {
+      "keywords": [
+        "context manager",
+        "token budget",
+        "context window",
+        "token usage",
+        "context overflow",
+        "sliding window",
+        "agent budget",
+        "token tracking",
+        "context trimming"
+      ],
+      "intentPatterns": [
+        "check.*context.*budget",
+        "token.*budget",
+        "context.*overflow",
+        "trim.*context",
+        "estimate.*tokens",
+        "agent.*context.*budget"
+      ],
+      "priority": "low",
+      "description": "Manage context window budgets per agent \u2014 track token usage, enforce budgets, and optimize cost across Claude model tiers",
+      "triggerWhen": "user checks token budgets, tracks context usage, trims conversation history, or estimates token counts for agent interactions",
+      "doNotTriggerWhen": "user routes to a model tier (use model-router), loads prompts (use prompt-loader), or defines tool schemas (use tool-use)"
+    },
+    "model-router": {
+      "keywords": [
+        "model router",
+        "model tier",
+        "model selection",
+        "haiku",
+        "sonnet",
+        "opus",
+        "cost optimization",
+        "model routing",
+        "task classification",
+        "model policy"
+      ],
+      "intentPatterns": [
+        "route.*model",
+        "select.*model",
+        "model.*tier",
+        "which.*model",
+        "cost.*optimization.*model",
+        "model.*routing.*policy"
+      ],
+      "priority": "low",
+      "description": "Route requests to the correct Claude model tier (Haiku/Sonnet/Opus) based on task complexity for cost efficiency",
+      "triggerWhen": "user configures model routing, asks about model tier policy, optimizes model costs, or reviews task-to-model mapping",
+      "doNotTriggerWhen": "user manages context budgets (use context-manager), loads prompts (use prompt-loader), or creates tool schemas (use tool-use)"
+    },
+    "prompt-loader": {
+      "keywords": [
+        "prompt loader",
+        "prompt version",
+        "semver prompt",
+        "prompt template",
+        "prompt variable",
+        "prompt yaml",
+        "prompt management",
+        "versioned prompt",
+        "prompt audit"
+      ],
+      "intentPatterns": [
+        "load.*prompt",
+        "version.*prompt",
+        "create.*prompt.*template",
+        "manage.*prompts",
+        "prompt.*versioning",
+        "render.*prompt"
+      ],
+      "priority": "low",
+      "description": "Load and version-control prompts for Claude-based agents \u2014 semver'd YAML prompts with template variables and audit trails",
+      "triggerWhen": "user loads, creates, or versions prompts for Claude agents, manages prompt templates, or validates prompt variables",
+      "doNotTriggerWhen": "user routes model tiers (use model-router), manages context budgets (use context-manager), or defines tool schemas (use tool-use)"
+    },
+    "tool-use": {
+      "keywords": [
+        "tool use",
+        "tool schema",
+        "tool definition",
+        "pydantic tool",
+        "tool validation",
+        "tool registration",
+        "claude tool",
+        "structured output",
+        "tool_use",
+        "tool idempotency"
+      ],
+      "intentPatterns": [
+        "register.*tool",
+        "define.*tool.*schema",
+        "validate.*tool.*input",
+        "list.*registered.*tools",
+        "tool.*use.*pattern",
+        "create.*tool.*schema"
+      ],
+      "priority": "low",
+      "description": "Define and validate tool schemas for Claude's tool use capability \u2014 Pydantic models, input/output validation, and error wrapping",
+      "triggerWhen": "user registers tools, defines tool schemas, validates tool inputs/outputs, or configures Claude tool use patterns",
+      "doNotTriggerWhen": "user loads prompts (use prompt-loader), routes models (use model-router), or manages context (use context-manager)"
+    },
+    "diff-summarizer": {
+      "keywords": [
+        "diff summarizer",
+        "changelog",
+        "release notes",
+        "git diff summary",
+        "commit summary",
+        "breaking changes",
+        "diff categories",
+        "conventional commits"
+      ],
+      "intentPatterns": [
+        "summarize.*diff",
+        "generate.*changelog",
+        "release.*notes",
+        "summarize.*commits",
+        "detect.*breaking.*changes",
+        "diff.*summary"
+      ],
+      "priority": "low",
+      "description": "Summarize git diffs into human-readable changelogs \u2014 categorized by features, bug fixes, refactoring, with audience-aware formatting",
+      "triggerWhen": "user needs a diff summary, changelog, release notes, or breaking change detection from git commits",
+      "doNotTriggerWhen": "user reviews PR code (use review), ships/deploys changes (use ship), or generates documentation pages (use md-generator)"
+    },
+    "docx-builder": {
+      "keywords": [
+        "docx",
+        "word document",
+        "python-docx",
+        "document generation",
+        "ohanafy brand",
+        "document template",
+        "DOCX generation",
+        "word template"
+      ],
+      "intentPatterns": [
+        "generate.*docx",
+        "create.*word.*document",
+        "build.*document",
+        "docx.*template",
+        "generate.*report.*docx",
+        "brand.*document"
+      ],
+      "priority": "low",
+      "description": "Generate DOCX documents from templates using python-docx with Ohanafy brand guidelines \u2014 consistent styling, colors, and typography",
+      "triggerWhen": "user generates Word documents, creates branded reports, or builds DOCX from templates following Ohanafy style guidelines",
+      "doNotTriggerWhen": "user generates HTML docs (use html-publisher), creates markdown docs (use md-generator), or summarizes diffs (use diff-summarizer)"
+    },
+    "html-publisher": {
+      "keywords": [
+        "html publisher",
+        "docusaurus",
+        "external docs",
+        "MDX",
+        "static site",
+        "documentation site",
+        "S3 CloudFront",
+        "documentation publishing"
+      ],
+      "intentPatterns": [
+        "publish.*html.*docs",
+        "generate.*docusaurus",
+        "build.*documentation.*site",
+        "deploy.*docs.*s3",
+        "create.*mdx.*page",
+        "publish.*external.*docs"
+      ],
+      "priority": "low",
+      "description": "Publish HTML documentation via Docusaurus for external-facing docs \u2014 MDX format, versioned, SEO-optimized, deployed to S3 + CloudFront",
+      "triggerWhen": "user publishes external documentation, generates Docusaurus MDX pages, builds static doc sites, or deploys docs to S3 + CloudFront",
+      "doNotTriggerWhen": "user creates internal markdown docs (use md-generator), generates Word documents (use docx-builder), or summarizes diffs (use diff-summarizer)"
+    },
+    "md-generator": {
+      "keywords": [
+        "markdown generator",
+        "mkdocs",
+        "internal docs",
+        "markdown documentation",
+        "mkdocs material",
+        "front matter",
+        "admonitions",
+        "documentation generation"
+      ],
+      "intentPatterns": [
+        "generate.*markdown",
+        "create.*mkdocs.*page",
+        "internal.*documentation",
+        "markdown.*template",
+        "mkdocs.*nav",
+        "generate.*docs.*markdown"
+      ],
+      "priority": "low",
+      "description": "Generate markdown documentation in MkDocs-compatible format with Material theme \u2014 front matter, navigation, and admonition support",
+      "triggerWhen": "user generates internal markdown docs, creates MkDocs pages, updates navigation, or validates markdown against MkDocs standards",
+      "doNotTriggerWhen": "user publishes external HTML docs (use html-publisher), generates DOCX documents (use docx-builder), or summarizes diffs (use diff-summarizer)"
     }
   }
 }

@@ -1,1 +1,1 @@
-../../../skills/ohfy-platform-expert/SKILL.md
+../../../skills/ohanafy/ohfy-platform-expert/SKILL.md

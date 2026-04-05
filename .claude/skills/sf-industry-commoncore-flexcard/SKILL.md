@@ -1,1 +1,1 @@
-../../../skills/sf-industry-commoncore-flexcard/SKILL.md
+../../../skills/salesforce/sf-industry-commoncore-flexcard/SKILL.md

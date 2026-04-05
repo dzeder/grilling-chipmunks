@@ -1,0 +1,1 @@
+../../../skills/docs/docx-builder/SKILL.md

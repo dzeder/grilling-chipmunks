@@ -1,1 +1,1 @@
-../../../skills/sf-connected-apps/SKILL.md
+../../../skills/salesforce/sf-connected-apps/SKILL.md

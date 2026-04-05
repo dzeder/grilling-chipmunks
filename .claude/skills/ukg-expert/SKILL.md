@@ -1,1 +1,1 @@
-../../../skills/ukg-expert/SKILL.md
+../../../skills/ukg/ukg-expert/SKILL.md

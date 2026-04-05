@@ -1,1 +1,1 @@
-../../../skills/sf-ai-agentforce-observability/SKILL.md
+../../../skills/salesforce/sf-ai-agentforce-observability/SKILL.md

@@ -1,1 +1,1 @@
-../../../skills/tray-script-generator/SKILL.md
+../../../skills/tray/tray-script-generator/SKILL.md

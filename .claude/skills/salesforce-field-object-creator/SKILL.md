@@ -1,1 +1,1 @@
-../../../skills/salesforce-field-object-creator/SKILL.md
+../../../skills/salesforce/salesforce-field-object-creator/SKILL.md

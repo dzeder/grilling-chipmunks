@@ -1,1 +1,1 @@
-../../../skills/security/SKILL.md
+../../../skills/tray/security/SKILL.md

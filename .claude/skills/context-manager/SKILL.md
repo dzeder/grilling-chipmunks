@@ -1,0 +1,1 @@
+../../../skills/claude/context-manager/SKILL.md
