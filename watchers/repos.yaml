@@ -36,6 +36,20 @@ ai:
     auto_adopt: false
     tags: [claude, cost, routing]
 
+  - url: addyosmani/agent-skills
+    priority: high
+    watch: new_files
+    why: Agent skill patterns from Addy Osmani. Directly applicable to our skill architecture.
+    auto_adopt: new_patterns
+    tags: [claude, agents, skills]
+
+  - url: shanraisshan/claude-code-best-practice
+    priority: critical
+    watch: all
+    why: Already vendored in references/. Watcher ensures we catch upstream changes.
+    auto_adopt: dependency_updates
+    tags: [claude, skills, best-practices]
+
 salesforce:
   - url: dxatscale/sfpowerscripts
     priority: critical
@@ -64,6 +78,13 @@ salesforce:
     why: Official LWC patterns for internal SF tools.
     auto_adopt: false
     tags: [salesforce, lwc]
+
+  - url: Jaganpro/sf-skills
+    priority: high
+    watch: new_files
+    why: Salesforce Claude Code skills. Patterns for our SF skill pillar.
+    auto_adopt: new_patterns
+    tags: [salesforce, claude, skills]
 
 tray_and_ipaas:
   - url: n8n-io/n8n
@@ -173,6 +194,13 @@ cicd:
     why: Run GitHub Actions locally.
     auto_adopt: dependency_updates
     tags: [ci-cd, local-dev]
+
+  - url: garrytan/gstack
+    priority: critical
+    watch: releases
+    why: Powers 36 gstack workflow skills. Must track releases for compatibility.
+    auto_adopt: dependency_updates
+    tags: [gstack, tooling, workflow]
 
 security:
   - url: trufflesecurity/trufflehog

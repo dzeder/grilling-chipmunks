@@ -11,6 +11,10 @@ description: >
   One-paragraph description. Must include:
   - TRIGGER when: conditions that activate this skill
   - DO NOT TRIGGER when: conditions that should route elsewhere (with skill names)
+learned_from:                          # optional — upstream repos that inspired this skill
+  - repo: owner/repo-name             # GitHub repo (must be in watchers/repos.yaml)
+    file: path/to/pattern.md           # specific file that informed this skill
+    adapted: "YYYY-MM-DD"             # when the adaptation was made
 metadata:
   version: "1.0.0"
   scoring: "N points across M categories" (if applicable)
@@ -63,6 +67,32 @@ At least one "when to use" and one "when NOT to use" example.
 ### Do NOT use this skill when:
 - [concrete scenario] — use [other-skill] instead
 ```
+
+## Upstream Lineage (`learned_from`)
+
+When a skill was inspired by or adapted from an upstream pattern, add a `learned_from` entry to the frontmatter. This enables the compounding knowledge loop:
+
+1. **Watcher** detects upstream changes in `watchers/repos.yaml` repos
+2. **Lineage check** finds YOUR skills that cite the changed repo
+3. **PR/issue** flags those skills for review — you may want to adapt the improvement
+4. **You adapt** (or not) and the cycle repeats
+
+```yaml
+learned_from:
+  - repo: addyosmani/agent-skills
+    file: skills/error-recovery.md
+    adapted: "2026-04-04"
+  - repo: shanraisshan/claude-code-best-practice
+    file: best-practice/claude-skills.md
+    adapted: "2026-03-15"
+```
+
+Rules:
+- `repo` must be a repo tracked in `watchers/repos.yaml`
+- `file` is the specific upstream file (helps you find it when upstream changes)
+- `adapted` is when you incorporated the pattern (absolute date, not relative)
+- Multiple entries are fine — a skill can draw from many sources
+- Only add when genuinely useful — not every skill needs lineage
 
 ## Required Directory Structure
 

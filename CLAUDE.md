@@ -245,9 +245,18 @@ Agent quality evaluation in `evals/`:
 
 Pass rate: 85% target, 75% hard fail. Run on every PR.
 
-## Claude Code Best Practices (reference layer)
+## Upstream References (read-only mirrors)
 
-Vendored from [shanraisshan/claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice). Consult before creating/modifying skills, agents, or CLAUDE.md.
+Read-only mirrors of upstream repos live in `references/`. These are auto-synced and **safe to overwrite** — never edit them directly. Your skills in `skills/` are never touched by any sync.
+
+| Reference | Source | Update | Schedule |
+|-----------|--------|--------|----------|
+| `references/claude-code-best-practices/` | [shanraisshan/claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice) | `bash scripts/update-best-practices.sh` | Wednesdays |
+| `references/agent-skills/` | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | `bash scripts/update-agent-skills.sh` | Thursdays |
+| `.claude/skills/gstack/` | [garrytan/gstack](https://github.com/garrytan/gstack) | `bash scripts/update-gstack.sh` | Mondays |
+
+Cherry-pick sources (issue-based, no auto-overwrite):
+- [Jaganpro/sf-skills](https://github.com/Jaganpro/sf-skills) — `bash scripts/update-sf-skills.sh` (Fridays)
 
 Key references in `references/claude-code-best-practices/`:
 - `best-practice/claude-skills.md` — Skill authoring patterns
@@ -255,7 +264,19 @@ Key references in `references/claude-code-best-practices/`:
 - `best-practice/claude-commands.md` — Command patterns
 - `reports/claude-skills-for-larger-mono-repos.md` — Monorepo skill organization
 
-Update: `bash scripts/update-best-practices.sh` (also checked weekly via GitHub Action)
+## Compounding Knowledge (`learned_from`)
+
+Skills can declare upstream lineage so improvements compound from both our work and the community:
+
+```yaml
+# In any SKILL.md frontmatter:
+learned_from:
+  - repo: addyosmani/agent-skills
+    file: skills/error-recovery.md
+    adapted: "2026-04-04"
+```
+
+When the watcher detects upstream changes, it checks `learned_from` lineage to flag your skills that may benefit. See `docs/SKILL_TEMPLATE.md` for full spec and `watchers/adoption-queue/README.md` for the adoption flow.
 
 ## Project structure
 
