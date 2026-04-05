@@ -38,6 +38,13 @@ Read the expert guide first:
 cat tray-expert-guide.md
 ```
 
+Also load the connector knowledge base (if available):
+
+```bash
+cat knowledge-base/tray/connector-catalog.md 2>/dev/null
+cat knowledge-base/tray/active-connectors.md 2>/dev/null
+```
+
 If the file doesn't exist in the current directory, search for it:
 
 ```bash
