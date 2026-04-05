@@ -101,10 +101,10 @@ def test_datacloud_skills_reference_shared_readiness_helpers() -> None:
 
 def test_datacloud_examples_exist_for_connection_and_search_index_workflows() -> None:
     expected_files = [
-        ROOT / "skills/sf-datacloud-connect/examples/connections/heroku-postgres.json",
-        ROOT / "skills/sf-datacloud-connect/examples/connections/redshift.json",
-        ROOT / "skills/sf-datacloud-retrieve/examples/search-indexes/hybrid-structured.json",
-        ROOT / "skills/sf-datacloud-retrieve/examples/search-indexes/vector-knowledge.json",
+        ROOT / "skills/salesforce/sf-datacloud-connect/examples/connections/heroku-postgres.json",
+        ROOT / "skills/salesforce/sf-datacloud-connect/examples/connections/redshift.json",
+        ROOT / "skills/salesforce/sf-datacloud-retrieve/examples/search-indexes/hybrid-structured.json",
+        ROOT / "skills/salesforce/sf-datacloud-retrieve/examples/search-indexes/vector-knowledge.json",
     ]
     for path in expected_files:
         assert path.exists(), f"Expected example file to exist: {path.relative_to(ROOT)}"

@@ -1,1 +1,1 @@
-../../../skills/ukg-field-mapper/SKILL.md
+../../../skills/ukg/ukg-field-mapper/SKILL.md

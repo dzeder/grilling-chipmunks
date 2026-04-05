@@ -1,1 +1,1 @@
-../../../skills/salesforce-composite/SKILL.md
+../../../skills/salesforce/salesforce-composite/SKILL.md

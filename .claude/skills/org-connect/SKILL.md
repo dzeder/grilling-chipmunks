@@ -1,1 +1,1 @@
-../../../skills/org-connect/SKILL.md
+../../../skills/utility/org-connect/SKILL.md

@@ -1,16 +1,62 @@
 # Daniel's Ohanafy Monorepo
 
-Unified skills, agents, patterns, and projects for Ohanafy development.
+The AI operations framework for Ohanafy — beverage supply chain SaaS.
+Unified skills, agents, patterns, pipelines, and knowledge for all Ohanafy development.
 
-## gstack skills (workflow layer)
+## Stack
+
+| Layer | Tech | Rule |
+|-------|------|------|
+| CRM | Salesforce Enterprise | sf CLI only, API v62.0+, scratch orgs, never prod direct |
+| iPaaS | Tray.ai | JSON configs in `skills/tray/`, Tray-first rule |
+| Cloud | AWS | CDK TypeScript only, Secrets Manager, Lambda Powertools |
+| AI | Claude | Model routing policy below |
+| CI/CD | GitHub Actions | All pipelines in `.github/workflows/` |
+
+## Model Routing
+
+- **haiku** → classification, routing, formatting, eval scoring
+- **sonnet** → reasoning, code review, doc generation, support responses
+- **opus** → evals and critical decisions only
+
+Always use the latest available version of each tier.
+
+## Security Rules
+
+1. No credentials in code — AWS Secrets Manager only
+2. No customer PII in logs
+3. No SF production org credentials in this repo
+4. No direct production DB queries — read replica only
+5. No public S3 buckets
+6. Tray webhooks must validate HMAC signatures
+
+## Skills (pillar organization)
+
+Skills are organized into pillars under `skills/`:
+
+```
+skills/
+  gstack/        # 36 workflow skills (browse, qa, ship, review, etc.)
+  salesforce/    # 36 SF skills (sf-apex, sf-flow, sf-lwc, data-harmonizer, etc.)
+  ohanafy/       # 11 SKU expert skills (ohfy-core-expert, ohfy-oms-expert, etc.)
+  tray/          # 9 integration skills (tray-expert, csv-output, deploy-prep, etc.)
+  ukg/           # 3 UKG domain skills
+  aws/           # 7 AWS infrastructure skills (CDK, Lambda, S3, IAM, RDS, Secrets)
+  claude/        # 4 Claude AI skills (model-router, prompt-loader, context-manager, tool-use)
+  docs/          # 4 doc generation skills (diff-summarizer, docx-builder, html-publisher, md-generator)
+  content-watcher/ # Content monitoring (podcast/YouTube → GitHub issues)
+  utility/       # 3 meta skills (org-connect, github-agent, claude-code-best-practices)
+```
+
+### gstack skills (workflow layer)
 
 Use `/browse` for all web browsing. Never use `mcp__claude-in-chrome__*` tools when `/browse` is available.
 
 Available gstack skills: `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`, `/plan-design-review`, `/design-consultation`, `/design-shotgun`, `/design-html`, `/review`, `/ship`, `/land-and-deploy`, `/canary`, `/benchmark`, `/browse`, `/connect-chrome`, `/qa`, `/qa-only`, `/design-review`, `/setup-browser-cookies`, `/setup-deploy`, `/retro`, `/investigate`, `/document-release`, `/codex`, `/autoplan`, `/careful`, `/freeze`, `/guard`, `/unfreeze`, `/learn`, `/checkpoint`, `/cso`, `/gstack`, `/gstack-upgrade`, `/health`.
 
-## Salesforce skills (domain layer)
+### Salesforce skills (domain layer)
 
-33 Salesforce-specific skills in `skills/sf-*`. Activate based on file patterns:
+36 Salesforce-specific skills in `skills/salesforce/`. Activate based on file patterns:
 - `.cls`, `.trigger` -> sf-apex
 - `.flow-meta.xml` -> sf-flow
 - `/lwc/**/*.js`, `.html` -> sf-lwc
@@ -18,8 +64,9 @@ Available gstack skills: `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`
 - `.agent` -> sf-ai-agentscript
 - `.object-meta.xml`, `.field-meta.xml` -> sf-metadata
 - `.namedCredential-meta.xml` -> sf-integration
+- Excel/CSV data import → data-harmonizer
 
-## Ohanafy SKU expert skills (product layer)
+### Ohanafy SKU expert skills (product layer)
 
 Each SKU skill has a pre-built source index (`references/source-index.md`) with:
 - Apex classes, triggers, service methods, custom objects & fields, LWC components
@@ -46,9 +93,9 @@ Check `references/last-synced.txt` — if stale (>7 days), refresh with `bash sc
 
 Source sync roadmap: `docs/ohanafy-source-sync-roadmap.md`
 
-## Integration skills (Tray / Ohanafy platform)
+### Integration skills (Tray / Ohanafy platform)
 
-13 integration-specific skills in `skills/`:
+13 integration-specific skills in `skills/tray/`:
 - **tray-expert** — Tray.io platform expert (Q&A, workflow design, integration audit, architecture)
 - **tray-embedded-customjs** — Custom JS patterns for Tray Embedded config wizards
 - **tray-errors** — Tray error handling protocols
@@ -56,21 +103,51 @@ Source sync roadmap: `docs/ohanafy-source-sync-roadmap.md`
 - **tray-insights** — Project usage metrics and analytics
 - **tray-script-generator** — Script scaffolding from production patterns
 - **csv-output** — CSV formatting patterns
-- **salesforce-composite** — SF Composite API patterns
-- **salesforce-field-object-creator** — Field/object definition utilities
-- **ohfy-transformation-settings** — Transformation rule configuration
+- **salesforce-composite** — SF Composite API patterns (in `skills/salesforce/`)
+- **salesforce-field-object-creator** — Field/object definition utilities (in `skills/salesforce/`)
+- **ohfy-transformation-settings** — Transformation rule configuration (in `skills/ohanafy/`)
 - **deploy-prep** — Deployment workflow preparation
-- **test-script** — Script testing infrastructure
+- **test-script** — Script testing infrastructure (in `skills/gstack/`)
 - **security** — Integration security patterns
 
-## Domain skills (UKG / ERP)
+### AWS skills (infrastructure layer)
 
+7 AWS infrastructure skills in `skills/aws/`:
+- **cdk-deploy** — Deploy CDK stacks to AWS
+- **iam-audit** — Audit IAM policies for least privilege
+- **lambda-deploy** — Deploy Lambda functions with validation
+- **rds-query** — Query RDS databases (read-replica only)
+- **s3-manager** — Manage S3 buckets and objects
+- **secrets-manager** — AWS Secrets Manager integration
+
+All IaC lives in `skills/aws/cdk/`. CDK TypeScript only — never write CloudFormation directly.
+
+### Claude AI skills (intelligence layer)
+
+4 Claude-specific skills in `skills/claude/`:
+- **model-router** — Route requests to haiku/sonnet/opus based on task complexity
+- **prompt-loader** — Load and version-control prompts (semver'd YAML in `skills/claude/prompts/`)
+- **context-manager** — Track token budgets per agent
+- **tool-use** — Define and validate tool schemas
+
+### Doc generation skills
+
+4 documentation skills in `skills/docs/`:
+- **diff-summarizer** — Summarize git diffs into changelogs
+- **docx-builder** — Generate DOCX from templates
+- **html-publisher** — Publish via Docusaurus
+- **md-generator** — Generate MkDocs markdown
+
+### Domain skills (UKG / ERP)
+
+3 UKG domain skills in `skills/ukg/`:
 - **ukg-expert** — UKG API, data model, authentication, scheduling
 - **ukg-api-debug** — UKG API debugging and troubleshooting
 - **ukg-field-mapper** — UKG-to-Ohanafy field mapping
 
-## Utility skills
+### Utility skills
 
+In `skills/utility/`:
 - **org-connect** — Connect to live Salesforce orgs for debugging and metadata retrieval
 - **claude-code-best-practices** — Skill/agent authoring patterns and monorepo organization
 - **github-agent** — GitHub Actions health audit, CI/CD best practices, repo configuration review
@@ -132,6 +209,42 @@ In `docs/integration-guides/`:
 - `SCRIPT_CONSOLIDATION_PATTERNS.md` — Refactoring and consolidation strategies
 - `Tray-AI-Project-JSON-Structure-Guide.md` — Tray export JSON schema breakdown
 
+## Knowledge base
+
+Domain knowledge in `knowledge-base/`:
+- `beverage-supply-chain/glossary.md` — Industry terminology (TTB, COLA, depletions, 3-tier)
+- `salesforce/object-model.md` — SF schema reference
+- `salesforce/key-flows.md` — Important Salesforce Flows
+- `industry-insights/` — Distribution trends, pricing models, competitive landscape
+
+## Registry
+
+Central configuration in `registry/`:
+- `ohanafy-repos.yaml` — All Ohanafy product repos (auto-discovered via `python scripts/ci/discover-repos.py`)
+- `content-sources.yaml` — Podcast/YouTube sources to monitor
+- `team.yaml` — Team ownership map
+
+**Before touching any product repo, check `registry/ohanafy-repos.yaml` first.** Know the type, SKU, and owner. Data-model changes require a migration plan.
+
+## Watchers
+
+Repo monitoring in `watchers/`:
+- `repos.yaml` — 25+ watched GitHub repos with priority, auto-adopt rules, tags
+- `adoption-queue/` — PRs proposed by adoption watcher
+- `digest/` — Weekly summaries
+
+Watcher job runs Monday 8am UTC. Content watcher runs daily 6am UTC.
+
+## Evals
+
+Agent quality evaluation in `evals/`:
+- `datasets/` — Golden dataset definitions per agent
+- `scorers/` — Eval scoring logic (hard checks + Claude Haiku rubric)
+- `results/` — **IMMUTABLE** append-only eval results (never delete)
+- `agents/` — Per-agent eval configs and fixtures
+
+Pass rate: 85% target, 75% hard fail. Run on every PR.
+
 ## Claude Code Best Practices (reference layer)
 
 Vendored from [shanraisshan/claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice). Consult before creating/modifying skills, agents, or CLAUDE.md.
@@ -147,24 +260,45 @@ Update: `bash scripts/update-best-practices.sh` (also checked weekly via GitHub 
 ## Project structure
 
 ```
-projects/
-  ohanafy-core/           # Main Salesforce org
-  netsuite-ohanafy/       # NetSuite integration
-  qbo-ohanafy/            # QuickBooks Online integration
-  xero-ohanafy/           # Xero integration
-  rehrig-ohanafy/         # Rehrig integration
-
-customers/
-  _template/              # Copy to create a new customer
-  gulf/                   # Gulf Distributing
-    profile.md            # Org topology, SKUs, data profile, external systems
-    orgs/                 # Per-environment metadata (populated by connect-org.sh)
-      production/
-      cam-sandbox/
+skills/               # 114 skills organized by pillar (see above)
+agents/               # 17 specialist agent definitions
+integrations/         # Tray patterns, marketplace UI, workflow artifacts
+projects/             # Shared technical work
+  ohanafy-core/         # Main Salesforce org
+  netsuite-ohanafy/     # NetSuite integration
+  qbo-ohanafy/          # QuickBooks Online integration
+  xero-ohanafy/         # Xero integration
+  rehrig-ohanafy/       # Rehrig integration
+customers/            # Per-customer Salesforce metadata
+  _template/            # Copy to create a new customer
+  gulf/                 # Gulf Distributing
+knowledge-base/       # Domain knowledge (beverage, SF, industry)
+registry/             # Repo registry, content sources, team ownership
+watchers/             # Repo monitoring configs and adoption queue
+evals/                # Agent evaluation datasets, scorers, results
+docs/                 # Guides, templates, case studies
+references/           # Vendored best practices, Ohanafy source indexes
+shared/               # Validators, LSP engine, code analyzer
+scripts/              # 23+ utility scripts
+tests/                # Unit, integration, E2E, eval tests
 ```
 
 `projects/` = shared technical work (integrations, reports, LWC).
 `customers/` = per-customer Salesforce/Ohanafy configurations and knowledge.
+
+## Directory Rules
+
+- New agent → copy `agents/_template/`, add evals in `evals/agents/`
+- New skill → copy `skills/_template_v2/` into correct pillar
+- New tracked repo → add to `watchers/repos.yaml`
+- New content source → add to `registry/content-sources.yaml`
+- New prompt → add to `skills/claude/prompts/` with semver, add eval case
+- All IaC → `skills/aws/cdk/`
+- Tray configs → `skills/tray/`
+
+## Tray-First Rule
+
+Ohanafy has extensive existing Tray workflows. Before building anything new in Tray, check existing workflows. Never duplicate. Extend or reference existing workflows where possible.
 
 ## Conventions
 
@@ -176,6 +310,18 @@ customers/
 - Tests: 85%+ Apex coverage target, meaningful assertions
 - Tray scripts: use patterns from `integrations/patterns/`, follow validate-transform-batch-output flow
 - Integration scripts: always use `script-scaffold.js` as starting template
+- Commit format: `type(scope): description` — types: feat|fix|agent|skill|docs|ci|eval|chore
+
+## Never Do
+
+- Modify `evals/results/`
+- Deploy to prod SF or AWS prod without explicit instruction
+- Hardcode any credential or secret
+- Use opus for anything except evals/critical decisions
+- Skip evals for a new agent or prompt
+- Write CloudFormation directly
+- Query SF production org from skill code
+- Build a new Tray workflow without checking existing ones first
 
 ## Hooks
 
@@ -184,7 +330,7 @@ PostToolUse validators auto-run on file writes (Apex LSP, Flow validation, LWC l
 ## Improving skills
 
 When a skill gives bad advice or misses something, fix it directly:
-1. Edit the skill file in `skills/<skill-name>/SKILL.md`
+1. Edit the skill file in `skills/<pillar>/<skill-name>/SKILL.md`
 2. Commit with the project change that revealed the gap
 3. The improvement is live immediately for all future work
 
@@ -243,7 +389,7 @@ Known customers: check `ls customers/` for current list (exclude `_template`).
 ### 2. Package context (task mentions an Ohanafy package)
 
 If the task mentions OMS, WMS, REX, EDI, Ecom, Payments, Configure, Platform, Core, or Data Model:
-- Read `skills/ohfy-<package>-expert/references/source-index.md` for code intelligence
+- Read `skills/ohanafy/ohfy-<package>-expert/references/source-index.md` for code intelligence
 - Check `references/last-synced.txt` — if >7 days stale, suggest: "Source index is stale, want me to refresh with `bash scripts/sync-ohanafy-index.sh --repo OHFY-<Package>`?"
 
 ### 3. Integration context (task mentions Tray, connector, sync, mapping)
@@ -286,3 +432,7 @@ Key routing rules:
 - Save progress, checkpoint, resume → invoke checkpoint
 - Code quality, health check → invoke health
 - GitHub Actions, CI/CD failures, workflow issues, repo config → invoke github-agent
+- AWS infrastructure, Lambda, S3, CDK → invoke relevant aws skill
+- Claude model routing, prompt management → invoke relevant claude skill
+- Data import, Excel mapping → invoke data-harmonizer
+- Content monitoring, podcast insights → invoke content-watcher

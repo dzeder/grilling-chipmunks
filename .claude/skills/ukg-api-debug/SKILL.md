@@ -1,1 +1,1 @@
-../../../skills/ukg-api-debug/SKILL.md
+../../../skills/ukg/ukg-api-debug/SKILL.md

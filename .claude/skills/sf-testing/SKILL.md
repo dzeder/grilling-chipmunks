@@ -1,1 +1,1 @@
-../../../skills/sf-testing/SKILL.md
+../../../skills/salesforce/sf-testing/SKILL.md

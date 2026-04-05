@@ -1,1 +1,1 @@
-../../../skills/sf-diagram-mermaid/SKILL.md
+../../../skills/salesforce/sf-diagram-mermaid/SKILL.md

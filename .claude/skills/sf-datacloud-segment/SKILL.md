@@ -1,1 +1,1 @@
-../../../skills/sf-datacloud-segment/SKILL.md
+../../../skills/salesforce/sf-datacloud-segment/SKILL.md

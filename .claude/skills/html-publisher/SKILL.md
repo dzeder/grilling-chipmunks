@@ -1,0 +1,1 @@
+../../../skills/docs/html-publisher/SKILL.md

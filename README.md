@@ -1,38 +1,54 @@
-# daniels-ohanafy
+# Ohanafy AI Ops
 
-Unified monorepo for Ohanafy development — combines [gstack](https://github.com/garrytan/gstack) (general-purpose workflow skills) with Salesforce-specific domain skills, agents, and project workspaces.
+The AI operations framework for Ohanafy — beverage supply chain SaaS. Combines [gstack](https://github.com/garrytan/gstack) workflow skills with Salesforce domain skills, agents, integration patterns, and knowledge infrastructure.
 
 ## Structure
 
 ```
-skills/                    # 97 skills — Salesforce, Tray.io, UKG, workflow, QA, design
+skills/                    # 114 skills organized by pillar
+  gstack/                  #   36 workflow skills (browse, qa, ship, review, etc.)
+  salesforce/              #   36 SF skills (apex, flow, lwc, soql, data-harmonizer, etc.)
+  ohanafy/                 #   11 SKU expert skills (core, oms, wms, rex, edi, etc.)
+  tray/                    #    9 integration skills (tray-expert, csv-output, etc.)
+  aws/                     #    7 AWS infrastructure (CDK, Lambda, S3, IAM, RDS, Secrets)
+  claude/                  #    4 Claude AI skills (model-router, prompt-loader, etc.)
+  docs/                    #    4 doc generation (docx-builder, html-publisher, etc.)
+  ukg/                     #    3 UKG domain skills
+  content-watcher/         #    1 content monitoring (podcast/YouTube → GitHub issues)
+  utility/                 #    3 meta skills (org-connect, github-agent, best-practices)
 agents/                    # 17 specialist agents (FDE, PS, Integration, Domain, Support)
+integrations/patterns/     # 11 production-tested JS modules for integration scripts
+knowledge-base/            # Domain knowledge (beverage supply chain, SF schema, industry)
+registry/                  # Repo registry, content sources, team ownership
+watchers/                  # 25+ watched GitHub repos with adoption scoring
+evals/                     # Agent quality evaluation (datasets, scorers, results)
 projects/                  # Integration project workspaces (Core, NetSuite, QBO, Xero, Rehrig)
 customers/                 # Per-customer Salesforce configs and knowledge
-integrations/patterns/     # 11 production-tested JS modules for integration scripts
+docs/                      # Integration guides, templates, case studies
 references/                # Claude Code best practices, ecosystem watch, Ohanafy source indexes
-docs/                      # Whitepapers, integration guides, templates, architecture
-scripts/                   # 23 utility scripts — setup, deploy, sync, lint, doctor
 shared/                    # Hook validators, LSP engine, code analyzer
-tools/                     # Installer and hygiene checker
-tests/                     # Validator and registry contract tests
-.claude/skills/gstack/     # gstack — planning, review, ship, QA, browser automation
+scripts/                   # 25+ utility scripts — setup, deploy, sync, lint, doctor
+tests/                     # Unit, integration, E2E, eval tests (4-layer strategy)
 ```
 
 ## Skills
 
-97 skills organized by domain:
+114 skills organized into 10 pillars:
 
-| Category | Prefix | Examples |
-|----------|--------|----------|
-| **Salesforce** | `sf-*` | sf-apex, sf-flow, sf-lwc, sf-soql, sf-metadata, sf-deploy, sf-testing, sf-integration, sf-permissions, sf-debug |
-| **Ohanafy SKU experts** | `ohfy-*` | ohfy-core-expert, ohfy-oms-expert, ohfy-wms-expert, ohfy-rex-expert, ohfy-ecom-expert, ohfy-edi-expert, ohfy-payments-expert, ohfy-configure-expert, ohfy-data-model-expert, ohfy-platform-expert |
-| **Integration** | `tray-*` | tray-expert, tray-script-generator, tray-errors, tray-diagrams, tray-insights, tray-embedded-customjs |
-| **Domain** | `ukg-*` | ukg-expert, ukg-api-debug, ukg-field-mapper |
-| **Workflow** | (gstack) | browse, qa, review, ship, canary, benchmark, investigate, design-consultation, design-shotgun, design-html |
-| **Utility** | — | org-connect, github-agent, claude-code-best-practices, security, checkpoint, health |
+| Pillar | Count | Key Skills |
+|--------|-------|------------|
+| **gstack** | 36 | browse, qa, review, ship, canary, investigate, design-consultation, office-hours, checkpoint, health |
+| **salesforce** | 36 | sf-apex, sf-flow, sf-lwc, sf-soql, sf-metadata, sf-deploy, sf-testing, sf-integration, data-harmonizer |
+| **ohanafy** | 11 | ohfy-core-expert, ohfy-oms-expert, ohfy-wms-expert, ohfy-rex-expert, ohfy-edi-expert, ohfy-payments-expert |
+| **tray** | 9 | tray-expert, tray-script-generator, tray-errors, tray-diagrams, tray-insights, csv-output |
+| **aws** | 7 | cdk-deploy, lambda-deploy, s3-manager, iam-audit, rds-query, secrets-manager |
+| **claude** | 4 | model-router, prompt-loader, context-manager, tool-use |
+| **docs** | 4 | diff-summarizer, docx-builder, html-publisher, md-generator |
+| **ukg** | 3 | ukg-expert, ukg-api-debug, ukg-field-mapper |
+| **content-watcher** | 1 | content-watcher (podcast/YouTube monitoring) |
+| **utility** | 3 | org-connect, github-agent, claude-code-best-practices |
 
-Each SKU expert skill includes a pre-built source index (`references/source-index.md`) with trigger-handler maps, service layer graphs, cross-object relationships, and test coverage summaries.
+Each Ohanafy SKU expert skill includes a pre-built source index with trigger-handler maps, service layer graphs, cross-object relationships, and test coverage summaries.
 
 ## Agents
 
@@ -46,35 +62,13 @@ Each SKU expert skill includes a pre-built source index (`references/source-inde
 | **Domain** | beverage-erp-expert |
 | **Support** | documentation-consolidation-specialist, integration-guide-curator |
 
-## Integration Patterns
+## Key Rules
 
-11 production-tested JS modules in `integrations/patterns/`:
-
-- `soql-query-builder.js` — SELECT/WHERE builder, IN operator, 2000-value chunking
-- `batch-processing.js` — Array chunking, groupBy, dedup, SF Composite batches
-- `data-mapping.js` — Field rules engine with AND/OR logic, multi-priority resolution
-- `error-handling.js` — SF Composite error extraction, SOAP fault handling
-- `validation.js` — Required fields, type/length/format checks
-- `string-manipulation.js` — Business name normalization, SOQL sanitization
-- `csv-output.js` — Fixed-width formatters, CSV generation
-- `date-time.js` — SF date formats, timezone conversion (no external libs)
-- `lookup-maps.js` — Map/Set factories, status mapper, partitioning
-- `output-structuring.js` — Success/error envelopes, summaries
-- `script-scaffold.js` — Full validate-transform-batch-output starter template
-
-## Projects & Customers
-
-**Projects** (`projects/`) — shared technical work (integrations, reports, LWC):
-- `ohanafy-core/` — Main Salesforce org
-- `netsuite-ohanafy/` — NetSuite integration
-- `qbo-ohanafy/` — QuickBooks Online integration
-- `xero-ohanafy/` — Xero integration
-- `rehrig-ohanafy/` — Rehrig integration
-
-**Customers** (`customers/`) — per-customer Salesforce configurations and knowledge:
-- Each customer has a `profile.md` (org topology, SKUs, data profile, external systems)
-- Per-environment metadata in `orgs/` (populated by `connect-org.sh`)
-- Copy `_template/` to create a new customer
+- **Model routing:** haiku (classification) → sonnet (reasoning) → opus (evals only)
+- **Tray-first:** Check existing Tray workflows before building new ones
+- **Customer context:** Load full customer data before every support response
+- **Security:** No creds in code. AWS Secrets Manager only. No prod direct access.
+- **Evals:** 85% pass rate target, 75% hard fail. Results are immutable.
 
 ## Setup
 
@@ -83,11 +77,21 @@ Each SKU expert skill includes a pre-built source index (`references/source-inde
 git clone git@github.com:dzeder/daniels-ohanafy.git
 cd daniels-ohanafy
 
-# 2. Build gstack browser binary
+# 2. Install dependencies
+pip install -r requirements-dev.txt
+
+# 3. Configure credentials
+cp .env.example .env
+# Fill in API keys
+
+# 4. Build gstack browser binary
 cd .claude/skills/gstack && ./setup && cd ../../..
 
-# 3. Install Salesforce skills + hooks into ~/.claude/
+# 5. Install Salesforce skills + hooks
 bash tools/install.sh
+
+# 6. Run health check
+bash scripts/doctor.sh
 ```
 
 ## Key Scripts
@@ -99,24 +103,26 @@ bash tools/install.sh
 | `scripts/lint-skills.sh` | Check all skills for template compliance |
 | `scripts/connect-org.sh` | Connect to a live Salesforce org |
 | `scripts/check-ecosystem.sh` | Check upstream repos for relevant changes |
-| `scripts/update-gstack.sh` | Update gstack to latest version |
-| `scripts/update-best-practices.sh` | Refresh Claude Code best practices reference |
+| `scripts/ci/discover-repos.py` | Auto-discover Ohanafy repos, populate registry |
+| `scripts/ci/health-check.js` | Verify dependencies, credentials, connectivity |
 
-## Adding New Skills
+## Schedules
 
-Create a new directory under `skills/` with the appropriate prefix:
+| Job | Schedule | Channel |
+|-----|----------|---------|
+| Repo Watcher | Every Monday 8am UTC | #ai-ops-updates |
+| Content Watcher | Daily 6am UTC | GitHub issues |
 
-| Prefix | Domain |
-|--------|--------|
-| `sf-*` | Salesforce |
-| `tray-*` | Tray.io |
-| `ohfy-*` | Ohanafy SKU |
-| `ukg-*` | UKG |
-| `ns-*` | NetSuite |
-| `qbo-*` | QuickBooks Online |
-| `xero-*` | Xero |
+## Commit Format
 
-Each skill needs a `SKILL.md` with YAML frontmatter (name, description) and trigger rules. See `docs/SKILL_TEMPLATE.md` for the required structure.
+```
+type(scope): description
+```
+
+Types: `feat` | `fix` | `agent` | `skill` | `docs` | `ci` | `eval` | `chore`
+Scopes: `salesforce` | `tray` | `aws` | `claude` | `docs` | `support` | `watchers` | `content`
+
+See [CLAUDE.md](CLAUDE.md) for the complete guide.
 
 ## License
 

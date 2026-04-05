@@ -1,1 +1,1 @@
-../../../skills/tray-insights/SKILL.md
+../../../skills/tray/tray-insights/SKILL.md

@@ -94,6 +94,67 @@ Cross-skill handoff rules. When a skill encounters work outside its scope, route
 | **ukg-expert** | Field mapping to Salesforce | **ukg-field-mapper** |
 | **ukg-field-mapper** | Salesforce target field questions | **ohfy-data-model-expert** |
 
+## AWS Infrastructure Handoffs
+
+| From | Trigger | Route To |
+|------|---------|----------|
+| **cdk-deploy** | IAM policy review needed | **iam-audit** |
+| **cdk-deploy** | Lambda function in stack | **lambda-deploy** |
+| **cdk-deploy** | S3 bucket configuration | **s3-manager** |
+| **cdk-deploy** | Secrets referenced in stack | **secrets-manager** |
+| **lambda-deploy** | IAM execution role review | **iam-audit** |
+| **lambda-deploy** | S3 event trigger source | **s3-manager** |
+| **lambda-deploy** | Secrets access needed | **secrets-manager** |
+| **lambda-deploy** | RDS connection config | **rds-query** |
+| **rds-query** | IAM DB auth policy | **iam-audit** |
+| **s3-manager** | IAM bucket policy review | **iam-audit** |
+| **secrets-manager** | IAM secrets access policy | **iam-audit** |
+| Any **aws/*** | CDK stack deployment | **cdk-deploy** |
+| Any **aws/*** | Security/credential concern | **security** |
+
+## Claude AI Handoffs
+
+| From | Trigger | Route To |
+|------|---------|----------|
+| **model-router** | Prompt template needed | **prompt-loader** |
+| **model-router** | Token budget exceeded | **context-manager** |
+| **model-router** | Tool schema validation | **tool-use** |
+| **prompt-loader** | Token count for prompt | **context-manager** |
+| **prompt-loader** | Tool definitions in prompt | **tool-use** |
+| **context-manager** | Model downgrade to fit budget | **model-router** |
+| **tool-use** | Prompt wrapping tool schema | **prompt-loader** |
+
+## Documentation Handoffs
+
+| From | Trigger | Route To |
+|------|---------|----------|
+| **diff-summarizer** | DOCX output needed | **docx-builder** |
+| **diff-summarizer** | HTML/web publish needed | **html-publisher** |
+| **diff-summarizer** | Markdown output needed | **md-generator** |
+| **docx-builder** | Git diff changelog input | **diff-summarizer** |
+| **html-publisher** | Git diff changelog input | **diff-summarizer** |
+| **md-generator** | Git diff changelog input | **diff-summarizer** |
+| **html-publisher** | DOCX companion output | **docx-builder** |
+| **docx-builder** | HTML companion output | **html-publisher** |
+
+## Data Import Handoffs
+
+| From | Trigger | Route To |
+|------|---------|----------|
+| **data-harmonizer** | Salesforce object/field schema | **sf-metadata** |
+| **data-harmonizer** | Ohanafy data model questions | **ohfy-data-model-expert** |
+| **data-harmonizer** | Bulk data load execution | **sf-data** |
+| **sf-data** | Excel/CSV column mapping | **data-harmonizer** |
+| **sf-metadata** | Inbound data file mapping | **data-harmonizer** |
+
+## Content Monitoring Handoffs
+
+| From | Trigger | Route To |
+|------|---------|----------|
+| **content-watcher** | Summarize monitored content | **diff-summarizer** |
+| **content-watcher** | Publish digest as HTML | **html-publisher** |
+| **content-watcher** | Publish digest as DOCX | **docx-builder** |
+
 ## Cross-Domain Handoffs
 
 | From | Trigger | Route To |
@@ -102,6 +163,11 @@ Cross-skill handoff rules. When a skill encounters work outside its scope, route
 | Any skill | Diagram/visualization needed | **sf-diagram-mermaid** |
 | Any skill | PNG/SVG image output | **sf-diagram-nanobananapro** |
 | Any skill | Security/credential concern | **security** |
+| Any skill | AWS Lambda, S3, CDK, IAM task | Route to **aws/*** skills |
+| Any skill | Claude prompt/model/token task | Route to **claude/*** skills |
+| Any skill | Doc generation (DOCX, HTML, MkDocs) | Route to **docs/*** skills |
+| Any skill | Excel/CSV data import to Salesforce | **data-harmonizer** |
+| Any skill | Podcast/YouTube content monitoring | **content-watcher** |
 | Any **sf-*** | Ohanafy-specific object behavior | Check **ohfy-core-expert** first |
 | Any **tray-*** | Salesforce API patterns | Check **salesforce-composite** first |
 

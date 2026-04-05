@@ -49,7 +49,7 @@ def test_verify_plugin_script_allows_partial_org_feature_gating() -> None:
     _require_runtime()
     org_alias = _require_partial_org_alias()
 
-    result = run(["bash", "skills/sf-datacloud/scripts/verify-plugin.sh", org_alias], timeout=300)
+    result = run(["bash", "skills/salesforce/sf-datacloud/scripts/verify-plugin.sh", org_alias], timeout=300)
     output = output_text(result)
 
     assert result.returncode == 0, output
@@ -66,7 +66,7 @@ def test_diagnose_org_classifies_partial_org_feature_gates() -> None:
     result = run(
         [
             "node",
-            "skills/sf-datacloud/scripts/diagnose-org.mjs",
+            "skills/salesforce/sf-datacloud/scripts/diagnose-org.mjs",
             "-o",
             org_alias,
             "--phase",
@@ -100,7 +100,7 @@ def test_diagnose_org_classifies_enabled_org_with_real_dmos_and_activation_catal
     result = run(
         [
             "node",
-            "skills/sf-datacloud/scripts/diagnose-org.mjs",
+            "skills/salesforce/sf-datacloud/scripts/diagnose-org.mjs",
             "-o",
             org_alias,
             "--phase",

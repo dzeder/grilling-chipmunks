@@ -48,7 +48,9 @@ addopts = [
 ]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "integration: marks tests requiring external resources",
+    "integration: marks tests requiring external resources (LocalStack, SF scratch org)",
+    "e2e: end-to-end tests requiring real credentials and staging env",
+    "eval: agent quality evaluation tests",
     "hooks: validation hook tests",
     "org_required: tests requiring a connected Salesforce org",
 ]
@@ -57,7 +59,7 @@ filterwarnings = [
 ]
 
 [tool.coverage.run]
-source = ["shared/hooks"]
+source = ["shared/hooks", "skills"]
 branch = true
 omit = [
     "tests/*",

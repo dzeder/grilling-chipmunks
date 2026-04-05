@@ -1,0 +1,31 @@
+version: "1.0"
+
+# Sources added via onboarding interview (Section 13, Item 4)
+# or: python -m skills.content_watcher.commands.add_source
+
+sources: []
+
+categories:
+  beverage_industry:
+    relevance_targets: [knowledge-base/industry-insights, knowledge-base/beverage-supply-chain, agents/support]
+    issue_labels: [content-insight, domain]
+    note: "Industry news, TTB, distribution trends, pricing, competitive moves"
+
+  product_strategy:
+    relevance_targets: [knowledge-base/industry-insights]
+    issue_labels: [content-insight, product]
+    note: "SaaS pricing, B2B strategy, customer success patterns. Routes to product team."
+
+  salesforce:
+    relevance_targets: [skills/salesforce]
+    issue_labels: [content-insight, salesforce]
+
+  ai_dev_tools:
+    relevance_targets: [skills/claude, agents, watchers/adoption-queue]
+    issue_labels: [content-insight, ai]
+
+monitor_job:
+  schedule: "0 6 * * *"
+  github_repo: "ohanafy/ai-ops"
+  min_relevance_score: 0.65
+  triage_note: "Created by Content Watcher. Team decides: work it, defer it, or close it."

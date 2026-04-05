@@ -1,1 +1,1 @@
-../../../skills/ohfy-transformation-settings/SKILL.md
+../../../skills/ohanafy/ohfy-transformation-settings/SKILL.md

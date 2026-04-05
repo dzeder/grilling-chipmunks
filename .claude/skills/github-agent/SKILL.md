@@ -1,1 +1,1 @@
-../../../skills/github-agent/SKILL.md
+../../../skills/utility/github-agent/SKILL.md

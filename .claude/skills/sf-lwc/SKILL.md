@@ -1,1 +1,1 @@
-../../../skills/sf-lwc/SKILL.md
+../../../skills/salesforce/sf-lwc/SKILL.md

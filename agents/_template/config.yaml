@@ -1,0 +1,25 @@
+name: "{agent-name}"
+version: "0.1.0"
+description: "{One-line description}"
+
+model:
+  default: "claude-sonnet-4-20250514"
+  eval: "claude-opus-4-20250514"
+  routing: "claude-haiku-4-5-20251001"
+
+context:
+  max_tokens: 8192
+  system_prompt: "prompts/system.md"
+
+escalation:
+  confidence_threshold: 0.75
+  always_escalate:
+    - "compliance"
+    - "legal"
+    - "data_integrity"
+  notify_channel: "#ops-alerts"
+
+retry:
+  max_attempts: 3
+  backoff_base: 2
+  backoff_max: 30

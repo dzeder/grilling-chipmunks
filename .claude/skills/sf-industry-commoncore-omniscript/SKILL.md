@@ -1,1 +1,1 @@
-../../../skills/sf-industry-commoncore-omniscript/SKILL.md
+../../../skills/salesforce/sf-industry-commoncore-omniscript/SKILL.md

@@ -1,1 +1,1 @@
-../../../skills/sf-permissions/SKILL.md
+../../../skills/salesforce/sf-permissions/SKILL.md

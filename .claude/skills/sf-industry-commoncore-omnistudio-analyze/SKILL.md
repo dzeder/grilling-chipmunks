@@ -1,1 +1,1 @@
-../../../skills/sf-industry-commoncore-omnistudio-analyze/SKILL.md
+../../../skills/salesforce/sf-industry-commoncore-omnistudio-analyze/SKILL.md

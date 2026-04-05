@@ -1,0 +1,208 @@
+version: "1.0"
+
+ai:
+  - url: anthropics/anthropic-cookbook
+    priority: critical
+    watch: all
+    why: Official Claude patterns. New notebooks directly applicable to our agents.
+    auto_adopt: new_patterns
+    tags: [claude, agents, prompts]
+
+  - url: pydantic/pydantic-ai
+    priority: high
+    watch: releases
+    why: Best-in-class agent framework for Python. Type-safe, Claude-native.
+    auto_adopt: dependency_updates
+    tags: [agents, claude, python]
+
+  - url: langchain-ai/langgraph
+    priority: medium
+    watch: releases
+    why: Graph-based orchestration. Fits support escalation and doc generation.
+    auto_adopt: false
+    tags: [agents, orchestration]
+
+  - url: microsoft/autogen
+    priority: medium
+    watch: releases
+    why: Multi-agent conversation patterns.
+    auto_adopt: false
+    tags: [agents, multi-agent]
+
+  - url: BerriAI/litellm
+    priority: medium
+    watch: releases
+    why: Model routing and cost tracking across Claude tiers.
+    auto_adopt: false
+    tags: [claude, cost, routing]
+
+salesforce:
+  - url: dxatscale/sfpowerscripts
+    priority: critical
+    watch: releases
+    why: Gold standard SF DevOps. Model our pipeline on this.
+    auto_adopt: false
+    tags: [salesforce, ci-cd, dx]
+
+  - url: forcedotcom/salesforcedx-vscode
+    priority: high
+    watch: releases
+    why: Official SF CLI. Changes affect our CI/CD pipeline.
+    auto_adopt: false
+    tags: [salesforce, dx]
+
+  - url: forcedotcom/source-deploy-retrieve
+    priority: high
+    watch: releases
+    why: Core library behind sf deploy. Watch for new metadata type support.
+    auto_adopt: false
+    tags: [salesforce, deploy]
+
+  - url: trailheadapps/lwc-recipes
+    priority: medium
+    watch: new_files
+    why: Official LWC patterns for internal SF tools.
+    auto_adopt: false
+    tags: [salesforce, lwc]
+
+tray_and_ipaas:
+  - url: n8n-io/n8n
+    priority: critical
+    watch: releases
+    why: Best OSS Tray equivalent. Workflow patterns map directly. Fallback option.
+    auto_adopt: false
+    tags: [tray, ipaas, patterns]
+
+  - url: temporalio/temporal
+    priority: high
+    watch: releases
+    why: Durable workflow patterns for SF<->AWS ETL pipelines.
+    auto_adopt: false
+    tags: [tray, ipaas, reliability]
+
+  - url: zapier/zapier-platform
+    priority: medium
+    watch: releases
+    why: Mature connector patterns. Reference for new Tray connectors.
+    auto_adopt: false
+    tags: [tray, connectors]
+
+  - url: prefecthq/prefect
+    priority: medium
+    watch: releases
+    why: Candidate for replacing complex Tray+Python workflows.
+    auto_adopt: false
+    tags: [tray, workflows, python]
+
+aws:
+  - url: aws/aws-cdk
+    priority: critical
+    watch: releases
+    why: Our IaC foundation. Watch for breaking changes.
+    auto_adopt: dependency_updates
+    tags: [aws, cdk]
+
+  - url: aws-powertools/powertools-lambda-python
+    priority: critical
+    watch: releases
+    why: In every Lambda function we write.
+    auto_adopt: dependency_updates
+    tags: [aws, lambda, observability]
+
+  - url: localstack/localstack
+    priority: high
+    watch: releases
+    why: Local AWS for dev and integration tests.
+    auto_adopt: dependency_updates
+    tags: [aws, local-dev, testing]
+
+  - url: bridgecrewio/checkov
+    priority: high
+    watch: releases
+    why: IaC security scanning. Runs in CI before every CDK deploy.
+    auto_adopt: dependency_updates
+    tags: [aws, security, ci-cd]
+
+  - url: aws-samples/aws-cdk-examples
+    priority: high
+    watch: new_files
+    why: Official CDK patterns for Lambda, API GW, Step Functions.
+    auto_adopt: false
+    tags: [aws, cdk, patterns]
+
+docs:
+  - url: squidfunk/mkdocs-material
+    priority: high
+    watch: releases
+    why: Internal docs site engine.
+    auto_adopt: dependency_updates
+    tags: [docs, internal]
+
+  - url: facebook/docusaurus
+    priority: high
+    watch: releases
+    why: External product docs and customer portal.
+    auto_adopt: dependency_updates
+    tags: [docs, external]
+
+  - url: python-openxml/python-docx
+    priority: medium
+    watch: releases
+    why: Powers DOCX generation skill.
+    auto_adopt: dependency_updates
+    tags: [docs, docx]
+
+cicd:
+  - url: semantic-release/semantic-release
+    priority: high
+    watch: releases
+    why: Automated versioning and changelog.
+    auto_adopt: dependency_updates
+    tags: [ci-cd, versioning]
+
+  - url: astral-sh/uv
+    priority: high
+    watch: releases
+    why: 10-100x faster Python packaging. Candidate to replace pip in CI.
+    auto_adopt: false
+    tags: [ci-cd, python, tooling]
+
+  - url: nektos/act
+    priority: medium
+    watch: releases
+    why: Run GitHub Actions locally.
+    auto_adopt: dependency_updates
+    tags: [ci-cd, local-dev]
+
+security:
+  - url: trufflesecurity/trufflehog
+    priority: high
+    watch: releases
+    why: Secret scanning in pre-commit and CI.
+    auto_adopt: dependency_updates
+    tags: [security, secrets]
+
+  - url: gitleaks/gitleaks
+    priority: medium
+    watch: releases
+    why: Complementary secret detection.
+    auto_adopt: dependency_updates
+    tags: [security, secrets]
+
+support:
+  - url: openai/evals
+    priority: medium
+    watch: new_files
+    why: Model-agnostic eval methodology adapted for Claude.
+    auto_adopt: false
+    tags: [support, evals]
+
+watcher_job:
+  schedule: "0 8 * * MON"
+  digest_channel: "#ai-ops-updates"
+  adoption_pr_label: "ai-ops-adoption"
+  min_relevance_score: 0.6
+  adoption_thresholds:
+    auto_pr_above: 0.85
+    notify_above: 0.60
+    ignore_below: 0.60

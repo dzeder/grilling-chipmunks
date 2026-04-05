@@ -1,1 +1,1 @@
-../../../skills/deploy-prep/SKILL.md
+../../../skills/tray/deploy-prep/SKILL.md

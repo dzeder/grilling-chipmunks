@@ -1,0 +1,8 @@
+version: "1.0"
+status: "PENDING — run: python ci-cd/scripts/discover-repos.py"
+rules:
+  - "Check this registry before any PR in an Ohanafy product repo"
+  - "Never modify a repo without knowing its owner"
+  - "frontend and backend repos for the same SKU deploy together"
+  - "data-model changes require a migration plan before any deploy"
+repos: []

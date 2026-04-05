@@ -1,0 +1,1 @@
+../../../skills/aws/s3-manager/SKILL.md

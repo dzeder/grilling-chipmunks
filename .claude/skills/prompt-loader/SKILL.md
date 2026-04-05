@@ -1,0 +1,1 @@
+../../../skills/claude/prompt-loader/SKILL.md

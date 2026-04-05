@@ -1,1 +1,1 @@
-../../../skills/sf-datacloud-act/SKILL.md
+../../../skills/salesforce/sf-datacloud-act/SKILL.md

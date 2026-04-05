@@ -1,1 +1,1 @@
-../../../skills/tray-errors/SKILL.md
+../../../skills/tray/tray-errors/SKILL.md
