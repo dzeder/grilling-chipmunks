@@ -1,0 +1,67 @@
+name: Check Agent Skills Upstream
+
+on:
+  schedule:
+    - cron: '0 10 * * 4'  # Thursdays at 10am UTC
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/check-agent-skills-update.yml'
+
+concurrency:
+  group: agent-skills-check
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+
+      - name: Check for upstream changes
+        id: check
+        run: |
+          CURRENT_HASH=$(cat references/agent-skills/VERSION 2>/dev/null | tr -d '[:space:]' || echo "none")
+          if ! echo "$CURRENT_HASH" | grep -qE '^[0-9a-f]{40}$'; then
+            echo "Invalid or missing version marker, treating as first run"
+            CURRENT_HASH="none"
+          fi
+          UPSTREAM_HASH=$(git ls-remote https://github.com/addyosmani/agent-skills.git HEAD | cut -f1)
+          echo "current=$CURRENT_HASH" >> $GITHUB_OUTPUT
+          echo "upstream=$UPSTREAM_HASH" >> $GITHUB_OUTPUT
+          if [ "$CURRENT_HASH" != "$UPSTREAM_HASH" ]; then
+            echo "needs_update=true" >> $GITHUB_OUTPUT
+          else
+            echo "needs_update=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Apply update
+        if: steps.check.outputs.needs_update == 'true'
+        run: bash scripts/update-agent-skills.sh --apply
+
+      - name: Create PR
+        if: steps.check.outputs.needs_update == 'true'
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0  # v8.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update agent-skills reference from upstream"
+          title: "Update Agent Skills Reference"
+          body: |
+            Upstream `addyosmani/agent-skills` has new commits.
+
+            **Previous:** `${{ steps.check.outputs.current }}`
+            **New:** `${{ steps.check.outputs.upstream }}`
+
+            This is a **read-only reference mirror** in `references/agent-skills/`.
+            Review the diff for patterns worth adapting into our skills.
+
+            Check `learned_from` lineage: skills citing this repo may benefit from the update.
+            ```bash
+            grep -rl "addyosmani/agent-skills" skills/
+            ```
+          branch: update-agent-skills
+          delete-branch: true
