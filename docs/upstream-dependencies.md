@@ -64,7 +64,7 @@ This preserves upstream commit messages and handles merges better, but the comma
 
 ## sf-skills (Jaganpro/sf-skills)
 
-**Location:** `skills/sf-*`, `agents/fde-*`, `agents/ps-*`, `shared/`, `tools/`, `tests/`
+**Location:** `skills/salesforce/sf-*`, `agents/fde-*`, `agents/ps-*`, `shared/`, `tools/`, `tests/`
 **Upstream:** https://github.com/Jaganpro/sf-skills
 **Version marker:** `skills/.sf-skills-upstream-version` (commit hash of last-reviewed upstream state)
 **Strategy:** Preview upstream changes, cherry-pick what you want

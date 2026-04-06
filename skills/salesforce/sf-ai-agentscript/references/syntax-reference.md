@@ -18,7 +18,9 @@
 
 ## Block Structure
 
-### Required Block Order
+### Recommended Top-Level Block Convention
+
+Use the following order as this skill's preferred convention:
 
 ```
 config → variables → system → connection → knowledge → language → start_agent → topic
@@ -35,7 +37,7 @@ config → variables → system → connection → knowledge → language → st
 | `start_agent:` | ✅ Yes | Entry point (exactly one) |
 | `topic:` | ✅ Yes | Conversation topics (one or more) |
 
-> ✅ **Validated Finding**: Documentation implies strict ordering, but both config-first and system-first orderings compile. Pick one convention and be consistent.
+> ✅ **Evidence note**: Official Salesforce docs and examples present top-level blocks in varying sequences, and local validation evidence indicates both config-first and system-first orderings compile. Use one convention consistently, but do not treat top-level block order alone as a correctness rule.
 
 ### Block Internal Ordering
 
@@ -71,6 +73,27 @@ system:
 | `messages.error` | Fallback error message |
 | `instructions` | Global system prompt for the agent |
 
+> **Message syntax note**: Quoted strings are fine for **static** `welcome` / `error` messages. If a welcome or error message includes variable interpolation such as `{!@variables.user_preferred_name}`, author that message in template/block form with `|` so the value is rendered in the system message. For first-turn personalization, prefer linked or session-backed variables.
+
+**❌ Wrong — quoted interpolation can render literally**
+```yaml
+system:
+  messages:
+    welcome: "Hi {!@variables.user_preferred_name}!"
+    error: "Sorry, something went wrong."
+  instructions: "You are a helpful assistant."
+```
+
+**✅ Correct — use block form for dynamic system messages**
+```yaml
+system:
+  messages:
+    welcome: |
+      Hi {!@variables.user_preferred_name}! How can I help today?
+    error: "Sorry, something went wrong."
+  instructions: "You are a helpful assistant."
+```
+
 ---
 
 ### 2. config: Block (Required)
@@ -78,7 +101,7 @@ system:
 ```yaml
 config:
   developer_name: "refund_agent"
-  agent_description: "Handles refund requests"
+  description: "Handles refund requests"
   agent_type: "AgentforceServiceAgent"
   default_agent_user: "admin@yourorg.com"
 ```
@@ -86,10 +109,11 @@ config:
 | Field | Required | Purpose |
 |-------|----------|---------|
 | `developer_name` | ✅ Yes | Internal identifier (must match folder name, case-sensitive) |
-| `agent_description` | ✅ Yes | Agent's purpose description |
+| `description` | ✅ Yes | Agent's goals and purpose |
 | `agent_type` | ✅ Yes | `AgentforceServiceAgent` or `AgentforceEmployeeAgent` |
 | `default_agent_user` | ⚠️ **REQUIRED** | Must be valid Einstein Agent User |
 | `agent_label` | Optional | Display name for the agent in UI (defaults to `developer_name` if omitted) |
+| `agent_description` | Optional / compatibility | Alternative config key accepted by local tooling; public docs/examples in this skill prefer `description` |
 | `company` | Optional | Company context for the agent |
 | `role` | Optional | Role/persona description for the agent |
 | `agent_version` | Optional / system-managed | Agent version metadata |
@@ -335,6 +359,50 @@ instructions: |
 ```
 
 The continued line is indented further than the `|` line and does NOT start with a new `|`.
+
+### Deterministic Resolution vs LLM-Driven Tool Use
+
+`instructions: ->` mixes two very different execution modes. Treat them separately when authoring.
+
+| Pattern | Who executes it | When it runs | Supports `...` | Best use |
+|---------|------------------|--------------|----------------|----------|
+| `run @actions.X` inside `instructions: ->` | Deterministic resolver | Before the LLM sees the final prompt | **No** | Preload data, normalize state, perform fixed control flow |
+| `reasoning.actions` tool invocation | LLM / planner | After instructions resolve | **Yes** | Slot filling, user-driven tool calls, flexible next-step selection |
+| `@utils.setVariables` from `reasoning.actions` | LLM / planner | After instructions resolve | **Yes** | Capture user-provided values into variables for later deterministic use |
+
+**Rule of thumb:** if a line begins with `run` inside `instructions: ->`, every `with` value must already exist as a literal, a variable, or a prior action output. Do not expect the resolver to slot-fill `...` in that phase.
+
+**❌ Wrong — deterministic `run` cannot slot-fill**
+```yaml
+reasoning:
+  instructions: ->
+    run @actions.send_verification_code
+      with email = ...
+```
+
+**✅ Correct — let the LLM capture first, then use the saved variable**
+```yaml
+variables:
+  member_email: mutable string = ""
+
+topic collect_email:
+  reasoning:
+    instructions: ->
+      if @variables.member_email == "":
+        | Ask the user for their email address, then call {!@actions.save_email}.
+      else:
+        transition to @topic.send_code
+    actions:
+      save_email: @utils.setVariables
+        description: "Save the user's email address"
+        with member_email = ...
+
+topic send_code:
+  reasoning:
+    instructions: ->
+      run @actions.send_verification_code
+        with email = @variables.member_email
+```
 
 ---
 
@@ -637,7 +705,7 @@ system:
 
 config:
   developer_name: "pronto_refund_agent"
-  agent_description: "Handles customer refund requests with churn risk assessment"
+  description: "Handles customer refund requests with churn risk assessment"
   agent_type: "AgentforceServiceAgent"
   default_agent_user: "agent_user@myorg.com"
 
@@ -837,6 +905,17 @@ actions:
 
 ---
 
+## Current Limitations and Practical Workarounds
+
+| Limitation | What happens | Practical workaround |
+|------------|--------------|----------------------|
+| `set @variables.list = []` in runtime logic | Parse error (`[` not allowed in expression position) | Define a dedicated empty list variable and assign from it |
+| Nested object mutation such as `set @variables.profile.name = ...` | Mutation is not portable / may fail silently or parse incorrectly | Flatten state into scalar variables or shape structured data upstream in Flow/Apex |
+| Direct variable capture with `set @variables.x = ...` | No user input is captured | Expose `@utils.setVariables` (or another LLM-invoked action) and let the planner fill `...` |
+| Exact quoted field names in special cases | Raw `.agent` may be valid, but some visual editors can rewrite the field name during round-trip save/reformat | Treat the raw `.agent` file in source control as the source of truth and diff after builder edits |
+
+---
+
 ## Common Pitfalls
 
 | Pitfall | Symptom | Fix |
@@ -848,8 +927,11 @@ actions:
 | Missing `source:` for linked | Variable empty | Add `source: @session.X` |
 | Missing `default_agent_user` | Internal error on deploy | Add valid Einstein Agent User |
 | `@inputs` in `set` directive | Unknown deploy error | Use `@utils.setVariables` to capture inputs separately, then reference via `@variables` |
+| `set @variables.X = ...` | Variable never fills from user input | Capture the value through an LLM-invoked action such as `@utils.setVariables`, then read `@variables.X` later |
 | Bare action name (no prefix) | Action not found / ignored | Always use `@actions.action_name` in `run`, templates, and instruction text |
+| `run @actions.X with param = ...` | Deterministic inline `run` never slot-fills the parameter | Capture the value first with an LLM-invoked action, then run deterministically using the saved variable |
 | `run @actions.X` for utility / delegation / unresolved action | `ACTION_NOT_IN_SCOPE`, action not found, or available-actions list excludes the name | `run @actions.X` resolves only to topic-level `actions:` that declare `target:`. Use direct `set` / `transition to` for deterministic utility behavior, or let `reasoning.actions:` invoke the utility. |
+| `set @variables.object.field = ...` or `set @variables.object["field"] = ...` | Nested object updates fail or behave inconsistently | Use flattened scalar variables, or update the structure in Flow/Apex and return a fresh object |
 | Null check vs empty string | Wrong comparison for null | Use `is None` for null checks, `== ""` for empty strings — they are different |
 | `is_required` not enforced | Planner invokes action without required inputs | Use `available when @variables.X is not None` guard instead. `is_required` is a hint, not a gate. See Issue 26 |
 | Raw `@system_variables.user_input contains/startswith/endswith` routing | Cancellation/revision intent checks behave inconsistently | Use a Flow/Apex/classifier action to normalize the utterance into a boolean or enum, then branch on `@variables.X`. See Issue 42 |
@@ -878,6 +960,29 @@ verify: @actions.verify_customer
    with account_number=@variables.account_number
    set @variables.customer_name = @outputs.customer_name
 ```
+
+### Direct Variable Capture — Use `@utils.setVariables`, not `set ... = ...`
+
+```yaml
+# ❌ WRONG — direct slot-fill in deterministic instructions does not work
+reasoning:
+   instructions: ->
+      set @variables.member_email = ...
+      run @actions.send_verification_code
+         with email = @variables.member_email
+
+# ✅ CORRECT — let the LLM capture the value through a tool
+reasoning:
+   instructions: ->
+      if @variables.member_email == "":
+         | Ask the user for their email address, then call {!@actions.save_email}.
+   actions:
+      save_email: @utils.setVariables
+         description: "Save the user's email address"
+         with member_email = ...
+```
+
+Once the variable is set, later deterministic logic can safely reference `@variables.member_email`.
 
 ### Bare Action Names — Always Use `@actions.` Prefix
 

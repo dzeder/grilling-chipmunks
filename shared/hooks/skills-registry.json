@@ -1106,6 +1106,81 @@
       "triggerWhen": "user creates FlexCards, configures data sources, designs card layouts, or asks about OmniUiCard metadata",
       "doNotTriggerWhen": "building OmniScripts (use sf-industry-commoncore-omniscript), creating Integration Procedures (use sf-industry-commoncore-integration-procedure), or analyzing dependencies (use sf-industry-commoncore-omnistudio-analyze)"
     },
+    "sf-flex-estimator": {
+      "keywords": [
+        "flex credit",
+        "flex credits",
+        "agentforce cost",
+        "agentforce pricing",
+        "data cloud cost",
+        "data cloud pricing",
+        "consumption estimate",
+        "budget sizing",
+        "scenario planning",
+        "credit estimation"
+      ],
+      "intentPatterns": [
+        "estimate.*flex.*credit",
+        "cost.*agentforce",
+        "budget.*data.*cloud",
+        "how.*much.*will.*cost",
+        "pricing.*scenario"
+      ],
+      "priority": "medium",
+      "description": "Salesforce Flex Credit estimation for Agentforce and Data Cloud workloads",
+      "triggerWhen": "user needs cost projections, scenario planning, budget sizing, or architecture tradeoff analysis for Agentforce or Data Cloud Flex Credit usage",
+      "doNotTriggerWhen": "building Agentforce metadata (use sf-ai-agentforce or sf-ai-agentscript), implementing Data Cloud assets (use sf-datacloud-*), or asking for contract-specific commercial approval"
+    },
+    "sf-industry-cme-epc-model": {
+      "keywords": [
+        "epc",
+        "enterprise product catalog",
+        "product2",
+        "product child item",
+        "attribute assignment",
+        "offer bundle",
+        "datapack",
+        "cme",
+        "vlocity product",
+        "product catalog"
+      ],
+      "intentPatterns": [
+        "create.*epc.*product",
+        "build.*offer.*bundle",
+        "configure.*product.*attribute",
+        "review.*datapack",
+        "model.*product.*catalog"
+      ],
+      "priority": "medium",
+      "description": "Salesforce Industries CME EPC product modeling for Product2-based catalog creation",
+      "triggerWhen": "user creates or updates Product2 EPC records, AttributeAssignment payloads, Offer bundles, or ProductChildItem relationships",
+      "doNotTriggerWhen": "designing OmniScripts/FlexCards/Integration Procedures (use sf-industry-commoncore-*), implementing Apex business logic (use sf-apex), or deploying metadata (use sf-deploy)"
+    },
+    "sf-vlocity-build-deploy": {
+      "keywords": [
+        "vlocity",
+        "vlocity build",
+        "packdeploy",
+        "packexport",
+        "packretry",
+        "datapack deploy",
+        "datapack migration",
+        "vlocity ci/cd",
+        "globalkey",
+        "matching key"
+      ],
+      "intentPatterns": [
+        "deploy.*datapack",
+        "vlocity.*pack",
+        "migrate.*datapack",
+        "export.*datapack",
+        "troubleshoot.*datapack"
+      ],
+      "priority": "medium",
+      "description": "Salesforce Industries DataPack deployment automation using Vlocity Build",
+      "triggerWhen": "user deploys or validates OmniStudio/Vlocity DataPacks with vlocity commands, sets up DataPack CI/CD pipelines, or troubleshoots DataPack migration errors",
+      "doNotTriggerWhen": "deploying Salesforce metadata with sf project deploy (use sf-deploy), authoring OmniStudio artifacts (use sf-industry-commoncore-*), or writing Apex/LWC business logic (use sf-apex/sf-lwc)"
+    },
     "ohfy-core-expert": {
       "keywords": [
         "ohfy-core",

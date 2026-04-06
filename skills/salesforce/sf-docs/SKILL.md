@@ -5,9 +5,6 @@ description: >
   authoritative Salesforce docs from developer.salesforce.com or
   help.salesforce.com, especially when pages are JS-heavy, shell-rendered, or
   hard to extract with naive fetching.
-  TRIGGER when: user asks for official Salesforce documentation, needs to look up
-  Apex/API/LWC/metadata/Agentforce references, or requests help articles from
-  developer.salesforce.com or help.salesforce.com.
 license: MIT
 metadata:
   version: "0.4.0"
@@ -198,13 +195,6 @@ Reject generic help shells. Follow linked Help articles from nearby official mes
 ### Example: System.StubProvider
 Prefer the official Salesforce reference/developer page where the exact identifier appears.
 Do not substitute a broader Apex landing page if the identifier is absent.
-
-## Delegation
-
-- **sf-apex** — Delegate to sf-apex when the user needs to write or debug Apex code, not just look up the reference docs
-- **sf-lwc** — Delegate to sf-lwc when the user needs to build LWC components, not just read the LWC documentation
-- **sf-metadata** — Delegate to sf-metadata when the user needs to create metadata XML, not just understand metadata types
-- Do not trigger for third-party integration documentation or non-Salesforce platform docs
 
 ## Non-Goals
 

@@ -26,12 +26,6 @@ Use `sf-soql` when the work involves:
 - query optimization and selectivity analysis
 - SOQL/SOSL syntax and governor-aware design
 
-### Examples
-
-- "Write a SOQL query to get all open Orders with their Line Items for a given Account" -- generate a parent-child subquery with proper filtering
-- "This query is hitting governor limits on a large org, help me optimize it" -- analyze selectivity, suggest indexed filters, and restructure for performance
-- "Convert this natural language request to SOQL: all Contacts who haven't been emailed in 90 days" -- generate a date-filtered query with appropriate field selection
-
 Delegate elsewhere when the user is:
 - performing bulk data operations → [sf-data](../sf-data/SKILL.md)
 - embedding query logic inside broader Apex implementation → [sf-apex](../sf-apex/SKILL.md)

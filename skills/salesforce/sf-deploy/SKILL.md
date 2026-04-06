@@ -33,12 +33,6 @@ Delegate elsewhere when the user is:
 
 ---
 
-## Examples
-
-- "Validate and deploy the force-app directory to the Gulf sandbox with RunLocalTests"
-- "Quick-deploy using the validation job ID from this morning's dry run"
-- "Troubleshoot why the permission set deploy fails with INVALID_CROSS_REFERENCE_KEY on the new custom field"
-
 ## Critical Operating Rules
 
 - Use **`sf` CLI v2 only**.
@@ -106,6 +100,9 @@ sf project deploy start --source-dir force-app --target-org <alias> --wait 30 --
 # manifest deploy
 sf project deploy start --manifest manifest/package.xml --target-org <alias> --test-level RunLocalTests --wait 30 --json
 
+# manifest deploy with Spring '26 relevant-test selection
+sf project deploy start --manifest manifest/package.xml --target-org <alias> --test-level RunRelevantTests --wait 30 --json
+
 # quick deploy after successful validation
 sf project deploy quick --job-id <validation-job-id> --target-org <alias> --json
 ```
@@ -148,6 +145,9 @@ Default pipeline shape:
 5. tests + coverage gates
 6. deploy
 7. verify + notify
+
+- When org policy and release risk allow it, consider `--test-level RunRelevantTests` for Apex-heavy deployments.
+- Pair this with modern Apex test annotations such as `@IsTest(testFor=...)` and `@IsTest(isCritical=true)` as documented in `sf-apex`.
 
 Static analysis now uses **Code Analyzer v5** (`sf code-analyzer`), not retired `sf scanner`.
 

@@ -15,7 +15,7 @@
 | 4 | Instructions (numbered text boxes) | `reasoning: instructions:` | Use `->` for logic/expressions, `\|` for literal text |
 | 5 | Flow actions | `target: flow://FlowName` | Flow must be Autolaunched and Active |
 | 6 | Apex actions | `target: apex://ClassName` | Class must have `@InvocableMethod` |
-| 7 | Prompt Template actions | `target: generatePromptResponse://TemplateName` | Template must exist in org |
+| 7 | Prompt Template actions | `target: prompt://TemplateName` | `generatePromptResponse://TemplateName` is also valid; template must exist in org |
 | 8 | "Collect from user" input | Slot-fill `...` operator | `with query = ...` — LLM extracts from conversation |
 | 9 | "Show/Hide in conversation" toggle | `filter_from_agent: True` | On action output definitions |
 | 10 | "Require Confirmation" toggle | `require_user_confirmation: True` | On action definitions |
@@ -39,6 +39,20 @@ These capabilities exist ONLY in Agent Script — they cannot be configured thro
 | 8 | Post-action loop pattern | Topic re-resolves after action, enabling check-at-top pattern | Deterministic post-action routing |
 | 9 | Latch variables | Force topic re-entry after user provides input | Workaround for topic selector limitations |
 | 10 | Connection block | Multi-channel escalation routing (messaging, voice) | Service Agent channel-specific escalation |
+
+---
+
+## Known Migration Gaps Requiring Manual Review
+
+| Gap | Why it matters | What to do |
+|-----|----------------|------------|
+| Legacy renderer / component override behavior | Rich rendering configured in legacy builders may not map 1:1 into Agent Script metadata | Re-test migrated actions in preview and runtime; be prepared for text fallback where the legacy surface used custom renderers |
+| Prompt-template input names containing `Input:` | Raw Agent Script requires quoted parameter names with `:` | Quote every prompt-template input key explicitly, for example `"Input:customerId"` |
+| Exact quoted field names | Some visual editors can rewrite specially quoted field names during round-trip save/reformat | Keep the raw `.agent` file in source control as the source of truth and diff after UI edits |
+| Legacy schema annotations | Some builder-era annotations and rendering hints do not have a direct Agent Script property | Record the intent in docs/comments and validate the migrated action manually instead of assuming automatic parity |
+| Separate topic/action YAML files | Builder-era or generated assets may suggest extra per-topic files | Consolidate topic logic and action definitions in the `.agent` file unless a separate packaging system explicitly requires otherwise |
+
+**Practical migration rule:** if a migrated action compiles but behaves differently, verify three things separately: (1) raw `.agent` syntax, (2) builder round-trip formatting, and (3) runtime behavior in the actual target surface.
 
 ---
 
@@ -204,7 +218,10 @@ When converting a Builder UI agent to Agent Script:
 | Action naming conflicts | Builder UI action names may conflict with reserved words | Rename to avoid `description`, `label`, `escalate` |
 | Missing variable declarations | Builder UI manages state implicitly | Declare all mutable/linked variables explicitly |
 | Wrong instruction syntax | Builder UI text → `\|` (pipe) syntax; conditional logic → `->` (arrow) syntax | Use arrow when you need `if`, `run`, `set`, or `transition` |
+| Renderer assumptions survived migration only in prose | Legacy descriptions may still mention a specific renderer even when the metadata no longer guarantees it | Re-validate rendering behavior in the target surface; treat description text as guidance, not a rendering contract |
+| Prompt template bindings copied literally without quotes | `Input:...` names parse differently in text DSL than in UI forms | Quote prompt-template input keys explicitly in `.agent` files |
+| Exact field names changed after save/re-open | Builder round-trip formatting can alter edge-case quoted keys | Diff the raw `.agent` after editing in UI if your action depends on an exact quoted field name |
 
 ---
 
-*Last updated: 2026-02-12*
+*Last updated: 2026-04-03*
