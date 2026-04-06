@@ -16,7 +16,7 @@ metadata:
 
 # sf-datacloud-prepare: Data Cloud Prepare Phase
 
-Use this skill when the user needs **ingestion and lake preparation work**: data streams, Data Lake Objects, transforms, or DocAI-based extraction.
+Use this skill when the user needs **ingestion and lake preparation work**: data streams, Data Lake Objects (DLOs), transforms, Document AI, unstructured ingestion, or the handoff from connector setup into a live stream.
 
 ## When This Skill Owns the Task
 
@@ -26,6 +26,8 @@ Use `sf-datacloud-prepare` when the work involves:
 - `sf data360 transform *`
 - `sf data360 docai *`
 - choosing how data should enter Data Cloud
+- rerunning or rescanning ingestion after a source update
+- preparing Ingestion API-backed streams after connector setup is complete
 
 Delegate elsewhere when the user is:
 - still creating/testing source connections → [sf-datacloud-connect](../sf-datacloud-connect/SKILL.md)
@@ -34,21 +36,16 @@ Delegate elsewhere when the user is:
 
 ---
 
-## Examples
-
-- "Create a data stream for the Contact object using the SalesforceDotCom_Home connection"
-- "Check if the Order DLO has all expected fields after ingestion and verify record counts"
-- "Set up a DocAI transform to extract invoice line items from uploaded PDF documents"
-
 ## Required Context to Gather First
 
 Ask for or infer:
 - target org alias
 - source connection name
-- source object / dataset
+- source object / dataset / document source
 - desired stream type
 - DLO naming expectations
 - whether the user is creating, updating, running, or deleting a stream
+- whether the source is CRM, a database connector, an unstructured file source, or an Ingestion API feed
 
 ---
 
@@ -60,6 +57,8 @@ Ask for or infer:
 - Suppress linked-plugin warning noise with `2>/dev/null` for normal usage.
 - Treat DLO naming and field naming as Data Cloud-specific, not CRM-native.
 - Confirm whether each dataset should be treated as `Profile`, `Engagement`, or `Other` before creating the stream.
+- Distinguish stream-level refresh from connection-level reruns when working with unstructured sources.
+- Use UI setup intentionally when initial stream or unstructured asset creation is platform-gated.
 - Hand off to Harmonize only after ingestion assets are clearly healthy.
 
 ---
@@ -93,6 +92,7 @@ When the source is ambiguous, ask the user explicitly whether the dataset should
 sf data360 data-stream get -o <org> --name <stream> 2>/dev/null
 sf data360 data-stream create-from-object -o <org> --object Contact --connection SalesforceDotCom_Home 2>/dev/null
 sf data360 data-stream create -o <org> -f stream.json 2>/dev/null
+sf data360 data-stream run -o <org> --name <stream> 2>/dev/null
 ```
 
 ### 5. Check DLO shape
@@ -100,7 +100,64 @@ sf data360 data-stream create -o <org> -f stream.json 2>/dev/null
 sf data360 dlo get -o <org> --name Contact_Home__dll 2>/dev/null
 ```
 
-### 6. Only then move into harmonization
+### 6. Choose the right refresh mechanism
+Use the smaller refresh scope that matches the user goal:
+
+```bash
+sf data360 data-stream run -o <org> --name <stream> 2>/dev/null
+sf data360 connection run-existing -o <org> --name <connection-id> 2>/dev/null
+```
+
+- `data-stream run` is the closest match to a stream-level refresh or re-scan.
+- `connection run-existing` runs at the connection level and can be useful for some connector workflows, but it is not a reliable replacement for stream refresh on unstructured sources.
+- For unstructured document connectors, prefer `data-stream run` when the goal is to re-scan newly added or changed files.
+
+### 7. Handle unstructured sources deliberately
+For SharePoint-style document ingestion, a minimal unstructured DLO payload can look like:
+
+```json
+{
+  "name": "my_udlo",
+  "label": "My UDLO",
+  "category": "Directory_Table",
+  "dataSource": {
+    "sourceType": "SF_DRIVE",
+    "directoryAndFilesDetails": [
+      {
+        "dirName": "SPUnstructuredDocument/<CONNECTION_ID>/<SITE_ID>",
+        "fileName": "*"
+      }
+    ],
+    "sourceConfig": {
+      "reservedPrefix": "$dcf_content$"
+    }
+  }
+}
+```
+
+Use the UI for the first-time unstructured setup when the user needs the richer end-to-end pipeline. The UI path can seed additional document metadata fields and downstream assets that a bare CLI DLO create flow may not provision automatically.
+
+### 8. Use the local Ingestion API example for send-data workflows
+For external systems pushing records into Data Cloud:
+
+1. create the connector in [sf-datacloud-connect](../sf-datacloud-connect/SKILL.md)
+2. upload the schema with `sf data360 connection schema-upsert`
+3. create the stream in the UI when required
+4. send records with the local example in `examples/ingestion-api/`
+
+```bash
+cd examples/ingestion-api
+cp .env.example .env
+python3 send-data.py
+```
+
+Key details:
+- auth is a staged flow: JWT → Salesforce token → Data Cloud token
+- the ingestion endpoint uses the tenant URL, not the Salesforce instance URL
+- `202` means the payload was accepted for processing, not that records are queryable immediately
+- validation failures often surface in the Problem Records DLO family
+
+### 9. Only then move into harmonization
 Once the stream and DLO are healthy, hand off to [sf-datacloud-harmonize](../sf-datacloud-harmonize/SKILL.md).
 
 ---
@@ -108,9 +165,12 @@ Once the stream and DLO are healthy, hand off to [sf-datacloud-harmonize](../sf-
 ## High-Signal Gotchas
 
 - CRM-backed stream behavior is not the same as fully custom connector-framework ingestion.
+- `sf data360 data-stream run` and `sf data360 connection run-existing` are not interchangeable; prefer stream-level refresh for unstructured rescans.
+- `SFDC` streams sync on a platform-managed schedule; `data-stream run` is not the general control path for CRM connector refresh.
 - Some external database connectors can be created via API while stream creation still requires UI flow or org-specific browser automation. Do not promise a pure CLI stream-creation path for every connector type.
+- Initial SharePoint-style unstructured setup can be richer in the UI than in a minimal CLI DLO create flow.
 - Stream deletion can also delete the associated DLO unless the delete mode says otherwise.
-- DLO field naming differs from CRM field naming.
+- DLO field naming differs from CRM field naming, including `__c` → `_c` transformations.
 - Query DLO record counts with Data Cloud SQL instead of assuming list output is sufficient.
 - `CdpDataStreams` means the stream module is gated for the current org/user; guide the user to provisioning/permissions review instead of retrying blindly.
 
@@ -132,6 +192,7 @@ Next step: <harmonize or retrieve>
 ## References
 
 - [README.md](README.md)
+- [examples/ingestion-api/README.md](examples/ingestion-api/README.md)
 - [../sf-datacloud/assets/definitions/data-stream.template.json](../sf-datacloud/assets/definitions/data-stream.template.json)
 - [../sf-datacloud/references/plugin-setup.md](../sf-datacloud/references/plugin-setup.md)
 - [../sf-datacloud/references/feature-readiness.md](../sf-datacloud/references/feature-readiness.md)

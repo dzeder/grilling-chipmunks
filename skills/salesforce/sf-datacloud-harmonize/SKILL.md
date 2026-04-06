@@ -35,12 +35,6 @@ Delegate elsewhere when the user is:
 
 ---
 
-## Examples
-
-- "Map the Contact_Home DLO fields to the Individual DMO and set up identity resolution rules"
-- "Create a data graph connecting Individual, Account, and Order DMOs for the unified customer view"
-- "Run identity resolution and check how many unified profiles were created from duplicate contacts"
-
 ## Required Context to Gather First
 
 Ask for or infer:

@@ -26,7 +26,7 @@
 ## Near-Term (Next 2 Weeks)
 - [ ] Run full `sync-ohanafy-index.sh` across all 10 repos and validate output quality
 - [ ] Connect to Gulf production org and populate org-snapshot.md with real metadata
-- [ ] Set up `OHANAFY_SYNC_TOKEN` repo secret for automated sync workflow
+- [ ] Set up `OHANAFY_SYNC_TOKEN` repo secret for automated sync workflow (see `docs/setup-ohanafy-sync-token.md`)
 - [ ] Run `gstack ./setup` in a test project and validate
 - [ ] Wire up sf-skills installer (`install.py`) for fresh environments
 - [ ] Add coworker (DHS) as collaborator on the repo

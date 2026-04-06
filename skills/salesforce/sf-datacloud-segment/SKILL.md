@@ -35,12 +35,6 @@ Delegate elsewhere when the user is:
 
 ---
 
-## Examples
-
-- "Create a segment for customers who placed an order in the last 90 days with lifetime value above $500"
-- "Publish the Churned_Customers segment and verify the member count matches expectations"
-- "Build a calculated insight that computes average order value per unified individual"
-
 ## Required Context to Gather First
 
 Ask for or infer:

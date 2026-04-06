@@ -3,6 +3,37 @@
 
 Quick reference for SOQL queries used in sf-permissions.
 
+## Identifier Strategy (Recommended)
+
+Start investigations with stable metadata names rather than org-specific record IDs.
+
+Prefer:
+- `PermissionSet.Name`
+- `PermissionSetGroup.DeveloperName`
+- `Assignee.Username`
+- object / field API names such as `Account` and `Account.AnnualRevenue`
+- `CustomPermission.DeveloperName`
+
+Use IDs only when:
+- a child object forces `ParentId` or `SetupEntityId`
+- you are reusing an ID returned by an earlier read-only query in the same investigation
+
+### Find Users Assigned to a Permission Set by Name
+
+```sql
+SELECT Assignee.Name, Assignee.Username, Assignee.IsActive
+FROM PermissionSetAssignment
+WHERE PermissionSet.Name = 'Sales_Manager'
+```
+
+### Find Users Assigned to a Permission Set Group by DeveloperName
+
+```sql
+SELECT Assignee.Name, Assignee.Username, Assignee.IsActive
+FROM PermissionSetAssignment
+WHERE PermissionSetGroup.DeveloperName = 'Sales_Cloud_User'
+```
+
 ## Permission Set Queries
 
 ### List All Permission Sets
@@ -39,18 +70,19 @@ FROM PermissionSetGroupComponent
 ```sql
 SELECT
     AssigneeId,
+    Assignee.Username,
     PermissionSetId,
     PermissionSet.Name,
     PermissionSetGroupId,
     PermissionSetGroup.DeveloperName
 FROM PermissionSetAssignment
-WHERE AssigneeId = '005xx...'
+WHERE Assignee.Username = 'john@company.com'
 AND PermissionSet.IsOwnedByProfile = false
 ```
 
 ## Object Permission Queries
 
-### Get All Object Permissions for a PS
+### Get All Object Permissions for a Permission Set by Name
 
 ```sql
 SELECT
@@ -62,7 +94,7 @@ SELECT
     PermissionsViewAllRecords,
     PermissionsModifyAllRecords
 FROM ObjectPermissions
-WHERE ParentId = '0PS...'
+WHERE Parent.Name = 'Sales_Manager'
 ORDER BY SobjectType
 ```
 
@@ -81,12 +113,12 @@ AND PermissionsDelete = true
 
 ## Field Permission Queries
 
-### Get Field Permissions for a PS
+### Get Field Permissions for a Permission Set by Name
 
 ```sql
 SELECT Field, PermissionsRead, PermissionsEdit
 FROM FieldPermissions
-WHERE ParentId = '0PS...'
+WHERE Parent.Name = 'Sales_Manager'
 ORDER BY Field
 ```
 
@@ -106,12 +138,12 @@ AND PermissionsEdit = true
 
 ## Setup Entity Access Queries
 
-### Get All Setup Entity Access for a PS
+### Get All Setup Entity Access for a Permission Set by Name
 
 ```sql
 SELECT SetupEntityType, SetupEntityId
 FROM SetupEntityAccess
-WHERE ParentId = '0PS...'
+WHERE Parent.Name = 'Sales_Manager'
 ```
 
 ### Find PS with Apex Class Access
@@ -149,11 +181,19 @@ AND SetupEntityId IN (
 
 ### Find PS with Flow Access
 
+Resolve the active flow version by `DeveloperName` first, then use that returned ID for the child access query.
+
+```sql
+SELECT ActiveVersionId
+FROM FlowDefinition
+WHERE DeveloperName = 'Case_Routing'
+```
+
 ```sql
 SELECT Parent.Name, Parent.Label
 FROM SetupEntityAccess
 WHERE SetupEntityType = 'Flow'
-AND SetupEntityId = '301xx...'  -- Active Flow Version ID
+AND SetupEntityId = '<ActiveVersionId from prior query>'
 ```
 
 ## User Count Queries
@@ -245,6 +285,8 @@ ORDER BY Label
 ## Notes
 
 - All permission queries are **read-only** - they don't modify data
+- Prefer stable names (`Name`, `DeveloperName`, API names, usernames) for first-pass investigation queries
 - `ParentId` in ObjectPermissions/FieldPermissions refers to the Permission Set ID
 - `SetupEntityId` is the ID of the Apex Class, VF Page, Flow, or Custom Permission
+- When a child query requires an ID, resolve it from a prior read-only query instead of starting with copied IDs
 - System permissions are fields on the PermissionSet object (e.g., `PermissionsModifyAllData`)

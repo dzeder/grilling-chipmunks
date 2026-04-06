@@ -14,6 +14,8 @@
 
 system:
 	instructions: "You are a friendly internal assistant. Help employees with their questions."
+	# Static welcome/error text uses quotes. If you later add {!@variables.x}
+	# personalization here, switch that message to block form with `|`.
 	messages:
 		welcome: "Hello! How can I help you today?"
 		error: "I'm sorry, something went wrong. Please try again."
@@ -22,7 +24,7 @@ config:
 	developer_name: "Hello_World_Employee"
 	agent_type: "AgentforceEmployeeAgent"
 	agent_label: "Hello World Employee Agent"
-	agent_description: "A minimal Employee Agent example -- no dedicated user needed"
+	description: "A minimal Employee Agent example -- no dedicated user needed"
 
 start_agent main:
 	label: "Main"

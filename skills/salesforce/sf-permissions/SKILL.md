@@ -60,6 +60,17 @@ Verify `sf` auth before running permission analysis.
 ### 3. Use the narrowest useful query
 Prefer focused analysis over broad org-wide scans unless the user explicitly wants a full audit.
 
+When choosing identifiers, prefer stable metadata names first:
+- `PermissionSet.Name`
+- `PermissionSetGroup.DeveloperName`
+- `CustomPermission.DeveloperName`
+- object and field API names such as `Account` or `Account.AnnualRevenue`
+- `Assignee.Username` / email for user-centric checks
+
+Use Salesforce record IDs only when:
+- the underlying object model requires `ParentId` or `SetupEntityId`, or
+- you are drilling into records returned by a prior read-only query in the same investigation
+
 ### 4. Render findings clearly
 Use:
 - ASCII tree or table output for terminal work
@@ -76,9 +87,11 @@ Use:
 ## High-Signal Rules
 
 - distinguish direct Permission Set grants from grants via Permission Set Groups
+- prefer `Name` / `DeveloperName` / API names over org-specific record IDs for first-pass investigation queries
 - be explicit about whether access is object-level, field-level, class-level, flow-level, or custom-permission-based
 - use Tooling API where required for setup entities and advanced visibility questions
 - for agent access questions, verify exact agent-name matching in permission metadata
+- when a follow-up child query requires `ParentId` or `SetupEntityId`, resolve the ID from a prior result instead of starting with copied IDs
 
 ---
 

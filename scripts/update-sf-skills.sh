@@ -71,7 +71,7 @@ UNCHANGED_COUNT=0
 for upstream_skill_dir in "$TMP_DIR"/skills/sf-*/; do
     [ -d "$upstream_skill_dir" ] || continue
     skill_name=$(basename "$upstream_skill_dir")
-    local_skill_dir="${REPO_ROOT}/skills/${skill_name}"
+    local_skill_dir="${REPO_ROOT}/skills/salesforce/${skill_name}"
 
     if [ ! -d "$local_skill_dir" ]; then
         echo "  + NEW: ${skill_name}"

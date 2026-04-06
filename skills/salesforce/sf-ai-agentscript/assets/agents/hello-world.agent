@@ -22,6 +22,8 @@
 
 system:
 	instructions: "You are a friendly assistant. Greet users warmly and help them."
+	# Static welcome/error text uses quotes. If you later add {!@variables.x}
+	# personalization here, switch that message to block form with `|`.
 	messages:
 		welcome: "Hello! I'm here to help. What can I do for you today?"
 		error: "I'm sorry, something went wrong. Please try again."
@@ -31,7 +33,7 @@ config:
 	agent_type: "AgentforceServiceAgent"
 	default_agent_user: "your.user@company.com"
 	agent_label: "Hello World Agent"
-	agent_description: "A minimal example agent to learn Agent Script basics"
+	description: "A minimal example agent to learn Agent Script basics"
 
 variables:
 	# Linked variables (required) - Connect to Salesforce Messaging context
