@@ -6,6 +6,7 @@ on:
     paths:
       - "scripts/**"
       - "tests/**"
+      - "evals/**"
       - "integrations/**"
       - "*.py"
       - "pyproject.toml"
@@ -17,6 +18,7 @@ on:
     paths:
       - "scripts/**"
       - "tests/**"
+      - "evals/**"
       - "integrations/**"
       - "*.py"
       - "pyproject.toml"
@@ -86,6 +88,23 @@ jobs:
           else
             echo "No test configuration found — skipping"
           fi
+
+  evals:
+    name: Agent Evals (Hard Checks)
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Install dependencies
+        run: pip install pytest -q
+      - name: Run eval hard checks
+        run: python -m pytest tests/test_evals.py -v -m eval --tb=short
+      - name: Run eval runner (verify pass rates)
+        run: PYTHONPATH=. python evals/run_evals.py --no-write --fail-under 0.75
 
   security:
     name: Python Dependency Scan
