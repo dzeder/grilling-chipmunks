@@ -232,17 +232,18 @@ async function startServer(extraEnv?: Record<string, string>): Promise<ServerSta
     // when the CLI exits, the server dies with it. Use Node's child_process.spawn
     // with { detached: true } instead, which is the gold standard for Windows
     // process independence. Credit: PR #191 by @fqueiro.
+    const extraEnvStr = JSON.stringify({ BROWSE_STATE_FILE: config.stateFile, BROWSE_PARENT_PID: String(process.pid), ...(extraEnv || {}) });
     const launcherCode =
       `const{spawn}=require('child_process');` +
       `spawn(process.execPath,[${JSON.stringify(NODE_SERVER_SCRIPT)}],` +
       `{detached:true,stdio:['ignore','ignore','ignore'],env:Object.assign({},process.env,` +
-      `{BROWSE_STATE_FILE:${JSON.stringify(config.stateFile)}})}).unref()`;
+      `${extraEnvStr})}).unref()`;
     Bun.spawnSync(['node', '-e', launcherCode], { stdio: ['ignore', 'ignore', 'ignore'] });
   } else {
     // macOS/Linux: Bun.spawn + unref works correctly
     proc = Bun.spawn(['bun', 'run', SERVER_SCRIPT], {
       stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, BROWSE_STATE_FILE: config.stateFile, ...extraEnv },
+      env: { ...process.env, BROWSE_STATE_FILE: config.stateFile, BROWSE_PARENT_PID: String(process.pid), ...extraEnv },
     });
     proc.unref();
   }
@@ -330,12 +331,21 @@ async function ensureServer(): Promise<ServerState> {
     return state;
   }
 
+  // BROWSE_NO_AUTOSTART: sidebar agent sets this so the child claude never
+  // spawns an invisible headless browser. If the headed server is down,
+  // fail fast with a clear error instead of silently starting a new one.
+  if (process.env.BROWSE_NO_AUTOSTART === '1') {
+    console.error('[browse] Server not available and BROWSE_NO_AUTOSTART is set.');
+    console.error('[browse] The headed browser may have been closed. Run /open-gstack-browser to restart.');
+    process.exit(1);
+  }
+
   // Guard: never silently replace a headed server with a headless one.
   // Headed mode means a user-visible Chrome window is (or was) controlled.
   // Silently replacing it would be confusing — tell the user to reconnect.
   if (state && state.mode === 'headed' && isProcessAlive(state.pid)) {
     console.error(`[browse] Headed server running (PID ${state.pid}) but not responding.`);
-    console.error(`[browse] Run '$B connect' to restart.`);
+    console.error(`[browse] Run '/open-gstack-browser' to restart.`);
     process.exit(1);
   }
 
@@ -578,7 +588,10 @@ Refs:           After 'snapshot', use @e1, @e2... as selectors:
         }
         // Clear old agent queue
         const agentQueue = path.join(process.env.HOME || '/tmp', '.gstack', 'sidebar-agent-queue.jsonl');
-        try { fs.writeFileSync(agentQueue, ''); } catch {}
+        try {
+          fs.mkdirSync(path.dirname(agentQueue), { recursive: true, mode: 0o700 });
+          fs.writeFileSync(agentQueue, '', { mode: 0o600 });
+        } catch {}
 
         // Resolve browse binary path the same way — execPath-relative
         let browseBin = path.resolve(__dirname, '..', 'dist', 'browse');
