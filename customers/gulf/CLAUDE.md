@@ -35,11 +35,11 @@ After connecting, read `orgs/<env>/org-snapshot.md` for metadata counts and quic
 ## Cross-referencing
 
 Gulf uses 9 Ohanafy SKUs. When debugging, load the relevant source indexes:
-- OMS: `skills/ohfy-oms-expert/references/source-index.md`
-- WMS: `skills/ohfy-wms-expert/references/source-index.md`
-- REX: `skills/ohfy-rex-expert/references/source-index.md`
-- Core: `skills/ohfy-core-expert/references/source-index.md`
-- EDI: `skills/ohfy-edi-expert/references/source-index.md`
+- OMS: `skills/ohanafy/ohfy-oms-expert/references/source-index.md`
+- WMS: `skills/ohanafy/ohfy-wms-expert/references/source-index.md`
+- REX: `skills/ohanafy/ohfy-rex-expert/references/source-index.md`
+- Core: `skills/ohanafy/ohfy-core-expert/references/source-index.md`
+- EDI: `skills/ohanafy/ohfy-edi-expert/references/source-index.md`
 
 ## What does NOT belong here
 

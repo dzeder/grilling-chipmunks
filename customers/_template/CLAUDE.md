@@ -44,4 +44,4 @@ After connecting, read `orgs/<env>/org-snapshot.md` for metadata counts and quic
 
 When debugging this customer, also load the relevant OHFY package source indexes:
 - Check which SKUs are installed in `profile.md`
-- Read `skills/ohfy-<package>-expert/references/source-index.md` for trigger maps, service graphs, and patterns
+- Read `skills/ohanafy/ohfy-<package>-expert/references/source-index.md` for trigger maps, service graphs, and patterns
