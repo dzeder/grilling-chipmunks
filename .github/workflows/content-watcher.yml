@@ -17,7 +17,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install anthropic feedparser httpx pyyaml google-api-python-client beautifulsoup4 requests
-      - run: python -m skills.content_watcher.monitor.fetch_content
+      - run: python skills/content-watcher/monitor/fetch-content.py
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
