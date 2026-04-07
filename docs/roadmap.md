@@ -39,10 +39,37 @@
 - [ ] Auto-freshness: skill checks source index staleness and auto-triggers sync when >7 days
 - [ ] Cross-customer pattern detection: diff customer profiles to find reusable patterns
 - [ ] Build connector-specific skills: `tray-netsuite`, `tray-qbo`, `tray-ukg-pro`
-- [ ] Create Ohanafy brand/voice skill for customer-facing docs
+- [x] Create Ohanafy brand/voice skill for customer-facing docs (installed from integrations repo)
 - [ ] Add pre-commit hooks for skill schema validation
 - [ ] Build integration test suite for skills (trigger-rule coverage)
 - [ ] Enhance `connect-org.sh` to capture richer metadata (installed package versions, active flows, validation rules, custom fields per object)
+
+## Future: Internal Salesforce Org Integration
+
+Ohanafy logs all activity in an internal Salesforce org. PR and AI activity should eventually flow there too.
+
+- [ ] Define `PR_Activity__c` custom object schema (PR number, branch, human estimate, AI time, tokens, cost, summary, labels)
+- [ ] Build Tray webhook workflow: GitHub PR webhook → Tray → SF Composite API upsert to internal org
+- [ ] Create `sf-internal-logger` skill for manual activity logging to the internal org
+- [ ] Wire into ship workflow as post-step (after PR creation, log to SF)
+- [ ] Build SF dashboard for AI velocity metrics (time saved per PR, cost trends, tokens over time, team productivity)
+
+**Implementation path**: GitHub webhook fires on PR events → Tray receives payload → transforms using `batch-processing.js` + `data-mapping.js` patterns → upserts `PR_Activity__c` via SF Composite API. Token costs come from `skills/claude/model-router/skill.py` pricing. Time metrics come from `.time-tracking/log.csv`.
+
+## Future: Vercel Documentation Site
+
+Static branded HTML site showcasing what the AI ops framework does.
+
+- [ ] Create `docs/site/` directory with `index.html` landing page (use `docs/templates/demo-template.html`)
+- [ ] Generate Skill Catalog HTML (auto-generate from `scripts/lint-skills.sh` output)
+- [ ] Generate Agent Roster HTML (from `agents/*/AGENT.md` frontmatter)
+- [ ] Write Integration Pattern Library page (from `integrations/patterns/`)
+- [ ] Write Customer Onboarding Guide
+- [ ] Write Gulf case study (time-to-value story)
+- [ ] Add `vercel.json` pointing `outputDirectory` to `docs/site/`
+- [ ] Deploy with `vercel --prod`
+
+**Key decision**: No framework (no Docusaurus, no MkDocs). The brand template produces zero-dependency HTML at ~30KB. Keep it simple.
 
 ## Longer-Term (3-6 Months)
 - [ ] Multi-agent orchestration: FDE strategist delegates to SKU experts automatically
@@ -75,3 +102,7 @@
 | 2026-04-04 | Machine user PAT for sync | Single PAT with read-only org scope is simpler than per-repo deploy keys |
 | 2026-04-04 | Static grep for service graphs | One level deep, static patterns only. Coverage limitations documented in index. |
 | 2026-04-04 | Commit org snapshots as markdown | Committed for agent access; raw JSON gitignored. Regenerate on-demand via connect-org.sh |
+| 2026-04-07 | Customer orgs read-only by default | Safety rule: never modify customer orgs unless user explicitly authorizes in conversation |
+| 2026-04-07 | PR metrics on every PR | Track human estimate, AI time, tokens, cost, and time saved percentage |
+| 2026-04-07 | Static HTML for Vercel site | No framework — brand template produces zero-dependency HTML. Simpler than Docusaurus/MkDocs |
+| 2026-04-07 | SF internal org logging via Tray | Future: PR activity flows to internal SF org via GitHub webhook → Tray → Composite API |

@@ -1,5 +1,22 @@
 # Customer: {{CUSTOMER_NAME}}
 
+## READ-ONLY ACCESS — HARD RULE
+
+Customer orgs are **read-only by default**. Do not write to this org unless the user explicitly authorizes it in the current conversation.
+
+**Allowed operations:**
+- `sf org list` — check connected orgs
+- `sf project retrieve start` — pull metadata down
+- `sf data query` — read data via SOQL
+- `sf org display` — view org info
+- `sf org open` — open org in browser
+
+**Prohibited operations (unless user explicitly authorizes):**
+- `sf project deploy start` — deploy metadata
+- `sf data update record` / `sf data create record` / `sf data delete record` — any DML
+- `sf apex run` — anonymous Apex that modifies data
+- Any destructive metadata operations (delete components, overwrite configs)
+
 ## Context loading order
 
 When working on this customer, read files in this order:

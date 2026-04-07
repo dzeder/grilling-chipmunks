@@ -33,7 +33,9 @@ Closes #
 | Metric | Value |
 |--------|-------|
 | Human Estimate (hrs) | |
-| AI Actual (hrs) | |
+| AI Actual (min) | |
+| Tokens Used | |
+| Est. Cost ($) | |
 | Time Saved (%) | |
 
 ## Screenshots / Demo

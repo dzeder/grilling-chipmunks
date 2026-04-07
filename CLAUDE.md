@@ -29,6 +29,7 @@ Always use the latest available version of each tier.
 4. No direct production DB queries — read replica only
 5. No public S3 buckets
 6. Tray webhooks must validate HMAC signatures
+7. Customer Salesforce orgs are strictly read-only by default — never deploy, push, update, or delete metadata/data in a connected customer org unless the user explicitly authorizes writes in the current conversation
 
 ## Skills (pillar organization)
 
@@ -336,6 +337,24 @@ Ohanafy has extensive existing Tray workflows. Before building anything new in T
 - Tray scripts: use patterns from `integrations/patterns/`, follow validate-transform-batch-output flow
 - Integration scripts: always use `script-scaffold.js` as starting template
 - Commit format: `type(scope): description` — types: feat|fix|agent|skill|docs|ci|eval|chore
+- HTML artifacts: always use Ohanafy 2025 brand template (`docs/templates/demo-template.html`) — Geist font, mellow/cork/dark-denim palette, branded header/footer. Invoke `/ohanafy-brand` skill for brand guidance.
+- Documentation: MD for internal, branded HTML for external (via demo-template.html + /ohanafy-brand), DOCX for client deliverables
+
+## PR Metrics Convention
+
+Every PR must populate the Time Tracking table in the PR description. This is how we measure the value of AI-assisted development.
+
+| Metric | How to estimate |
+|--------|----------------|
+| **Human Estimate (hrs)** | How long would a human developer take to do this work from scratch? Include research, coding, testing, and review time. |
+| **AI Actual (min)** | Wall-clock minutes from session start to PR creation. |
+| **Tokens Used** | Approximate input + output tokens. Estimate ~4K tokens per tool call, ~1K per response turn. |
+| **Est. Cost ($)** | Use Sonnet pricing: $3/1M input, $15/1M output. If Opus was used, $15/1M input, $75/1M output. |
+| **Time Saved (%)** | `((human_hrs × 60 − ai_min) / (human_hrs × 60)) × 100` |
+
+Agents must fill these values when creating PRs. The ship skill is upstream (gstack) — don't modify it. Instead, update the PR body after creation if needed using `gh pr edit`.
+
+Append a row to `.time-tracking/log.csv` after each PR for longitudinal tracking.
 
 ## Never Do
 
@@ -347,6 +366,7 @@ Ohanafy has extensive existing Tray workflows. Before building anything new in T
 - Write CloudFormation directly
 - Query SF production org from skill code
 - Build a new Tray workflow without checking existing ones first
+- Modify, deploy to, or write data/metadata to any connected customer Salesforce org without explicit user authorization — customer orgs are READ-ONLY by default (retrieve only). No `sf project deploy`, no `sf data update`, no `sf apex run`, no destructive changes
 
 ## Hooks
 

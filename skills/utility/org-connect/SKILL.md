@@ -41,6 +41,23 @@ sf org list
 sf project retrieve start --target-org <alias> --manifest ./package.xml
 ```
 
+## CRITICAL: Read-Only Operations Only
+
+Customer orgs are **read-only by default**. Do not write to any customer org unless the user explicitly authorizes it in the current conversation.
+
+**Allowed operations:**
+- `sf org list` — check connected orgs
+- `sf project retrieve start` — pull metadata down
+- `sf data query` — read data via SOQL
+- `sf org display` — view org info
+- `sf org open` — open org in browser
+
+**Prohibited operations (unless user explicitly authorizes):**
+- `sf project deploy start` — deploy metadata
+- `sf data update record` / `sf data create record` / `sf data delete record` — any DML
+- `sf apex run` — anonymous Apex that modifies data
+- Any destructive metadata operations (delete components, overwrite configs)
+
 ## What the Script Does
 
 1. **Creates project directory** under `customers/<name>/orgs/<env>/`
