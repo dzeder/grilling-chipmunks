@@ -65,7 +65,13 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
       - name: Check gstack symlinks are relative
-        run: bash scripts/fix-gstack-symlinks.sh --check
+        run: |
+          if ! bash scripts/fix-gstack-symlinks.sh --check; then
+            echo ""
+            echo "::error::Symlinks are out of sync. This will be auto-fixed on merge to main."
+            echo "To fix locally: bash scripts/fix-gstack-symlinks.sh"
+            exit 1
+          fi
 
   test:
     name: Unit Tests

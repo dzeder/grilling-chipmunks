@@ -1,0 +1,320 @@
+# CI Watchdog — reacts to workflow failures in real-time.
+# Diagnoses failures, auto-retries transient issues, opens issues for persistent ones.
+# Keeps CI green by catching problems before they accumulate.
+
+name: CI Watchdog
+
+on:
+  workflow_run:
+    workflows:
+      - CI Pipeline
+      - Salesforce Deploy
+      - Security Agent
+      - QA Agent
+      - Lint & Format Agent
+      - Fix Symlinks
+      - Dependabot Auto-Merge
+      - AWS Deploy
+    types: [completed]
+
+  # Weekly health audit — catches anything the real-time trigger misses
+  schedule:
+    - cron: '0 9 * * 1'  # Monday 9am UTC
+
+permissions:
+  contents: read
+  issues: write
+  actions: write  # needed for gh run rerun
+
+jobs:
+  # ── Real-time failure response ──
+  on-failure:
+    name: Diagnose failure
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+
+      - name: Gather failure context
+        id: context
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          echo "workflow=$WORKFLOW_NAME" >> "$GITHUB_OUTPUT"
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "run_url=$RUN_URL" >> "$GITHUB_OUTPUT"
+          echo "branch=$HEAD_BRANCH" >> "$GITHUB_OUTPUT"
+          echo "sha=${HEAD_SHA:0:7}" >> "$GITHUB_OUTPUT"
+
+          # Get failed jobs and their logs
+          echo "--- Failed jobs ---"
+          FAILED_JOBS=$(gh run view "$RUN_ID" --json jobs \
+            --jq '[.jobs[] | select(.conclusion == "failure") | .name] | join(", ")' 2>/dev/null || echo "unknown")
+          echo "failed_jobs=$FAILED_JOBS" >> "$GITHUB_OUTPUT"
+          echo "Failed: $FAILED_JOBS"
+
+          # Get log snippet (last 30 lines of failed output)
+          LOG_SNIPPET=$(gh run view "$RUN_ID" --log-failed 2>/dev/null | tail -30 || echo "Could not fetch logs")
+          {
+            echo "log_snippet<<LOGEOF"
+            echo "$LOG_SNIPPET"
+            echo "LOGEOF"
+          } >> "$GITHUB_OUTPUT"
+
+          # Count consecutive failures for this workflow on this branch
+          RECENT_FAILURES=$(gh run list \
+            --workflow "$WORKFLOW_NAME" \
+            --branch "$HEAD_BRANCH" \
+            --limit 5 \
+            --json conclusion \
+            --jq '[.[] | select(.conclusion == "failure")] | length' 2>/dev/null || echo "0")
+          echo "consecutive_failures=$RECENT_FAILURES" >> "$GITHUB_OUTPUT"
+          echo "Consecutive failures on $HEAD_BRANCH: $RECENT_FAILURES"
+
+      - name: Classify failure
+        id: classify
+        env:
+          WORKFLOW: ${{ steps.context.outputs.workflow }}
+          FAILED_JOBS: ${{ steps.context.outputs.failed_jobs }}
+          LOG_SNIPPET: ${{ steps.context.outputs.log_snippet }}
+          CONSECUTIVE: ${{ steps.context.outputs.consecutive_failures }}
+        run: |
+          ACTION="none"
+          CATEGORY="unknown"
+
+          # --- Known transient patterns (auto-retry) ---
+          if echo "$LOG_SNIPPET" | grep -qi "rate limit\|ETIMEDOUT\|socket hang up\|503 Service\|network error\|HTTP 429"; then
+            CATEGORY="transient-network"
+            ACTION="retry"
+          elif echo "$LOG_SNIPPET" | grep -qi "runner error\|no space left\|disk quota\|out of memory"; then
+            CATEGORY="transient-runner"
+            ACTION="retry"
+          # --- Known fixable patterns ---
+          elif echo "$LOG_SNIPPET" | grep -qi "symlink.*need fixing\|skill not discoverable"; then
+            CATEGORY="symlinks-drift"
+            ACTION="info"  # fix-symlinks.yml handles this
+          elif echo "$LOG_SNIPPET" | grep -qi "workflow file issue"; then
+            CATEGORY="workflow-yaml-error"
+            ACTION="issue"
+          elif echo "$LOG_SNIPPET" | grep -qi "secret.*not configured\|SF_CLIENT_ID"; then
+            CATEGORY="missing-secret"
+            ACTION="issue"
+          # --- Persistent unknown failure ---
+          elif [ "$CONSECUTIVE" -ge 3 ]; then
+            CATEGORY="persistent-unknown"
+            ACTION="issue"
+          # --- First or second failure, might be transient ---
+          else
+            CATEGORY="possibly-transient"
+            ACTION="retry"
+          fi
+
+          echo "category=$CATEGORY" >> "$GITHUB_OUTPUT"
+          echo "action=$ACTION" >> "$GITHUB_OUTPUT"
+          echo "Classification: $CATEGORY → $ACTION"
+
+      - name: Auto-retry transient failures
+        if: steps.classify.outputs.action == 'retry'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ steps.context.outputs.run_id }}
+          WORKFLOW: ${{ steps.context.outputs.workflow }}
+          CONSECUTIVE: ${{ steps.context.outputs.consecutive_failures }}
+        run: |
+          # Only retry once — if it already failed twice, escalate to issue
+          if [ "$CONSECUTIVE" -ge 3 ]; then
+            echo "::warning::$WORKFLOW has failed $CONSECUTIVE times — skipping retry, will open issue."
+            echo "ESCALATE=true" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          echo "Retrying $WORKFLOW (run $RUN_ID)..."
+          gh run rerun "$RUN_ID" --failed 2>/dev/null || echo "::warning::Could not rerun — may need manual intervention."
+
+      - name: Check for existing issue
+        if: steps.classify.outputs.action == 'issue' || env.ESCALATE == 'true'
+        id: existing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKFLOW: ${{ steps.context.outputs.workflow }}
+        run: |
+          ISSUE_URL=$(gh issue list \
+            --label "ci-watchdog" \
+            --state open \
+            --search "\"$WORKFLOW\" in:title" \
+            --json url \
+            --jq '.[0].url // empty' 2>/dev/null || true)
+
+          if [ -n "$ISSUE_URL" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "url=$ISSUE_URL" >> "$GITHUB_OUTPUT"
+            echo "Issue already open: $ISSUE_URL"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open issue for persistent failure
+        if: (steps.classify.outputs.action == 'issue' || env.ESCALATE == 'true') && steps.existing.outputs.exists != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKFLOW: ${{ steps.context.outputs.workflow }}
+          FAILED_JOBS: ${{ steps.context.outputs.failed_jobs }}
+          CATEGORY: ${{ steps.classify.outputs.category }}
+          RUN_URL: ${{ steps.context.outputs.run_url }}
+          BRANCH: ${{ steps.context.outputs.branch }}
+          SHA: ${{ steps.context.outputs.sha }}
+          CONSECUTIVE: ${{ steps.context.outputs.consecutive_failures }}
+          LOG_SNIPPET: ${{ steps.context.outputs.log_snippet }}
+        run: |
+          # Ensure label exists
+          gh label create "ci-watchdog" --color "D93F0B" --description "Auto-created by CI Watchdog" 2>/dev/null || true
+
+          gh issue create \
+            --title "CI: $WORKFLOW is failing ($CATEGORY)" \
+            --label "ci-watchdog" \
+            --body "$(cat <<EOF
+          ## CI Watchdog Alert
+
+          **Workflow:** $WORKFLOW
+          **Category:** \`$CATEGORY\`
+          **Branch:** \`$BRANCH\` (\`$SHA\`)
+          **Failed jobs:** $FAILED_JOBS
+          **Consecutive failures:** $CONSECUTIVE
+          **Run:** $RUN_URL
+
+          ### Log snippet
+          \`\`\`
+          $(echo "$LOG_SNIPPET" | head -30)
+          \`\`\`
+
+          ### What to do
+          $(case "$CATEGORY" in
+            "workflow-yaml-error") echo "The workflow YAML has a syntax or configuration error. Check the workflow file for invalid expressions or missing references." ;;
+            "missing-secret") echo "A required secret is not configured. Go to Settings → Secrets and add the missing secret." ;;
+            "persistent-unknown") echo "This workflow has failed $CONSECUTIVE consecutive times with no known pattern. Manual investigation needed." ;;
+            *) echo "Review the logs and fix the root cause." ;;
+          esac)
+
+          ---
+          *Auto-created by CI Watchdog. This issue will be referenced by future failures of the same workflow.*
+          EOF
+          )"
+
+      - name: Comment on existing issue
+        if: (steps.classify.outputs.action == 'issue' || env.ESCALATE == 'true') && steps.existing.outputs.exists == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_URL: ${{ steps.existing.outputs.url }}
+          RUN_URL: ${{ steps.context.outputs.run_url }}
+          BRANCH: ${{ steps.context.outputs.branch }}
+          SHA: ${{ steps.context.outputs.sha }}
+          CONSECUTIVE: ${{ steps.context.outputs.consecutive_failures }}
+        run: |
+          gh issue comment "$ISSUE_URL" \
+            --body "Still failing — run [$SHA]($RUN_URL) on \`$BRANCH\` ($CONSECUTIVE consecutive failures)."
+
+  # ── Weekly health audit ──
+  health-audit:
+    name: Weekly CI health report
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+
+      - name: Audit all workflows
+        id: audit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "# CI Health Report — $(date -u +%Y-%m-%d)" > /tmp/report.md
+          echo "" >> /tmp/report.md
+
+          UNHEALTHY=0
+
+          # Get all unique workflow names from recent runs
+          WORKFLOWS=$(gh run list --limit 100 --json workflowName --jq '[.[].workflowName] | unique | .[]' 2>/dev/null)
+
+          echo "| Workflow | Runs | Passed | Failed | Rate |" >> /tmp/report.md
+          echo "|----------|------|--------|--------|------|" >> /tmp/report.md
+
+          while IFS= read -r wf; do
+            [ -z "$wf" ] && continue
+
+            TOTAL=$(gh run list --workflow "$wf" --limit 20 --json conclusion --jq 'length' 2>/dev/null || echo "0")
+            PASSED=$(gh run list --workflow "$wf" --limit 20 --json conclusion --jq '[.[] | select(.conclusion == "success")] | length' 2>/dev/null || echo "0")
+            FAILED=$(gh run list --workflow "$wf" --limit 20 --json conclusion --jq '[.[] | select(.conclusion == "failure")] | length' 2>/dev/null || echo "0")
+
+            if [ "$TOTAL" -gt 0 ]; then
+              RATE=$(( PASSED * 100 / TOTAL ))
+            else
+              RATE=100
+            fi
+
+            # Flag unhealthy workflows
+            ICON="✅"
+            if [ "$RATE" -lt 75 ]; then
+              ICON="🔴"
+              UNHEALTHY=$((UNHEALTHY + 1))
+            elif [ "$RATE" -lt 90 ]; then
+              ICON="🟡"
+            fi
+
+            echo "| $ICON $wf | $TOTAL | $PASSED | $FAILED | ${RATE}% |" >> /tmp/report.md
+          done <<< "$WORKFLOWS"
+
+          echo "" >> /tmp/report.md
+          echo "unhealthy=$UNHEALTHY" >> "$GITHUB_OUTPUT"
+
+          if [ "$UNHEALTHY" -gt 0 ]; then
+            echo "" >> /tmp/report.md
+            echo "**$UNHEALTHY workflow(s) below 75% pass rate.** These need attention." >> /tmp/report.md
+          else
+            echo "All workflows are healthy." >> /tmp/report.md
+          fi
+
+          cat /tmp/report.md
+
+          # Save for next step
+          {
+            echo "report<<REPORTEOF"
+            cat /tmp/report.md
+            echo "REPORTEOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Open or update health issue
+        if: steps.audit.outputs.unhealthy != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPORT: ${{ steps.audit.outputs.report }}
+        run: |
+          gh label create "ci-watchdog" --color "D93F0B" --description "Auto-created by CI Watchdog" 2>/dev/null || true
+
+          # Check for existing weekly health issue
+          EXISTING=$(gh issue list \
+            --label "ci-watchdog" \
+            --state open \
+            --search "\"CI Health Report\" in:title" \
+            --json url \
+            --jq '.[0].url // empty' 2>/dev/null || true)
+
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body "$REPORT"
+          else
+            gh issue create \
+              --title "CI Health Report — $(date -u +%Y-%m-%d)" \
+              --label "ci-watchdog" \
+              --body "$(cat <<EOF
+          $REPORT
+
+          ---
+          *Weekly report from CI Watchdog. Fix failing workflows and close this issue.*
+          EOF
+          )"
+          fi

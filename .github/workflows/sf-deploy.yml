@@ -13,27 +13,47 @@ on:
 jobs:
   scratch-org-test:
     runs-on: ubuntu-latest
-    if: ${{ secrets.SF_CLIENT_ID != '' }}
+    outputs:
+      has_credentials: ${{ steps.auth.outputs.has_credentials }}
     steps:
+      - name: Check Salesforce credentials
+        id: auth
+        run: |
+          if [ -z "$SF_CLIENT_ID" ]; then
+            echo "::notice::SF_CLIENT_ID secret not configured — skipping Salesforce deploy."
+            echo "has_credentials=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_credentials=true" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
       - uses: actions/checkout@v4
+        if: steps.auth.outputs.has_credentials == 'true'
       - name: Install SF CLI
+        if: steps.auth.outputs.has_credentials == 'true'
         run: npm install -g @salesforce/cli
       - name: Authenticate to DevHub
+        if: steps.auth.outputs.has_credentials == 'true'
         run: sf org login jwt --client-id ${{ secrets.SF_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SF_DEVHUB_USERNAME }}
       - name: Create scratch org
+        if: steps.auth.outputs.has_credentials == 'true'
         run: sf org create scratch -f config/project-scratch-def.json -a ci-scratch -d 1
       - name: Deploy source
+        if: steps.auth.outputs.has_credentials == 'true'
         run: sf project deploy start --target-org ci-scratch
       - name: Run Apex tests
+        if: steps.auth.outputs.has_credentials == 'true'
         run: sf apex run test --target-org ci-scratch --code-coverage --result-format human --wait 10
       - name: Check coverage (75% gate)
+        if: steps.auth.outputs.has_credentials == 'true'
         run: sf apex get test --target-org ci-scratch --code-coverage | grep -E "Org Wide Coverage.*[7-9][5-9]|[8-9][0-9]|100"
       - name: Delete scratch org
-        if: always()
+        if: always() && steps.auth.outputs.has_credentials == 'true'
         run: sf org delete scratch --target-org ci-scratch --no-prompt
 
   delta-deploy:
     needs: scratch-org-test
+    if: needs.scratch-org-test.outputs.has_credentials == 'true'
     runs-on: ubuntu-latest
     environment: staging
     steps:
