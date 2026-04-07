@@ -1,5 +1,5 @@
 # OHFY-Utilities Source Index
-> Last synced: 2026-04-03T12:19:04Z | Commit: d109a8e | Repo: Ohanafy/OHFY-Utilities
+> Last synced: 2026-04-07T12:29:13Z | Commit: d109a8e | Repo: Ohanafy/OHFY-Utilities
 
 ## Apex Classes (22 production, 3 test/mock excluded)
 
@@ -55,7 +55,44 @@ _No triggers found._
 | QueryService | objectName | `public QueryBuilder objectName(String objectName) ` |
 | QueryService | build | `public QueryService build() ` |
 
+## Service Layer Graph (one level deep)
+
+> **Coverage Limitations:** Captures static patterns only: `new *Service(`,
+> `ServiceLocator.getInstance(`, `System.enqueueJob`. Dynamic dispatch and
+> factory patterns are not captured. Treat as a starting map, not exhaustive.
+
+| Service Class | Calls / Instantiates | Pattern |
+|--------------|---------------------|---------|
+| QueryService | QueryService | new Instance() |
+
 ## Custom Objects & Fields
 
 _No custom objects found._
+
+## Common Patterns
+
+| Pattern | Files Using It | Notes |
+|---------|---------------|-------|
+| Trigger Bypass | 2 | Classes referencing bypass mechanisms |
+| Service Locator | 0 | Classes using service locator pattern |
+| Batch/Schedulable | 0 | Classes implementing batch or schedulable |
+| Queueable | 0 | Classes using async queueable jobs |
+| Platform Events | 0 | Classes publishing or subscribing to events |
+
+## Test Coverage Summary
+
+| Metric | Count |
+|--------|-------|
+| Production classes | 12 |
+| Test/Mock/Stub classes | 13 |
+| Test-to-production ratio | 108% |
+
+### Classes Without Apparent Test Coverage (2)
+
+- `E_FieldsetCustomizationMDT`
+- `U_UserUtilityExceptions`
+
+## Known Gotchas
+
+_No known gotchas recorded yet. This section is populated by operational learnings from debugging sessions._
 

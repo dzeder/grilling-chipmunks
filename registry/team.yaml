@@ -1,3 +1,13 @@
 version: "1.0"
-# Populated during onboarding interview (Section 13, Item 10)
-team: []
+last_updated: "2026-04-07"
+
+team:
+  - name: Daniel Zeder
+    github: dzeder
+    role: Solutions Architect
+    owns:
+      - integrations
+      - ai-ops
+      - tray-workflows
+    focus: "AI operations framework, Salesforce integrations, Tray.ai workflows"
+    notes: "Primary operator of the boston monorepo (AI command center)"

@@ -1,8 +1,410 @@
 version: "1.0"
-status: "PENDING — run: python ci-cd/scripts/discover-repos.py"
+status: "ACTIVE"
+total_repos: 55
+last_discovered: "2026-04-07"
 rules:
   - "Check this registry before any PR in an Ohanafy product repo"
   - "Never modify a repo without knowing its owner"
   - "frontend and backend repos for the same SKU deploy together"
   - "data-model changes require a migration plan before any deploy"
-repos: []
+
+repos:
+  # ── Core Product (Salesforce 2GP packages) ──────────────────────
+
+  - name: OHFY-Core
+    type: backend
+    sku: core
+    stack: [Apex, Salesforce]
+    active: true
+    notes: "Main managed package — triggers, services, 583 Apex classes, 143 objects"
+
+  - name: OHFY-Data_Model
+    type: data-model
+    sku: all
+    stack: [JavaScript, Salesforce]
+    active: true
+    notes: "Shared custom objects, fields, value sets across all SKUs"
+
+  - name: OHFY-Platform
+    type: backend
+    sku: platform
+    stack: [Apex, Salesforce]
+    active: true
+    notes: "Shared platform services across all SKUs"
+
+  - name: OHFY-PLTFM-UI
+    type: frontend
+    sku: platform
+    stack: [JavaScript, LWC]
+    active: true
+    notes: "Platform UI components — deploys with OHFY-Platform"
+
+  - name: OHFY-Service_Locator
+    type: backend
+    sku: platform
+    stack: [Apex, Salesforce]
+    active: true
+    notes: "Service locator pattern — secondary to OHFY-Platform"
+
+  # ── OMS (Order Management) ──────────────────────────────────────
+
+  - name: OHFY-OMS
+    type: backend
+    sku: oms
+    stack: [Apex, Salesforce]
+    active: true
+    notes: "Order management — invoicing, allocations, credits, 134 Apex classes"
+
+  - name: OHFY-OMS-UI
+    type: frontend
+    sku: oms
+    stack: [JavaScript, LWC]
+    active: true
+    notes: "OMS UI components — deploys with OHFY-OMS"
+
+  # ── WMS (Warehouse Management) ──────────────────────────────────
+
+  - name: OHFY-WMS
+    type: backend
+    sku: wms
+    stack: [Apex, Salesforce]
+    active: true
+    notes: "Warehouse ops, inventory, picking/packing"
+
+  - name: OHFY-WMS-UI
+    type: frontend
+    sku: wms
+    stack: [JavaScript, LWC]
+    active: true
+    notes: "WMS UI components — deploys with OHFY-WMS"
+
+  # ── REX (Retail Excellence) ─────────────────────────────────────
+
+  - name: OHFY-REX
+    type: backend
+    sku: rex
+    stack: [Apex, Salesforce]
+    active: true
+    notes: "Retail excellence, POS, displays"
+
+  - name: OHFY-REX-UI
+    type: frontend
+    sku: rex
+    stack: [JavaScript, LWC]
+    active: true
+    notes: "REX UI components — deploys with OHFY-REX"
+
+  - name: OHFY-Planogram
+    type: backend
+    sku: rex
+    stack: [Apex, Salesforce]
+    active: true
+    notes: "Planogram functionality — secondary to OHFY-REX"
+
+  # ── Other SKU packages ──────────────────────────────────────────
+
+  - name: OHFY-EDI
+    type: backend
+    sku: edi
+    stack: [Kotlin, Salesforce]
+    active: true
+    notes: "X12 850/810/856 EDI processing, B2B interchange"
+
+  - name: OHFY-Ecom
+    type: backend
+    sku: ecom
+    stack: [Apex, Salesforce]
+    active: true
+    notes: "E-commerce integration — Shopify/WooCommerce"
+
+  - name: OHFY-Payments
+    type: backend
+    sku: payments
+    stack: [Apex, Salesforce]
+    active: true
+    notes: "Payment processing and settlement"
+
+  - name: OHFY-Configure
+    type: backend
+    sku: configure
+    stack: [Apex, Salesforce]
+    active: true
+    notes: "System configuration, feature flags, setup"
+
+  - name: OHFY-Maps
+    type: backend
+    sku: maps
+    stack: [Apex, Salesforce]
+    active: true
+    notes: "Salesforce Maps customer implementations"
+
+  # ── Shared / Tooling ────────────────────────────────────────────
+
+  - name: OHFY-Utilities
+    type: shared
+    sku: all
+    stack: [Apex, Salesforce]
+    active: true
+    notes: "Shared utility classes"
+
+  - name: OHFY-Utility
+    type: shared
+    sku: all
+    stack: [Apex, Salesforce]
+    active: true
+    notes: "Legacy utility repo — check if deprecated vs OHFY-Utilities"
+
+  - name: OHFY-CICD
+    type: infrastructure
+    sku: all
+    stack: [TypeScript]
+    active: true
+    notes: "CI/CD pipelines and deployment tooling"
+
+  - name: OHFY-SF-Perf
+    type: tooling
+    sku: all
+    stack: [Kotlin]
+    active: true
+    notes: "Salesforce performance monitoring and optimization"
+
+  - name: OHFY-Workflows
+    type: tooling
+    sku: all
+    stack: []
+    active: true
+    notes: "GitHub Actions workflow templates"
+
+  - name: shared-configs
+    type: shared
+    sku: all
+    stack: [JavaScript]
+    active: true
+    notes: "Shared Prettier, ESLint configs for Ohanafy ecosystem"
+
+  # ── AI / Intelligence ───────────────────────────────────────────
+
+  - name: OHFY-AI
+    type: backend
+    sku: ai
+    stack: [Salesforce]
+    active: true
+    notes: "Ohanafy AI Agentic AI Package"
+
+  - name: OHFY-AI-D
+    type: backend
+    sku: ai
+    stack: []
+    active: true
+    notes: "AI development/sandbox package"
+
+  - name: OHFY-CRMA
+    type: backend
+    sku: analytics
+    stack: [JavaScript, Salesforce]
+    active: true
+    notes: "CRM Analytics (Tableau CRM) dashboards and lenses"
+
+  - name: Claude-Core
+    type: tooling
+    sku: ai
+    stack: [Python]
+    active: true
+    notes: "Claude AI integration core — Python SDK patterns"
+
+  - name: ohanafy-claude-plugins
+    type: tooling
+    sku: ai
+    stack: [Shell]
+    active: true
+    notes: "Claude Code plugins for Ohanafy development"
+
+  # ── AWS / Infrastructure ────────────────────────────────────────
+
+  - name: AWSDocs
+    type: infrastructure
+    sku: all
+    stack: [TypeScript]
+    active: true
+    notes: "AWS documentation and CDK patterns"
+
+  - name: AWS-BOL-VS-PO
+    type: infrastructure
+    sku: oms
+    stack: []
+    active: true
+    notes: "AWS Bill of Lading vs Purchase Order processing"
+
+  - name: AWS-DOCS
+    type: infrastructure
+    sku: all
+    stack: []
+    active: false
+    notes: "Legacy AWS docs — likely superseded by AWSDocs"
+
+  - name: AWS-PROCESS
+    type: infrastructure
+    sku: all
+    stack: []
+    active: false
+    notes: "Legacy AWS processing — check if still in use"
+
+  - name: AWSInvoiceOCR
+    type: infrastructure
+    sku: oms
+    stack: []
+    active: true
+    notes: "Invoice OCR processing via AWS Textract"
+
+  - name: DatadogTerraform
+    type: infrastructure
+    sku: all
+    stack: [HCL, Terraform]
+    active: true
+    notes: "Datadog monitoring infrastructure as code"
+
+  - name: LogIngestion
+    type: infrastructure
+    sku: all
+    stack: [Kotlin]
+    active: true
+    notes: "Log ingestion pipeline"
+
+  # ── ToChange / Mobile ───────────────────────────────────────────
+
+  - name: ToChange-E2ETests
+    type: tooling
+    sku: mobile
+    stack: [TypeScript, Playwright]
+    active: true
+    notes: "Playwright E2E tests for mobile/web apps"
+
+  - name: ToChange-Goals
+    type: backend
+    sku: mobile
+    stack: []
+    active: true
+    notes: "Goals feature for mobile platform"
+
+  - name: ToChange-Planograms
+    type: backend
+    sku: mobile
+    stack: [Kotlin]
+    active: true
+    notes: "Mobile planogram functionality"
+
+  - name: ToChange-Terraform
+    type: infrastructure
+    sku: mobile
+    stack: [HCL, Terraform]
+    active: true
+    notes: "Mobile platform infrastructure"
+
+  - name: ToChange-TestGenerator
+    type: tooling
+    sku: mobile
+    stack: [Kotlin]
+    active: true
+    notes: "Test generation tooling for mobile"
+
+  - name: ToChange-VisualizeWorkflows
+    type: tooling
+    sku: mobile
+    stack: [JavaScript]
+    active: true
+    notes: "Workflow visualization for mobile platform"
+
+  # ── Document generation ─────────────────────────────────────────
+
+  - name: DocGenEDocGen
+    type: backend
+    sku: docs
+    stack: [Apex, Salesforce]
+    active: true
+    notes: "Electronic document generation (invoices, BOLs)"
+
+  - name: DocGenLegacy
+    type: backend
+    sku: docs
+    stack: [Apex, Salesforce]
+    active: false
+    notes: "Legacy doc gen — superseded by DocGenEDocGen"
+
+  # ── Other / Legacy ──────────────────────────────────────────────
+
+  - name: OHFY-Integrations
+    type: shared
+    sku: all
+    stack: []
+    active: true
+    notes: "Integration configs and middleware"
+
+  - name: OHFY-Offline
+    type: backend
+    sku: offline
+    stack: [JavaScript]
+    active: true
+    notes: "Offline-capable mobile functionality"
+
+  - name: OHFY-ProdDev
+    type: tooling
+    sku: all
+    stack: [Apex, Salesforce]
+    active: true
+    notes: "Product development sandbox and prototyping"
+
+  - name: Ohanafy-Core
+    type: backend
+    sku: core
+    stack: [Apex, Salesforce]
+    active: false
+    notes: "Legacy core repo — superseded by OHFY-Core"
+
+  - name: Ozone
+    type: frontend
+    sku: all
+    stack: [HTML]
+    active: true
+    notes: "Ozone web portal"
+
+  - name: Ozone-Payments
+    type: backend
+    sku: payments
+    stack: [Apex, Salesforce]
+    active: true
+    notes: "Ozone payment processing"
+
+  - name: Printtron
+    type: backend
+    sku: all
+    stack: []
+    active: true
+    notes: "Print/label generation service"
+
+  - name: printtron-mobile-pro
+    type: frontend
+    sku: all
+    stack: [TypeScript]
+    active: true
+    notes: "Mobile print/label app"
+
+  - name: Sales-Demos
+    type: tooling
+    sku: all
+    stack: [Apex, Salesforce]
+    active: true
+    notes: "Demo org configurations and sample data"
+
+  - name: Engineering-Notes
+    type: tooling
+    sku: all
+    stack: []
+    active: true
+    notes: "Internal engineering documentation and runbooks"
+
+  - name: cs-gulf
+    type: tooling
+    sku: all
+    stack: []
+    active: true
+    notes: "Gulf Distributing customer-specific configs"
