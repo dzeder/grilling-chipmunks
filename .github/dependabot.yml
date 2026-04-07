@@ -22,11 +22,3 @@ updates:
       - "dependencies"
     allow:
       - dependency-type: "direct"
-  - package-ecosystem: "npm_and_yarn"
-    directory: "/.claude/skills/gstack"
-    schedule:
-      interval: "weekly"
-    labels:
-      - "dependencies"
-    allow:
-      - dependency-type: "direct"
