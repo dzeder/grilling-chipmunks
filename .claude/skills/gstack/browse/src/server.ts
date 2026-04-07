@@ -46,6 +46,31 @@ function validateAuth(req: Request): boolean {
   return header === `Bearer ${AUTH_TOKEN}`;
 }
 
+// ─── Sidebar Model Router ────────────────────────────────────────
+// Fast model for navigation/interaction, smart model for reading/analysis.
+// The delta between sonnet and opus on "click @e24" is 5-10x in latency
+// and cost, with zero quality difference. Save opus for when you need it.
+
+const ANALYSIS_WORDS = /\b(what|why|how|explain|describe|summarize|analyze|compare|review|read\b.*\b(and|then)|tell\s*me|find.*bugs?|check.*for|assess|evaluate|report)\b/i;
+const ACTION_PATTERNS = /^(go\s*to|open|navigate|click|tap|press|fill|type|enter|scroll|screenshot|snap|reload|refresh|back|forward|close|submit|select|toggle|expand|collapse|dismiss|accept|upload|download|focus|hover|cleanup|clean\s*up)\b/i;
+const ACTION_ANYWHERE = /\b(go\s*to|click|tap|fill\s*(in|out)?|type\s*in|navigate\s*to|open\s*(the|this|that)?|take\s*a?\s*screenshot|scroll\s*(down|up|to)|reload|refresh|submit|press\s*(the|enter|button))\b/i;
+
+function pickSidebarModel(message: string): string {
+  const msg = message.trim();
+
+  // Analysis/comprehension always gets opus — regardless of action verbs mixed in
+  if (ANALYSIS_WORDS.test(msg)) return 'opus';
+
+  // Short action commands (under ~80 chars, starts with an action verb)
+  if (msg.length < 80 && ACTION_PATTERNS.test(msg)) return 'sonnet';
+
+  // Longer messages that are clearly action-oriented (no analysis words already checked above)
+  if (ACTION_ANYWHERE.test(msg)) return 'sonnet';
+
+  // Everything else: multi-step, ambiguous, or complex
+  return 'opus';
+}
+
 // ─── Help text (auto-generated from COMMAND_DESCRIPTIONS) ────────
 function generateHelpText(): string {
   // Group commands by category
@@ -246,7 +271,9 @@ function addChatEntry(entry: Omit<ChatEntry, 'id'>, tabId?: number): ChatEntry {
   // Persist to disk (best-effort)
   if (sidebarSession) {
     const chatFile = path.join(SESSIONS_DIR, sidebarSession.id, 'chat.jsonl');
-    try { fs.appendFileSync(chatFile, JSON.stringify(full) + '\n'); } catch {}
+    try { fs.appendFileSync(chatFile, JSON.stringify(full) + '\n'); } catch (err: any) {
+      console.error('[browse] Failed to persist chat entry:', err.message);
+    }
   }
   return full;
 }
@@ -255,6 +282,10 @@ function loadSession(): SidebarSession | null {
   try {
     const activeFile = path.join(SESSIONS_DIR, 'active.json');
     const activeData = JSON.parse(fs.readFileSync(activeFile, 'utf-8'));
+    if (typeof activeData.id !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(activeData.id)) {
+      console.warn('[browse] Invalid session ID in active.json — ignoring');
+      return null;
+    }
     const sessionFile = path.join(SESSIONS_DIR, activeData.id, 'session.json');
     const session = JSON.parse(fs.readFileSync(sessionFile, 'utf-8')) as SidebarSession;
     // Validate worktree still exists — crash may have left stale path
@@ -271,11 +302,17 @@ function loadSession(): SidebarSession | null {
     const chatFile = path.join(SESSIONS_DIR, session.id, 'chat.jsonl');
     try {
       const lines = fs.readFileSync(chatFile, 'utf-8').split('\n').filter(Boolean);
-      chatBuffer = lines.map(line => { try { return JSON.parse(line); } catch { return null; } }).filter(Boolean);
+      const parsed = lines.map(line => { try { return JSON.parse(line); } catch { return null; } });
+      const discarded = parsed.filter(x => x === null).length;
+      if (discarded > 0) console.warn(`[browse] Discarding ${discarded} corrupted chat entries during load`);
+      chatBuffer = parsed.filter(Boolean);
       chatNextId = chatBuffer.length > 0 ? Math.max(...chatBuffer.map(e => e.id)) + 1 : 0;
-    } catch {}
+    } catch (err: any) {
+      if (err.code !== 'ENOENT') console.warn('[browse] Chat history not loaded:', err.message);
+    }
     return session;
-  } catch {
+  } catch (err: any) {
+    if (err.code !== 'ENOENT') console.error('[browse] Failed to load session:', err.message);
     return null;
   }
 }
@@ -303,7 +340,9 @@ function createWorktree(sessionId: string): string | null {
       Bun.spawnSync(['git', 'worktree', 'remove', '--force', worktreeDir], {
         cwd: repoRoot, stdout: 'pipe', stderr: 'pipe', timeout: 5000,
       });
-      try { fs.rmSync(worktreeDir, { recursive: true, force: true }); } catch {}
+      try { fs.rmSync(worktreeDir, { recursive: true, force: true }); } catch (err: any) {
+        console.warn('[browse] Failed to clean stale worktree dir:', err.message);
+      }
     }
 
     // Get current branch/commit
@@ -343,8 +382,12 @@ function removeWorktree(worktreePath: string | null): void {
       });
     }
     // Cleanup dir if git worktree remove didn't
-    try { fs.rmSync(worktreePath, { recursive: true, force: true }); } catch {}
-  } catch {}
+    try { fs.rmSync(worktreePath, { recursive: true, force: true }); } catch (err: any) {
+      console.warn('[browse] Failed to remove worktree dir:', worktreePath, err.message);
+    }
+  } catch (err: any) {
+    console.warn('[browse] Worktree removal error:', err.message);
+  }
 }
 
 function createSession(): SidebarSession {
@@ -359,10 +402,10 @@ function createSession(): SidebarSession {
     lastActiveAt: new Date().toISOString(),
   };
   const sessionDir = path.join(SESSIONS_DIR, id);
-  fs.mkdirSync(sessionDir, { recursive: true });
-  fs.writeFileSync(path.join(sessionDir, 'session.json'), JSON.stringify(session, null, 2));
-  fs.writeFileSync(path.join(sessionDir, 'chat.jsonl'), '');
-  fs.writeFileSync(path.join(SESSIONS_DIR, 'active.json'), JSON.stringify({ id }));
+  fs.mkdirSync(sessionDir, { recursive: true, mode: 0o700 });
+  fs.writeFileSync(path.join(sessionDir, 'session.json'), JSON.stringify(session, null, 2), { mode: 0o600 });
+  fs.writeFileSync(path.join(sessionDir, 'chat.jsonl'), '', { mode: 0o600 });
+  fs.writeFileSync(path.join(SESSIONS_DIR, 'active.json'), JSON.stringify({ id }), { mode: 0o600 });
   chatBuffer = [];
   chatNextId = 0;
   return session;
@@ -372,7 +415,9 @@ function saveSession(): void {
   if (!sidebarSession) return;
   sidebarSession.lastActiveAt = new Date().toISOString();
   const sessionFile = path.join(SESSIONS_DIR, sidebarSession.id, 'session.json');
-  try { fs.writeFileSync(sessionFile, JSON.stringify(sidebarSession, null, 2)); } catch {}
+  try { fs.writeFileSync(sessionFile, JSON.stringify(sidebarSession, null, 2), { mode: 0o600 }); } catch (err: any) {
+    console.error('[browse] Failed to save session:', err.message);
+  }
 }
 
 function listSessions(): Array<SidebarSession & { chatLines: number }> {
@@ -382,11 +427,16 @@ function listSessions(): Array<SidebarSession & { chatLines: number }> {
       try {
         const session = JSON.parse(fs.readFileSync(path.join(SESSIONS_DIR, d, 'session.json'), 'utf-8'));
         let chatLines = 0;
-        try { chatLines = fs.readFileSync(path.join(SESSIONS_DIR, d, 'chat.jsonl'), 'utf-8').split('\n').filter(Boolean).length; } catch {}
+        try { chatLines = fs.readFileSync(path.join(SESSIONS_DIR, d, 'chat.jsonl'), 'utf-8').split('\n').filter(Boolean).length; } catch {
+          // Expected: no chat file yet
+        }
         return { ...session, chatLines };
       } catch { return null; }
     }).filter(Boolean);
-  } catch { return []; }
+  } catch (err: any) {
+    console.warn('[browse] Failed to list sessions:', err.message);
+    return [];
+  }
 }
 
 function processAgentEvent(event: any): void {
@@ -482,7 +532,14 @@ function spawnClaude(userMessage: string, extensionUrl?: string | null, forTabId
   const prompt = `${systemPrompt}\n\n<user-message>\n${escapedMessage}\n</user-message>`;
   // Never resume — each message is a fresh context. Resuming carries stale
   // page URLs and old navigation state that makes the agent fight the user.
-  const args = ['-p', prompt, '--model', 'opus', '--output-format', 'stream-json', '--verbose',
+
+  // Auto model routing: fast model for navigation/interaction, smart model for reading/analysis.
+  // Navigation, clicking, filling forms, screenshots = deterministic tool calls, no thinking needed.
+  // Reading, summarizing, analyzing, explaining = needs comprehension.
+  const model = pickSidebarModel(userMessage);
+  console.log(`[browse] Sidebar model: ${model} for "${userMessage.slice(0, 60)}"`);
+
+  const args = ['-p', prompt, '--model', model, '--output-format', 'stream-json', '--verbose',
     '--allowedTools', 'Bash,Read,Glob,Grep'];
 
   addChatEntry({ ts: new Date().toISOString(), role: 'agent', type: 'agent_start' });
@@ -505,8 +562,9 @@ function spawnClaude(userMessage: string, extensionUrl?: string | null, forTabId
     tabId: agentTabId,
   });
   try {
-    fs.mkdirSync(gstackDir, { recursive: true });
+    fs.mkdirSync(gstackDir, { recursive: true, mode: 0o700 });
     fs.appendFileSync(agentQueue, entry + '\n');
+    try { fs.chmodSync(agentQueue, 0o600); } catch {}
   } catch (err: any) {
     addChatEntry({ ts: new Date().toISOString(), role: 'agent', type: 'agent_error', error: `Failed to queue: ${err.message}` });
     agentStatus = 'idle';
@@ -519,11 +577,23 @@ function spawnClaude(userMessage: string, extensionUrl?: string | null, forTabId
   // Agent status transitions happen when we receive agent_done/agent_error events.
 }
 
-function killAgent(): void {
+function killAgent(targetTabId?: number | null): void {
   if (agentProcess) {
-    try { agentProcess.kill('SIGTERM'); } catch {}
-    setTimeout(() => { try { agentProcess?.kill('SIGKILL'); } catch {} }, 3000);
+    try { agentProcess.kill('SIGTERM'); } catch (err: any) {
+      console.warn('[browse] Failed to SIGTERM agent:', err.message);
+    }
+    setTimeout(() => { try { agentProcess?.kill('SIGKILL'); } catch (err: any) {
+      console.warn('[browse] Failed to SIGKILL agent:', err.message);
+    } }, 3000);
   }
+  // Signal the sidebar-agent worker to cancel via a per-tab cancel file.
+  // Using per-tab files prevents race conditions where one agent's cancel
+  // signal is consumed by a different tab's agent in concurrent mode.
+  // When targetTabId is provided, only that tab's agent is cancelled.
+  const cancelDir = path.join(process.env.HOME || '/tmp', '.gstack');
+  const tabId = targetTabId ?? agentTabId ?? 0;
+  const cancelFile = path.join(cancelDir, `sidebar-agent-cancel-${tabId}`);
+  try { fs.writeFileSync(cancelFile, Date.now().toString()); } catch {}
   agentProcess = null;
   agentStartTime = null;
   currentMessage = null;
@@ -550,7 +620,7 @@ function startAgentHealthCheck(): void {
 
 // Initialize session on startup
 function initSidebarSession(): void {
-  fs.mkdirSync(SESSIONS_DIR, { recursive: true });
+  fs.mkdirSync(SESSIONS_DIR, { recursive: true, mode: 0o700 });
   sidebarSession = loadSession();
   if (!sidebarSession) {
     sidebarSession = createSession();
@@ -600,8 +670,8 @@ async function flushBuffers() {
       fs.appendFileSync(DIALOG_LOG_PATH, lines);
       lastDialogFlushed = dialogBuffer.totalAdded;
     }
-  } catch {
-    // Flush failures are non-fatal — buffers are in memory
+  } catch (err: any) {
+    console.error('[browse] Buffer flush failed:', err.message);
   } finally {
     flushInProgress = false;
   }
@@ -618,11 +688,31 @@ function resetIdleTimer() {
 }
 
 const idleCheckInterval = setInterval(() => {
+  // Headed mode: the user is looking at the browser. Never auto-die.
+  // Only shut down when the user explicitly disconnects or closes the window.
+  if (browserManager.getConnectionMode() === 'headed') return;
   if (Date.now() - lastActivity > IDLE_TIMEOUT_MS) {
     console.log(`[browse] Idle for ${IDLE_TIMEOUT_MS / 1000}s, shutting down`);
     shutdown();
   }
 }, 60_000);
+
+// ─── Parent-Process Watchdog ────────────────────────────────────────
+// When the spawning CLI process (e.g. a Claude Code session) exits, this
+// server can become an orphan — keeping chrome-headless-shell alive and
+// causing console-window flicker on Windows. Poll the parent PID every 15s
+// and self-terminate if it is gone.
+const BROWSE_PARENT_PID = parseInt(process.env.BROWSE_PARENT_PID || '0', 10);
+if (BROWSE_PARENT_PID > 0) {
+  setInterval(() => {
+    try {
+      process.kill(BROWSE_PARENT_PID, 0); // signal 0 = existence check only, no signal sent
+    } catch {
+      console.log(`[browse] Parent process ${BROWSE_PARENT_PID} exited, shutting down`);
+      shutdown();
+    }
+  }, 15_000);
+}
 
 // ─── Command Sets (from commands.ts — single source of truth) ───
 import { READ_COMMANDS, WRITE_COMMANDS, META_COMMANDS } from './commands';
@@ -639,7 +729,9 @@ const inspectorSubscribers = new Set<InspectorSubscriber>();
 function emitInspectorEvent(event: any): void {
   for (const notify of inspectorSubscribers) {
     queueMicrotask(() => {
-      try { notify(event); } catch {}
+      try { notify(event); } catch (err: any) {
+        console.error('[browse] Inspector event subscriber threw:', err.message);
+      }
     });
   }
 }
@@ -725,7 +817,9 @@ async function handleCommand(body: any): Promise<Response> {
   if (tabId !== undefined && tabId !== null) {
     savedTabId = browserManager.getActiveTabId();
     // bringToFront: false — internal tab pinning must NOT steal window focus
-    try { browserManager.switchTab(tabId, { bringToFront: false }); } catch {}
+    try { browserManager.switchTab(tabId, { bringToFront: false }); } catch (err: any) {
+      console.warn('[browse] Failed to pin tab', tabId, ':', err.message);
+    }
   }
 
   // Block mutation commands while watching (read-only observation mode)
@@ -809,7 +903,9 @@ async function handleCommand(body: any): Promise<Response> {
     browserManager.resetFailures();
     // Restore original active tab if we pinned to a specific one
     if (savedTabId !== null) {
-      try { browserManager.switchTab(savedTabId, { bringToFront: false }); } catch {}
+      try { browserManager.switchTab(savedTabId, { bringToFront: false }); } catch (restoreErr: any) {
+        console.warn('[browse] Failed to restore tab after command:', restoreErr.message);
+      }
     }
     return new Response(result, {
       status: 200,
@@ -818,7 +914,9 @@ async function handleCommand(body: any): Promise<Response> {
   } catch (err: any) {
     // Restore original active tab even on error
     if (savedTabId !== null) {
-      try { browserManager.switchTab(savedTabId, { bringToFront: false }); } catch {}
+      try { browserManager.switchTab(savedTabId, { bringToFront: false }); } catch (restoreErr: any) {
+        console.warn('[browse] Failed to restore tab after error:', restoreErr.message);
+      }
     }
 
     // Activity: emit command_end (error)
@@ -850,8 +948,19 @@ async function shutdown() {
   isShuttingDown = true;
 
   console.log('[browse] Shutting down...');
+  // Kill the sidebar-agent daemon process (spawned by cli.ts, detached).
+  // Without this, the agent keeps polling a dead server and spawns confused
+  // claude processes that auto-start headless browsers.
+  try {
+    const { spawnSync } = require('child_process');
+    spawnSync('pkill', ['-f', 'sidebar-agent\\.ts'], { stdio: 'ignore', timeout: 3000 });
+  } catch (err: any) {
+    console.warn('[browse] Failed to kill sidebar-agent:', err.message);
+  }
   // Clean up CDP inspector sessions
-  try { detachSession(); } catch {}
+  try { detachSession(); } catch (err: any) {
+    console.warn('[browse] Failed to detach CDP session:', err.message);
+  }
   inspectorSubscribers.clear();
   // Stop watch mode if active
   if (browserManager.isWatching()) browserManager.stopWatch();
@@ -869,11 +978,15 @@ async function shutdown() {
   // Clean up Chromium profile locks (prevent SingletonLock on next launch)
   const profileDir = path.join(process.env.HOME || '/tmp', '.gstack', 'chromium-profile');
   for (const lockFile of ['SingletonLock', 'SingletonSocket', 'SingletonCookie']) {
-    try { fs.unlinkSync(path.join(profileDir, lockFile)); } catch {}
+    try { fs.unlinkSync(path.join(profileDir, lockFile)); } catch (err: any) {
+      console.debug('[browse] Lock cleanup:', lockFile, err.message);
+    }
   }
 
   // Clean up state file
-  try { fs.unlinkSync(config.stateFile); } catch {}
+  try { fs.unlinkSync(config.stateFile); } catch (err: any) {
+    console.debug('[browse] State file cleanup:', err.message);
+  }
 
   process.exit(0);
 }
@@ -885,7 +998,9 @@ process.on('SIGINT', shutdown);
 // Defense-in-depth — primary cleanup is the CLI's stale-state detection via health check.
 if (process.platform === 'win32') {
   process.on('exit', () => {
-    try { fs.unlinkSync(config.stateFile); } catch {}
+    try { fs.unlinkSync(config.stateFile); } catch {
+      // Best-effort on exit
+    }
   });
 }
 
@@ -894,15 +1009,23 @@ function emergencyCleanup() {
   if (isShuttingDown) return;
   isShuttingDown = true;
   // Kill agent subprocess if running
-  try { killAgent(); } catch {}
+  try { killAgent(); } catch (err: any) {
+    console.error('[browse] Emergency: failed to kill agent:', err.message);
+  }
   // Save session state so chat history persists across crashes
-  try { saveSession(); } catch {}
+  try { saveSession(); } catch (err: any) {
+    console.error('[browse] Emergency: failed to save session:', err.message);
+  }
   // Clean Chromium profile locks
   const profileDir = path.join(process.env.HOME || '/tmp', '.gstack', 'chromium-profile');
   for (const lockFile of ['SingletonLock', 'SingletonSocket', 'SingletonCookie']) {
-    try { fs.unlinkSync(path.join(profileDir, lockFile)); } catch {}
+    try { fs.unlinkSync(path.join(profileDir, lockFile)); } catch (err: any) {
+      console.debug('[browse] Emergency lock cleanup:', lockFile, err.message);
+    }
   }
-  try { fs.unlinkSync(config.stateFile); } catch {}
+  try { fs.unlinkSync(config.stateFile); } catch (err: any) {
+    console.debug('[browse] Emergency state cleanup:', err.message);
+  }
 }
 process.on('uncaughtException', (err) => {
   console.error('[browse] FATAL uncaught exception:', err.message);
@@ -918,9 +1041,15 @@ process.on('unhandledRejection', (err: any) => {
 // ─── Start ─────────────────────────────────────────────────────
 async function start() {
   // Clear old log files
-  try { fs.unlinkSync(CONSOLE_LOG_PATH); } catch {}
-  try { fs.unlinkSync(NETWORK_LOG_PATH); } catch {}
-  try { fs.unlinkSync(DIALOG_LOG_PATH); } catch {}
+  try { fs.unlinkSync(CONSOLE_LOG_PATH); } catch (err: any) {
+    if (err.code !== 'ENOENT') console.debug('[browse] Log cleanup console:', err.message);
+  }
+  try { fs.unlinkSync(NETWORK_LOG_PATH); } catch (err: any) {
+    if (err.code !== 'ENOENT') console.debug('[browse] Log cleanup network:', err.message);
+  }
+  try { fs.unlinkSync(DIALOG_LOG_PATH); } catch (err: any) {
+    if (err.code !== 'ENOENT') console.debug('[browse] Log cleanup dialog:', err.message);
+  }
 
   const port = await findPort();
 
@@ -949,6 +1078,42 @@ async function start() {
         return handleCookiePickerRoute(url, req, browserManager, AUTH_TOKEN);
       }
 
+      // Welcome page — served when GStack Browser launches in headed mode
+      if (url.pathname === '/welcome') {
+        const welcomePath = (() => {
+          // Check project-local designs first, then global
+          const slug = process.env.GSTACK_SLUG || 'unknown';
+          const homeDir = process.env.HOME || process.env.USERPROFILE || '/tmp';
+          const projectWelcome = `${homeDir}/.gstack/projects/${slug}/designs/welcome-page-20260331/finalized.html`;
+          try { if (require('fs').existsSync(projectWelcome)) return projectWelcome; } catch (err: any) {
+            console.warn('[browse] Error checking project welcome page:', err.message);
+          }
+          // Fallback: built-in welcome page from gstack install
+          const skillRoot = process.env.GSTACK_SKILL_ROOT || `${homeDir}/.claude/skills/gstack`;
+          const builtinWelcome = `${skillRoot}/browse/src/welcome.html`;
+          try { if (require('fs').existsSync(builtinWelcome)) return builtinWelcome; } catch (err: any) {
+            console.warn('[browse] Error checking builtin welcome page:', err.message);
+          }
+          return null;
+        })();
+        if (welcomePath) {
+          try {
+            const html = require('fs').readFileSync(welcomePath, 'utf-8');
+            return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+          } catch (err: any) {
+            console.error('[browse] Failed to read welcome page:', welcomePath, err.message);
+          }
+        }
+        // No welcome page found — serve a simple fallback (avoid ERR_UNSAFE_REDIRECT on Windows)
+        return new Response(
+          `<!DOCTYPE html><html><head><title>GStack Browser</title>
+          <style>body{background:#111;color:#fff;font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;}
+          .msg{text-align:center;opacity:.7;}.gold{color:#f5a623;font-size:2em;margin-bottom:12px;}</style></head>
+          <body><div class="msg"><div class="gold">◈</div><p>GStack Browser ready.</p><p style="font-size:.85em">Waiting for commands from Claude Code.</p></div></body></html>`,
+          { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+        );
+      }
+
       // Health check — no auth required, does NOT reset idle timer
       if (url.pathname === '/health') {
         const healthy = await browserManager.isHealthy();
@@ -957,13 +1122,18 @@ async function start() {
           mode: browserManager.getConnectionMode(),
           uptime: Math.floor((Date.now() - startTime) / 1000),
           tabs: browserManager.getTabCount(),
-          currentUrl: browserManager.getCurrentUrl(),
-          // token removed — see .auth.json for extension bootstrap
+          // Auth token for extension bootstrap. Safe: /health is localhost-only.
+          // Previously served unconditionally, but that leaks the token if the
+          // server is tunneled to the internet (ngrok, SSH tunnel).
+          // In headed mode the server is always local, so return token unconditionally
+          // (fixes Playwright Chromium extensions that don't send Origin header).
+          ...(browserManager.getConnectionMode() === 'headed' ||
+              req.headers.get('origin')?.startsWith('chrome-extension://')
+              ? { token: AUTH_TOKEN } : {}),
           chatEnabled: true,
           agent: {
             status: agentStatus,
             runningFor: agentStartTime ? Date.now() - agentStartTime : null,
-            currentMessage,
             queueLength: messageQueue.length,
           },
           session: sidebarSession ? { id: sidebarSession.id, name: sidebarSession.name } : null,
@@ -1020,7 +1190,8 @@ async function start() {
             const unsubscribe = subscribe((entry) => {
               try {
                 controller.enqueue(encoder.encode(`event: activity\ndata: ${JSON.stringify(entry)}\n\n`));
-              } catch {
+              } catch (err: any) {
+                console.debug('[browse] Activity SSE stream error, unsubscribing:', err.message);
                 unsubscribe();
               }
             });
@@ -1029,7 +1200,8 @@ async function start() {
             const heartbeat = setInterval(() => {
               try {
                 controller.enqueue(encoder.encode(`: heartbeat\n\n`));
-              } catch {
+              } catch (err: any) {
+                console.debug('[browse] Activity SSE heartbeat failed:', err.message);
                 clearInterval(heartbeat);
                 unsubscribe();
               }
@@ -1039,7 +1211,9 @@ async function start() {
             req.signal.addEventListener('abort', () => {
               clearInterval(heartbeat);
               unsubscribe();
-              try { controller.close(); } catch {}
+              try { controller.close(); } catch {
+                // Expected: stream already closed
+              }
             });
           },
         });
@@ -1080,19 +1254,20 @@ async function start() {
         }
         try {
           // Sync active tab from Chrome extension — detects manual tab switches
-          const activeUrl = url.searchParams.get('activeUrl');
-          if (activeUrl) {
-            browserManager.syncActiveTabByUrl(activeUrl);
+          const rawActiveUrl = url.searchParams.get('activeUrl');
+          const sanitizedActiveUrl = sanitizeExtensionUrl(rawActiveUrl);
+          if (sanitizedActiveUrl) {
+            browserManager.syncActiveTabByUrl(sanitizedActiveUrl);
           }
           const tabs = await browserManager.getTabListWithTitles();
           return new Response(JSON.stringify({ tabs }), {
             status: 200,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://127.0.0.1' },
           });
         } catch (err: any) {
           return new Response(JSON.stringify({ tabs: [], error: err.message }), {
             status: 200,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://127.0.0.1' },
           });
         }
       }
@@ -1111,7 +1286,7 @@ async function start() {
           browserManager.switchTab(tabId);
           return new Response(JSON.stringify({ ok: true, activeTab: tabId }), {
             status: 200,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://127.0.0.1' },
           });
         } catch (err: any) {
           return new Response(JSON.stringify({ error: err.message }), { status: 400, headers: { 'Content-Type': 'application/json' } });
@@ -1133,7 +1308,7 @@ async function start() {
         const tabAgentStatus = tabId !== null ? getTabAgentStatus(tabId) : agentStatus;
         return new Response(JSON.stringify({ entries, total: chatNextId, agentStatus: tabAgentStatus, activeTabId: activeTab }), {
           status: 200,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'http://127.0.0.1' },
         });
       }
 
@@ -1142,6 +1317,7 @@ async function start() {
         if (!validateAuth(req)) {
           return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
         }
+        resetIdleTimer(); // Sidebar chat is real user activity
         const body = await req.json();
         const msg = body.message?.trim();
         if (!msg) {
@@ -1150,11 +1326,12 @@ async function start() {
         // The Chrome extension sends the active tab's URL — prefer it over
         // Playwright's page.url() which can be stale in headed mode when
         // the user navigates manually.
-        const extensionUrl = body.activeTabUrl || null;
+        const rawExtensionUrl = body.activeTabUrl || null;
+        const sanitizedExtUrl = sanitizeExtensionUrl(rawExtensionUrl);
         // Sync active tab BEFORE reading the ID — the user may have switched
         // tabs manually and the server's activeTabId is stale.
-        if (extensionUrl) {
-          browserManager.syncActiveTabByUrl(extensionUrl);
+        if (sanitizedExtUrl) {
+          browserManager.syncActiveTabByUrl(sanitizedExtUrl);
         }
         const msgTabId = browserManager?.getActiveTabId?.() ?? 0;
         const ts = new Date().toISOString();
@@ -1164,12 +1341,12 @@ async function start() {
         // Per-tab agent: each tab can run its own agent concurrently
         const tabState = getTabAgent(msgTabId);
         if (tabState.status === 'idle') {
-          spawnClaude(msg, extensionUrl, msgTabId);
+          spawnClaude(msg, sanitizedExtUrl, msgTabId);
           return new Response(JSON.stringify({ ok: true, processing: true }), {
             status: 200, headers: { 'Content-Type': 'application/json' },
           });
         } else if (tabState.queue.length < MAX_QUEUE) {
-          tabState.queue.push({ message: msg, ts, extensionUrl });
+          tabState.queue.push({ message: msg, ts, extensionUrl: sanitizedExtUrl });
           return new Response(JSON.stringify({ ok: true, queued: true, position: tabState.queue.length }), {
             status: 200, headers: { 'Content-Type': 'application/json' },
           });
@@ -1188,7 +1365,9 @@ async function start() {
         chatBuffer = [];
         chatNextId = 0;
         if (sidebarSession) {
-          try { fs.writeFileSync(path.join(SESSIONS_DIR, sidebarSession.id, 'chat.jsonl'), ''); } catch {}
+          try { fs.writeFileSync(path.join(SESSIONS_DIR, sidebarSession.id, 'chat.jsonl'), '', { mode: 0o600 }); } catch (err: any) {
+            console.error('[browse] Failed to clear chat file:', err.message);
+          }
         }
         return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
       }
@@ -1198,7 +1377,8 @@ async function start() {
         if (!validateAuth(req)) {
           return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
         }
-        killAgent();
+        const killBody = await req.json().catch(() => ({}));
+        killAgent(killBody.tabId ?? null);
         addChatEntry({ ts: new Date().toISOString(), role: 'agent', type: 'agent_error', error: 'Killed by user' });
         // Process next in queue
         if (messageQueue.length > 0) {
@@ -1213,7 +1393,8 @@ async function start() {
         if (!validateAuth(req)) {
           return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
         }
-        killAgent();
+        const stopBody = await req.json().catch(() => ({}));
+        killAgent(stopBody.tabId ?? null);
         addChatEntry({ ts: new Date().toISOString(), role: 'agent', type: 'agent_error', error: 'Stopped by user' });
         return new Response(JSON.stringify({ ok: true, queuedMessages: messageQueue.length }), {
           status: 200, headers: { 'Content-Type': 'application/json' },
@@ -1411,8 +1592,14 @@ async function start() {
         });
       }
 
-      // GET /inspector/events — SSE for inspector state changes
+      // GET /inspector/events — SSE for inspector state changes (auth required)
       if (url.pathname === '/inspector/events' && req.method === 'GET') {
+        const streamToken = url.searchParams.get('token');
+        if (!validateAuth(req) && streamToken !== AUTH_TOKEN) {
+          return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+            status: 401, headers: { 'Content-Type': 'application/json' },
+          });
+        }
         const encoder = new TextEncoder();
         const stream = new ReadableStream({
           start(controller) {
@@ -1429,7 +1616,8 @@ async function start() {
                 controller.enqueue(encoder.encode(
                   `event: inspector\ndata: ${JSON.stringify(event)}\n\n`
                 ));
-              } catch {
+              } catch (err: any) {
+                console.debug('[browse] Inspector SSE stream error:', err.message);
                 inspectorSubscribers.delete(notify);
               }
             };
@@ -1439,7 +1627,8 @@ async function start() {
             const heartbeat = setInterval(() => {
               try {
                 controller.enqueue(encoder.encode(`: heartbeat\n\n`));
-              } catch {
+              } catch (err: any) {
+                console.debug('[browse] Inspector SSE heartbeat failed:', err.message);
                 clearInterval(heartbeat);
                 inspectorSubscribers.delete(notify);
               }
@@ -1449,7 +1638,9 @@ async function start() {
             req.signal.addEventListener('abort', () => {
               clearInterval(heartbeat);
               inspectorSubscribers.delete(notify);
-              try { controller.close(); } catch {}
+              try { controller.close(); } catch (err: any) {
+                // Expected: stream already closed
+              }
             });
           },
         });
@@ -1491,6 +1682,21 @@ async function start() {
 
   browserManager.serverPort = port;
 
+  // Navigate to welcome page if in headed mode and still on about:blank
+  if (browserManager.getConnectionMode() === 'headed') {
+    try {
+      const currentUrl = browserManager.getCurrentUrl();
+      if (currentUrl === 'about:blank' || currentUrl === '') {
+        const page = browserManager.getPage();
+        page.goto(`http://127.0.0.1:${port}/welcome`, { timeout: 3000 }).catch((err: any) => {
+          console.warn('[browse] Failed to navigate to welcome page:', err.message);
+        });
+      }
+    } catch (err: any) {
+      console.warn('[browse] Welcome page navigation setup failed:', err.message);
+    }
+  }
+
   // Clean up stale state files (older than 7 days)
   try {
     const stateDir = path.join(config.stateDir, 'browse-states');
@@ -1505,7 +1711,9 @@ async function start() {
         }
       }
     }
-  } catch {}
+  } catch (err: any) {
+    console.warn('[browse] Failed to clean stale state files:', err.message);
+  }
 
   console.log(`[browse] Server running on http://127.0.0.1:${port} (PID: ${process.pid})`);
   console.log(`[browse] State file: ${config.stateFile}`);
@@ -1521,8 +1729,8 @@ start().catch((err) => {
   // stderr because the server is launched with detached: true, stdio: 'ignore'.
   try {
     const errorLogPath = path.join(config.stateDir, 'browse-startup-error.log');
-    fs.mkdirSync(config.stateDir, { recursive: true });
-    fs.writeFileSync(errorLogPath, `${new Date().toISOString()} ${err.message}\n${err.stack || ''}\n`);
+    fs.mkdirSync(config.stateDir, { recursive: true, mode: 0o700 });
+    fs.writeFileSync(errorLogPath, `${new Date().toISOString()} ${err.message}\n${err.stack || ''}\n`, { mode: 0o600 });
   } catch {
     // stateDir may not exist — nothing more we can do
   }
