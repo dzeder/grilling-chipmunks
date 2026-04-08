@@ -1,6 +1,6 @@
 version: "1.0"
 status: "ACTIVE"
-total_repos: 55
+total_repos: 56
 last_discovered: "2026-04-07"
 rules:
   - "Check this registry before any PR in an Ohanafy product repo"
@@ -338,6 +338,19 @@ repos:
     stack: []
     active: true
     notes: "Integration configs and middleware"
+
+  - name: dzeder/Integrations
+    type: reference
+    sku: all
+    stack: [JavaScript, Tray.io]
+    active: true
+    url: "https://github.com/dzeder/Integrations.git"
+    notes: >
+      Daniel's integration working repo — 88+ Tray Embedded projects with raw exports,
+      extracted scripts, configs, diagrams. Source of truth for real Tray workflow JSON
+      structure. Key paths: 01-tray/Embedded/{ProjectName}/raw-exports/ for real exports,
+      scripts/ for extracted script steps with input.json and test-runner.js.
+      2.5GB — clone on demand, never pull into irvine.
 
   - name: OHFY-Offline
     type: backend
