@@ -290,12 +290,6 @@ When the watcher detects upstream changes, it checks `learned_from` lineage to f
 skills/               # 114 skills organized by pillar (see above)
 agents/               # 17 specialist agent definitions
 integrations/         # Tray patterns, marketplace UI, workflow artifacts
-projects/             # Shared technical work
-  ohanafy-core/         # Main Salesforce org
-  netsuite-ohanafy/     # NetSuite integration
-  qbo-ohanafy/          # QuickBooks Online integration
-  xero-ohanafy/         # Xero integration
-  rehrig-ohanafy/       # Rehrig integration
 customers/            # Per-customer Salesforce metadata
   _template/            # Copy to create a new customer
   gulf/                 # Gulf Distributing
@@ -310,7 +304,6 @@ scripts/              # 23+ utility scripts
 tests/                # Unit, integration, E2E, eval tests
 ```
 
-`projects/` = shared technical work (integrations, reports, LWC).
 `customers/` = per-customer Salesforce/Ohanafy configurations and knowledge.
 
 ## Directory Rules
@@ -322,6 +315,19 @@ tests/                # Unit, integration, E2E, eval tests
 - New prompt → add to `skills/claude/prompts/` with semver, add eval case
 - All IaC → `skills/aws/cdk/`
 - Tray configs → `skills/tray/`
+
+## Artifact Routing
+
+This repo is the brain — skills, agents, patterns, knowledge. Built outputs go to the artifacts repo.
+
+| What | Where |
+|------|-------|
+| Skills, agents, patterns, knowledge | This repo (`daniels-ohanafy`) |
+| Built artifacts (Tray exports, SF metadata, deliverables) | `dzeder/daniels-ohanafy-artifacts` |
+| Legacy Tray exports (88+ projects, reference only) | `dzeder/Integrations` (read-only) |
+| Per-customer Salesforce configs | This repo (`customers/`) |
+
+Never commit built artifacts to this repo. Route to `dzeder/daniels-ohanafy-artifacts` with proper versioning.
 
 ## Tray-First Rule
 

@@ -343,14 +343,26 @@ repos:
     type: reference
     sku: all
     stack: [JavaScript, Tray.io]
-    active: true
+    active: false
     url: "https://github.com/dzeder/Integrations.git"
     notes: >
-      Daniel's integration working repo — 88+ Tray Embedded projects with raw exports,
-      extracted scripts, configs, diagrams. Source of truth for real Tray workflow JSON
-      structure. Key paths: 01-tray/Embedded/{ProjectName}/raw-exports/ for real exports,
-      scripts/ for extracted script steps with input.json and test-runner.js.
-      2.5GB — clone on demand, never pull into irvine.
+      LEGACY — read-only reference. Daniel's original integration working repo — 88+ Tray
+      Embedded projects with raw exports, extracted scripts, configs, diagrams. Source of
+      truth for real Tray workflow JSON structure. 2.5GB — clone on demand, never pull
+      into brain repo. New artifacts go to dzeder/daniels-ohanafy-artifacts.
+
+  # ── Artifacts / Meta ──────────────────────────────────────────
+
+  - name: dzeder/daniels-ohanafy-artifacts
+    type: artifacts
+    sku: all
+    stack: []
+    active: true
+    url: "https://github.com/dzeder/daniels-ohanafy-artifacts.git"
+    notes: >
+      Canonical artifacts repo for all work produced by the daniels-ohanafy brain repo.
+      Stores Tray integration exports, Salesforce metadata bundles, customer docs,
+      project deliverables. Versioned with semver directories per project.
 
   - name: OHFY-Offline
     type: backend
