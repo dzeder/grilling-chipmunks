@@ -1,0 +1,366 @@
+{
+  "tray_export_version": 4,
+  "export_type": "project",
+  "workflows": [
+    {
+      "id": "41e816e9-6aee-4600-9560-3d0b1e172e89",
+      "created": "2026-04-08T00:00:00.000000Z",
+      "workspace_id": "c52d79bd-5882-4b67-9e35-67fac73b367f",
+      "project_id": "581360fd-5754-404b-92da-f00fa45ce619",
+      "group": "59cb3629-f792-4d4d-9a7a-2561c3ef32f8",
+      "creator": "c52d79bd-5882-4b67-9e35-67fac73b367f",
+      "version": {
+        "id": "9c5197f8-491b-4191-afa5-954ce48d3fd9",
+        "created": "2026-04-08T00:00:00.000000Z"
+      },
+      "title": "Draft Order Item Cleanup",
+      "enabled": true,
+      "tags": [],
+      "settings": {
+        "config": {},
+        "input_schema": {},
+        "output_schema": {}
+      },
+      "steps_structure": [
+        { "name": "trigger", "type": "normal", "content": {} },
+        { "name": "salesforce-1", "type": "normal", "content": {} },
+        {
+          "name": "boolean-condition-1",
+          "type": "branch",
+          "content": {
+            "true": [
+              { "name": "script-1", "type": "normal", "content": {} },
+              { "name": "salesforce-2", "type": "normal", "content": {} },
+              {
+                "name": "boolean-condition-2",
+                "type": "branch",
+                "content": {
+                  "true": [
+                    { "name": "slack-1", "type": "normal", "content": {} }
+                  ],
+                  "false": [
+                    { "name": "slack-2", "type": "normal", "content": {} }
+                  ]
+                }
+              }
+            ],
+            "false": []
+          }
+        }
+      ],
+      "steps": {
+        "trigger": {
+          "title": "Scheduled Trigger",
+          "connector": { "name": "scheduled", "version": "3.5" },
+          "operation": "daily",
+          "output_schema": {},
+          "error_handling": {},
+          "properties": {
+            "synchronous": { "type": "boolean", "value": false },
+            "public_url": { "type": "jsonpath", "value": "$.env.public_url" },
+            "hour": { "type": "string", "value": "19" },
+            "minute": { "type": "string", "value": "0" },
+            "day_of_week": {
+              "type": "object",
+              "value": {
+                "monday": { "type": "boolean", "value": true },
+                "tuesday": { "type": "boolean", "value": true },
+                "wednesday": { "type": "boolean", "value": true },
+                "thursday": { "type": "boolean", "value": true },
+                "friday": { "type": "boolean", "value": true },
+                "saturday": { "type": "boolean", "value": true },
+                "sunday": { "type": "boolean", "value": true }
+              }
+            },
+            "tz": { "type": "string", "value": "EST5EDT" }
+          }
+        },
+        "salesforce-1": {
+          "title": "Query Draft Order Items",
+          "connector": { "name": "salesforce", "version": "8.7" },
+          "operation": "raw_http_request",
+          "output_schema": {},
+          "error_handling": {},
+          "authentication": {
+            "group": "1eab5959-014e-4978-ae7c-51c06f7368aa",
+            "title": "TBM PRODUCTION OHANAFY 2025-12-15",
+            "service_icon": {
+              "icon_type": "url",
+              "value": "https://s3.amazonaws.com/images.tray.io/artisan/icons/dd966f42-81e8-4770-a3d8-d095ca41ab45.png"
+            },
+            "scopes": ["full", "refresh_token"],
+            "service_name": "salesforce",
+            "service_version": 1
+          },
+          "properties": {
+            "method": { "type": "string", "value": "GET" },
+            "include_raw_body": { "type": "boolean", "value": false },
+            "parse_response": { "type": "string", "value": "true" },
+            "url": {
+              "type": "object",
+              "value": {
+                "endpoint": { "type": "string", "value": "services/data/v62.0/query" }
+              }
+            },
+            "query_parameters": {
+              "type": "array",
+              "value": [
+                {
+                  "type": "object",
+                  "value": {
+                    "key": { "type": "string", "value": "q" },
+                    "value": { "type": "string", "value": "SELECT Id, Name, ohfy__Order__c FROM ohfy__Order_Item__c WHERE ohfy__Is_Draft__c = true AND ohfy__Order__r.ohfy__Status__c != 'Draft' AND ohfy__Order__r.ohfy__Delivery_Date__c > TODAY" }
+                  }
+                }
+              ]
+            },
+            "body": {
+              "type": "object",
+              "value": {
+                "none": { "type": "null", "value": null }
+              }
+            }
+          }
+        },
+        "boolean-condition-1": {
+          "title": "Has Draft Items?",
+          "connector": { "name": "boolean-condition", "version": "2.3" },
+          "operation": "boolean_condition",
+          "output_schema": {},
+          "error_handling": {},
+          "properties": {
+            "conditions": {
+              "type": "array",
+              "value": [
+                {
+                  "type": "object",
+                  "value": {
+                    "value1": { "type": "jsonpath", "value": "$.steps.salesforce-1.response.body.totalSize" },
+                    "comparison_type": { "type": "string", "value": ">" },
+                    "value2": { "type": "number", "value": 0 }
+                  }
+                }
+              ]
+            },
+            "strictness": { "type": "string", "value": "All" }
+          }
+        },
+        "script-1": {
+          "title": "Transform to Batch Update Format",
+          "connector": { "name": "script", "version": "3.4" },
+          "operation": "execute",
+          "output_schema": {},
+          "error_handling": {},
+          "properties": {
+            "variables": {
+              "type": "array",
+              "value": [
+                {
+                  "type": "object",
+                  "value": {
+                    "name": { "type": "string", "value": "records" },
+                    "value": { "type": "jsonpath", "value": "$.steps.salesforce-1.response.body.records" }
+                  }
+                }
+              ]
+            },
+            "script": {
+              "type": "string",
+              "value": "exports.step = function(input, fileInput) {\n  var records = input.records;\n  var batchUpdateList = [];\n\n  for (var i = 0; i < records.length; i++) {\n    batchUpdateList.push({\n      object_id: records[i].Id,\n      fields: [\n        { key: \"ohfy__Is_Draft__c\", value: false }\n      ]\n    });\n  }\n\n  return {\n    batch_update_list: batchUpdateList,\n    count: records.length,\n    success_message: \":white_check_mark: *Draft Order Item Cleanup — SUCCESS*\\n\\nUpdated \" + records.length + \" draft order item(s) to non-draft.\"\n  };\n};"
+            },
+            "file_output": { "type": "boolean", "value": false }
+          }
+        },
+        "salesforce-2": {
+          "title": "Batch Update Order Items",
+          "connector": { "name": "salesforce", "version": "8.7" },
+          "operation": "batch_update_records",
+          "output_schema": {},
+          "error_handling": {},
+          "authentication": {
+            "group": "1eab5959-014e-4978-ae7c-51c06f7368aa",
+            "title": "TBM PRODUCTION OHANAFY 2025-12-15",
+            "service_icon": {
+              "icon_type": "url",
+              "value": "https://s3.amazonaws.com/images.tray.io/artisan/icons/dd966f42-81e8-4770-a3d8-d095ca41ab45.png"
+            },
+            "scopes": ["full", "refresh_token"],
+            "service_name": "salesforce",
+            "service_version": 1
+          },
+          "properties": {
+            "object": { "type": "string", "value": "ohfy__Order_Item__c" },
+            "error_handling": { "type": "string", "value": "rollback_fail" },
+            "batch_update_list": {
+              "type": "jsonpath",
+              "value": "$.steps.script-1.result.batch_update_list"
+            }
+          }
+        },
+        "boolean-condition-2": {
+          "title": "Update Successful?",
+          "connector": { "name": "boolean-condition", "version": "2.3" },
+          "operation": "boolean_condition",
+          "output_schema": {},
+          "error_handling": {},
+          "properties": {
+            "conditions": {
+              "type": "array",
+              "value": [
+                {
+                  "type": "object",
+                  "value": {
+                    "value1": { "type": "jsonpath", "value": "$.steps.salesforce-2.hasErrors" },
+                    "comparison_type": { "type": "string", "value": "===" },
+                    "value2": { "type": "boolean", "value": false }
+                  }
+                }
+              ]
+            },
+            "strictness": { "type": "string", "value": "All" }
+          }
+        },
+        "slack-1": {
+          "title": "Notify Success",
+          "connector": { "name": "slack", "version": "11.0" },
+          "operation": "send_message",
+          "output_schema": {},
+          "error_handling": {},
+          "authentication": {
+            "group": "1759fea0-ad14-4529-a2aa-96842769e89a",
+            "title": "Daniel's Slack",
+            "service_icon": {
+              "icon_type": "url",
+              "value": "https://s3.amazonaws.com/images.tray.io/artisan/icons/6632c308-2cd1-4f68-8128-e521e552a66b.png"
+            },
+            "scopes": ["reminders:read", "links:write", "users:read.email", "pins:read", "team:read", "channels:write.topic", "reminders:write", "calls:read", "commands", "reactions:write", "users:read", "groups:write", "mpim:history", "pins:write", "mpim:write", "mpim:read", "users:write", "channels:manage", "emoji:read", "im:read", "usergroups:read", "dnd:read", "channels:read", "reactions:read", "im:history", "users.profile:read", "im:write", "files:write", "links:read", "files:read", "chat:write", "groups:history", "channels:history", "usergroups:write", "groups:read", "channels:write.invites"],
+            "service_name": "slack",
+            "service_version": 5
+          },
+          "properties": {
+            "use_user_token": { "type": "boolean", "value": false },
+            "username": { "type": "string", "value": "Tray.io" },
+            "parse": { "type": "string", "value": "none" },
+            "link_names": { "type": "boolean", "value": false },
+            "reply_broadcast": { "type": "boolean", "value": false },
+            "channel": { "type": "string", "value": "U05UL218VA5" },
+            "text": {
+              "type": "jsonpath",
+              "value": "$.steps.script-1.result.success_message"
+            }
+          }
+        },
+        "slack-2": {
+          "title": "Notify Failure",
+          "connector": { "name": "slack", "version": "11.0" },
+          "operation": "send_message",
+          "output_schema": {},
+          "error_handling": {},
+          "authentication": {
+            "group": "1759fea0-ad14-4529-a2aa-96842769e89a",
+            "title": "Daniel's Slack",
+            "service_icon": {
+              "icon_type": "url",
+              "value": "https://s3.amazonaws.com/images.tray.io/artisan/icons/6632c308-2cd1-4f68-8128-e521e552a66b.png"
+            },
+            "scopes": ["reminders:read", "links:write", "users:read.email", "pins:read", "team:read", "channels:write.topic", "reminders:write", "calls:read", "commands", "reactions:write", "users:read", "groups:write", "mpim:history", "pins:write", "mpim:write", "mpim:read", "users:write", "channels:manage", "emoji:read", "im:read", "usergroups:read", "dnd:read", "channels:read", "reactions:read", "im:history", "users.profile:read", "im:write", "files:write", "links:read", "files:read", "chat:write", "groups:history", "channels:history", "usergroups:write", "groups:read", "channels:write.invites"],
+            "service_name": "slack",
+            "service_version": 5
+          },
+          "properties": {
+            "use_user_token": { "type": "boolean", "value": false },
+            "username": { "type": "string", "value": "Tray.io" },
+            "parse": { "type": "string", "value": "none" },
+            "link_names": { "type": "boolean", "value": false },
+            "reply_broadcast": { "type": "boolean", "value": false },
+            "channel": { "type": "string", "value": "U05UL218VA5" },
+            "text": { "type": "string", "value": ":x: *Draft Order Item Cleanup — FAILED*\n\nThe batch update failed to process draft order items.\n\nCheck logs: https://app.tray.io/workspaces/c52d79bd-5882-4b67-9e35-67fac73b367f/projects/581360fd-5754-404b-92da-f00fa45ce619/workflows/41e816e9-6aee-4600-9560-3d0b1e172e89/logs" }
+          }
+        }
+      },
+      "legacy_error_handling": false,
+      "dependencies": []
+    },
+    {
+      "id": "8f904b53-d9d0-4cce-b980-98c74ede1c94",
+      "created": "2026-04-08T00:00:00.000000Z",
+      "workspace_id": "c52d79bd-5882-4b67-9e35-67fac73b367f",
+      "project_id": "581360fd-5754-404b-92da-f00fa45ce619",
+      "group": "11184cdb-7630-4ee6-92dd-a0d46843d34f",
+      "creator": "c52d79bd-5882-4b67-9e35-67fac73b367f",
+      "version": {
+        "id": "5c0e63e7-5780-4f63-b17a-fa2486ad3d53",
+        "created": "2026-04-08T00:00:00.000000Z"
+      },
+      "title": "Draft Order Item Cleanup - Error Handler",
+      "enabled": true,
+      "tags": [],
+      "settings": {
+        "config": {},
+        "input_schema": {},
+        "output_schema": {}
+      },
+      "steps_structure": [
+        { "name": "trigger", "type": "normal", "content": {} },
+        { "name": "slack-1", "type": "normal", "content": {} }
+      ],
+      "steps": {
+        "trigger": {
+          "title": "Alert",
+          "connector": { "name": "alerting-trigger", "version": "1.1" },
+          "operation": "trigger",
+          "output_schema": {},
+          "error_handling": {},
+          "properties": {}
+        },
+        "slack-1": {
+          "title": "Notify Error",
+          "connector": { "name": "slack", "version": "11.0" },
+          "operation": "send_message",
+          "output_schema": {},
+          "error_handling": {},
+          "authentication": {
+            "group": "1759fea0-ad14-4529-a2aa-96842769e89a",
+            "title": "Daniel's Slack",
+            "service_icon": {
+              "icon_type": "url",
+              "value": "https://s3.amazonaws.com/images.tray.io/artisan/icons/6632c308-2cd1-4f68-8128-e521e552a66b.png"
+            },
+            "scopes": ["reminders:read", "links:write", "users:read.email", "pins:read", "team:read", "channels:write.topic", "reminders:write", "calls:read", "commands", "reactions:write", "users:read", "groups:write", "mpim:history", "pins:write", "mpim:write", "mpim:read", "users:write", "channels:manage", "emoji:read", "im:read", "usergroups:read", "dnd:read", "channels:read", "reactions:read", "im:history", "users.profile:read", "im:write", "files:write", "links:read", "files:read", "chat:write", "groups:history", "channels:history", "usergroups:write", "groups:read", "channels:write.invites"],
+            "service_name": "slack",
+            "service_version": 5
+          },
+          "properties": {
+            "use_user_token": { "type": "boolean", "value": false },
+            "username": { "type": "string", "value": "Tray.io" },
+            "parse": { "type": "string", "value": "none" },
+            "link_names": { "type": "boolean", "value": false },
+            "reply_broadcast": { "type": "boolean", "value": false },
+            "channel": { "type": "string", "value": "U05UL218VA5" },
+            "text": { "type": "string", "value": ":rotating_light: *Draft Order Item Cleanup — ERRORED*\n\nA workflow in this project errored.\n\nCheck logs: https://app.tray.io/workspaces/c52d79bd-5882-4b67-9e35-67fac73b367f/projects/581360fd-5754-404b-92da-f00fa45ce619/workflows/41e816e9-6aee-4600-9560-3d0b1e172e89/logs" }
+          }
+        }
+      },
+      "legacy_error_handling": false,
+      "dependencies": []
+    }
+  ],
+  "projects": [
+    {
+      "id": "581360fd-5754-404b-92da-f00fa45ce619",
+      "version": null,
+      "parent_project_id": null,
+      "type": null,
+      "name": "Draft Order Item Cleanup",
+      "config": {},
+      "workflows": [
+        "41e816e9-6aee-4600-9560-3d0b1e172e89",
+        "8f904b53-d9d0-4cce-b980-98c74ede1c94"
+      ],
+      "dependencies": [],
+      "installation_source_id": null,
+      "installation_version_id": null,
+      "installation_guide": null
+    }
+  ]
+}
