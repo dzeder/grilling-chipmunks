@@ -41,6 +41,11 @@ credentials.json
 .claude/skills/gstack/browse/dist/
 .claude/skills/gstack/design/dist/
 
+# Tray built artifacts (exports go to dzeder/daniels-ohanafy-artifacts)
+integrations/tray/**/raw-exports/
+integrations/tray/**/versions/
+integrations/tray/Embedded/
+
 # Conductor
 .context/
 
