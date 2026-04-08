@@ -1,0 +1,6 @@
+# Keep markdown knowledge files, ignore raw Salesforce metadata
+# Reconnect with connect-org.sh when you need the raw source
+
+**/orgs/**/force-app/
+**/orgs/**/package.xml
+**/orgs/**/sfdx-project.json
