@@ -96,8 +96,9 @@ Source sync roadmap: `docs/ohanafy-source-sync-roadmap.md`
 
 ### Integration skills (Tray / Ohanafy platform)
 
-15 integration-specific skills in `skills/tray/`:
+16 integration-specific skills in `skills/tray/`:
 - **tray-expert** — Tray.io platform expert (Q&A, workflow design, integration audit, architecture)
+- **tray-project** — Generate importable Tray project JSON exports (flat UI format, typed values, auth objects)
 - **tray-embedded-customjs** — Custom JS patterns for Tray Embedded config wizards
 - **tray-errors** — Tray error handling protocols
 - **tray-diagrams** — Workflow visualization with Mermaid

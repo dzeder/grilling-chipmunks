@@ -1,5 +1,11 @@
 # Tray.ai Project JSON Structure Guide for LLM Analysis
 
+> **For generating importable project JSON**, use the authoritative spec at
+> [`skills/tray/tray-project/references/project-json-spec.md`](../../skills/tray/tray-project/references/project-json-spec.md).
+> This guide is useful for **analyzing** existing exports but has known inaccuracies
+> for **generating** new ones (e.g., auth objects ARE visible in exports, typed values
+> are required, `raw_http_request` is preferred over `find_records` for SOQL).
+
 ## Overview
 
 This document provides a comprehensive guide for Large Language Models (LLMs) to deeply understand and analyze Tray.ai project JSON exports. Tray.ai is an integration platform as a service (iPaaS) that allows users to create complex automation workflows between various applications and services.

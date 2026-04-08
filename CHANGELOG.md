@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.2.0] - 2026-04-08
+
+### Added
+- Draft Order Item Cleanup Tray project: importable JSON with nightly scheduled workflow that queries stale draft order items, batch-updates them via Salesforce, and Slack DMs results. Includes error alerting workflow.
+- `tray-project` skill: generate importable Tray.io project JSON exports with authoritative spec covering flat UI format, typed values, auth objects, and all common step patterns
+- Extracted script and test fixtures for the cleanup workflow's JavaScript transform step
+
+### Changed
+- CLAUDE.md: registered tray-project as the 16th integration skill
+- Tray-AI-Project-JSON-Structure-Guide: added accuracy banner pointing to the authoritative spec for JSON generation
+- gstack updated to 0.16.0.0
+
 ## [0.0.1.0] - 2026-04-08
 
 ### Added
