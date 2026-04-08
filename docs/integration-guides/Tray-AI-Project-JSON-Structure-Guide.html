@@ -304,6 +304,16 @@
     <h1
     id="tray.ai-project-json-structure-guide-for-llm-analysis">Tray.ai
     Project JSON Structure Guide for LLM Analysis</h1>
+    <blockquote>
+    <p><strong>For generating importable project JSON</strong>, use the
+    authoritative spec at <a
+    href="../../skills/tray/tray-project/references/project-json-spec.md"><code>skills/tray/tray-project/references/project-json-spec.md</code></a>.
+    This guide is useful for <strong>analyzing</strong> existing exports
+    but has known inaccuracies for <strong>generating</strong> new ones
+    (e.g., auth objects ARE visible in exports, typed values are
+    required, <code>raw_http_request</code> is preferred over
+    <code>find_records</code> for SOQL).</p>
+    </blockquote>
     <h2 id="overview">Overview</h2>
     <p>This document provides a comprehensive guide for Large Language
     Models (LLMs) to deeply understand and analyze Tray.ai project JSON
