@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.3.0] - 2026-04-08
+
+### Added
+- Draft Order Item Cleanup Tray project export: nightly 7pm EST scheduled workflow that finds orphaned draft order items (draft item on non-draft order with future delivery date), batch-updates them to non-draft, and Slack DMs results with success count or failure details including log URL
+- Error handler workflow with alerting trigger that Slack DMs on any project error
+- Extracted JavaScript transform script with test fixture directory
+
 ## [0.0.2.0] - 2026-04-08
 
 ### Added
