@@ -1,0 +1,40 @@
+{
+  "data": [
+    {
+      "attributes": {
+        "type": "ohfy__Order_Item__c",
+        "url": "/services/data/v60.0/sobjects/ohfy__Order_Item__c/a0Bxx000000TEST1"
+      },
+      "Id": "a0Bxx000000TEST1",
+      "ohfy__Is_Draft__c": true,
+      "ohfy__Order__r": {
+        "ohfy__Status__c": "New",
+        "ohfy__Delivery_Pickup_Date__c": "2026-04-15"
+      }
+    },
+    {
+      "attributes": {
+        "type": "ohfy__Order_Item__c",
+        "url": "/services/data/v60.0/sobjects/ohfy__Order_Item__c/a0Bxx000000TEST2"
+      },
+      "Id": "a0Bxx000000TEST2",
+      "ohfy__Is_Draft__c": true,
+      "ohfy__Order__r": {
+        "ohfy__Status__c": "Picking",
+        "ohfy__Delivery_Pickup_Date__c": "2026-04-20"
+      }
+    },
+    {
+      "attributes": {
+        "type": "ohfy__Order_Item__c",
+        "url": "/services/data/v60.0/sobjects/ohfy__Order_Item__c/a0Bxx000000TEST3"
+      },
+      "Id": "a0Bxx000000TEST3",
+      "ohfy__Is_Draft__c": true,
+      "ohfy__Order__r": {
+        "ohfy__Status__c": "New",
+        "ohfy__Delivery_Pickup_Date__c": "2026-04-15"
+      }
+    }
+  ]
+}

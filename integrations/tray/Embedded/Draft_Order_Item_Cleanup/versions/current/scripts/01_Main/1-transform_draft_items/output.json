@@ -1,0 +1,26 @@
+[
+  {
+    "object": "ohfy__Order_Item__c",
+    "error_handling": "rollback_fail",
+    "batch_update_list": [
+      {
+        "object_id": "a0Bxx000000TEST1",
+        "fields": [
+          { "key": "ohfy__Is_Draft__c", "value": false }
+        ]
+      },
+      {
+        "object_id": "a0Bxx000000TEST2",
+        "fields": [
+          { "key": "ohfy__Is_Draft__c", "value": false }
+        ]
+      },
+      {
+        "object_id": "a0Bxx000000TEST3",
+        "fields": [
+          { "key": "ohfy__Is_Draft__c", "value": false }
+        ]
+      }
+    ]
+  }
+]
