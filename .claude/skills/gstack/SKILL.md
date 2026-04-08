@@ -706,6 +706,9 @@ $B css ".button" "background-color"
 ## Snapshot System
 
 The snapshot is your primary tool for understanding and interacting with pages.
+`$B` is the browse binary (resolved from `$_ROOT/.claude/skills/gstack/browse/dist/browse` or `~/.claude/skills/gstack/browse/dist/browse`).
+
+**Syntax:** `$B snapshot [flags]`
 
 ```
 -i        --interactive           Interactive elements only (buttons, links, inputs) with @e refs. Also auto-enables cursor-interactive scan (-C) to capture dropdowns and popovers.
@@ -720,6 +723,12 @@ The snapshot is your primary tool for understanding and interacting with pages.
 
 All flags can be combined freely. `-o` only applies when `-a` is also used.
 Example: `$B snapshot -i -a -C -o /tmp/annotated.png`
+
+**Flag details:**
+- `-d <N>`: depth 0 = root element only, 1 = root + direct children, etc. Default: unlimited. Works with all other flags including `-i`.
+- `-s <sel>`: any valid CSS selector (`#main`, `.content`, `nav > ul`, `[data-testid="hero"]`). Scopes the tree to that subtree.
+- `-D`: outputs a unified diff (lines prefixed with `+`/`-`/` `) comparing the current snapshot against the previous one. First call stores the baseline and returns the full tree. Baseline persists across navigations until the next `-D` call resets it.
+- `-a`: saves an annotated screenshot (PNG) with red overlay boxes and @ref labels drawn on each interactive element. The screenshot is a separate output from the text tree — both are produced when `-a` is used.
 
 **Ref numbering:** @e refs are assigned sequentially (@e1, @e2, ...) in tree order.
 @c refs from `-C` are numbered separately (@c1, @c2, ...).
@@ -764,10 +773,19 @@ Refs are invalidated on navigation — run `snapshot` again after `goto`.
 | Command | Description |
 |---------|-------------|
 | `accessibility` | Full ARIA tree |
+| `data [--jsonld|--og|--meta|--twitter]` | Structured data: JSON-LD, Open Graph, Twitter Cards, meta tags |
 | `forms` | Form fields as JSON |
 | `html [selector]` | innerHTML of selector (throws if not found), or full page HTML if no selector given |
 | `links` | All links as "text → href" |
+| `media [--images|--videos|--audio] [selector]` | All media elements (images, videos, audio) with URLs, dimensions, types |
 | `text` | Cleaned page text |
+
+### Extraction
+| Command | Description |
+|---------|-------------|
+| `archive [path]` | Save complete page as MHTML via CDP |
+| `download <url|@ref> [path] [--base64]` | Download URL or media element to disk using browser cookies |
+| `scrape <images|videos|media> [--selector sel] [--dir path] [--limit N]` | Bulk download all media from page. Writes manifest.json |
 
 ### Interaction
 | Command | Description |

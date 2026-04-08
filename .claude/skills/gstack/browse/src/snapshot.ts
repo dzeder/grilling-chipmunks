@@ -18,7 +18,7 @@
  */
 
 import type { Page, Frame, Locator } from 'playwright';
-import type { BrowserManager, RefEntry } from './browser-manager';
+import type { TabSession, RefEntry } from './tab-session';
 import * as Diff from 'diff';
 import { TEMP_DIR, isPathWithin } from './platform';
 
@@ -132,13 +132,14 @@ function parseLine(line: string): ParsedNode | null {
  */
 export async function handleSnapshot(
   args: string[],
-  bm: BrowserManager
+  session: TabSession,
+  securityOpts?: { splitForScoped?: boolean },
 ): Promise<string> {
   const opts = parseSnapshotArgs(args);
-  const page = bm.getPage();
+  const page = session.getPage();
   // Frame-aware target for accessibility tree
-  const target = bm.getActiveFrameOrPage();
-  const inFrame = bm.getFrame() !== null;
+  const target = session.getActiveFrameOrPage();
+  const inFrame = session.getFrame() !== null;
 
   // Get accessibility tree via ariaSnapshot
   let rootLocator: Locator;
@@ -152,7 +153,7 @@ export async function handleSnapshot(
 
   const ariaText = await rootLocator.ariaSnapshot();
   if (!ariaText || ariaText.trim().length === 0) {
-    bm.setRefMap(new Map());
+    session.setRefMap(new Map());
     return '(no accessible elements found)';
   }
 
@@ -337,7 +338,7 @@ export async function handleSnapshot(
   }
 
   // Store ref map on BrowserManager
-  bm.setRefMap(refMap);
+  session.setRefMap(refMap);
 
   if (output.length === 0) {
     return '(no interactive elements found)';
@@ -429,9 +430,9 @@ export async function handleSnapshot(
 
   // ─── Diff mode (-D) ───────────────────────────────────────
   if (opts.diff) {
-    const lastSnapshot = bm.getLastSnapshot();
+    const lastSnapshot = session.getLastSnapshot();
     if (!lastSnapshot) {
-      bm.setLastSnapshot(snapshotText);
+      session.setLastSnapshot(snapshotText);
       return snapshotText + '\n\n(no previous snapshot to diff against — this snapshot stored as baseline)';
     }
 
@@ -446,17 +447,49 @@ export async function handleSnapshot(
       }
     }
 
-    bm.setLastSnapshot(snapshotText);
+    session.setLastSnapshot(snapshotText);
     return diffOutput.join('\n');
   }
 
   // Store for future diffs
-  bm.setLastSnapshot(snapshotText);
+  session.setLastSnapshot(snapshotText);
 
   // Add frame context header when operating inside an iframe
   if (inFrame) {
-    const frameUrl = bm.getFrame()?.url() ?? 'unknown';
+    const frameUrl = session.getFrame()?.url() ?? 'unknown';
     output.unshift(`[Context: iframe src="${frameUrl}"]`);
+  }
+
+  // Split output for scoped tokens: trusted refs + untrusted text
+  if (securityOpts?.splitForScoped) {
+    const trustedRefs: string[] = [];
+    const untrustedLines: string[] = [];
+
+    for (const line of output) {
+      // Lines starting with @ref are interactive elements (trusted metadata)
+      const refMatch = line.match(/^(\s*)@(e\d+|c\d+)\s+\[([^\]]+)\]\s*(.*)/);
+      if (refMatch) {
+        const [, indent, ref, role, rest] = refMatch;
+        // Truncate element name/content to 50 chars for trusted section
+        const nameMatch = rest.match(/^"(.+?)"/);
+        let truncName = nameMatch ? nameMatch[1] : rest.trim();
+        if (truncName.length > 50) truncName = truncName.slice(0, 47) + '...';
+        trustedRefs.push(`${indent}@${ref} [${role}] "${truncName}"`);
+      }
+      // All lines go to untrusted section (full content)
+      untrustedLines.push(line);
+    }
+
+    const parts: string[] = [];
+    if (trustedRefs.length > 0) {
+      parts.push('INTERACTIVE ELEMENTS (trusted — use these @refs for click/fill):');
+      parts.push(...trustedRefs);
+      parts.push('');
+    }
+    parts.push('═══ BEGIN UNTRUSTED WEB CONTENT ═══');
+    parts.push(...untrustedLines);
+    parts.push('═══ END UNTRUSTED WEB CONTENT ═══');
+    return parts.join('\n');
   }
 
   return output.join('\n');
