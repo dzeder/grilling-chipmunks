@@ -2487,6 +2487,40 @@
       "triggerWhen": "user publishes external documentation, generates Docusaurus MDX pages, builds static doc sites, or deploys docs to S3 + CloudFront",
       "doNotTriggerWhen": "user creates internal markdown docs (use md-generator), generates Word documents (use docx-builder), or summarizes diffs (use diff-summarizer)"
     },
+    "datadog-expert": {
+      "keywords": [
+        "datadog",
+        "dd",
+        "monitoring",
+        "observability",
+        "dashboard",
+        "monitor",
+        "slo",
+        "apm",
+        "logs",
+        "metrics",
+        "tracing",
+        "alerting",
+        "incident",
+        "datadog terraform",
+        "log ingestion"
+      ],
+      "intentPatterns": [
+        "create.*dashboard",
+        "build.*monitor",
+        "set up.*alerting",
+        "configure.*datadog",
+        "review.*monitoring",
+        "check.*slo",
+        "audit.*observability",
+        "datadog.*query",
+        "dd.*metrics"
+      ],
+      "priority": "high",
+      "description": "Datadog expert agent for dashboards, monitors, SLOs, APM, and observability architecture — Terraform IaC output",
+      "triggerWhen": "user asks about Datadog, DD dashboards, monitors, SLOs, APM traces, log pipelines, metrics, alerting, incidents, or observability architecture",
+      "doNotTriggerWhen": "Salesforce-specific tracing (use sf-ai-agentforce-observability), AWS CloudWatch only (use aws skills), Tray workflow logic (use tray-expert), or general infrastructure unrelated to monitoring"
+    },
     "md-generator": {
       "keywords": [
         "markdown generator",
