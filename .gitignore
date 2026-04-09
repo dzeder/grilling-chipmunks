@@ -54,6 +54,9 @@ integrations/tray/Embedded/
 htmlcov/
 .pytest_cache/
 
+# Claude local settings (personal overrides, may contain API keys)
+.claude/settings.local.json
+
 # Backups
 *.bak
 .settings-backups/
