@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.4.0] - 2026-04-09
+
+### Changed
+- CLAUDE.md slimmed from 490 to 143 lines — every conversation now loads ~350 fewer irrelevant tokens
+- Skill catalog, agent roster, integration patterns, and context loading extracted into dedicated files that lazy-load only when relevant
+- Skill routing quick reference expanded to 15 routes (was 8)
+- Customer Salesforce read-only rule now lists explicit prohibited CLI commands
+
+### Added
+- `.claude/rules/` with 3 glob-scoped rules: context-loading, integration-patterns, skill-routing
+- `docs/SKILL_CATALOG.md` — full 114-skill catalog organized by pillar
+- `agents/README.md` — agent roster with team groupings and selection guide
+- `integrations/CLAUDE.md` — pattern module index with Tray-First reminder
+- `references/README.md` — upstream mirror documentation (prevents agents from editing vendored content)
+- `docs/README.md` — documentation index by category
+- `scripts/validate-context.sh` — CI-ready context health checker (CLAUDE.md size, rules, indexes, freshness)
+- `.claude/settings.local.json` added to `.gitignore` (security hygiene)
+
 ## [0.0.3.0] - 2026-04-08
 
 ### Added
