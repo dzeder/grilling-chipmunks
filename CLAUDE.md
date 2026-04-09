@@ -39,7 +39,7 @@ agents/               # 19 specialist agents (see agents/README.md)
 integrations/         # Tray patterns, marketplace UI (see integrations/CLAUDE.md)
 customers/            # Per-customer Salesforce configs
 knowledge-base/       # Domain knowledge (beverage, SF, industry)
-registry/             # Repo registry, content sources, team ownership
+registry/             # Repo registry, content sources, team ownership — **check before touching any product repo**
 watchers/             # Repo monitoring configs and adoption queue
 evals/                # Agent evaluation datasets, scorers, results (IMMUTABLE)
 docs/                 # Guides, templates, case studies (see docs/README.md)
@@ -86,7 +86,7 @@ Never commit built artifacts to this repo.
 
 ## Never Do
 
-- Modify `evals/results/`
+- Modify `evals/results/` — **IMMUTABLE** append-only (85% target, 75% hard fail, run on every PR)
 - Deploy to prod SF or AWS prod without explicit instruction
 - Hardcode any credential or secret
 - Use opus for anything except evals/critical decisions
@@ -94,7 +94,7 @@ Never commit built artifacts to this repo.
 - Write CloudFormation directly
 - Query SF production org from skill code
 - Build a new Tray workflow without checking existing ones first
-- Modify, deploy to, or write data/metadata to any connected customer Salesforce org without explicit user authorization
+- Modify, deploy to, or write data/metadata to any connected customer Salesforce org without explicit user authorization — no `sf project deploy`, no `sf data update`, no `sf apex run`, no destructive changes
 
 ## Hooks
 
@@ -124,13 +124,20 @@ Edit skill files directly in `skills/<pillar>/<skill-name>/SKILL.md`. Commit wit
 
 When the user's request matches a skill, invoke it FIRST via the Skill tool.
 
+- Product ideas, brainstorming → `/office-hours`
 - Bugs, errors → `/investigate`
 - Ship, deploy, PR → `/ship`
 - QA, test the site → `/qa`
 - Code review → `/review`
+- Update docs after shipping → `/document-release`
+- Weekly retro → `/retro`
 - Design system → `/design-consultation`
+- Visual audit, design polish → `/design-review`
 - Architecture review → `/plan-eng-review`
+- Save progress, resume → `/checkpoint`
+- Code quality, health check → `/health`
 - GitHub Actions, CI/CD → `/github-agent`
 - Data import → `/data-harmonizer`
+- Org debugging, connect SF org → `/org-connect`
 
 Full routing: `docs/SKILL_ROUTING_MATRIX.md` | Context loading: `.claude/rules/context-loading.md`

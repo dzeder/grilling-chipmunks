@@ -20,7 +20,7 @@ echo ""
 
 # 1. CLAUDE.md line count
 echo "--- Entry Point ---"
-CLAUDE_LINES=$(wc -l < "$REPO_ROOT/CLAUDE.md" 2>/dev/null || echo 0)
+CLAUDE_LINES=$(wc -l < "$REPO_ROOT/CLAUDE.md" 2>/dev/null | tr -d ' ' || echo 0)
 if [ "$CLAUDE_LINES" -gt 200 ]; then
   red "FAIL: CLAUDE.md is $CLAUDE_LINES lines (max 200)"
   ERRORS=$((ERRORS + 1))
