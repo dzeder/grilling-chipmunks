@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.5.0] - 2026-04-09
+
+### Added
+- `skills/simplify/SKILL.md` — new skill for behavior-preserving code simplification (5 principles, Chesterton's Fence, structured process)
+- `skills/deprecation/SKILL.md` — new skill for deprecation decisions and migration planning (5-question decision tree, strangler/adapter/feature-flag patterns)
+- `skills/idea-refine/SKILL.md` — new skill for structured ideation (3-phase divergent→convergent→sharpen process, 7 lenses, one-pager output)
+- `docs/SECURITY_CHECKLIST.md` — pre-commit and OWASP security reference with Ohanafy-specific checks (SF FLS, Tray HMAC, AWS, LLM trust)
+- `docs/TESTING_PATTERNS.md` — testing patterns reference with Ohanafy-specific patterns (SF API mocking, Tray webhook simulation, Apex testing)
+
+### Changed
+- `skills/review/SKILL.md` — enriched with 5-axis review framework, severity labels, Ohanafy-specific security checks
+- `skills/ship/SKILL.md` — enriched with pre-ship checklist, rollback decision tree, post-deploy verification
+- `skills/claude/context-manager/SKILL.md` — enriched with context hierarchy diagram, trust levels, anti-patterns table
+
+### Source
+All patterns adapted from `references/agent-skills/` (addyosmani/agent-skills), tracked via `learned_from` frontmatter in each skill.
+
 ## [0.0.4.0] - 2026-04-09
 
 ### Changed
