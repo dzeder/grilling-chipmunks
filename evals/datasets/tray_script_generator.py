@@ -317,10 +317,12 @@ function formatOutput(results) {
         },
     },
     # --- Failing cases (test that scorer catches violations) ---
+    # These cases have expected_pass: False — the test runner inverts assertions.
     {
         "name": "violation_inline_functions",
         "description": "Script with inline function definitions inside exports.step — should fail fp_compliance",
         "tags": ["violation", "fp", "failing"],
+        "expected_pass": False,
         "input": {
             "prompt": "Transform data",
         },
@@ -349,6 +351,7 @@ exports.step = function({data = [], configuration = {}}, fileInput) {
         "name": "violation_console_log",
         "description": "Script with console.log statements — should fail fp_compliance",
         "tags": ["violation", "fp", "failing"],
+        "expected_pass": False,
         "input": {
             "prompt": "Process records",
         },
@@ -384,6 +387,7 @@ function formatOutput(records) {
         "name": "violation_unavailable_library",
         "description": "Script that imports axios — should fail library_compliance",
         "tags": ["violation", "library", "failing"],
+        "expected_pass": False,
         "input": {
             "prompt": "Fetch and transform API data",
         },
@@ -418,6 +422,7 @@ function formatOutput(results) {
         "name": "violation_missing_url_encoding",
         "description": "SF composite script without encodeURIComponent — should fail sf_url_encoding",
         "tags": ["violation", "salesforce", "failing"],
+        "expected_pass": False,
         "input": {
             "prompt": "Build SF composite upsert with external IDs",
         },
@@ -459,6 +464,7 @@ function formatOutput(requests) {
         "name": "violation_imperative_loops",
         "description": "Script using for loops instead of .map/.filter/.reduce — should fail fp_compliance",
         "tags": ["violation", "fp", "failing"],
+        "expected_pass": False,
         "input": {
             "prompt": "Transform product list",
         },

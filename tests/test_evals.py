@@ -37,7 +37,7 @@ class TestAgentEvals:
         ids=[f"{agent}::{case['name']}" for agent, case in _ALL_CASES],
     )
     def test_eval_case(self, agent_name: str, case: dict):
-        """Each eval case must pass all hard checks."""
+        """Each eval case must pass all hard checks (or fail, if expected_pass is False)."""
         scorer = get_scorer(agent_name)
         result = scorer.score_case(
             case=case,
@@ -45,7 +45,17 @@ class TestAgentEvals:
             haiku_enabled=False,
         )
 
-        # Report details on failure
+        expected_pass = case.get("expected_pass", True)
+
+        if not expected_pass:
+            # Violation cases: verify the scorer correctly detects failures
+            assert not result.passed, (
+                f"Case '{case['name']}' was expected to FAIL but passed — "
+                f"scorer did not catch the violation"
+            )
+            return
+
+        # Standard cases: must pass all hard checks
         if not result.passed:
             failed_checks = [c for c in result.hard_checks if not c.passed]
             details = "; ".join(f"[{c.name}] {c.details}" for c in failed_checks)
