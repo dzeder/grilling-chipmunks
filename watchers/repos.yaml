@@ -151,6 +151,35 @@ aws:
     auto_adopt: false
     tags: [aws, cdk, patterns]
 
+observability:
+  - url: shelfio/datadog-mcp
+    priority: critical
+    watch: all
+    why: "MCP server for Datadog. Enables Claude Code to query DD dashboards, monitors, and incidents. Direct integration point for brain repo."
+    auto_adopt: new_patterns
+    tags: [datadog, mcp, claude]
+
+  - url: DataDog/datadog-agent
+    priority: high
+    watch: releases
+    why: "Core DD agent. Breaking changes affect DatadogTerraform configs and LogIngestion pipeline."
+    auto_adopt: false
+    tags: [datadog, agent, infrastructure]
+
+  - url: DataDog/integrations-core
+    priority: high
+    watch: releases
+    why: "Official DD integrations for AWS, Salesforce, and generic services. New versions affect our monitoring coverage."
+    auto_adopt: false
+    tags: [datadog, integrations, aws, salesforce]
+
+  - url: DataDog/datadog-lambda-python
+    priority: medium
+    watch: releases
+    why: "DD Lambda tracing library. Complements aws-powertools in our Python Lambdas."
+    auto_adopt: dependency_updates
+    tags: [datadog, lambda, python, observability]
+
 docs:
   - url: squidfunk/mkdocs-material
     priority: high

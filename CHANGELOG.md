@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.6.0] - 2026-04-09
+
+### Added
+- New `observability` skill pillar with `datadog-expert` skill — three modes: Q&A, Build (dashboard/monitor/SLO design as Terraform), Review (audit existing DD config with 6-dimension scoring)
+- `datadog-expert-guide.md` knowledge base covering Ohanafy's DD architecture, beverage supply chain dashboards, Terraform patterns, and integration setup for AWS/Salesforce/Tray
+- New `observability` category in `watchers/repos.yaml` tracking 4 Datadog repos: `shelfio/datadog-mcp` (critical), `DataDog/datadog-agent`, `DataDog/integrations-core`, `DataDog/datadog-lambda-python`
+- `datadog-expert` registered in skills-registry.json with discovery keywords and intent patterns
+
 ## [0.0.5.0] - 2026-04-09
 
 ### Added
