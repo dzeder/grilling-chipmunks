@@ -34,7 +34,7 @@ Always use the latest available version of each tier.
 ## Project Structure
 
 ```
-skills/               # 114 skills organized by pillar (see docs/SKILL_CATALOG.md)
+skills/               # 115+ skills organized by pillar (see docs/SKILL_CATALOG.md)
 agents/               # 19 specialist agents (see agents/README.md)
 integrations/         # Tray patterns, marketplace UI (see integrations/CLAUDE.md)
 customers/            # Per-customer Salesforce configs
@@ -108,7 +108,7 @@ Edit skill files directly in `skills/<pillar>/<skill-name>/SKILL.md`. Commit wit
 
 | Topic | Location |
 |-------|----------|
-| Full skill catalog (114+) | `docs/SKILL_CATALOG.md` |
+| Full skill catalog (115+) | `docs/SKILL_CATALOG.md` |
 | Agent roster & teams | `agents/README.md` |
 | Integration patterns | `integrations/CLAUDE.md` |
 | Documentation index | `docs/README.md` |
@@ -139,5 +139,6 @@ When the user's request matches a skill, invoke it FIRST via the Skill tool.
 - GitHub Actions, CI/CD → `/github-agent`
 - Data import → `/data-harmonizer`
 - Org debugging, connect SF org → `/org-connect`
+- Datadog, monitoring, observability → `/datadog-expert`
 
 Full routing: `docs/SKILL_ROUTING_MATRIX.md` | Context loading: `.claude/rules/context-loading.md`

@@ -1,6 +1,6 @@
 # Skill Catalog
 
-114+ skills organized by pillar under `skills/`:
+115+ skills organized by pillar under `skills/`:
 
 ```
 skills/
@@ -13,6 +13,7 @@ skills/
   claude/          # 4 Claude AI skills
   docs/            # 4 doc generation skills
   content-watcher/ # Content monitoring
+  observability/   # 1 observability skill
   utility/         # 3 meta skills
 ```
 
@@ -116,6 +117,11 @@ All IaC lives in `skills/aws/cdk/`. CDK TypeScript only — never write CloudFor
 - **ukg-api-debug** — UKG API debugging and troubleshooting
 - **ukg-field-mapper** — UKG-to-Ohanafy field mapping
 
+## Observability
+
+1 skill in `skills/observability/`:
+- **datadog-expert** — Three-mode Datadog agent: Q&A (DD platform questions), Build (dashboard/monitor/SLO design as Terraform HCL), Review (audit existing DD config with 6-dimension scoring). Covers Ohanafy's full stack: AWS Lambda/API GW/RDS, Salesforce event monitoring, Tray workflow health.
+
 ## Utility
 
 In `skills/utility/`:
@@ -145,3 +151,4 @@ Key routing rules:
 - Claude model routing → relevant claude skill
 - Data import, Excel mapping → data-harmonizer
 - Content monitoring → content-watcher
+- Datadog, monitoring, observability → datadog-expert
