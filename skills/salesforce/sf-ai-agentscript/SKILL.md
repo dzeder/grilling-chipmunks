@@ -48,6 +48,16 @@ If the user is in Builder Script / Canvas view but the outcome is a `.agent` aut
 
 ---
 
+## Right-Size Determinism
+
+- Determinism is a dial, not a destination.
+- Use Agent Script when “mostly right” is not acceptable: gates, mandatory sequencing, explicit state transitions, compliance, or drift control.
+- If a workflow is fully static and linear, use Flow or Apex instead of scripting the conversation.
+- Prefer a deterministic envelope: deterministic entry/gate → flexible middle → deterministic closeout.
+- More determinism is not automatically better. Start minimal, then harden only the parts that show routing drift, sequencing failures, or compliance risk.
+
+---
+
 ## Required Context to Gather First
 
 Ask for or infer:

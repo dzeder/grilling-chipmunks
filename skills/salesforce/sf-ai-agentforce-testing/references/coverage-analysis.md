@@ -86,6 +86,16 @@ Phrasings tested:
 Phrasing Diversity = 3 ✅
 ```
 
+### Routing and Control Regression Minimums
+
+Add at least one scenario for each:
+
+- **Sibling-topic collision** — similar asks that should route differently
+- **Turn-2 pivot / re-matching** — user changes intent mid-conversation
+- **Gate bypass attempt** — protected workflow attempted without required verification or sequence
+- **Off-topic handling** — agent should refuse, redirect, or safely contain unsupported asks
+- **Grounding regression** — policy answer should come from retrieved knowledge, not brittle scripted wording
+
 ---
 
 ## Coverage Report
@@ -313,6 +323,28 @@ testCases:
     category: topic_routing
     utterance: "[another alternative]"
     expectedTopic: [topic_name]
+```
+
+### Adding Collision and Pivot Tests
+
+For each high-traffic topic, add tests for nearest-neighbor stability and turn-2 re-matching.
+
+```yaml
+testCases:
+  # Nearest-neighbor collision test
+  - name: route_collision_returns_vs_order_status
+    category: topic_routing
+    utterance: "I need help with an order return, not tracking"
+    expectedTopic: returns
+
+  # Turn-2 pivot / re-matching test
+  - name: pivot_order_status_to_billing
+    category: multi_turn_topic_switch
+    conversation:
+      - user: "Where is my order?"
+        expectedTopic: order_lookup
+      - user: "Actually I need to update my card for billing"
+        expectedTopic: billing
 ```
 
 ### Adding Action Tests

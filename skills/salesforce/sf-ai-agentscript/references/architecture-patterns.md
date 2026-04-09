@@ -6,6 +6,32 @@ Use these patterns when deciding how much should be deterministic, how much shou
 
 ---
 
+## Control Heuristic
+
+- Start with the minimum deterministic control needed.
+- Script only where “mostly right” is unacceptable.
+- Keep high-variance conversation LLM-directed when possible.
+- If the workflow has no real reasoning need, use Flow or Apex.
+
+---
+
+## Pattern 0: Deterministic Sandwich
+
+Apply hard control at the edges and leave the middle flexible.
+
+```text
+gate / triage / auth  →  flexible worker topic(s)  →  deterministic closeout
+```
+
+**Use when:**
+- auth or verification must happen first
+- compliance text or closeout steps must always run
+- the middle still benefits from flexible reasoning
+
+**Anti-pattern:** scripting the whole conversation when only the edges need guarantees. If the middle is also fixed, use Flow or Apex.
+
+---
+
 ## Pattern 1: Hub and Spoke
 
 Central router (hub) to specialized topics (spokes). Use for multi-purpose agents.
@@ -23,6 +49,8 @@ Central router (hub) to specialized topics (spokes). Use for multi-purpose agent
 ```
 
 **Use when:** the first turn is mostly classification and each downstream topic owns a distinct capability.
+
+**Routing note:** keep spoke descriptions semantically non-overlapping. If one utterance plausibly fits two spokes, merge, split, or rename them.
 
 ---
 
@@ -163,7 +191,9 @@ start_agent router:
 | Need | Prefer |
 |---|---|
 | Hard gating before sensitive actions | Verification Gate |
+| Critical gate + flexible middle + must-run closeout | Deterministic Sandwich |
 | Deterministic branch after action result | Post-Action Loop |
 | Multi-turn data collection then deterministic execution | Staged Multi-Turn Workflow |
 | Multiple specialist capabilities | Hub and Spoke |
 | Several possible intents in one utterance | Multi-Intent Orchestration |
+| Fully fixed workflow with no real reasoning need | Flow or Apex instead of full Agent Script |

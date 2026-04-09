@@ -5,6 +5,26 @@
 
 ---
 
+## Tool Selection Preflight
+
+```
+What kind of problem is this?
+│
+├─► Single-turn generation only?
+│   └─► PROMPT TEMPLATE / prompt action
+│
+├─► Fully static deterministic sequence?
+│   └─► FLOW / APEX
+│
+├─► Dynamic user input + branching + must-pass gates?
+│   └─► AGENT SCRIPT
+│
+└─► Mostly flexible conversation with a few hard controls?
+    └─► AGENT SCRIPT + deterministic envelope
+```
+
+---
+
 ## Pattern Selection Decision Tree
 
 ### Which Architecture Pattern?
@@ -32,6 +52,22 @@ What's your agent's purpose?
     └─► STATE GATE (OPEN GATE)
         3-variable bypass with deferred routing
 ```
+
+---
+
+## Routing Quick Rules
+
+- Use `description:` for routing and `label:` for display.
+- If one utterance fits two sibling topics, redesign.
+- Keep escalation and handoff topics limited to meta-intents.
+- Assume every new turn can trigger re-matching.
+
+### Quick Overlap Check
+
+Ask:
+- Would the same utterance reasonably match both topics?
+- Are you relying on instructions, not the topic description, to separate them?
+- Does one topic use broad umbrella terms like `help`, `support`, `account`, or `billing` that absorb adjacent intents?
 
 ---
 
@@ -126,6 +162,18 @@ Should this be code-enforced or LLM-flexible?
 └─► Natural language generation?
     └─► SUBJECTIVE (LLM)
 ```
+
+---
+
+## Control Placement Cheat Sheet
+
+| Need | Best home |
+|---|---|
+| Tone, behavior, conversational guidance | Instructions |
+| Facts, policy text, mutable rules | Retrieval / knowledge |
+| Visibility, scope, access control | Filters, `available when`, guarded transitions |
+| Mandatory order, must-run logic | Agent Script transitions, `run`, or Flow / Apex |
+| Long-lived context across turns | Variables |
 
 ---
 
