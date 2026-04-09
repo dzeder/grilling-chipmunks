@@ -218,10 +218,31 @@ class BaseScorer(ABC):
         if tag_filter:
             cases = [c for c in cases if tag_filter in c.get("tags", [])]
 
+        # Separate expected-pass and expected-fail cases
+        pass_cases = [c for c in cases if c.get("expected_pass", True)]
+        fail_cases = [c for c in cases if not c.get("expected_pass", True)]
+
         results = []
-        for case in cases:
+        for case in pass_cases:
             output = case.get("recorded_output", {})
             result = self.score_case(case, output, haiku_enabled)
+            results.append(result)
+
+        # Expected-fail cases: verify scorer catches them (inverted assertion)
+        for case in fail_cases:
+            output = case.get("recorded_output", {})
+            result = self.score_case(case, output, haiku_enabled)
+            # Invert: a correctly-detected violation counts as a pass
+            result = EvalCaseResult(
+                case_name=result.case_name,
+                passed=not result.passed,
+                hard_checks=result.hard_checks,
+                rubric_score=result.rubric_score,
+                rubric_details=result.rubric_details,
+                total_score=1.0 if not result.passed else 0.0,
+                max_score=result.max_score,
+                duration_ms=result.duration_ms,
+            )
             results.append(result)
 
         total = len(results)

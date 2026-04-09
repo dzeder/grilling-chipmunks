@@ -37,8 +37,14 @@ def _register_scorers():
         return
 
     from evals.scorers.data_harmonizer import DataHarmonizerScorer
+    from evals.scorers.tray_script_generator import TrayScriptGeneratorScorer
+    from evals.scorers.tray_expert import TrayExpertScorer
+    from evals.scorers.tray_discovery import TrayDiscoveryScorer
 
     SCORER_REGISTRY["data_harmonizer"] = DataHarmonizerScorer
+    SCORER_REGISTRY["tray_script_generator"] = TrayScriptGeneratorScorer
+    SCORER_REGISTRY["tray_expert"] = TrayExpertScorer
+    SCORER_REGISTRY["tray_discovery"] = TrayDiscoveryScorer
 
 
 def get_scorer(agent_name: str) -> BaseScorer:
