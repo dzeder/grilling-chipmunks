@@ -16,7 +16,7 @@
 // INLINE SHARED
 // =============================================================================
 
-var PREFIX = { ITEM: 'ITM', ALLOCATION: 'ALC' };
+var PREFIX = { ITEM: 'ITM', ALLOCATION: 'ALC', LOCATION: 'LOC' };
 var SF_CONFIG = { apiVersion: 'v62.0', batchSize: 25, namespacePrefix: 'ohfy' };
 var NS = SF_CONFIG.namespacePrefix + '__';
 
@@ -29,6 +29,18 @@ function toSfMonthDate(yyyymm) {
   if (!yyyymm || String(yyyymm).length < 6) return '';
   var s = String(yyyymm);
   return s.substring(0, 4) + '-' + s.substring(4, 6) + '-01';
+}
+
+function toSfEndOfMonth(yyyymm) {
+  if (!yyyymm || String(yyyymm).length < 6) return '';
+  var s = String(yyyymm);
+  var year = parseInt(s.substring(0, 4), 10);
+  var month = parseInt(s.substring(4, 6), 10);
+  // Day 0 of next month = last day of current month
+  var lastDay = new Date(year, month, 0).getDate();
+  var mm = month < 10 ? '0' + month : '' + month;
+  var dd = lastDay < 10 ? '0' + lastDay : '' + lastDay;
+  return year + '-' + mm + '-' + dd;
 }
 
 function toInt(v) {
@@ -74,12 +86,19 @@ function transformAllocation(row, distId, fileDate) {
   record[NS + 'Item__r'] = {};
   record[NS + 'Item__r'][NS + 'VIP_External_ID__c'] = itemKey(supplierItem);
 
+  // Location lookup (distributor's warehouse)
+  record[NS + 'Location__r'] = { VIP_External_ID__c: PREFIX.LOCATION + ':' + distId };
+
   // Allocated_Case_Amount__c is the correct writable quantity field
   record[NS + 'Allocated_Case_Amount__c'] = toInt(row.Quantity);
   record[NS + 'Start_Date__c'] = toSfMonthDate(controlDate);
+  record[NS + 'End_Date__c'] = toSfEndOfMonth(controlDate);
   record[NS + 'Is_Active__c'] = true;
 
-  // Stale cleanup (unmanaged custom fields)
+  // Stale cleanup dates (unmanaged custom fields)
+  // Derive From/To from ControlDate month boundaries so cleanup script 09 can match
+  record.VIP_From_Date__c = toSfMonthDate(controlDate);
+  record.VIP_To_Date__c = toSfEndOfMonth(controlDate);
   if (fileDate) record.VIP_File_Date__c = fileDate;
 
   return record;
