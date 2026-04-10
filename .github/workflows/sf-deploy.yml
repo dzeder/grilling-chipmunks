@@ -27,7 +27,7 @@ jobs:
           fi
         env:
           SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         if: steps.auth.outputs.has_credentials == 'true'
       - name: Install SF CLI
         if: steps.auth.outputs.has_credentials == 'true'
@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: staging
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
       - name: Install SF CLI
