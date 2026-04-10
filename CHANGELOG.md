@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.7.0] - 2026-04-10
+
+### Changed
+- Synced 22 Salesforce skills from upstream `Jaganpro/sf-skills` (commits `a34ff34`, `11d9cf0`)
+- `sf agent preview` CLI commands now use correct syntax for authoring bundles: explicit `--simulate-actions` or `--use-live-actions` required, `-o TARGET_ORG` on send/end
+- External Client App metadata directories documented correctly: 6 separate top-level source directories with accurate file suffixes
+- New "Right-Size Determinism" guidance for Agent Script: when to use Agent Script vs Flow/Apex, "Deterministic Sandwich" pattern, routing heuristics
+- New decision trees: Tool Selection Preflight, Routing Quick Rules, Control Placement Cheat Sheet
+- Agent testing coverage analysis now includes routing collision, turn-2 pivot, and gate bypass test templates
+- Context placement rules and retrieval storage heuristics added to grounding/multiagent reference
+
+### Source
+Upstream: [Jaganpro/sf-skills](https://github.com/Jaganpro/sf-skills) `a64b0d1..11d9cf0`. Closes #72.
+
 ## [0.0.6.0] - 2026-04-09
 
 ### Added
