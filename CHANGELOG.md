@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.7.1] - 2026-04-10
+
+### Added
+- SFBen YouTube channel (`@OfficialSFBen`) added to content watcher — Salesforce ecosystem videos now auto-scored and surfaced as insights
+- Daily digest GitHub issue created after each pipeline run — one scannable summary per day in `ohanafy/ai-ops` with all insights grouped by category, scores, effort, and links to individual issues
+- Quiet days labeled `(quiet day)` in the digest title so you know the pipeline ran but found nothing
+
 ## [0.0.7.0] - 2026-04-10
 
 ### Changed
