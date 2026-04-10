@@ -20,6 +20,7 @@ sys.path.insert(0, str(_SKILL_DIR))
 from monitor.fetch_transcripts import fetch_all_new  # noqa: E402
 from monitor.process_insights import process_new_content  # noqa: E402
 from github.create_issue import create_issue  # noqa: E402
+from github.create_digest import create_digest  # noqa: E402
 from schema import InsightAction, RoutedInsight  # noqa: E402
 
 logger = logging.getLogger(__name__)
@@ -100,6 +101,25 @@ def run_pipeline() -> dict:
         "issues_created": issues_created,
         "errors": fetch_result.errors,
     }
+
+    # Create daily digest issue
+    digest_insights = []
+    for ri in routed:
+        digest_insights.append({
+            "source": ri.insight.source,
+            "insight": ri.insight.insight,
+            "score": ri.insight.score,
+            "effort": ri.insight.effort,
+            "category": ri.insight.category,
+            "action": ri.action.value,
+            "issue_url": ri.issue_url,
+        })
+
+    try:
+        digest_issue = create_digest(summary, digest_insights)
+        logger.info("Daily digest created: %s", digest_issue.get("html_url", ""))
+    except Exception as e:
+        logger.error("Failed to create daily digest: %s", e)
 
     logger.info(
         "Pipeline complete: %d sources, %d items, %d insights, %d issues",

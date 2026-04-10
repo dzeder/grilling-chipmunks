@@ -32,6 +32,11 @@ sources:
     url: "https://www.youtube.com/@SalesforceDevelopers"
     category: salesforce
 
+  - name: "SFBen"
+    type: youtube
+    url: "https://www.youtube.com/@OfficialSFBen"
+    category: salesforce
+
   - name: "Salesforce Admins Podcast"
     type: podcast
     url: "https://admin.salesforce.com/feed/podcast"
