@@ -73,6 +73,16 @@ start_agent topic_selector:
 
 **When to Use**: Entry point for multi-purpose agents
 
+#### Routing Heuristics
+
+> **Terminology note:** Public Agentforce docs increasingly say **subagent**. In Agent Script and this repo, the routing unit is still a **topic**.
+
+- Use `description:` as the primary routing signal. Use `label:` for display only.
+- Topic names should be short and literal; descriptions should capture the exact job to be done.
+- If one utterance fits two topics, narrow, merge, or rename them.
+- Keep escalation, handoff, and frustration separate from business-domain intents. Broad escalation descriptions absorb real work.
+- Expect re-classification on every new turn. Protected actions and gates must still hold after rerouting.
+
 ---
 
 ### Pattern 2: VERIFICATION (Identity Gate)
@@ -767,6 +777,9 @@ topic legal_specialist:
 | Mistake | Fix |
 |---------|-----|
 | Missing `description` | Add `description:` to every topic (required for LLM routing) |
+| Overlapping sibling topics | Increase semantic distance or merge/split by clearer jobs-to-be-done |
+| Broad escalation or handoff descriptions | Restrict them to meta-intents only; remove business-domain wording |
+| Trying to fix routing in instructions | Strengthen topic names and descriptions instead |
 | Orphaned topics (unreachable) | Ensure all topics have incoming transitions |
 | No way to go back | Add transition to topic_selector or escalation |
 | Too many topics | Combine related functionality |
@@ -779,3 +792,6 @@ topic legal_specialist:
 - [ ] Each topic has at least one outbound transition (or escalation)
 - [ ] Users can navigate back to main menu or exit
 - [ ] Topic descriptions are clear and detailed for LLM routing
+- [ ] High-traffic topics have nearest-neighbor collision tests
+- [ ] Turn-2 pivot / re-classification paths are tested for important workflows
+- [ ] Protected topics still enforce gates even after rerouting

@@ -14,6 +14,20 @@
 
 ---
 
+## Context Placement Rules
+
+- **Instructions**: behavior, tone, guardrails, tool-choice guidance.
+- **Knowledge / retrieval**: facts, policy text, mutable rules, product specifics.
+- **Filters**: what the agent can see or use; stronger than instructions for scope control.
+- **Variables**: facts or state that must survive turn history or feed later actions.
+
+### Retrieval Storage Heuristic
+
+- Do not put long policy text in instructions.
+- Retrieve facts just in time.
+- Store retrieval output in variables only when it must persist across turns or feed deterministic follow-up.
+- Prefer Flow-wrapped filtering over prose like “only use region X policy.”
+
 ## Retriever Actions
 
 ### Connecting Agents to Data Cloud
