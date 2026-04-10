@@ -36,7 +36,7 @@ jobs:
         if: steps.check.outputs.skip != 'true'
       - run: npx cdk synth
         if: steps.check.outputs.skip != 'true'
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: steps.check.outputs.skip != 'true'
         with:
           name: cdk-output
