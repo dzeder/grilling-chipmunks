@@ -10,7 +10,7 @@
     "jwt": "node ./utils/jwt.js"
   },
   "dependencies": {
-    "axios": "^0.30.3",
+    "axios": "^1.15.0",
     "classnames": "^2.3.1",
     "color": "^4.2.3",
     "graphql": "^16.3.0",
