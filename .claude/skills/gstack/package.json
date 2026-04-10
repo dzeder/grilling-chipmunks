@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@ngrok/ngrok": "^1.7.0",
-    "diff": "^7.0.0",
+    "diff": "^8.0.3",
     "playwright": "^1.58.2",
     "puppeteer-core": "^24.40.0"
   },
