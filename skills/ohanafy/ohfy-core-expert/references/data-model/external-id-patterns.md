@@ -27,7 +27,7 @@ OHFY-Core uses a standardized External_ID__c pattern to enable upsert operations
 | WooCommerce | `woo_` | `woo_4201` |
 | Ware2Go | `ware2go_` | `ware2go_SKU001` |
 | GP Analytics | `gpa_` | `gpa_1019#HRB` |
-| VIP SRS | `vip_` | `vip_ABC123` |
+| VIP SRS | colon-delimited prefix | `CHN:0000010305`, `ITM:102312102`, `ACT:FL01:00015` |
 | EDI | `edi_` | `edi_PO-12345` |
 | Square | `square_` | `square_ABCD1234` |
 | QuickBooks | `qbo_` | `qbo_987654` |
@@ -40,7 +40,7 @@ OHFY-Core uses a standardized External_ID__c pattern to enable upsert operations
 
 ### Account (Customer)
 
-**Field**: `External_ID__c`
+**Field**: `ohfy__External_ID__c` (**managed package field — requires `ohfy__` namespace**)
 
 **Examples**:
 ```
@@ -48,13 +48,15 @@ shopify_12345678        # Shopify customer ID
 woo_cust_4201          # WooCommerce customer ID
 qbo_987654             # QuickBooks customer ID
 edi_ISA-QUAL-ID        # EDI trading partner ID
+CHN:0000010305         # VIP SRS chain banner (colon-delimited prefix)
+ACT:FL01:00015         # VIP SRS outlet account (dist:acctNum)
 ```
 
 **Upsert**:
 ```javascript
 {
     "method": "PATCH",
-    "url": "/services/data/v58.0/sobjects/Account/External_ID__c/shopify_12345678",
+    "url": "/services/data/v62.0/sobjects/Account/ohfy__External_ID__c/shopify_12345678",
     "body": {
         "Name": "ABC Distributing"
     }
@@ -73,7 +75,7 @@ shopify_98765432        # Shopify variant ID
 gpa_1019#HRB           # GP Analytics PDCN (includes # separator)
 woo_4201               # WooCommerce product ID
 ware2go_SKU001         # Ware2Go SKU
-vip_ABC123             # VIP SRS item code
+ITM:102312102          # VIP SRS item code (colon-delimited prefix)
 edi_UPC-012345678901   # EDI UPC code
 ```
 
@@ -81,7 +83,7 @@ edi_UPC-012345678901   # EDI UPC code
 ```javascript
 {
     "method": "PATCH",
-    "url": "/services/data/v58.0/sobjects/ohfy__Item__c/ohfy__External_ID__c/shopify_98765432",
+    "url": "/services/data/v62.0/sobjects/ohfy__Item__c/ohfy__External_ID__c/shopify_98765432",
     "body": {
         "Name": "Premium Lager 12pk",
         "ohfy__Item_Number__c": "SKU-001"
@@ -98,7 +100,7 @@ edi_UPC-012345678901   # EDI UPC code
 **Examples**:
 ```
 gpa_brand_abc          # GP Analytics brand
-vip_line_xyz           # VIP SRS product line
+ILN:Shipyard IPA       # VIP SRS product line (colon-delimited prefix)
 shopify_vendor_123     # Shopify vendor
 ```
 
@@ -106,7 +108,7 @@ shopify_vendor_123     # Shopify vendor
 ```javascript
 {
     "method": "PATCH",
-    "url": "/services/data/v58.0/sobjects/ohfy__Item_Line__c/ohfy__Mapping_Key__c/gpa_brand_abc",
+    "url": "/services/data/v62.0/sobjects/ohfy__Item_Line__c/ohfy__Mapping_Key__c/gpa_brand_abc",
     "body": {
         "Name": "ABC Brewery"
     }
@@ -130,7 +132,7 @@ woo_cat_123            # WooCommerce category ID
 ```javascript
 {
     "method": "PATCH",
-    "url": "/services/data/v58.0/sobjects/ohfy__Item_Type__c/ohfy__Mapping_Key__c/gpa_type_lager",
+    "url": "/services/data/v62.0/sobjects/ohfy__Item_Type__c/ohfy__Mapping_Key__c/gpa_type_lager",
     "body": {
         "Name": "Lager"
     }
@@ -155,7 +157,7 @@ edi_850-PO12345        # EDI 850 purchase order
 ```javascript
 {
     "method": "PATCH",
-    "url": "/services/data/v58.0/sobjects/ohfy__Order__c/ohfy__External_ID__c/shopify_order_1001",
+    "url": "/services/data/v62.0/sobjects/ohfy__Order__c/ohfy__External_ID__c/shopify_order_1001",
     "referenceId": "order1",
     "body": {
         "ohfy__Account__c": "@{account1.id}",
@@ -182,7 +184,7 @@ edi_850-PO12345-LN001      # EDI line item
 ```javascript
 {
     "method": "PATCH",
-    "url": "/services/data/v58.0/sobjects/ohfy__Order_Item__c/ohfy__External_ID__c/shopify_orderitem_1001_1",
+    "url": "/services/data/v62.0/sobjects/ohfy__Order_Item__c/ohfy__External_ID__c/shopify_orderitem_1001_1",
     "body": {
         "ohfy__Order__c": "@{order1.id}",
         "ohfy__Item__c": "@{item1.id}",
@@ -210,7 +212,7 @@ gpa_1234#XYZ-SPECIAL   # Valid with hyphen
 const externalId = "gpa_1019#HRB";
 const encoded = encodeURIComponent(externalId); // "gpa_1019%23HRB"
 
-const url = `/services/data/v58.0/sobjects/ohfy__Item__c/ohfy__External_ID__c/${encoded}`;
+const url = `/services/data/v62.0/sobjects/ohfy__Item__c/ohfy__External_ID__c/${encoded}`;
 ```
 
 ### EDI Identifiers
@@ -250,7 +252,7 @@ edi_850-PO12345-LN001  # Document + PO + line
         {
             "referenceId": "account1",
             "method": "PATCH",
-            "url": "/services/data/v58.0/sobjects/Account/External_ID__c/shopify_12345",
+            "url": "/services/data/v62.0/sobjects/Account/ohfy__External_ID__c/shopify_12345",
             "body": {
                 "Name": "ABC Distributing"
             }
@@ -259,7 +261,7 @@ edi_850-PO12345-LN001  # Document + PO + line
         {
             "referenceId": "item1",
             "method": "PATCH",
-            "url": "/services/data/v58.0/sobjects/ohfy__Item__c/ohfy__External_ID__c/shopify_98765",
+            "url": "/services/data/v62.0/sobjects/ohfy__Item__c/ohfy__External_ID__c/shopify_98765",
             "body": {
                 "Name": "Product A"
             }
@@ -268,7 +270,7 @@ edi_850-PO12345-LN001  # Document + PO + line
         {
             "referenceId": "order1",
             "method": "PATCH",
-            "url": "/services/data/v58.0/sobjects/ohfy__Order__c/ohfy__External_ID__c/shopify_order_1001",
+            "url": "/services/data/v62.0/sobjects/ohfy__Order__c/ohfy__External_ID__c/shopify_order_1001",
             "body": {
                 "ohfy__Account__c": "@{account1.id}",
                 "ohfy__Order_Date__c": "2025-01-15"
@@ -278,7 +280,7 @@ edi_850-PO12345-LN001  # Document + PO + line
         {
             "referenceId": "orderitem1",
             "method": "PATCH",
-            "url": "/services/data/v58.0/sobjects/ohfy__Order_Item__c/ohfy__External_ID__c/shopify_orderitem_1001_1",
+            "url": "/services/data/v62.0/sobjects/ohfy__Order_Item__c/ohfy__External_ID__c/shopify_orderitem_1001_1",
             "body": {
                 "ohfy__Order__c": "@{order1.id}",
                 "ohfy__Item__c": "@{item1.id}",
@@ -297,7 +299,7 @@ edi_850-PO12345-LN001  # Document + PO + line
 
 | Object | API Name | External ID Field |
 |--------|----------|------------------|
-| Account | Account | External_ID__c |
+| Account | Account | ohfy__External_ID__c |
 | Item__c | ohfy__Item__c | ohfy__External_ID__c |
 | Order__c | ohfy__Order__c | ohfy__External_ID__c |
 | Order_Item__c | ohfy__Order_Item__c | ohfy__External_ID__c |
@@ -319,7 +321,7 @@ edi_850-PO12345-LN001  # Document + PO + line
 - `ohfy__VIP_External_ID__c` - VIP SRS specific
 
 **Account** has multiple external ID options:
-- `External_ID__c` - Primary (recommended)
+- `ohfy__External_ID__c` - Primary (recommended) — **managed package field, requires `ohfy__` namespace**
 - `Mapping_Key__c` - Legacy
 - `EFT_Customer_ID__c` - EFT payment system
 

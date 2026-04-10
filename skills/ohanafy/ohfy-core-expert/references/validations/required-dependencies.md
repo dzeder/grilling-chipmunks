@@ -146,7 +146,7 @@ While not strictly required, these lookups should exist before creating records:
 **Recommended**: Upsert Account before creating Order__c
 ```javascript
 [
-    { "referenceId": "account1", "url": ".../Account/External_ID__c/...", ... },
+    { "referenceId": "account1", "url": ".../Account/ohfy__External_ID__c/...", ... },
     { "body": { "ohfy__Account__c": "@{account1.id}" }, ... }
 ]
 ```

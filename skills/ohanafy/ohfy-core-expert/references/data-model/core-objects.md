@@ -15,7 +15,7 @@ The core objects represent the primary business entities in OHFY-Core: customers
 **Fields**: 183 total (standard + custom)
 
 **Key External IDs**:
-- `External_ID__c` - Cross-system identifier (format: `{service}_{identifier}`)
+- `ohfy__External_ID__c` - Cross-system identifier (format: `{service}_{identifier}`) — **managed package field, requires `ohfy__` namespace**
 - `Mapping_Key__c` - Legacy mapping identifier
 - `EFT_Customer_ID__c` - EFT payment system ID
 
@@ -24,6 +24,9 @@ The core objects represent the primary business entities in OHFY-Core: customers
 - `Account_Number__c` - Business account number
 - `Type` - Customer, Vendor, Distributor, etc.
 - `Status__c` - Active, Inactive, Suspended
+- `ohfy__Market__c` - Market/channel classification (**restricted picklist** — values vary by org, e.g., Grocery Store, Liquor, Convenience, Bars/Clubs/Taverns, Restaurants)
+- `ohfy__Premise_Type__c` - On Premise, Off Premise (**restricted picklist**)
+- `ohfy__Retail_Type__c` - Chain, Independent, Distributor (**restricted picklist**)
 - `Payment_Terms__c` - NET30, COD, etc.
 - `Credit_Limit__c` - Maximum credit allowed
 - `Tax_Exempt__c` - Tax exemption status
@@ -41,10 +44,10 @@ Account
 
 **Integration Pattern**:
 ```javascript
-// Upsert via External_ID__c
+// Upsert via ohfy__External_ID__c (managed package field — requires ohfy__ namespace)
 {
     "method": "PATCH",
-    "url": "/services/data/v58.0/sobjects/Account/External_ID__c/shopify_12345",
+    "url": "/services/data/v62.0/sobjects/Account/ohfy__External_ID__c/shopify_12345",
     "body": {
         "Name": "ABC Distributing",
         "Phone": "555-1234",
@@ -94,6 +97,15 @@ Item__c
   └── Lot__c (1:M) - Lot numbers
 ```
 
+**Record Types**:
+- `Finished_Good` - Finished Good (required for VIP items — gates `Type__c` and `Packaging_Type__c` picklist values)
+- `Keg_Shell` - Keg Shell
+- `Merchandise` - Merchandise
+- `Packaging` - Packaging
+- `Raw_Material` - Raw Material
+
+> **Note:** `ohfy__Packaging_Type__c` is a restricted picklist gated by record type. The integration user must have the target record type assigned, and the Composite body must include `RecordTypeId`. Without it, the default Master record type rejects valid picklist values.
+
 **Triggers**:
 - `TA_Item_AI_InventoryCreator` - Auto-creates Inventory__c for each Location__c
 - `TA_Item_AI_PricelistItemCreator` - Auto-creates Pricelist_Item__c for each Pricelist__c
@@ -104,7 +116,7 @@ Item__c
 // Upsert via External_ID__c
 {
     "method": "PATCH",
-    "url": "/services/data/v58.0/sobjects/ohfy__Item__c/ohfy__External_ID__c/shopify_98765",
+    "url": "/services/data/v62.0/sobjects/ohfy__Item__c/ohfy__External_ID__c/shopify_98765",
     "body": {
         "Name": "Premium Lager 12pk",
         "ohfy__Item_Number__c": "SKU-001",
@@ -148,7 +160,7 @@ try {
 // Upsert via Mapping_Key__c
 {
     "method": "PATCH",
-    "url": "/services/data/v58.0/sobjects/ohfy__Item_Line__c/ohfy__Mapping_Key__c/brand_abc",
+    "url": "/services/data/v62.0/sobjects/ohfy__Item_Line__c/ohfy__Mapping_Key__c/brand_abc",
     "body": {
         "Name": "ABC Brewery",
         "ohfy__Active__c": true
@@ -176,7 +188,7 @@ try {
 // Upsert via Mapping_Key__c
 {
     "method": "PATCH",
-    "url": "/services/data/v58.0/sobjects/ohfy__Item_Type__c/ohfy__Mapping_Key__c/type_lager",
+    "url": "/services/data/v62.0/sobjects/ohfy__Item_Type__c/ohfy__Mapping_Key__c/type_lager",
     "body": {
         "Name": "Lager",
         "ohfy__Active__c": true
@@ -237,7 +249,7 @@ Out For Delivery → Delivered → Complete
 // Create order with upsert
 {
     "method": "PATCH",
-    "url": "/services/data/v58.0/sobjects/ohfy__Order__c/ohfy__External_ID__c/shopify_order_1001",
+    "url": "/services/data/v62.0/sobjects/ohfy__Order__c/ohfy__External_ID__c/shopify_order_1001",
     "referenceId": "order1",
     "body": {
         "ohfy__Account__c": "@{account1.id}",
@@ -299,7 +311,7 @@ Order_Item__c
 // Create order item (must reference existing Order__c)
 {
     "method": "PATCH",
-    "url": "/services/data/v58.0/sobjects/ohfy__Order_Item__c/ohfy__External_ID__c/shopify_item_001",
+    "url": "/services/data/v62.0/sobjects/ohfy__Order_Item__c/ohfy__External_ID__c/shopify_item_001",
     "body": {
         "ohfy__Order__c": "@{order1.id}",  // Reference from composite request
         "ohfy__Item__c": "@{item1.id}",
@@ -347,7 +359,7 @@ const deduplicatedItems = Array.from(itemMap.values());
 // Create sync record
 {
     "method": "POST",
-    "url": "/services/data/v58.0/sobjects/ohfy__Integration_Sync__c",
+    "url": "/services/data/v62.0/sobjects/ohfy__Integration_Sync__c",
     "body": {
         "ohfy__Object_Type__c": "Order",
         "ohfy__External_System__c": "Shopify",
@@ -378,7 +390,7 @@ const deduplicatedItems = Array.from(itemMap.values());
 // Create mapping record
 {
     "method": "POST",
-    "url": "/services/data/v58.0/sobjects/ohfy__External_ID__c",
+    "url": "/services/data/v62.0/sobjects/ohfy__External_ID__c",
     "body": {
         "ohfy__External_System__c": "Shopify",
         "ohfy__External_Value__c": "shopify_12345",

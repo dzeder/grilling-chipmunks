@@ -26,20 +26,49 @@ Applied to 6 objects: Invoice__c, Invoice_Item__c, Placement__c, Inventory_Histo
 
 | Object | Field API Name | Type | Purpose |
 |--------|---------------|------|---------|
-| Account | Premise_Type__c | Picklist (On Premise, Off Premise) | Needs verification if already exists |
+| Account | ohfy__Premise_Type__c | Picklist (On Premise, Off Premise) | **Exists in managed package** — not a custom addition |
 
-## Custom Picklist Values
+## Restricted Picklist Fields (verified 2026-04-10)
 
-| Object | Field | Added Values | Reason |
-|--------|-------|-------------|--------|
-| Account | Market__c / Account_Sub_Type | 46 Class of Trade values | VIP SRS OUTDA crosswalk (see spec Section 7.1) |
+These managed package fields are restricted picklists. VIP crosswalk values must match exactly.
+
+| Object | Field | Valid Values (sample) | Notes |
+|--------|-------|----------------------|-------|
+| Account | ohfy__Market__c | Grocery Store, Liquor, Convenience, Bars/Clubs/Taverns, Restaurants, ... (22 total) | 14 of 46 VIP Class of Trade codes have no match |
+| Account | ohfy__Premise_Type__c | On Premise, Off Premise | Direct match |
+| Account | ohfy__Retail_Type__c | Chain, Independent, Distributor | Direct match |
+| ohfy__Item__c | ohfy__Packaging_Type__c | Each, Liter(s), 1/2 Barrel(s), Case Equivalent(s), ... (38 total) | Gated by record type — need Finished Good RT |
+| ohfy__Item__c | ohfy__Package_Type__c | Packaged, Kegged, Bulk, ... (8 total) | Not restricted |
+| ohfy__Location__c | ohfy__Type__c | Warehouse, Zone, Aisle, Rack, Shelf, Bin | Restricted |
+
+## Record Types (verified 2026-04-10)
+
+### Account
+| Record Type | Developer Name | ID | Integration User | VIP Usage |
+|------------|----------------|-----|------------------|-----------|
+| Chain Banner | Chain_Banner | 012am0000050BVYAA2 | Assigned ✓ | SRSCHAIN chain parent records |
+| Customer | Customer | 012am0000050BVXAA2 | Assigned ✓ | OUTDA distributors (ClassOfTrade 06/07/50) |
+| Distributed Customer | Distributed_Customer | 012WF000003L8VWYA0 | Assigned ✓ | OUTDA retailers (all other ClassOfTrade) |
+| Wholesaler | Wholesaler | 012am0000050BVaAAM | Not assigned | Not used by VIP |
+| Supplier | Supplier | 012am0000050BVcAAM | Not assigned | Not used by VIP |
+
+### Item__c
+| Record Type | Developer Name | Notes |
+|------------|----------------|-------|
+| Finished Good | Finished_Good | Required for VIP items. Integration user needs assignment. |
+| Keg Shell | Keg_Shell | |
+| Merchandise | Merchandise | |
+| Packaging | Packaging | |
+| Raw Material | Raw_Material | |
 
 ## Validation Rules
 
 | Object | Rule Name | Description |
 |--------|-----------|-------------|
-| _(none added yet)_ | | |
+| ohfy__Item__c | (Error Code 003) | "Please ensure Stock UOM Sub Type field is set for Finished Goods" — requires `Packaging_Type__c` when Type = Finished Good |
 
 ## Other Customizations
 
-<!-- TBD after sandbox connection -->
+| Field | Max Length | Notes |
+|-------|-----------|-------|
+| ohfy__Location_Code__c | 5 | Raw dist ID only (e.g., `FL01`), not prefixed key |

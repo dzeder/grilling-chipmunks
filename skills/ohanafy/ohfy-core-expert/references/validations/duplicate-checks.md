@@ -43,7 +43,7 @@ const deduplicatedItems = Array.from(itemMap.values());
 ```javascript
 {
     "method": "PATCH",
-    "url": "/services/data/v58.0/sobjects/ohfy__Order_Item__c/ohfy__External_ID__c/order1_item123",
+    "url": "/services/data/v62.0/sobjects/ohfy__Order_Item__c/ohfy__External_ID__c/order1_item123",
     "body": {
         "ohfy__Order__c": "orderId",
         "ohfy__Item__c": "itemId",
@@ -99,7 +99,7 @@ if (existing.length > 0) {
 ```javascript
 {
     "method": "PATCH",
-    "url": "/services/data/v58.0/sobjects/ohfy__Inventory__c/ohfy__Item__c,ohfy__Location__c/itemId,locationId",
+    "url": "/services/data/v62.0/sobjects/ohfy__Inventory__c/ohfy__Item__c,ohfy__Location__c/itemId,locationId",
     "body": {
         "ohfy__Quantity__c": 100
     }
@@ -125,7 +125,7 @@ if (existing.length > 0) {
 // Recommended - creates or updates
 {
     "method": "PATCH",
-    "url": "/services/data/v58.0/sobjects/ohfy__Item__c/ohfy__External_ID__c/shopify_12345",
+    "url": "/services/data/v62.0/sobjects/ohfy__Item__c/ohfy__External_ID__c/shopify_12345",
     "body": { "Name": "Product Name" }
 }
 ```

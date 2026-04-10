@@ -71,105 +71,113 @@ function chunkArray(array, size) {
 // CROSSWALKS
 // =============================================================================
 
+// VIP Class of Trade → ohfy__Market__c (restricted picklist) + Premise_Type__c
+// Market values must match the org's picklist. null = skip (no match).
 var CLASS_OF_TRADE = {
-  '01': { market: 'Convenience Store', premise: 'Off Premise' },
+  '01': { market: 'Convenience', premise: 'Off Premise' },
   '02': { market: 'Drug Store', premise: 'Off Premise' },
-  '03': { market: 'Liquor Store', premise: 'Off Premise' },
-  '04': { market: 'Military', premise: 'Off Premise' },
+  '03': { market: 'Liquor', premise: 'Off Premise' },
+  '04': { market: null, premise: 'Off Premise' },                    // Military — no match
   '05': { market: 'Grocery Store', premise: 'Off Premise' },
-  '06': { market: 'Non-Retail', premise: null },
-  '07': { market: 'Distributor', premise: null },
-  '08': { market: 'Mass Merchant', premise: 'Off Premise' },
+  '06': { market: null, premise: null },                              // Non-Retail — no match
+  '07': { market: 'Distributor House Account', premise: null },
+  '08': { market: 'Club Mass Merchandiser', premise: 'Off Premise' },
   '09': { market: 'Grocery Store', premise: 'Off Premise' },
-  '10': { market: 'Wholesale Club', premise: 'Off Premise' },
-  '11': { market: 'Fine Wine Store', premise: 'Off Premise' },
-  '12': { market: 'State Liquor Store', premise: 'Off Premise' },
-  '13': { market: 'General Merchandise', premise: 'Off Premise' },
-  '14': { market: 'Retail Specialty', premise: 'Off Premise' },
-  '15': { market: 'E-Commerce', premise: 'Off Premise' },
-  '16': { market: 'Dollar Store', premise: 'Off Premise' },
-  '17': { market: 'CBD/THC', premise: 'Off Premise' },
-  '18': { market: 'CBD/THC', premise: 'Off Premise' },
-  '19': { market: 'Other Off Premise', premise: 'Off Premise' },
+  '10': { market: 'Club Mass Merchandiser', premise: 'Off Premise' },
+  '11': { market: 'Liquor', premise: 'Off Premise' },                // Fine Wine → Liquor
+  '12': { market: 'Liquor', premise: 'Off Premise' },                // State Liquor → Liquor
+  '13': { market: 'Supercenter', premise: 'Off Premise' },
+  '14': { market: null, premise: 'Off Premise' },                    // Retail Specialty — no match
+  '15': { market: null, premise: 'Off Premise' },                    // E-Commerce — no match
+  '16': { market: 'Convenience', premise: 'Off Premise' },           // Dollar Store → Convenience
+  '17': { market: null, premise: 'Off Premise' },                    // CBD/THC — no match
+  '18': { market: null, premise: 'Off Premise' },                    // CBD/THC — no match
+  '19': { market: null, premise: 'Off Premise' },                    // Other Off Premise — no match
   '21': { market: 'Adult Entertainment', premise: 'On Premise' },
-  '22': { market: 'Transportation', premise: 'On Premise' },
-  '23': { market: 'Bar', premise: 'On Premise' },
-  '24': { market: 'Entertainment', premise: 'On Premise' },
-  '25': { market: 'Casino', premise: 'On Premise' },
-  '26': { market: 'Concessionaire', premise: 'On Premise' },
-  '27': { market: 'Country Club', premise: 'On Premise' },
-  '28': { market: 'Hotel', premise: 'On Premise' },
-  '29': { market: 'Military', premise: 'On Premise' },
-  '30': { market: 'Night Club', premise: 'On Premise' },
+  '22': { market: 'Airlines / Transportation', premise: 'On Premise' },
+  '23': { market: 'Bars/Clubs/Taverns', premise: 'On Premise' },
+  '24': { market: 'Recreational', premise: 'On Premise' },
+  '25': { market: 'Casinos', premise: 'On Premise' },
+  '26': { market: 'Concessions / Stadiums', premise: 'On Premise' },
+  '27': { market: 'Private Club', premise: 'On Premise' },
+  '28': { market: 'Hotel / Motel / Resort', premise: 'On Premise' },
+  '29': { market: null, premise: 'On Premise' },                     // Military — no match
+  '30': { market: 'Bars/Clubs/Taverns', premise: 'On Premise' },
   '31': { market: 'Private Club', premise: 'On Premise' },
-  '32': { market: 'Restaurant', premise: 'On Premise' },
-  '33': { market: 'Special Event', premise: 'On Premise' },
+  '32': { market: 'Restaurants', premise: 'On Premise' },
+  '33': { market: 'Special Events', premise: 'On Premise' },
   '34': { market: 'Sports Bar', premise: 'On Premise' },
-  '35': { market: 'Casual Dining', premise: 'On Premise' },
-  '36': { market: 'Fine Dining', premise: 'On Premise' },
-  '37': { market: 'School', premise: 'On Premise' },
-  '38': { market: 'Office', premise: 'On Premise' },
-  '39': { market: 'Other On Premise', premise: 'On Premise' },
-  '40': { market: 'Hospital', premise: 'On Premise' },
-  '41': { market: 'Government', premise: 'On Premise' },
-  '42': { market: 'Irish Pub', premise: 'On Premise' },
-  '43': { market: 'Tasting Room', premise: 'On Premise' },
-  '50': { market: 'Direct Distributor', premise: null },
-  '99': { market: 'Unassigned', premise: null }
+  '35': { market: 'Restaurants', premise: 'On Premise' },            // Casual Dining → Restaurants
+  '36': { market: 'Restaurants', premise: 'On Premise' },            // Fine Dining → Restaurants
+  '37': { market: null, premise: 'On Premise' },                     // School — no match
+  '38': { market: null, premise: 'On Premise' },                     // Office — no match
+  '39': { market: null, premise: 'On Premise' },                     // Other On Premise — no match
+  '40': { market: null, premise: 'On Premise' },                     // Hospital — no match
+  '41': { market: null, premise: 'On Premise' },                     // Government — no match
+  '42': { market: 'Bars/Clubs/Taverns', premise: 'On Premise' },     // Irish Pub → Bars
+  '43': { market: null, premise: 'On Premise' },                     // Tasting Room — no match
+  '50': { market: 'Distributor House Account', premise: null },
+  '99': { market: null, premise: null }                               // Unassigned — skip
 };
 
 var CHAIN_STATUS = { 'C': 'Chain', 'I': 'Independent', '': 'Independent' };
 var OUTLET_STATUS = { 'A': true, 'I': false, 'O': false };
 
+// Distributor ClassOfTrade codes (Non-Retail, Distributor House Account)
+var DISTRIBUTOR_COT = { '06': true, '07': true, '50': true };
+
+// Record Type IDs (from ROS2 org describe)
+// NOTE: Customer RT (012am0000050BVXAA2) is NOT available to integration user yet — org config needed
+var RECORD_TYPES = {
+  Customer: '012am0000050BVXAA2',
+  Distributed_Customer: '012WF000003L8VWYA0'
+};
+
 // =============================================================================
 // TRANSFORM
 // =============================================================================
 
+function isDistributor(classOfTrade) {
+  return DISTRIBUTOR_COT.hasOwnProperty(classOfTrade);
+}
+
 function transformAccount(row, distId) {
   var account = clean(row.Account);
+  var classOfTrade = clean(row.ClassOfTrade);
+  var isDist = isDistributor(classOfTrade);
   var record = {};
 
+  // --- Common fields ---
   record.ohfy__External_ID__c = accountKey(distId, account);
   record.ohfy__Customer_Number__c = account;
   record.Name = clean(row.DBA);
+  record.AccountSource = 'VIP SRS';
 
+  // Legal Name — use LicName if present, otherwise match Name
   var licName = clean(row.LicName);
-  if (licName) record.ohfy__Legal_Name__c = licName;
+  record.ohfy__Legal_Name__c = licName || record.Name;
 
-  // Address
-  record.BillingStreet = combineAddress(row.Addr1, row.Addr2);
-  record.BillingCity = clean(row.City);
-  record.BillingState = clean(row.State);
-  record.BillingPostalCode = clean(row.Zip9);
+  // Address (billing and shipping are the same for VIP data)
+  var street = combineAddress(row.Addr1, row.Addr2);
+  var city = clean(row.City);
+  var state = clean(row.State);
+  var postalCode = clean(row.Zip9);
+  var country = clean(row.Country) || 'US';
 
-  var country = clean(row.Country);
-  record.BillingCountry = country || 'US';
+  record.BillingStreet = street;
+  record.BillingCity = city;
+  record.BillingState = state;
+  record.BillingPostalCode = postalCode;
+  record.BillingCountry = country;
+  record.ShippingStreet = street;
+  record.ShippingCity = city;
+  record.ShippingState = state;
+  record.ShippingPostalCode = postalCode;
+  record.ShippingCountry = country;
 
   // Phone
   var phone = formatPhone(row.Phone);
   if (phone) record.Phone = phone;
-
-  // Chain Banner lookup (relationship reference to parent Account)
-  var chain = clean(row.Chain);
-  if (chain) {
-    record.ohfy__Chain_Banner__r = { ohfy__External_ID__c: chainKey(chain) };
-  }
-
-  // Class of Trade crosswalk
-  var classOfTrade = clean(row.ClassOfTrade);
-  var cot = CLASS_OF_TRADE[classOfTrade];
-  if (cot) {
-    record.ohfy__Market__c = cot.market;
-    if (cot.premise) record.ohfy__Premise_Type__c = cot.premise;
-  }
-
-  // Chain status
-  var chainStatus = clean(row.ChainStatus);
-  record.ohfy__Retail_Type__c = CHAIN_STATUS[chainStatus] || 'Independent';
-
-  // Store number
-  var store = clean(row.Store);
-  if (store) record.ohfy__Store_Number__c = store;
 
   // Status
   var status = clean(row.Status);
@@ -178,6 +186,39 @@ function transformAccount(row, distId) {
   // License
   var license = clean(row.License);
   if (license) record.ohfy__ABC_License_Number__c = license;
+
+  if (isDist) {
+    // --- Distributor/Wholesaler: who the supplier sells to ---
+    record.Type = 'Customer';
+    record.RecordTypeId = RECORD_TYPES.Customer;
+    record.ohfy__Retail_Type__c = 'Distributor';
+    // Premise Type blank for distributors
+  } else {
+    // --- Retailer: the distributor's customer ---
+    record.Type = 'Distributed Customer';
+    record.RecordTypeId = RECORD_TYPES.Distributed_Customer;
+
+    // Chain Banner lookup
+    var chain = clean(row.Chain);
+    if (chain) {
+      record.ohfy__Chain_Banner__r = { ohfy__External_ID__c: chainKey(chain) };
+    }
+
+    // Class of Trade → Market + Premise_Type
+    var cot = CLASS_OF_TRADE[classOfTrade];
+    if (cot) {
+      if (cot.market) record.ohfy__Market__c = cot.market;
+      if (cot.premise) record.ohfy__Premise_Type__c = cot.premise;
+    }
+
+    // Chain status → Retail Type (Chain or Independent)
+    var chainStatus = clean(row.ChainStatus);
+    record.ohfy__Retail_Type__c = CHAIN_STATUS[chainStatus] || 'Independent';
+
+    // Store number
+    var store = clean(row.Store);
+    if (store) record.ohfy__Store_Number__c = store;
+  }
 
   return record;
 }

@@ -100,7 +100,7 @@ const deduplicatedItems = Array.from(itemMap.values());
     "compositeRequest": [
         {
             "method": "PATCH",
-            "url": "/services/data/v58.0/sobjects/Order_Item__c/External_ID__c/order1_item123",
+            "url": "/services/data/v62.0/sobjects/Order_Item__c/External_ID__c/order1_item123",
             "referenceId": "item1",
             "body": {
                 "Order__c": "@{orderRef}",
@@ -372,7 +372,7 @@ try {
 // Tray Salesforce composite request - use PATCH with external ID
 {
     "method": "PATCH",
-    "url": "/services/data/v58.0/sobjects/Item__c/External_ID__c/shopify_12345678",
+    "url": "/services/data/v62.0/sobjects/Item__c/External_ID__c/shopify_12345678",
     "body": {
         "Name": "Updated Product Name"
     }
@@ -421,7 +421,7 @@ if (existing.length > 0) {
         {
             "referenceId": "item1",
             "method": "POST",
-            "url": "/services/data/v58.0/sobjects/Order_Item__c",
+            "url": "/services/data/v62.0/sobjects/Order_Item__c",
             "body": {
                 "Order__c": "@{order1.id}", // order1 not yet in request!
                 "Item__c": "itemId"
@@ -441,14 +441,14 @@ if (existing.length > 0) {
         {
             "referenceId": "order1",
             "method": "POST",
-            "url": "/services/data/v58.0/sobjects/Order__c",
+            "url": "/services/data/v62.0/sobjects/Order__c",
             "body": { "Name": "Order 123" }
         },
         // 2. Create child second, reference parent
         {
             "referenceId": "item1",
             "method": "POST",
-            "url": "/services/data/v58.0/sobjects/Order_Item__c",
+            "url": "/services/data/v62.0/sobjects/Order_Item__c",
             "body": {
                 "Order__c": "@{order1.id}", // Now valid
                 "Item__c": "itemId"

@@ -78,10 +78,13 @@ function transformChain(row) {
   return {
     ohfy__External_ID__c: chainKey(chain),
     Name: toTitleCase(desc),
+    ohfy__Legal_Name__c: toTitleCase(desc),
     ohfy__Is_Chain_Banner__c: true,
     ohfy__Retail_Type__c: 'Chain',
     ohfy__Is_Active__c: true,
-    Type: 'Retail Chain'
+    Type: 'Chain Banner',
+    RecordTypeId: '012am0000050BVYAA2', // Chain_Banner — NOT yet available to integration user
+    AccountSource: 'VIP SRS'
   };
 }
 

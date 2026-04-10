@@ -28,7 +28,7 @@ Inventory__c has **5 trigger actions** that prevent negative inventory, validate
 // Tray Salesforce composite request
 {
     "method": "PATCH",
-    "url": "/services/data/v58.0/sobjects/Inventory__c/Item__c,Location__c/itemId,locationId",
+    "url": "/services/data/v62.0/sobjects/Inventory__c/Item__c,Location__c/itemId,locationId",
     "body": {
         "Quantity__c": 100
     }

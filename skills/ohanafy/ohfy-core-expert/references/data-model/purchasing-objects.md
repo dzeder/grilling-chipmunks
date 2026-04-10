@@ -31,7 +31,7 @@ Vendor__c
 ```javascript
 {
     "method": "POST",
-    "url": "/services/data/v58.0/sobjects/ohfy__Vendor__c",
+    "url": "/services/data/v62.0/sobjects/ohfy__Vendor__c",
     "body": {
         "Name": "ABC Distributors",
         "ohfy__Vendor_Number__c": "V-001",
@@ -81,7 +81,7 @@ Draft → Submitted → Approved → Received → Complete
 ```javascript
 {
     "method": "POST",
-    "url": "/services/data/v58.0/sobjects/ohfy__Purchase_Order__c",
+    "url": "/services/data/v62.0/sobjects/ohfy__Purchase_Order__c",
     "referenceId": "po1",
     "body": {
         "ohfy__Vendor__c": "vendorId",
@@ -123,7 +123,7 @@ Purchase_Order_Item__c
 ```javascript
 {
     "method": "POST",
-    "url": "/services/data/v58.0/sobjects/ohfy__Purchase_Order_Item__c",
+    "url": "/services/data/v62.0/sobjects/ohfy__Purchase_Order_Item__c",
     "body": {
         "ohfy__Purchase_Order__c": "@{po1.id}",
         "ohfy__Item__c": "itemId",
@@ -145,7 +145,7 @@ Purchase_Order_Item__c
         {
             "referenceId": "po1",
             "method": "POST",
-            "url": "/services/data/v58.0/sobjects/ohfy__Purchase_Order__c",
+            "url": "/services/data/v62.0/sobjects/ohfy__Purchase_Order__c",
             "body": {
                 "ohfy__Vendor__c": "vendorId",
                 "ohfy__Status__c": "Draft",
@@ -163,7 +163,7 @@ Purchase_Order_Item__c
     "compositeRequest": [
         {
             "method": "POST",
-            "url": "/services/data/v58.0/sobjects/ohfy__Purchase_Order_Item__c",
+            "url": "/services/data/v62.0/sobjects/ohfy__Purchase_Order_Item__c",
             "body": {
                 "ohfy__Purchase_Order__c": "poId",
                 "ohfy__Item__c": "item1",

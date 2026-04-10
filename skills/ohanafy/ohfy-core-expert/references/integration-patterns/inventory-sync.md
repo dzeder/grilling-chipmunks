@@ -84,7 +84,7 @@ async function deltaInventorySync(lastSyncDate) {
     changedInventory.forEach(inv => {
         compositeRequests.push({
             method: "PATCH",
-            url: `/services/data/v58.0/sobjects/ohfy__Inventory__c/ohfy__Item__c,ohfy__Location__c/${inv.itemId},${inv.locationId}`,
+            url: `/services/data/v62.0/sobjects/ohfy__Inventory__c/ohfy__Item__c,ohfy__Location__c/${inv.itemId},${inv.locationId}`,
             body: {
                 ohfy__Quantity__c: inv.quantity,
                 ohfy__Available_Quantity__c: inv.available
@@ -122,7 +122,7 @@ async function adjustInventory(adjustments) {
         compositeRequests.push({
             referenceId: `adj_${adj.inventoryId}`,
             method: "POST",
-            url: "/services/data/v58.0/sobjects/ohfy__Inventory_Adjustment__c",
+            url: "/services/data/v62.0/sobjects/ohfy__Inventory_Adjustment__c",
             body: {
                 ohfy__Inventory__c: adj.inventoryId,
                 ohfy__Adjustment_Type__c: adj.type,  // "Physical Count", "Damage", etc.
@@ -134,7 +134,7 @@ async function adjustInventory(adjustments) {
         // Update inventory quantity
         compositeRequests.push({
             method: "PATCH",
-            url: `/services/data/v58.0/sobjects/ohfy__Inventory__c/${adj.inventoryId}`,
+            url: `/services/data/v62.0/sobjects/ohfy__Inventory__c/${adj.inventoryId}`,
             body: {
                 ohfy__Quantity__c: adj.newQuantity
             }
