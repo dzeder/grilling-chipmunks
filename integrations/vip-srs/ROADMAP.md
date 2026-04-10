@@ -91,6 +91,14 @@
 - [x] Updated e2e-sandbox-runner.js: placements wired into pipeline (Phase 4), fixtures switched to slsda-25.csv
 - [x] All phase 4 objects (Depletions, Placements, Allocations) verified with correct file date
 
+### Phase 5d: Quick Wins + Cleanup Hardening (2026-04-10)
+- [x] Script 07 (depletions): Set `ohfy__Type__c = 'Sale'` — depletions now visible in Type-filtered reports
+- [x] Script 08 (allocations): Set `ohfy__End_Date__c` (last day of month) + `ohfy__Location__r` (distributor warehouse lookup)
+- [x] Script 05 (accounts): Set `ohfy__Fulfillment_Location__r` on retailer accounts (links to `LOC:{DistId}`)
+- [x] Script 06 (inventory): Set `ohfy__Status__c = 'Complete'` on Inventory_Adjustment__c records
+- [x] Script 09 (cleanup): Added `countQuery` (SELECT COUNT()) per target for sanity check — Tray workflow should compare stale count vs upsert count before deleting; if stale > upserted, skip delete (possible truncated/partial file)
+- [x] **Key decision documented:** Invoice__c/Invoice_Item__c is NOT built from VIP data. VIP SLSDA = distributor→retailer depletions (Depletion__c + Placement__c). Invoice objects are for supplier→distributor invoicing — a separate data source entirely.
+
 ## Next Up
 
 ### Phase 6: Tray.io Project Build
@@ -130,6 +138,7 @@
 | **Permission Set** for FLS | Easier to assign to any integration user than modifying every profile |
 | **Deploy package includes Admin.profile FLS** | SF Metadata API silently fails without it in subscriber orgs |
 | **Placement__c keyed by Account×Item** (not per invoice line) | One placement per distributor+account+item. Aggregated from SLSDA rows: earliest/latest sold dates, latest price/qty. External ID: `PLC:{DistId}:{AcctNbr}:{SuppItem}` |
+| **No Invoice__c from VIP data** | VIP SLSDA = distributor→retailer depletions (Depletion__c + Placement__c). Invoice__c is for supplier→distributor invoicing — different data source, not from VIP files |
 | **VIP_File_Date__c = date of pipeline run** | Not derived from file contents. FromDate/ToDate capture the file's reporting window. File date stamps when a record was last refreshed, enabling stale cleanup. |
 
 ## Gotchas

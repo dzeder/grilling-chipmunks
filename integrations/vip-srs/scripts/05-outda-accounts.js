@@ -218,6 +218,9 @@ function transformAccount(row, distId) {
     // Store number
     var store = clean(row.Store);
     if (store) record.ohfy__Store_Number__c = store;
+
+    // Link to distributor's warehouse location
+    record.ohfy__Fulfillment_Location__r = { VIP_External_ID__c: 'LOC:' + distId };
   }
 
   return record;

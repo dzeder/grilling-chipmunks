@@ -135,6 +135,7 @@ function transformAdjustment(row, distId, transCodeInfo, fileDate) {
   record.VIP_External_ID__c = adjustmentKey(distId, supplierItem, transCode, transDate, uom);
   record[NS + 'Type__c'] = transCodeInfo.type;
   record[NS + 'Reason__c'] = transCodeInfo.reason;
+  record[NS + 'Status__c'] = 'Complete';
   record[NS + 'Date__c'] = toSfDate(transDate);
   record[NS + 'Quantity_Change__c'] = toInt(row.Quantity);
   // Parent Inventory lookup (relationship syntax)

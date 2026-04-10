@@ -70,6 +70,14 @@ function buildStaleQuery(target, distId, currentFileDate, fromDate, toDate) {
     " AND " + target.externalIdField + " LIKE '" + target.prefix + ':' + distId + ":%'";
 }
 
+function buildCountQuery(target, distId, currentFileDate, fromDate, toDate) {
+  return 'SELECT COUNT() FROM ' + target.sobject +
+    ' WHERE ' + target.fileDateField + ' < ' + currentFileDate +
+    ' AND ' + target.fromDateField + ' >= ' + fromDate +
+    ' AND ' + target.toDateField + ' <= ' + toDate +
+    " AND " + target.externalIdField + " LIKE '" + target.prefix + ':' + distId + ":%'";
+}
+
 // =============================================================================
 // ORCHESTRATOR
 // =============================================================================
@@ -102,12 +110,17 @@ exports.step = function(input) {
   }
 
   // Generate stale cleanup queries for each target object
+  // Each target includes a countQuery for safety validation:
+  // compare stale count vs upsert count from the same run.
+  // If stale count > upsert count, the file may be truncated — skip cleanup and alert.
   var queries = CLEANUP_TARGETS.map(function(target) {
     return {
       sobject: target.sobject,
       prefix: target.prefix,
       purpose: 'Delete stale ' + target.sobject + ' records',
-      soql: buildStaleQuery(target, distId, currentFileDate, fromDate, toDate)
+      soql: buildStaleQuery(target, distId, currentFileDate, fromDate, toDate),
+      countQuery: buildCountQuery(target, distId, currentFileDate, fromDate, toDate),
+      safetyNote: 'Compare stale count against upsert count for ' + target.sobject + '. If stale > upserted, skip delete (possible truncated file).'
     };
   });
 
