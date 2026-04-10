@@ -9,6 +9,16 @@ globs:
 
 Before starting any task, determine what context to pre-load.
 
+## Workspace context (check first)
+
+If `.context/workspace.md` exists and was created today, read it first. It contains:
+- Active customer and integration
+- Which environment to target
+- Which context files have already been loaded
+- Suggested branch name
+
+This was set by `/kickoff`. Use it instead of branch-name parsing when available.
+
 ## Customer context (branch or task mentions a customer)
 
 Parse the branch name: if it matches `dzeder/<customer>-*`, match against `customers/` directories.
