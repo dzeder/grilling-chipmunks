@@ -60,8 +60,8 @@ function transformLocation(row) {
   // External ID for upsert
   record.VIP_External_ID__c = locationKey(distId);
 
-  // Also populate Location_Code__c
-  record[NS + 'Location_Code__c'] = locationKey(distId);
+  // Location_Code__c stores the raw distributor ID (max 5 chars)
+  record[NS + 'Location_Code__c'] = distId;
 
   // Direct mappings
   record.Name = clean(row['Distributor Name']);
@@ -71,7 +71,7 @@ function transformLocation(row) {
   record[NS + 'Location_Postal_Code__c'] = clean(row.Zip);
 
   // Hardcoded fields
-  record[NS + 'Location_Type__c'] = 'Warehouse';
+  record[NS + 'Type__c'] = 'Warehouse';
   record[NS + 'Is_Active__c'] = true;
   record[NS + 'Is_Sellable__c'] = true;
   record[NS + 'Is_Finished_Good__c'] = true;

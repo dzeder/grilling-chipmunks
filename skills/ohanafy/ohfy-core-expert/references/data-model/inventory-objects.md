@@ -14,7 +14,7 @@ Inventory objects manage warehouse locations, inventory quantities, lot tracking
 
 **Critical Fields**:
 - `Name` - Location name/identifier
-- `Location_Type__c` - Warehouse, Store, Truck, etc.
+- `Type__c` - Warehouse, Zone, Aisle, Rack, Shelf, Bin (**restricted picklist**)
 - `Active__c` - Boolean
 - `Is_Default__c` - Default location flag
 - `Address__c` - Physical address
@@ -33,10 +33,10 @@ Location__c
 ```javascript
 {
     "method": "POST",
-    "url": "/services/data/v58.0/sobjects/ohfy__Location__c",
+    "url": "/services/data/v62.0/sobjects/ohfy__Location__c",
     "body": {
         "Name": "Warehouse A",
-        "ohfy__Location_Type__c": "Warehouse",
+        "ohfy__Type__c": "Warehouse",
         "ohfy__Active__c": true
     }
 }
@@ -81,7 +81,7 @@ Inventory__c
 // Upsert via Item__c + Location__c composite key
 {
     "method": "PATCH",
-    "url": "/services/data/v58.0/sobjects/ohfy__Inventory__c/ohfy__Item__c,ohfy__Location__c/itemId,locationId",
+    "url": "/services/data/v62.0/sobjects/ohfy__Inventory__c/ohfy__Item__c,ohfy__Location__c/itemId,locationId",
     "body": {
         "ohfy__Quantity__c": 100
     }
@@ -141,7 +141,7 @@ Allocation__c
 // Create allocation
 {
     "method": "POST",
-    "url": "/services/data/v58.0/sobjects/ohfy__Allocation__c",
+    "url": "/services/data/v62.0/sobjects/ohfy__Allocation__c",
     "body": {
         "ohfy__Inventory__c": "invId",
         "ohfy__Quantity__c": 15,
@@ -178,7 +178,7 @@ Lot__c
 ```javascript
 {
     "method": "POST",
-    "url": "/services/data/v58.0/sobjects/ohfy__Lot__c",
+    "url": "/services/data/v62.0/sobjects/ohfy__Lot__c",
     "body": {
         "Name": "LOT-2025-001",
         "ohfy__Item__c": "itemId",
@@ -248,7 +248,7 @@ Lot_Invoice_Item__c
 ```javascript
 {
     "method": "POST",
-    "url": "/services/data/v58.0/sobjects/ohfy__Inventory_Adjustment__c",
+    "url": "/services/data/v62.0/sobjects/ohfy__Inventory_Adjustment__c",
     "body": {
         "ohfy__Inventory__c": "invId",
         "ohfy__Adjustment_Type__c": "Physical Count",

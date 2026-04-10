@@ -60,6 +60,7 @@ integrations/vip-srs/
     08-ctlda-allocations.js# → Allocation
     09-cleanup-stale.js    # Stale record deletion
     10-run-summary.js      # Daily run summary
+    purge-vip-data.sh      # Delete all VIP test data from sandbox
   tests/
     fixtures/              # Sample data from yangon workspace
   docs/

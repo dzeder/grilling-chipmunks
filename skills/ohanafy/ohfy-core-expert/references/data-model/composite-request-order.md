@@ -76,7 +76,7 @@ WRONG:
         {
             "referenceId": "account1",
             "method": "PATCH",
-            "url": "/services/data/v58.0/sobjects/Account/External_ID__c/shopify_12345",
+            "url": "/services/data/v62.0/sobjects/Account/ohfy__External_ID__c/shopify_12345",
             "body": {
                 "Name": "ABC Distributing",
                 "Phone": "555-1234",
@@ -88,7 +88,7 @@ WRONG:
         {
             "referenceId": "brand1",
             "method": "PATCH",
-            "url": "/services/data/v58.0/sobjects/ohfy__Item_Line__c/ohfy__Mapping_Key__c/brand_xyz",
+            "url": "/services/data/v62.0/sobjects/ohfy__Item_Line__c/ohfy__Mapping_Key__c/brand_xyz",
             "body": {
                 "Name": "XYZ Brewery",
                 "ohfy__Active__c": true
@@ -99,7 +99,7 @@ WRONG:
         {
             "referenceId": "type1",
             "method": "PATCH",
-            "url": "/services/data/v58.0/sobjects/ohfy__Item_Type__c/ohfy__Mapping_Key__c/type_lager",
+            "url": "/services/data/v62.0/sobjects/ohfy__Item_Type__c/ohfy__Mapping_Key__c/type_lager",
             "body": {
                 "Name": "Lager",
                 "ohfy__Active__c": true
@@ -110,7 +110,7 @@ WRONG:
         {
             "referenceId": "item1",
             "method": "PATCH",
-            "url": "/services/data/v58.0/sobjects/ohfy__Item__c/ohfy__External_ID__c/shopify_98765",
+            "url": "/services/data/v62.0/sobjects/ohfy__Item__c/ohfy__External_ID__c/shopify_98765",
             "body": {
                 "Name": "Premium Lager 12pk",
                 "ohfy__Item_Number__c": "SKU-001",
@@ -125,7 +125,7 @@ WRONG:
         {
             "referenceId": "order1",
             "method": "PATCH",
-            "url": "/services/data/v58.0/sobjects/ohfy__Order__c/ohfy__External_ID__c/shopify_order_1001",
+            "url": "/services/data/v62.0/sobjects/ohfy__Order__c/ohfy__External_ID__c/shopify_order_1001",
             "body": {
                 "ohfy__Account__c": "@{account1.id}",
                 "ohfy__Order_Date__c": "2025-01-15",
@@ -138,7 +138,7 @@ WRONG:
         {
             "referenceId": "orderitem1",
             "method": "PATCH",
-            "url": "/services/data/v58.0/sobjects/ohfy__Order_Item__c/ohfy__External_ID__c/shopify_orderitem_1001_1",
+            "url": "/services/data/v62.0/sobjects/ohfy__Order_Item__c/ohfy__External_ID__c/shopify_orderitem_1001_1",
             "body": {
                 "ohfy__Order__c": "@{order1.id}",
                 "ohfy__Item__c": "@{item1.id}",
@@ -222,7 +222,7 @@ WRONG:
     {
         "referenceId": "account1",
         "method": "PATCH",
-        "url": ".../Account/External_ID__c/shopify_12345",
+        "url": ".../Account/ohfy__External_ID__c/shopify_12345",
         "body": { "Name": "Customer" }
     },
     {
@@ -419,9 +419,9 @@ for (const batch of batches) {
 **Faster**: Independent requests (can execute in parallel)
 ```javascript
 [
-    { "url": ".../Account/External_ID__c/cust1", ... },  // Independent
-    { "url": ".../Account/External_ID__c/cust2", ... },  // Independent
-    { "url": ".../Account/External_ID__c/cust3", ... }   // Independent
+    { "url": ".../Account/ohfy__External_ID__c/cust1", ... },  // Independent
+    { "url": ".../Account/ohfy__External_ID__c/cust2", ... },  // Independent
+    { "url": ".../Account/ohfy__External_ID__c/cust3", ... }   // Independent
 ]
 ```
 

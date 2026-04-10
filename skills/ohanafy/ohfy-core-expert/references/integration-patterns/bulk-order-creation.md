@@ -18,7 +18,7 @@ Use PATCH with External_ID for all records - safest for integrations.
         {
             "referenceId": "account1",
             "method": "PATCH",
-            "url": "/services/data/v58.0/sobjects/Account/External_ID__c/shopify_12345",
+            "url": "/services/data/v62.0/sobjects/Account/ohfy__External_ID__c/shopify_12345",
             "body": {
                 "Name": "ABC Distributing",
                 "Type": "Customer"
@@ -28,7 +28,7 @@ Use PATCH with External_ID for all records - safest for integrations.
         {
             "referenceId": "item1",
             "method": "PATCH",
-            "url": "/services/data/v58.0/sobjects/ohfy__Item__c/ohfy__External_ID__c/shopify_98765",
+            "url": "/services/data/v62.0/sobjects/ohfy__Item__c/ohfy__External_ID__c/shopify_98765",
             "body": {
                 "Name": "Premium Lager 12pk",
                 "ohfy__Base_Price__c": 12.99
@@ -38,7 +38,7 @@ Use PATCH with External_ID for all records - safest for integrations.
         {
             "referenceId": "order1",
             "method": "PATCH",
-            "url": "/services/data/v58.0/sobjects/ohfy__Order__c/ohfy__External_ID__c/shopify_order_1001",
+            "url": "/services/data/v62.0/sobjects/ohfy__Order__c/ohfy__External_ID__c/shopify_order_1001",
             "body": {
                 "ohfy__Account__c": "@{account1.id}",
                 "ohfy__Order_Date__c": "2025-01-15",
@@ -49,7 +49,7 @@ Use PATCH with External_ID for all records - safest for integrations.
         {
             "referenceId": "orderitem1",
             "method": "PATCH",
-            "url": "/services/data/v58.0/sobjects/ohfy__Order_Item__c/ohfy__External_ID__c/shopify_orderitem_1001_1",
+            "url": "/services/data/v62.0/sobjects/ohfy__Order_Item__c/ohfy__External_ID__c/shopify_orderitem_1001_1",
             "body": {
                 "ohfy__Order__c": "@{order1.id}",
                 "ohfy__Item__c": "@{item1.id}",
@@ -201,7 +201,7 @@ async function syncShopifyOrders(shopifyOrders) {
         compositeRequests.push({
             referenceId: `account_${shopifyOrder.customer.id}`,
             method: "PATCH",
-            url: `/services/data/v58.0/sobjects/Account/External_ID__c/shopify_${shopifyOrder.customer.id}`,
+            url: `/services/data/v62.0/sobjects/Account/ohfy__External_ID__c/shopify_${shopifyOrder.customer.id}`,
             body: {
                 Name: shopifyOrder.customer.name,
                 Phone: shopifyOrder.customer.phone,
@@ -215,7 +215,7 @@ async function syncShopifyOrders(shopifyOrders) {
             compositeRequests.push({
                 referenceId: `item_${lineItem.variant_id}`,
                 method: "PATCH",
-                url: `/services/data/v58.0/sobjects/ohfy__Item__c/ohfy__External_ID__c/shopify_${lineItem.variant_id}`,
+                url: `/services/data/v62.0/sobjects/ohfy__Item__c/ohfy__External_ID__c/shopify_${lineItem.variant_id}`,
                 body: {
                     Name: lineItem.name,
                     ohfy__Item_Number__c: lineItem.sku,
@@ -228,7 +228,7 @@ async function syncShopifyOrders(shopifyOrders) {
         compositeRequests.push({
             referenceId: `order_${shopifyOrder.id}`,
             method: "PATCH",
-            url: `/services/data/v58.0/sobjects/ohfy__Order__c/ohfy__External_ID__c/shopify_order_${shopifyOrder.id}`,
+            url: `/services/data/v62.0/sobjects/ohfy__Order__c/ohfy__External_ID__c/shopify_order_${shopifyOrder.id}`,
             body: {
                 ohfy__Account__c: `@{account_${shopifyOrder.customer.id}.id}`,
                 ohfy__Order_Date__c: shopifyOrder.created_at,
@@ -242,7 +242,7 @@ async function syncShopifyOrders(shopifyOrders) {
             compositeRequests.push({
                 referenceId: `orderitem_${shopifyOrder.id}_${index}`,
                 method: "PATCH",
-                url: `/services/data/v58.0/sobjects/ohfy__Order_Item__c/ohfy__External_ID__c/shopify_orderitem_${shopifyOrder.id}_${index}`,
+                url: `/services/data/v62.0/sobjects/ohfy__Order_Item__c/ohfy__External_ID__c/shopify_orderitem_${shopifyOrder.id}_${index}`,
                 body: {
                     ohfy__Order__c: `@{order_${shopifyOrder.id}.id}`,
                     ohfy__Item__c: `@{item_${lineItem.variant_id}.id}`,

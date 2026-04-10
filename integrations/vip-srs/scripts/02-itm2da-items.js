@@ -106,17 +106,18 @@ function transformItem(row) {
     record[NS + 'Package_Type__c'] = packageType === 'BTL' ? 'Packaged' : packageType;
   }
 
-  // Package size
+  // Package size (human-readable goes to Short Name)
   var packageSize = clean(row.PackageSize);
-  if (packageSize) record[NS + 'Packaging_Type__c'] = packageSize;
+  if (packageSize) record[NS + 'Packaging_Type_Short_Name__c'] = packageSize;
+
+  // NOTE: Packaging_Type__c (restricted picklist, stock UOM sub-type) and Type__c
+  // require the 'Finished Good' record type to be assigned to the integration user.
+  // These fields are set by the Tray workflow after record type assignment is confirmed.
+  // See ROADMAP.md Phase 8 prerequisites.
 
   // Status: A → true, I → false
   var status = clean(row.Status);
   record[NS + 'Is_Active__c'] = status === 'A';
-
-  // Container type → Type__c (all map to Finished Good)
-  var containerType = clean(row.ContainerType);
-  record[NS + 'Type__c'] = CONTAINER_TYPE[containerType] || CONTAINER_TYPE_DEFAULT;
 
   // Volume conversion: VolofUnit (in VolUOM) → UOM_In_Fluid_Ounces__c
   var volOfUnit = toNumber(row.VolofUnit);
