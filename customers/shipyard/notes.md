@@ -4,6 +4,24 @@ Running notes from debugging sessions, design decisions, and gotchas.
 
 <!-- Add entries with dates. Most recent first. -->
 
+## 2026-04-10 — Depletions, Placements, and File Date Logic (evening session)
+
+- Loaded curated 25-row SLSDA fixture with all supporting data (accounts, chains, items, transformation settings)
+- **Item lookup filter chain discovered:** Depletion__c.Item__c has a non-optional filter requiring Finished Good RT + Type__c + UOM__c + Packaging_Type__c + Transformation_Setting__c. All 5 prerequisites must be met or FIELD_FILTER_VALIDATION_EXCEPTION. This was undocumented.
+- Created Transformation_Setting__c (Each → Fluid Ounce(s), Volume, Spirit) to satisfy the filter
+- Set all 13 items to Finished Good RT + UOM (US Count) + Packaging_Type (Each)
+- 25 depletion rows → 15 unique records (deduplication via upsert across overlapping file date windows)
+- **Built Placement__c integration (script 07b):**
+  - Aggregates SLSDA by Account×Item → one placement per pair
+  - External ID: `PLC:{DistId}:{AcctNbr}:{SuppItem}` (changed from spec's DPL: per-invoice-line format)
+  - Maps: First_Sold_Date__c, Last_Sold_Date__c, Last_Purchase_Date__c, Last_Purchase_Quantity__c, Last_Invoice_Price__c, Is_Active__c
+  - Master-detail fields (Account__c, Item__c) are create-only — set via relationship syntax
+  - Deployed VIP_External_ID__c + VIP_File_Date__c on Placement__c
+- **Fixed VIP_File_Date__c semantics:** File date = date of pipeline run (today), not derived from file contents. FromDate/ToDate already capture the file's reporting window. Stale cleanup needs "when was this record last refreshed" = run date.
+- Updated shared/constants.js PREFIX.PLACEMENT from DPL to PLC
+- Updated shared/external-ids.js placementKey() to match implementation (3 components, not 5)
+- All sandbox data cleared after verification
+
 ## 2026-04-10 — Account Model Refinement (afternoon session)
 
 - ROS is a supplier → clarified the account classification model:

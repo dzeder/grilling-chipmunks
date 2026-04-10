@@ -11,16 +11,19 @@ Custom fields, picklist values, validation rules, and other org-specific differe
 | ohfy__Inventory_History__c | VIP_External_ID__c | Text | 255 | Yes | Yes | Upsert key for IVH: prefix |
 | ohfy__Inventory_Adjustment__c | VIP_External_ID__c | Text | 255 | Yes | Yes | Upsert key for IVA: prefix |
 | ohfy__Allocation__c | VIP_External_ID__c | Text | 255 | Yes | Yes | Upsert key for ALC: prefix |
+| ohfy__Placement__c | VIP_External_ID__c | Text | 255 | Yes | Yes | Upsert key for PLC: prefix (Account×Item) |
 
 ## Custom Fields — VIP Date Stamps (for stale record cleanup)
 
-Applied to 6 objects: Invoice__c, Invoice_Item__c, Placement__c, Inventory_History__c, Inventory_Adjustment__c, Allocation__c
+Applied to transaction objects: Depletion__c, Placement__c, Inventory_History__c, Inventory_Adjustment__c, Allocation__c (and Invoice__c, Invoice_Item__c when built).
 
 | Field API Name | Type | Purpose |
 |---------------|------|---------|
-| VIP_File_Date__c | Date | Filename date stamp for stale cleanup |
-| VIP_From_Date__c | Date | Reporting period start |
-| VIP_To_Date__c | Date | Reporting period end |
+| VIP_File_Date__c | Date | Date of pipeline run — for stale cleanup ("last refreshed on") |
+| VIP_From_Date__c | Date | Reporting period start (from file contents) |
+| VIP_To_Date__c | Date | Reporting period end (from file contents) |
+
+**Note:** VIP_File_Date__c is the date the pipeline ran, NOT a date from the file. FromDate/ToDate capture the file's reporting window.
 
 ## Custom Fields — Other
 
@@ -60,6 +63,12 @@ These managed package fields are restricted picklists. VIP crosswalk values must
 | Merchandise | Merchandise | |
 | Packaging | Packaging | |
 | Raw Material | Raw_Material | |
+
+## Lookup Filters
+
+| Object.Field | Filter | Notes |
+|-------------|--------|-------|
+| ohfy__Depletion__c.ohfy__Item__c | Item must have: Finished Good RT + Type__c + UOM__c + Packaging_Type__c + Transformation_Setting__c | `optionalFilter: false` — blocks save if any prerequisite missing |
 
 ## Validation Rules
 

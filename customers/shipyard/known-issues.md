@@ -11,12 +11,17 @@ Running log of known issues, workarounds, and resolutions for this customer.
 - **Workaround:** First insert succeeds; only AfterUpdate (re-upsert) fails. Avoid re-upserting Accounts in the same run. In Tray, handle allOrNone=false and log these errors.
 - **Description:** `ohfy.AccountTrigger` AfterUpdate fires `ServiceLocator.ServiceLocatorException: Invalid implementation class: AccountTriggerMethods`. The managed package class `AccountTriggerMethods` is not found. This blocks Account updates but not inserts. Ohanafy engineering needs to either deploy the missing class or update the ServiceLocator config in ROS2.
 
-### Integration user missing Finished Good record type on Item__c (ROS2)
-- **Severity:** Medium
-- **Affected area:** Integration — Item__c upserts
+### Item lookup filter chain on Depletion__c.Item__c
+- **Severity:** High
+- **Affected area:** Integration — Depletion__c upserts
 - **Reported:** 2026-04-10
-- **Workaround:** Skip `ohfy__Type__c` and `ohfy__Packaging_Type__c` fields in upsert. Items are created without type classification.
-- **Description:** The integration user (`integrations@ohanafy.ros.test`) does not have the "Finished Good" record type assigned on `ohfy__Item__c`. The `Packaging_Type__c` restricted picklist only accepts values valid for the Finished Good record type (e.g., "Each"). Without the record type assignment, setting either `Type__c = 'Finished Good'` or any `Packaging_Type__c` value fails. Fix: assign the Finished Good record type to the integration user's profile.
+- **Workaround:** Manually set all 5 prerequisites on each Item before loading depletions. Script 02 should be updated to handle this automatically.
+- **Description:** `Depletion__c.ohfy__Item__c` has a non-optional lookup filter requiring the Item to have ALL of: (1) Finished Good record type, (2) `Type__c = 'Finished Good'`, (3) `UOM__c` set (e.g., 'US Count'), (4) `Packaging_Type__c` set (dependent on UOM, e.g., 'Each'), and (5) a `Transformation_Setting__c` record linking the Packaging_Type to a Volume UOM. Missing ANY prerequisite causes `FIELD_FILTER_VALIDATION_EXCEPTION`. The dependency chain is: RecordType → Type__c → UOM__c → Packaging_Type__c (dependent picklist) → Transformation_Setting__c. This was undocumented and discovered during E2E testing. For production: Script 02 needs to ensure items meet all prerequisites, and Transformation_Setting__c records need to exist for all item packaging types.
+
+### ~~Integration user missing Finished Good record type on Item__c (ROS2)~~ RESOLVED
+- **Severity:** Medium
+- **Resolved:** 2026-04-10
+- **Description:** The integration user (`integrations@ohanafy.ros.test`) did not have the "Finished Good" record type assigned on `ohfy__Item__c`. Fixed by manually assigning RecordTypeId during E2E testing. For production: assign the Finished Good record type to the integration user's profile via Setup.
 
 ### ~~Integration user missing Customer record type on Account (ROS2)~~ RESOLVED
 - **Severity:** Medium

@@ -26,6 +26,7 @@ var DIST_ID = 'FL01';
 var DRY_RUN = false;
 var PHASE_FILTER = null; // null = all phases
 var API_VERSION = 'v62.0';
+var FILE_DATE = ''; // YYYY-MM-DD — set via --file-date, defaults to today (date of run)
 
 // Parse CLI args
 var args = process.argv.slice(2);
@@ -35,8 +36,9 @@ for (var i = 0; i < args.length; i++) {
     case '--dist-id': DIST_ID = args[++i]; break;
     case '--dry-run': DRY_RUN = true; break;
     case '--phase': PHASE_FILTER = parseInt(args[++i], 10); break;
+    case '--file-date': FILE_DATE = args[++i]; break;
     case '--help': case '-h':
-      console.log('Usage: node e2e-sandbox-runner.js [--target-org ORG] [--dist-id ID] [--phase N] [--dry-run]');
+      console.log('Usage: node e2e-sandbox-runner.js [--target-org ORG] [--dist-id ID] [--phase N] [--file-date YYYY-MM-DD] [--dry-run]');
       process.exit(0);
   }
 }
@@ -328,9 +330,18 @@ var PIPELINE = [
     phase: 4,
     name: '07-slsda → Depletion',
     script: '07-slsda-depletions.js',
-    fixture: 'slsda-sample.csv',
+    fixture: 'slsda-25.csv',
     run: function(result) {
       return sendBatches(result.batches, 'Depletions');
+    }
+  },
+  {
+    phase: 4,
+    name: '07b-slsda → Placement',
+    script: '07b-slsda-placements.js',
+    fixture: 'slsda-25.csv',
+    run: function(result) {
+      return sendBatches(result.batches, 'Placements');
     }
   },
   {
@@ -353,6 +364,7 @@ console.log('VIP SRS E2E Sandbox Runner');
 console.log('============================================');
 console.log('Target org:  ' + TARGET_ORG);
 console.log('Dist ID:     ' + DIST_ID);
+console.log('File date:   ' + (FILE_DATE || '(today: ' + new Date().toISOString().substring(0, 10) + ')'));
 console.log('Mode:        ' + (DRY_RUN ? 'DRY RUN' : 'LIVE'));
 console.log('Phase:       ' + (PHASE_FILTER ? PHASE_FILTER : 'ALL'));
 console.log('============================================');
@@ -388,6 +400,10 @@ PIPELINE.forEach(function(step) {
 
   var input = { rows: rows };
   if (DIST_ID) input.targetDistId = DIST_ID;
+
+  // fileDate = date of run (for stale cleanup). CLI arg overrides, otherwise today.
+  var fileDate = FILE_DATE || new Date().toISOString().substring(0, 10);
+  input.fileDate = fileDate;
 
   var result;
   try {

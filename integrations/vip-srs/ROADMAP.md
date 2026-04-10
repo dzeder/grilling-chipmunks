@@ -24,11 +24,11 @@
 - [x] `08-ctlda-allocations.js` — Allocation__c
 
 ### Phase 4: Cleanup + Summary
-- [x] `09-cleanup-stale.js` — SOQL generators for stale record deletion (4 objects)
+- [x] `09-cleanup-stale.js` — SOQL generators for stale record deletion (5 objects including Placement__c)
 - [x] `10-run-summary.js` — Aggregates per-script results
 
 ### ROS2 Sandbox Field Deployment
-- [x] 22 custom fields deployed across 7 objects (Depletion, Location, Inventory, History, Adjustment, Allocation, Contact)
+- [x] 24 custom fields deployed across 8 objects (Depletion, Placement, Location, Inventory, History, Adjustment, Allocation, Contact)
 - [x] Admin profile FLS included in deploy package
 - [x] VIP_SRS_Integration Permission Set created and deployed
 - [x] Fields verified queryable via SOQL and upsertable via REST API
@@ -71,13 +71,33 @@
 - [x] Purge script fixed: removed `--no-prompt` flag (not supported by `sf data delete record`)
 - [x] Core skill files updated: Account `External_ID__c` → `ohfy__External_ID__c`, Location `Location_Type__c` → `Type__c`, all API versions `v58.0` → `v62.0`
 
+### Phase 5c: Depletions + Placements E2E (2026-04-10)
+- [x] Created `slsda-25.csv` — curated 25-row fixture with matching supporting data across all phases (accounts, chains, items)
+- [x] Created `outda-depletion-deps.csv` — 5 OUTDA accounts referenced by the 25 depletions
+- [x] Loaded chain banner CHN:0000091321 (ABC Discount Wine & Liquor) — referenced by account 13791
+- [x] Resolved Item lookup filter chain on Depletion__c.Item__c:
+  - Items need Finished Good record type + `Type__c = 'Finished Good'` + `UOM__c` + `Packaging_Type__c` (dependent picklist)
+  - Also requires `Transformation_Setting__c` record linking the Packaging_Type to a Volume UOM
+  - Created Transformation_Setting__c (Each → Fluid Ounce(s), Volume, Spirit) manually
+  - Set all 13 items: Finished Good RT + Type + UOM (US Count) + Packaging_Type (Each)
+- [x] 25 depletions → 15 unique records (deduplication via upsert across overlapping file date windows)
+- [x] `07b-slsda-placements.js` — new script, aggregates SLSDA invoice lines into Account×Item placements
+  - External ID: `PLC:{DistId}:{AcctNbr}:{SuppItem}` (one per Account×Item, not per transaction)
+  - Master-detail fields (Account__c, Item__c) are create-only — set via `__r` relationship syntax
+  - Maps: First_Sold_Date__c, Last_Sold_Date__c, Last_Purchase_Date__c, Last_Purchase_Quantity__c, Last_Invoice_Price__c, Is_Active__c
+  - 25 rows → 8 unique placements
+- [x] Deployed `VIP_External_ID__c` + `VIP_File_Date__c` on Placement__c (field + permset + profile FLS)
+- [x] **VIP_File_Date__c = date of run** (not derived from file contents). FromDate/ToDate capture the file's reporting window. File date is for stale cleanup: "this record was present in the pipeline run on this date."
+- [x] Updated e2e-sandbox-runner.js: placements wired into pipeline (Phase 4), fixtures switched to slsda-25.csv
+- [x] All phase 4 objects (Depletions, Placements, Allocations) verified with correct file date
+
 ## Next Up
 
 ### Phase 6: Tray.io Project Build
 - [ ] Create Tray project with daily schedule trigger
 - [ ] SFTP connector: pickup + decompress .gz files
 - [ ] CSV parser step per file type
-- [ ] Script connectors wired to each transform script (01-10)
+- [ ] Script connectors wired to each transform script (01-10, including 07b)
 - [ ] SF Composite API connector for each batch output
 - [ ] Phase-sequenced execution (reference data before enrichment before transactions)
 - [ ] Error handling + notification connector (Slack/email)
@@ -109,6 +129,8 @@
 | **ohfy__Stamped_Date__c** for history | Inventory_Date__c is non-updatable |
 | **Permission Set** for FLS | Easier to assign to any integration user than modifying every profile |
 | **Deploy package includes Admin.profile FLS** | SF Metadata API silently fails without it in subscriber orgs |
+| **Placement__c keyed by Account×Item** (not per invoice line) | One placement per distributor+account+item. Aggregated from SLSDA rows: earliest/latest sold dates, latest price/qty. External ID: `PLC:{DistId}:{AcctNbr}:{SuppItem}` |
+| **VIP_File_Date__c = date of pipeline run** | Not derived from file contents. FromDate/ToDate capture the file's reporting window. File date stamps when a record was last refreshed, enabling stale cleanup. |
 
 ## Gotchas
 
@@ -125,3 +147,5 @@
 11. **Supplier vs Distributor perspective matters:** ROS is a supplier. OUTDA accounts split into two types: distributors/wholesalers (ClassOfTrade 06/07/50) are the supplier's **Customers** (record type Customer); retailers are the distributor's customers → **Distributed Customers**. This affects record type, account type, retail type, and premise type mappings.
 12. **SRSCHAIN records are chain banners** even if names seem small (e.g., "Horizon Market"). They're parent accounts that OUTDA outlets link to via `Chain_Banner__r`. The detail (address, market, etc.) lives on the outlets, not the chains.
 13. **AccountSource 'VIP SRS' not in picklist:** The field is not restricted so the API accepts it, but the value won't appear in picklist dropdowns until added via Setup.
+14. **Item lookup filter chain on Depletion__c.Item__c:** The lookup filter (`optionalFilter: false`) requires the Item to have: (a) Finished Good record type, (b) `Type__c = 'Finished Good'`, (c) `UOM__c` set (e.g., 'US Count'), (d) `Packaging_Type__c` set (dependent on UOM, e.g., 'Each'), and (e) a `Transformation_Setting__c` record linking the Packaging_Type to a Volume UOM (e.g., Each → Fluid Ounce(s)). Missing any of these causes `FIELD_FILTER_VALIDATION_EXCEPTION`. Script 02 must ensure items meet all prerequisites before depletions can load.
+15. **Placement__c master-detail fields are create-only:** `ohfy__Account__c` and `ohfy__Item__c` are master-detail and can only be set on initial create (updateable=false). Use `__r` relationship syntax in Composite API body. On subsequent upserts, the API silently ignores these fields — the record stays parented to the original Account×Item.

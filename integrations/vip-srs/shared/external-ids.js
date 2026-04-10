@@ -120,15 +120,14 @@ function allocationKey(distId, supplierItem, controlDate, uom) {
 }
 
 /**
- * Placement__c: DPL:{DistId}:{InvoiceNbr}:{AcctNbr}:{SuppItem}:{UOM}
+ * Placement__c: PLC:{DistId}:{AcctNbr}:{SuppItem}
+ * One per Account×Item pair — aggregated from SLSDA invoice lines.
  * @param {string} distId - Distributor code
- * @param {string} invoiceNbr - Invoice number
  * @param {string} acctNbr - Account number
  * @param {string} suppItem - Supplier item number
- * @param {string} uom - Unit of measure (C or B)
  */
-function placementKey(distId, invoiceNbr, acctNbr, suppItem, uom) {
-  return PREFIX.PLACEMENT + ':' + distId + ':' + invoiceNbr + ':' + acctNbr + ':' + suppItem + ':' + uom;
+function placementKey(distId, acctNbr, suppItem) {
+  return PREFIX.PLACEMENT + ':' + distId + ':' + acctNbr + ':' + suppItem;
 }
 
 // =============================================================================
