@@ -140,5 +140,6 @@ When the user's request matches a skill, invoke it FIRST via the Skill tool.
 - Data import → `/data-harmonizer`
 - Org debugging, connect SF org → `/org-connect`
 - Datadog, monitoring, observability → `/datadog-expert`
+- Start new work, set up context → `/kickoff`
 
 Full routing: `docs/SKILL_ROUTING_MATRIX.md` | Context loading: `.claude/rules/context-loading.md`

@@ -14,7 +14,7 @@ skills/
   docs/            # 4 doc generation skills
   content-watcher/ # Content monitoring
   observability/   # 1 observability skill
-  utility/         # 3 meta skills
+  utility/         # 4 meta skills
 ```
 
 ## gstack (workflow layer)
@@ -125,6 +125,7 @@ All IaC lives in `skills/aws/cdk/`. CDK TypeScript only — never write CloudFor
 ## Utility
 
 In `skills/utility/`:
+- **kickoff** — Guided workspace setup wizard (customer + integration context in 30 seconds)
 - **org-connect** — Connect to live Salesforce orgs for debugging and metadata retrieval
 - **claude-code-best-practices** — Skill/agent authoring patterns and monorepo organization
 - **github-agent** — GitHub Actions health audit, CI/CD best practices, repo configuration review
@@ -152,3 +153,4 @@ Key routing rules:
 - Data import, Excel mapping → data-harmonizer
 - Content monitoring → content-watcher
 - Datadog, monitoring, observability → datadog-expert
+- Start work, new session, set up context → kickoff
