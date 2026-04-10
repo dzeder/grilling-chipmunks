@@ -18,7 +18,7 @@ jobs:
   cdk-synth:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Check CDK project exists
         id: check
         run: |
@@ -28,7 +28,7 @@ jobs:
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         if: steps.check.outputs.skip != 'true'
         with:
           node-version: '20'
@@ -36,7 +36,7 @@ jobs:
         if: steps.check.outputs.skip != 'true'
       - run: npx cdk synth
         if: steps.check.outputs.skip != 'true'
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
         if: steps.check.outputs.skip != 'true'
         with:
           name: cdk-output
@@ -46,13 +46,13 @@ jobs:
     needs: cdk-synth
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v8
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: cdk-output
           path: cdk.out/
         continue-on-error: true
-      - uses: bridgecrewio/checkov-action@master
+      - uses: bridgecrewio/checkov-action@99bb2caf247dfd9f03cf984373bc6043d4e32ebf # v12.1347.0
         if: hashFiles('cdk.out/') != ''
         with:
           directory: cdk.out/
@@ -62,11 +62,11 @@ jobs:
     runs-on: ubuntu-latest
     environment: staging
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Check CDK project exists
         id: check
         run: test -f package.json && echo "skip=false" >> "$GITHUB_OUTPUT" || echo "skip=true" >> "$GITHUB_OUTPUT"
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         if: steps.check.outputs.skip != 'true'
         with:
           node-version: '20'
@@ -84,11 +84,11 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Check CDK project exists
         id: check
         run: test -f package.json && echo "skip=false" >> "$GITHUB_OUTPUT" || echo "skip=true" >> "$GITHUB_OUTPUT"
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         if: steps.check.outputs.skip != 'true'
         with:
           node-version: '20'
