@@ -1,0 +1,11 @@
+RecordType,DistId,Reserved,DistName,SupplierItem,Quantity,UnitOfMeasure,ControlDate
+"DETAIL","FL01","","Gold Coast Eagle Distributing Inc.","102312102",15,"C","202604"
+"DETAIL","FL01","","Gold Coast Eagle Distributing Inc.","102312116",20,"C","202604"
+"DETAIL","FL01","","Gold Coast Eagle Distributing Inc.","102312117",10,"C","202604"
+"DETAIL","FL02","","Great Bay Dist. - St. Petersburg","102312102",193,"B","202604"
+"DETAIL","FL02","","Great Bay Dist. - St. Petersburg","102312106",6,"B","202604"
+"DETAIL","FL02","","Great Bay Dist. - St. Petersburg","102312113",6,"B","202604"
+"DETAIL","FL02","","Great Bay Dist. - St. Petersburg","102312115",12,"B","202604"
+"DETAIL","FL02","","Great Bay Dist. - St. Petersburg","102312116",8,"B","202604"
+"DETAIL","FL02","","Great Bay Dist. - St. Petersburg","102312117",2,"B","202604"
+"DETAIL","FL02","","Great Bay Dist. - St. Petersburg","102312118",1,"B","202604"
