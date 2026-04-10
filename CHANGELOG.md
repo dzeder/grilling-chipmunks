@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.7.2] - 2026-04-10
+
+### Added
+- `/kickoff` skill — guided workspace setup wizard that asks what integration and which customer, then writes `.context/workspace.md` so all downstream skills know the working context automatically
+- Context-loading protocol now checks `.context/workspace.md` first before falling back to branch-name parsing
+- Workspace setup handoffs added to skill routing matrix (kickoff → org-connect, tray-expert, investigate)
+
 ## [0.0.7.1] - 2026-04-10
 
 ### Added
