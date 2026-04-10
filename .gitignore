@@ -27,6 +27,8 @@ yarn-error.log*
 # Salesforce
 .sfdx/
 .sf/
+# Retrieved org metadata snapshots (too large for git, regenerable via sf project retrieve)
+customers/*/orgs/*/force-app/
 
 # Secrets
 .env

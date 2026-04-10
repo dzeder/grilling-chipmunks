@@ -1,0 +1,27 @@
+{
+  "customer": "Shipyard Brewing Company",
+  "supplierCode": "ARG",
+  "targetDistributorId": null,
+  "sftpEndpoint": null,
+  "sftpPath": null,
+  "salesforce": {
+    "apiVersion": "v62.0",
+    "batchSize": 25,
+    "namespacePrefix": "ohfy",
+    "orgAlias": "shipyard-sandbox"
+  },
+  "externalIdFields": {
+    "Account": "External_ID__c",
+    "Contact": "External_ID__c",
+    "Item__c": "VIP_External_ID__c",
+    "Location__c": "Location_Code__c",
+    "Invoice__c": "Invoice_Number__c",
+    "Invoice_Item__c": "VIP_External_ID__c",
+    "Inventory__c": "VIP_External_ID__c",
+    "Inventory_History__c": "VIP_External_ID__c",
+    "Inventory_Adjustment__c": "VIP_External_ID__c",
+    "Allocation__c": "VIP_External_ID__c",
+    "Placement__c": "Integration_ID__c"
+  },
+  "notes": "targetDistributorId must be set per-distributor org. Each Ohanafy org belongs to one distributor."
+}
