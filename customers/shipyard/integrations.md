@@ -6,7 +6,7 @@ External systems connected to this customer's Ohanafy instance.
 
 | Integration | Direction | Method | Frequency | Status |
 |-------------|-----------|--------|-----------|--------|
-| VIP SRS (9 file types) | Inbound | SFTP → Tray.io → SF Composite API | Daily | Building |
+| VIP SRS (9 file types) | Inbound | SFTP → Tray.io → SF Composite API | Daily | Scripts complete, Tray build next |
 
 <!-- Direction: Inbound (to SF), Outbound (from SF), Bidirectional -->
 <!-- Method: Tray.io, SF Connect, REST API, SFTP, Manual -->
@@ -28,7 +28,7 @@ External systems connected to this customer's Ohanafy instance.
 | DISTDA | Location__c | ~13 (1 after filtering) |
 | ITMDA | Item__c (enrichment) | ~102 |
 | OUTDA | Account (Outlets), Contact (Buyers) | ~36,587 (filtered by dist) |
-| SLSDA | Invoice__c, Invoice_Item__c, Placement__c | ~110 |
+| SLSDA | Depletion__c, Placement__c | ~110 |
 | INVDA | Inventory__c, Inventory_History__c, Inventory_Adjustment__c | ~656 |
 | CTLDA | Allocation__c | ~24 |
 | SRSVALUE | Not loaded — used as crosswalk reference | ~177 |
@@ -64,4 +64,5 @@ Cleanup: Stale record deletion
 
 ## Known Integration Issues
 
-<!-- Running log of integration-specific problems and their resolutions -->
+- **AccountTriggerMethods missing:** Blocks Account AfterUpdate (upserts). See `known-issues.md`.
+- **Item lookup filter chain:** Depletion__c.Item__c requires Finished Good RT + Type__c + UOM__c + Packaging_Type__c + Transformation_Setting__c. See `customizations.md`.

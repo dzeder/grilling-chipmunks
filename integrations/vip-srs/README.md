@@ -18,6 +18,7 @@ SFTP (9 .gz files daily)
         06-invda    → Inventory__c + History + Adjustments
     → Phase 4: Transactions (parallel)
         07-slsda    → Depletion__c
+        07b-slsda   → Placement__c (Account×Item aggregation)
         08-ctlda    → Allocation__c
     → Cleanup
         09-cleanup  → Stale record deletion
@@ -34,7 +35,7 @@ SFTP (9 .gz files daily)
 | DISTDA | Distributor master | ~13 | Location__c |
 | ITMDA | Distributor-item mapping | ~102 | Item__c (enrichment) |
 | OUTDA | Outlet/account universe | ~36,587 | Account (Outlets), Contact (Buyers) |
-| SLSDA | Sales/depletion lines | ~110 | Depletion__c |
+| SLSDA | Sales/depletion lines | ~110 | Depletion__c, Placement__c |
 | INVDA | Inventory transactions | ~656 | Inventory__c, History__c, Adjustment__c |
 | CTLDA | Supplier allocations | ~24 | Allocation__c |
 
@@ -57,6 +58,7 @@ integrations/vip-srs/
     05-outda-accounts.js   # → Account (Outlets) + Contact
     06-invda-inventory.js  # → Inventory + History + Adjustments
     07-slsda-depletions.js # → Depletion
+    07b-slsda-placements.js# → Placement (Account×Item)
     08-ctlda-allocations.js# → Allocation
     09-cleanup-stale.js    # Stale record deletion
     10-run-summary.js      # Daily run summary
@@ -82,6 +84,7 @@ Keys use only immutable business identifiers. Colon-delimited, prefixed, determi
 | Inventory__c | IVT | `IVT:FL01:102312102` |
 | Inventory_History__c | IVH | `IVH:FL01:102312102:20260403:C` |
 | Inventory_Adjustment__c | IVA | `IVA:FL01:102312102:20:20260403:C` |
+| Placement__c | PLC | `PLC:FL01:21159:102312102` |
 | Allocation__c | ALC | `ALC:FL01:102312102:202604:C` |
 
 ## Customers

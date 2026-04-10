@@ -39,6 +39,9 @@ These are source files for development/testing. For Tray deployment, inline the 
 - External IDs: only immutable business identifiers, colon-delimited, prefixed
 - Load order: Phase 1 (references) → Phase 2 (enrichment) → Phase 3 (inventory) → Phase 4 (transactions)
 - Namespace: `ohfy__` prefix on all managed package fields
+- **VIP_File_Date__c = date of pipeline run** (not from file contents). FromDate/ToDate capture the reporting window. File date is for stale cleanup.
+- **Placement__c** is Account×Item (not per transaction). External ID: `PLC:{DistId}:{AcctNbr}:{SuppItem}`. Master-detail fields are create-only.
+- **Item lookup filter on Depletion__c.Item__c**: Items need Finished Good RT + Type__c + UOM__c + Packaging_Type__c + Transformation_Setting__c record. See ROADMAP.md Gotcha #14.
 
 ## Testing
 
