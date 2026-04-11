@@ -72,12 +72,15 @@ var CONFIG = {
 // TRANSFORM
 // =============================================================================
 
-function transformItem(row) {
+function transformItem(row, recordTypeId) {
   var supplierItem = clean(row.SupplierItem);
   var record = {};
 
   // External ID
   record[NS + 'VIP_External_ID__c'] = itemKey(supplierItem);
+
+  // Record Type — Finished Good (required for dependent picklist validation)
+  if (recordTypeId) record.RecordTypeId = recordTypeId;
 
   // Direct mappings
   record[NS + 'Supplier_Number__c'] = supplierItem;
@@ -110,10 +113,11 @@ function transformItem(row) {
   var packageSize = clean(row.PackageSize);
   if (packageSize) record[NS + 'Packaging_Type_Short_Name__c'] = packageSize;
 
-  // NOTE: Packaging_Type__c (restricted picklist, stock UOM sub-type) and Type__c
-  // require the 'Finished Good' record type to be assigned to the integration user.
-  // These fields are set by the Tray workflow after record type assignment is confirmed.
-  // See ROADMAP.md Phase 8 prerequisites.
+  // Type__c: all VIP items are finished goods
+  record[NS + 'Type__c'] = CONTAINER_TYPE[clean(row.ContainerType)] || CONTAINER_TYPE_DEFAULT;
+
+  // Packaging_Type__c (Stock UOM Sub Type): VIP items are individual bottle/unit SKUs
+  record[NS + 'Packaging_Type__c'] = 'Each';
 
   // Status: A → true, I → false
   var status = clean(row.Status);
@@ -131,10 +135,10 @@ function transformItem(row) {
     }
   }
 
-  // UOM mapping
-  if (volUOM && VOLUME_UOM[volUOM]) {
-    record[NS + 'UOM__c'] = VOLUME_UOM[volUOM];
-  }
+  // UOM: "US Count" for all VIP items (individual bottle/unit SKUs)
+  // Packaging_Type__c "Each" is a dependent picklist requiring UOM = "US Count"
+  // Volume info is captured separately in UOM_In_Fluid_Ounces__c
+  record[NS + 'UOM__c'] = 'US Count';
 
   return record;
 }
@@ -145,6 +149,9 @@ function transformItem(row) {
 
 exports.step = function(input) {
   var rows = input.rows || input.csvData || input.data || [];
+
+  // Finished Good record type ID (required for dependent picklist validation)
+  var finishedGoodRtId = input.finishedGoodRecordTypeId || null;
 
   // Collect existing Item_Line and Item_Type lookups if provided
   var existingItemLines = input.existingItemLines || {};   // { name: sfId }
@@ -209,7 +216,7 @@ exports.step = function(input) {
 
   valid.forEach(function(row, idx) {
     try {
-      var record = transformItem(row);
+      var record = transformItem(row, finishedGoodRtId);
 
       // Add Item_Line__c lookup reference (by name)
       var brandDesc = clean(row.BrandDesc);

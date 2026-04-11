@@ -22,7 +22,7 @@ var execSync = require('child_process').execSync;
 // =============================================================================
 
 var TARGET_ORG = 'shipyard-ros2-sandbox';
-var DIST_ID = 'FL01';
+var DIST_ID = ''; // empty = all distributors; use --dist-id FL01 to filter
 var DRY_RUN = false;
 var PHASE_FILTER = null; // null = all phases
 var API_VERSION = 'v62.0';
@@ -363,11 +363,20 @@ console.log('============================================');
 console.log('VIP SRS E2E Sandbox Runner');
 console.log('============================================');
 console.log('Target org:  ' + TARGET_ORG);
-console.log('Dist ID:     ' + DIST_ID);
+console.log('Dist ID:     ' + (DIST_ID || '(all distributors)'));
 console.log('File date:   ' + (FILE_DATE || '(today: ' + new Date().toISOString().substring(0, 10) + ')'));
 console.log('Mode:        ' + (DRY_RUN ? 'DRY RUN' : 'LIVE'));
 console.log('Phase:       ' + (PHASE_FILTER ? PHASE_FILTER : 'ALL'));
 console.log('============================================');
+console.log('');
+
+// Pre-fetch record type IDs needed by scripts
+var FINISHED_GOOD_RT_ID = getRecordTypeId('ohfy__Item__c', 'Finished_Good');
+if (FINISHED_GOOD_RT_ID) {
+  console.log('Finished Good RT: ' + FINISHED_GOOD_RT_ID);
+} else {
+  console.log('WARNING: Finished_Good RecordType not found on ohfy__Item__c');
+}
 console.log('');
 
 var totalSuccess = 0;
@@ -404,6 +413,9 @@ PIPELINE.forEach(function(step) {
   // fileDate = date of run (for stale cleanup). CLI arg overrides, otherwise today.
   var fileDate = FILE_DATE || new Date().toISOString().substring(0, 10);
   input.fileDate = fileDate;
+
+  // Inject record type IDs for item scripts
+  if (FINISHED_GOOD_RT_ID) input.finishedGoodRecordTypeId = FINISHED_GOOD_RT_ID;
 
   var result;
   try {

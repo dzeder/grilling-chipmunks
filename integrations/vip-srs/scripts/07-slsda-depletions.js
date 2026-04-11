@@ -81,8 +81,8 @@ function transformDepletion(row, distId, fileDate) {
   record[NS + 'Item__r'] = {};
   record[NS + 'Item__r'][NS + 'VIP_External_ID__c'] = itemKey(suppItem);
 
-  // Depletion type — all VIP SLSDA records are sales
-  record[NS + 'Type__c'] = 'Sale';
+  // Depletion type — org picklist has display types (Cold Box, Draft Line, etc.),
+  // not transaction types. Skip for VIP sales data.
 
   // Case vs Bottle quantity
   if (uom === 'C') {
