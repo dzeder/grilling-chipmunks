@@ -36,6 +36,16 @@ If the task mentions OMS, WMS, REX, EDI, Ecom, Payments, Configure, Platform, Co
 - Read `skills/ohanafy/ohfy-<package>-expert/references/source-index.md`
 - Check `references/last-synced.txt` — if >7 days stale, suggest refresh
 
+## VIP SRS context (task mentions VIP, SRS, distributor data files, SFTP distribution files)
+
+If the task mentions VIP, SRS, SLSDA, OUTDA, INVDA, CTLDA, DISTDA, ITM2DA, ITMDA, SRSCHAIN, SRSVALUE, or any VIP file type:
+- Read `skills/ohanafy/ohfy-vip-srs-expert/SKILL.md` for domain coverage and routing
+- Read `integrations/vip-srs/CLAUDE.md` for implementation context
+- For file format questions: read `knowledge-base/vip-srs/isv-spec-overview.md`
+- For coded values: read `knowledge-base/vip-srs/valid-values.md`
+- For specific file types: read `knowledge-base/vip-srs/file-types/{FILE_TYPE}.md`
+- For field mappings to Ohanafy: read `integrations/vip-srs/docs/VIP_AGENT_HANDOFF.md`
+
 ## Integration context (task mentions Tray, connector, sync, mapping)
 
 - Read `integrations/patterns/README.md` for available pattern modules

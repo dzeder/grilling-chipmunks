@@ -1012,3 +1012,49 @@ Key relationships:
 | `data/` | Sample VIP data files |
 | `.ohfy-data-model/` | Ohanafy Salesforce metadata |
 | `.integrations/` | Tray.io integration patterns |
+| `knowledge-base/vip-srs/` | Complete VIP SRS specification (all 22 file types + appendices) |
+| `skills/ohanafy/ohfy-vip-srs-expert/` | VIP SRS expert skill for agent routing |
+
+---
+
+## 16. Additional VIP File Types (Not Currently Integrated)
+
+VIP delivers up to 22 file types. This integration covers 9. The remaining 13 are documented in `knowledge-base/vip-srs/file-types/` for future reference.
+
+### Summary
+
+| Prefix | Name | Columns | Description | Potential Ohanafy Mapping |
+|--------|------|---------|-------------|--------------------------|
+| SLSLITE | Sales Lite | 9 | Simplified sales summary (new Nov 2024) | Depletion__c (lighter alternative to SLSDA) |
+| DEPL | Summary Depletions | 39 | Monthly summarized depletions with inventory | Summary_Depletion__c (custom) or aggregate Depletion__c |
+| CTLS | Depletions Control | 10 | Depletion balancing file | QA/validation only — not loaded |
+| ORD | Future Sales/Orders | 25 | Pre-sold orders | Order__c or existing Ohanafy Order objects |
+| SLM | Dist Salesperson | 14 | Sales rep hierarchy (3 levels) | Contact or User records |
+| CAL | Calendar | 7 | Trading days (DOW + exceptions) | Distributor_Calendar__c (custom) |
+| NON/NONA | Non-Reporters | 4-6 | Missing data tracking with rank | Integration_Alert__c or Data_Quality__c |
+| VIPOUT | VIP Outlet Master | 75+ | VIP's own outlet DB (geocoded, validated) | Enrich Account with VIP geocoding/chain hierarchy |
+| DIC | Dist Item Cross-Ref | 17 | Formal spec for ITMDA data | Already integrated as ITMDA |
+
+### Sales Transaction Type Codes (BSTRTYPE)
+
+Not currently used in the integration but present in SLSDA data. The ISV spec defines these transaction types:
+
+| Code | Description | Notes |
+|------|-------------|-------|
+| R | Retail Sales | Default — standard sales transaction |
+| B | Warehouse Breakage | Damage at warehouse level |
+| C | Credit Memo | Credit issued to retailer |
+| D | Debit Memo | Debit issued to retailer |
+| E | Revenue Adjustment — Current Month | Current period revenue correction |
+| S | Supplier Samples | Product given as sample |
+| T | Warehouse Distributor Transfer | Inter-warehouse transfer |
+| V | Revenue Adjustment — Prior Month | Prior period revenue correction |
+
+### Full Specification Reference
+
+Complete field layouts, valid values, and business rules for all file types:
+- `knowledge-base/vip-srs/README.md` — Master index
+- `knowledge-base/vip-srs/valid-values.md` — All coded field values
+- `knowledge-base/vip-srs/isv-spec-overview.md` — File format conventions
+- `knowledge-base/vip-srs/file-types/*.md` — Per-file detailed layouts
+- `knowledge-base/vip-srs/appendices/*.md` — Repack logic, zero sales, summary inventory, depletion warehouse, retroactive discounts

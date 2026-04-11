@@ -1,6 +1,9 @@
 # VIP SRS Integration
 
-Daily automated pipeline that ingests 9 VIP beverage distribution data files, transforms them to the Ohanafy data model, and loads them into Salesforce via Tray.io.
+Daily automated pipeline that ingests 9 of 22 VIP beverage distribution data files, transforms them to the Ohanafy data model, and loads them into Salesforce via Tray.io.
+
+> **Full VIP SRS Specification:** See `knowledge-base/vip-srs/` for all 22 file types, valid values, and ISV spec appendices.
+> **VIP SRS Expert Skill:** See `skills/ohanafy/ohfy-vip-srs-expert/SKILL.md` for agent routing.
 
 ## Architecture
 
@@ -95,4 +98,6 @@ Keys use only immutable business identifiers. Colon-delimited, prefixed, determi
 
 ## Spec
 
-Full specification: `.context/attachments/VIP_AGENT_HANDOFF.md`
+- **Ohanafy field mappings:** `docs/VIP_AGENT_HANDOFF.md`
+- **Full VIP SRS specification:** `knowledge-base/vip-srs/` (all 22 file types + appendices)
+- **VIP SRS expert skill:** `skills/ohanafy/ohfy-vip-srs-expert/SKILL.md`

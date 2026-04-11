@@ -2,11 +2,19 @@
 
 ## What this is
 
-Daily SFTP-to-Salesforce integration for VIP beverage distribution data. 9 source file types → 14 Ohanafy SF objects via Tray.io Script connectors.
+Daily SFTP-to-Salesforce integration for VIP beverage distribution data. 9 of 22 VIP file types are currently integrated → 14 Ohanafy SF objects via Tray.io Script connectors.
 
 ## The spec
 
-THE source of truth is `.context/attachments/VIP_AGENT_HANDOFF.md`. All field mappings, crosswalks, external ID formats, load order, and cleanup logic are defined there.
+THE source of truth for **Ohanafy field mappings** is `docs/VIP_AGENT_HANDOFF.md`. All field mappings, crosswalks, external ID formats, load order, and cleanup logic are defined there.
+
+For the **complete VIP SRS specification** (all 22 file types, valid values, appendices), see `knowledge-base/vip-srs/`. This covers:
+- All 22 VIP file types with complete field layouts
+- Complete valid field value reference (Appendix B)
+- ISV Spec v6.0 conventions (file format, naming, SFTP delivery)
+- Appendices: repack logic, zero sales, summary inventory, depletion warehouse, retroactive discounts
+
+The VIP SRS expert skill (`skills/ohanafy/ohfy-vip-srs-expert/SKILL.md`) routes agents to the right knowledge.
 
 ## Script structure
 

@@ -58,6 +58,7 @@ Check `references/last-synced.txt` — if stale (>7 days), refresh with `bash sc
 | **ohfy-ecom-expert** | OHFY-Ecom | E-commerce, Shopify/WooCommerce |
 | **ohfy-payments-expert** | OHFY-Payments | Payment processing, settlement |
 | **ohfy-edi-expert** | OHFY-EDI | X12 850/810/856, B2B interchange |
+| **ohfy-vip-srs-expert** | VIP SRS (ISV Spec v6.0) | VIP distributor data files, beverage distribution SFTP ingestion |
 | **ohfy-configure-expert** | OHFY-Configure | System config, feature flags, setup |
 
 Source sync roadmap: `docs/ohanafy-source-sync-roadmap.md`

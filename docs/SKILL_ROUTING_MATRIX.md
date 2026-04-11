@@ -83,6 +83,10 @@ Cross-skill handoff rules. When a skill encounters work outside its scope, route
 | **ohfy-oms-expert** | Payment settlement | **ohfy-payments-expert** |
 | **ohfy-wms-expert** | Core trigger/service patterns | **ohfy-core-expert** |
 | **ohfy-edi-expert** | Order creation from EDI | **ohfy-oms-expert** |
+| **ohfy-vip-srs-expert** | VIP file format/field questions | `knowledge-base/vip-srs/` |
+| **ohfy-vip-srs-expert** | VIP-to-Ohanafy field mapping | `integrations/vip-srs/docs/` |
+| **ohfy-vip-srs-expert** | Salesforce object model | **ohfy-core-expert** |
+| **ohfy-vip-srs-expert** | Tray.io workflow patterns | **tray-expert** |
 | Any **ohfy-*** | Platform services | **ohfy-platform-expert** |
 | Any **ohfy-*** | System configuration | **ohfy-configure-expert** |
 
