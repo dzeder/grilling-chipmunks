@@ -159,6 +159,17 @@ Cross-skill handoff rules. When a skill encounters work outside its scope, route
 | **content-watcher** | Publish digest as HTML | **html-publisher** |
 | **content-watcher** | Publish digest as DOCX | **docx-builder** |
 
+## Workspace Setup Handoffs
+
+| From | Trigger | Route To |
+|------|---------|----------|
+| **kickoff** | Customer org needed | **org-connect** |
+| **kickoff** | New integration design | **tray-expert** or **office-hours** |
+| **kickoff** | Debug existing integration | **investigate** |
+| **kickoff** | Customer doesn't exist yet | Create from `customers/_template` |
+| **checkpoint** | Resuming saved state, workspace stale | **kickoff** |
+| Any skill | No workspace context established | **kickoff** |
+
 ## Cross-Domain Handoffs
 
 | From | Trigger | Route To |
