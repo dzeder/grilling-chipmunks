@@ -118,11 +118,14 @@ function itemLineKey(name) {
 }
 
 /**
- * Item_Type__c: ITY:{GenericCat3}
+ * Item_Type__c: ITY:{BrandDesc}:{GenericCat3}
+ * Scoped per Item_Line because the Item_Type lookup on Item__c has a
+ * dependent filter requiring Item_Type.Item_Line = Item.Item_Line.
+ * @param {string} brandDesc - Brand description (BrandDesc from ITM2DA)
  * @param {string} name - Category name (GenericCat3 from ITM2DA)
  */
-function itemTypeKey(name) {
-  return PREFIX.ITEM_TYPE + ':' + name;
+function itemTypeKey(brandDesc, name) {
+  return PREFIX.ITEM_TYPE + ':' + brandDesc + ':' + name;
 }
 
 /**
