@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.7.4] - 2026-04-13
+
+### Changed
+- Gstack upgrade workflow now auto-merges non-breaking (patch/minor) version bumps — no more manual PR review for routine updates
+- Auto-merge waits for CI checks to pass before merging (`--auto` flag) and skips on push-triggered workflow runs
+- Manual override available via `skip_auto_merge` input on workflow dispatch
+
 ## [0.0.7.3] - 2026-04-13
 
 ### Added
