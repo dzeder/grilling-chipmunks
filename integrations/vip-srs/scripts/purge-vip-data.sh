@@ -11,6 +11,7 @@
 #   bash purge-vip-data.sh --target-org my-sandbox            # dry-run, custom org
 #   bash purge-vip-data.sh --dist-id FL01 --execute           # delete only FL01 records
 #   bash purge-vip-data.sh --include-references --execute     # also delete Item_Line/Item_Type
+#   bash purge-vip-data.sh --config config/gulf.json          # use a different customer config
 
 set -euo pipefail
 
@@ -22,6 +23,7 @@ TARGET_ORG="shipyard-ros2-sandbox"
 DIST_ID=""
 EXECUTE=false
 INCLUDE_REFS=false
+CONFIG_FILE=""
 
 # =============================================================================
 # PARSE ARGS
@@ -31,13 +33,15 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --target-org)   TARGET_ORG="$2"; shift 2 ;;
     --dist-id)      DIST_ID="$2"; shift 2 ;;
+    --config)       CONFIG_FILE="$2"; shift 2 ;;
     --execute)      EXECUTE=true; shift ;;
     --include-references) INCLUDE_REFS=true; shift ;;
     -h|--help)
-      echo "Usage: bash purge-vip-data.sh [--target-org ORG] [--dist-id ID] [--include-references] [--execute]"
+      echo "Usage: bash purge-vip-data.sh [--config FILE] [--target-org ORG] [--dist-id ID] [--include-references] [--execute]"
       echo ""
-      echo "  --target-org ORG         Salesforce org alias (default: shipyard-ros2-sandbox)"
-      echo "  --dist-id ID             Filter by distributor ID (e.g., FL01). Without this, deletes ALL VIP records."
+      echo "  --config FILE            Customer config JSON (default: config/shipyard.json)"
+      echo "  --target-org ORG         Salesforce org alias (overrides config)"
+      echo "  --dist-id ID             Filter by distributor ID (overrides config)"
       echo "  --include-references     Also delete Item_Line__c and Item_Type__c (shared reference data)"
       echo "  --execute                Actually delete records. Without this, dry-run only."
       exit 0
@@ -45,6 +49,38 @@ while [[ $# -gt 0 ]]; do
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
+
+# =============================================================================
+# LOAD CONFIG (if --config or default exists, CLI args override)
+# =============================================================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEFAULT_CONFIG="${SCRIPT_DIR}/../config/shipyard.json"
+
+if [[ -n "$CONFIG_FILE" ]]; then
+  # Resolve relative paths
+  [[ "$CONFIG_FILE" != /* ]] && CONFIG_FILE="$(pwd)/$CONFIG_FILE"
+  if [[ ! -f "$CONFIG_FILE" ]]; then
+    echo "ERROR: Config file not found: $CONFIG_FILE"
+    exit 1
+  fi
+elif [[ -f "$DEFAULT_CONFIG" ]]; then
+  CONFIG_FILE="$DEFAULT_CONFIG"
+fi
+
+if [[ -n "$CONFIG_FILE" ]]; then
+  # Extract values from JSON using node (available since we're in a Node project)
+  _cfg_org=$(node -e "var c=require('$CONFIG_FILE'); console.log((c.salesforce||{}).orgAlias||'')" 2>/dev/null || true)
+  _cfg_dist=$(node -e "var c=require('$CONFIG_FILE'); console.log(c.targetDistributorId||'')" 2>/dev/null || true)
+  # Config provides defaults — only apply if CLI didn't set them explicitly
+  # We detect "CLI didn't set" by checking if the value is still the hardcoded default
+  if [[ "$TARGET_ORG" == "shipyard-ros2-sandbox" && -n "$_cfg_org" ]]; then
+    TARGET_ORG="$_cfg_org"
+  fi
+  if [[ -z "$DIST_ID" && -n "$_cfg_dist" ]]; then
+    DIST_ID="$_cfg_dist"
+  fi
+fi
 
 # =============================================================================
 # HELPERS

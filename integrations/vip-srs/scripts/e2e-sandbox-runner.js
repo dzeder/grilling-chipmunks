@@ -11,24 +11,31 @@
  *   node e2e-sandbox-runner.js --target-org my-sandbox  # custom org
  *   node e2e-sandbox-runner.js --dist-id FL01           # filter by distributor
  *   node e2e-sandbox-runner.js --dry-run                # show batches without sending
+ *   node e2e-sandbox-runner.js --output-json out.json   # write structured JSON report
+ *   node e2e-sandbox-runner.js --config config/gulf.json # use a different customer config
  */
 
 var fs = require('fs');
 var path = require('path');
 var execSync = require('child_process').execSync;
+var loadConfig = require('./config-loader');
 
 // =============================================================================
 // CONFIG
 // =============================================================================
 
-var TARGET_ORG = 'shipyard-ros2-sandbox';
-var DIST_ID = ''; // empty = all distributors; use --dist-id FL01 to filter
+// Load customer config (--config flag or default shipyard.json), then apply CLI overrides
+var _cfg = loadConfig(process.argv.slice(2));
+var TARGET_ORG = _cfg.targetOrg;
+var DIST_ID = _cfg.distId;
+var API_VERSION = _cfg.apiVersion;
 var DRY_RUN = false;
 var PHASE_FILTER = null; // null = all phases
-var API_VERSION = 'v62.0';
 var FILE_DATE = ''; // YYYY-MM-DD — set via --file-date, defaults to today (date of run)
+var OUTPUT_JSON = ''; // path to write structured JSON report
+var MAX_RETRIES = 3; // retry attempts for transient API failures
 
-// Parse CLI args
+// CLI args override config values
 var args = process.argv.slice(2);
 for (var i = 0; i < args.length; i++) {
   switch (args[i]) {
@@ -37,8 +44,10 @@ for (var i = 0; i < args.length; i++) {
     case '--dry-run': DRY_RUN = true; break;
     case '--phase': PHASE_FILTER = parseInt(args[++i], 10); break;
     case '--file-date': FILE_DATE = args[++i]; break;
+    case '--output-json': OUTPUT_JSON = args[++i]; break;
+    case '--config': i++; break; // already consumed by config-loader
     case '--help': case '-h':
-      console.log('Usage: node e2e-sandbox-runner.js [--target-org ORG] [--dist-id ID] [--phase N] [--file-date YYYY-MM-DD] [--dry-run]');
+      console.log('Usage: node e2e-sandbox-runner.js [--config FILE] [--target-org ORG] [--dist-id ID] [--phase N] [--file-date YYYY-MM-DD] [--output-json FILE] [--dry-run]');
       process.exit(0);
   }
 }
@@ -92,45 +101,92 @@ function parseCSVLine(line) {
 // SF API HELPERS
 // =============================================================================
 
+// Retry-eligible: timeouts, 503 (throttling), ECONNRESET, socket hang up
+function isRetryable(error) {
+  if (!error) return false;
+  var msg = typeof error === 'string' ? error : (error.message || JSON.stringify(error));
+  return /timeout|ETIMEDOUT|ECONNRESET|socket hang up|503|SERVICE_UNAVAILABLE/i.test(msg);
+}
+
+function sleepMs(ms) {
+  execSync('sleep ' + (ms / 1000), { timeout: ms + 1000 });
+}
+
 function sfApiPost(endpoint, body) {
-  var tmpFile = '/tmp/vip-e2e-body-' + Date.now() + '.json';
-  fs.writeFileSync(tmpFile, JSON.stringify(body));
-  try {
-    var result = execSync(
-      'sf api request rest "' + endpoint + '" --method POST --body @' + tmpFile +
-      ' --target-org ' + TARGET_ORG + ' 2>/dev/null',
-      { encoding: 'utf8', timeout: 60000 }
-    );
-    return JSON.parse(result);
-  } catch (e) {
-    var output = e.stdout ? e.stdout.toString() : '';
-    try { return JSON.parse(output); } catch (_) {}
-    return { error: e.message, stdout: output };
-  } finally {
-    try { fs.unlinkSync(tmpFile); } catch (_) {}
+  for (var attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    var tmpFile = '/tmp/vip-e2e-body-' + Date.now() + '.json';
+    fs.writeFileSync(tmpFile, JSON.stringify(body));
+    try {
+      var result = execSync(
+        'sf api request rest "' + endpoint + '" --method POST --body @' + tmpFile +
+        ' --target-org ' + TARGET_ORG + ' 2>/dev/null',
+        { encoding: 'utf8', timeout: 60000 }
+      );
+      try { fs.unlinkSync(tmpFile); } catch (_) {}
+      return JSON.parse(result);
+    } catch (e) {
+      try { fs.unlinkSync(tmpFile); } catch (_) {}
+      var output = e.stdout ? e.stdout.toString() : '';
+      // If we got a parseable response, return it (not a transient failure)
+      try { var parsed = JSON.parse(output); return parsed; } catch (_) {}
+      // Retry on transient errors
+      if (isRetryable(e) && attempt < MAX_RETRIES) {
+        var delay = Math.pow(2, attempt - 1) * 1000; // 1s, 2s, 4s
+        console.log('    RETRY ' + attempt + '/' + MAX_RETRIES + ' after ' + delay + 'ms (' + (e.message || '').substring(0, 80) + ')');
+        sleepMs(delay);
+        continue;
+      }
+      return { error: e.message, stdout: output };
+    }
   }
 }
 
 function sfApiPatch(endpoint, body) {
-  var tmpFile = '/tmp/vip-e2e-body-' + Date.now() + '.json';
-  fs.writeFileSync(tmpFile, JSON.stringify(body));
-  try {
-    var result = execSync(
-      'sf api request rest "' + endpoint + '" --method PATCH --body @' + tmpFile +
-      ' --target-org ' + TARGET_ORG + ' 2>/dev/null',
-      { encoding: 'utf8', timeout: 60000 }
-    );
-    // PATCH upsert returns 204 (no body) on success, 201 with body on create
-    if (!result || !result.trim()) return { success: true, httpStatusCode: 204 };
-    return JSON.parse(result);
-  } catch (e) {
-    var output = e.stdout ? e.stdout.toString() : '';
-    if (!output || !output.trim()) return { success: true, httpStatusCode: 204 };
-    try { return JSON.parse(output); } catch (_) {}
-    return { error: e.message };
-  } finally {
-    try { fs.unlinkSync(tmpFile); } catch (_) {}
+  for (var attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    var tmpFile = '/tmp/vip-e2e-body-' + Date.now() + '.json';
+    fs.writeFileSync(tmpFile, JSON.stringify(body));
+    try {
+      var result = execSync(
+        'sf api request rest "' + endpoint + '" --method PATCH --body @' + tmpFile +
+        ' --target-org ' + TARGET_ORG + ' 2>/dev/null',
+        { encoding: 'utf8', timeout: 60000 }
+      );
+      try { fs.unlinkSync(tmpFile); } catch (_) {}
+      // PATCH upsert returns 204 (no body) on success, 201 with body on create
+      if (!result || !result.trim()) return { success: true, httpStatusCode: 204 };
+      return JSON.parse(result);
+    } catch (e) {
+      try { fs.unlinkSync(tmpFile); } catch (_) {}
+      var output = e.stdout ? e.stdout.toString() : '';
+      if (!output || !output.trim()) return { success: true, httpStatusCode: 204 };
+      try { var parsed = JSON.parse(output); return parsed; } catch (_) {}
+      if (isRetryable(e) && attempt < MAX_RETRIES) {
+        var delay = Math.pow(2, attempt - 1) * 1000;
+        console.log('    RETRY ' + attempt + '/' + MAX_RETRIES + ' after ' + delay + 'ms (' + (e.message || '').substring(0, 80) + ')');
+        sleepMs(delay);
+        continue;
+      }
+      return { error: e.message };
+    }
   }
+}
+
+// Known error patterns for categorization
+var KNOWN_ERRORS = {
+  ACCOUNT_TRIGGER_METHODS: /AccountTriggerMethods/,
+  FIELD_FILTER_VALIDATION: /FIELD_FILTER_VALIDATION_EXCEPTION/,
+  DUPLICATE_BLOCKED: /Duplicate Record Blocked/i,
+  CUSTOM_VALIDATION: /FIELD_CUSTOM_VALIDATION_EXCEPTION/
+};
+
+// Global error tracker for JSON output
+var errorDetails = [];
+
+function categorizeError(bodyStr) {
+  for (var key in KNOWN_ERRORS) {
+    if (KNOWN_ERRORS[key].test(bodyStr)) return key;
+  }
+  return 'OTHER';
 }
 
 function sendCompositeBatch(batch, label) {
@@ -162,7 +218,18 @@ function sendCompositeBatch(batch, label) {
     if (failures > 0) {
       response.compositeResponse.forEach(function(r, idx) {
         if (r.httpStatusCode >= 300) {
-          console.log('    ERROR [' + idx + '] ' + r.httpStatusCode + ': ' + JSON.stringify(r.body));
+          var bodyStr = JSON.stringify(r.body);
+          var category = categorizeError(bodyStr);
+          var prefix = category === 'OTHER' ? 'ERROR' : category;
+          console.log('    ' + prefix + ' [' + idx + '] ' + r.httpStatusCode + ': ' + bodyStr.substring(0, 200));
+          errorDetails.push({
+            step: label,
+            index: idx,
+            httpStatus: r.httpStatusCode,
+            category: category,
+            referenceId: batch.compositeRequest[idx] ? batch.compositeRequest[idx].referenceId : null,
+            message: bodyStr.substring(0, 500)
+          });
         }
       });
     }
@@ -356,6 +423,8 @@ var PIPELINE = [
 console.log('============================================');
 console.log('VIP SRS E2E Sandbox Runner');
 console.log('============================================');
+if (_cfg.customer) console.log('Customer:    ' + _cfg.customer + (_cfg.supplierCode ? ' (' + _cfg.supplierCode + ')' : ''));
+if (_cfg._configFile) console.log('Config:      ' + path.basename(_cfg._configFile));
 console.log('Target org:  ' + TARGET_ORG);
 console.log('Dist ID:     ' + (DIST_ID || '(all distributors)'));
 console.log('File date:   ' + (FILE_DATE || '(today: ' + new Date().toISOString().substring(0, 10) + ')'));
@@ -523,6 +592,50 @@ stepResults.forEach(function(r) {
 console.log('');
 console.log('Total: ' + totalSuccess + ' succeeded, ' + totalFail + ' failed');
 if (DRY_RUN) console.log('(DRY RUN — no records were actually sent)');
+
+// Categorized error summary
+if (errorDetails.length > 0) {
+  var errorsByCategory = {};
+  errorDetails.forEach(function(e) {
+    errorsByCategory[e.category] = (errorsByCategory[e.category] || 0) + 1;
+  });
+  console.log('');
+  console.log('Error breakdown:');
+  Object.keys(errorsByCategory).forEach(function(cat) {
+    console.log('  ' + cat + ': ' + errorsByCategory[cat]);
+  });
+}
+
 console.log('============================================');
+
+// JSON output
+if (OUTPUT_JSON) {
+  var report = {
+    timestamp: new Date().toISOString(),
+    config: {
+      customer: _cfg.customer || null,
+      supplierCode: _cfg.supplierCode || null,
+      configFile: _cfg._configFile ? path.basename(_cfg._configFile) : null,
+      targetOrg: TARGET_ORG,
+      distId: DIST_ID || null,
+      fileDate: FILE_DATE || new Date().toISOString().substring(0, 10),
+      dryRun: DRY_RUN,
+      phaseFilter: PHASE_FILTER
+    },
+    summary: {
+      totalSuccess: totalSuccess,
+      totalFail: totalFail,
+      steps: stepResults
+    },
+    errors: errorDetails,
+    errorsByCategory: {}
+  };
+  errorDetails.forEach(function(e) {
+    report.errorsByCategory[e.category] = (report.errorsByCategory[e.category] || 0) + 1;
+  });
+  fs.writeFileSync(OUTPUT_JSON, JSON.stringify(report, null, 2));
+  console.log('');
+  console.log('JSON report written to: ' + OUTPUT_JSON);
+}
 
 process.exit(totalFail > 0 ? 1 : 0);

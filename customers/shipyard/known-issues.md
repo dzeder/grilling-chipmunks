@@ -28,6 +28,20 @@ Running log of known issues, workarounds, and resolutions for this customer.
 - **Resolved:** 2026-04-10
 - **Description:** Customer (`012am0000050BVXAA2`) and Chain_Banner (`012am0000050BVYAA2`) record types were not assigned to integration user. **Fixed by Ohanafy engineering same day.** Both record types now available.
 
+### Contact DML blocked by AccountTriggerMethods cascade (ROS2)
+- **Severity:** High
+- **Affected area:** Integration — all Contact inserts (Script 05, OUTDA buyers)
+- **Reported:** 2026-04-13
+- **Workaround:** None — Contact inserts cannot succeed until AccountTriggerMethods is fixed. Skip Contact loading or accept 100% failure on contacts.
+- **Description:** Contact inserts trigger `ohfy.ContactTrigger` AfterInsert, which performs a DML update on the parent Account. That Account update fires `ohfy.AccountTrigger` AfterUpdate, which hits the same `ServiceLocatorException: Invalid implementation class: AccountTriggerMethods`. This means ALL Contact DML is blocked in ROS2, not just Account re-upserts. The cascade path is: Contact INSERT → ContactTrigger AfterInsert → Account UPDATE → AccountTrigger AfterUpdate → AccountTriggerMethods missing. This is the same root cause as the Account update blocker but with a wider blast radius.
+
+### Stock_UOM_Sub_Type__c validation rule on Item enrichment (ROS2)
+- **Severity:** Medium
+- **Affected area:** Integration — Item enrichment (Script 04, ITMDA)
+- **Reported:** 2026-04-13
+- **Workaround:** Skip `Packaging_Type__c` during enrichment, or set `Stock_UOM_Sub_Type__c` alongside it.
+- **Description:** A managed validation rule requires `ohfy__Stock_UOM_Sub_Type__c` to be set when `ohfy__Packaging_Type__c` is present on Finished Good items (Error Code: 003). Script 04 (ITMDA enrichment) sets `Packaging_Type_Short_Name__c` but doesn't set `Stock_UOM_Sub_Type__c`, causing 1 item enrichment failure per run. Script 02 (ITM2DA) doesn't hit this because it sets `Packaging_Type__c` via a different code path. Need to either map `Stock_UOM_Sub_Type__c` from VIP data or skip the field in enrichment.
+
 ### AccountSource picklist missing 'VIP SRS' value
 - **Severity:** Low
 - **Affected area:** Integration — all Account upserts
