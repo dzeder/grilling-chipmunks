@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/09/metadata">
+    <fullName>VIP_Salesman1__c</fullName>
+    <description>Distributor primary sales rep code from VIP OUTDA (ROSM1). Not Shipyard's own rep — see Account.Sales_Rep__c for that.</description>
+    <externalId>false</externalId>
+    <label>VIP Distributor Rep 1</label>
+    <length>8</length>
+    <required>false</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

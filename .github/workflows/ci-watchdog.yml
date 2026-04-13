@@ -241,15 +241,16 @@ jobs:
           # Get all unique workflow names from recent runs
           WORKFLOWS=$(gh run list --limit 100 --json workflowName --jq '[.[].workflowName] | unique | .[]' 2>/dev/null)
 
-          echo "| Workflow | Runs | Passed | Failed | Rate |" >> /tmp/report.md
-          echo "|----------|------|--------|--------|------|" >> /tmp/report.md
+          echo "| Workflow | Runs | Passed | Failed | Skipped | Rate |" >> /tmp/report.md
+          echo "|----------|------|--------|--------|---------|------|" >> /tmp/report.md
 
           while IFS= read -r wf; do
             [ -z "$wf" ] && continue
 
-            TOTAL=$(gh run list --workflow "$wf" --limit 20 --json conclusion --jq 'length' 2>/dev/null || echo "0")
+            TOTAL=$(gh run list --workflow "$wf" --limit 20 --json conclusion --jq '[.[] | select(.conclusion == "success" or .conclusion == "failure")] | length' 2>/dev/null || echo "0")
             PASSED=$(gh run list --workflow "$wf" --limit 20 --json conclusion --jq '[.[] | select(.conclusion == "success")] | length' 2>/dev/null || echo "0")
             FAILED=$(gh run list --workflow "$wf" --limit 20 --json conclusion --jq '[.[] | select(.conclusion == "failure")] | length' 2>/dev/null || echo "0")
+            SKIPPED=$(gh run list --workflow "$wf" --limit 20 --json conclusion --jq '[.[] | select(.conclusion == "skipped")] | length' 2>/dev/null || echo "0")
 
             if [ "$TOTAL" -gt 0 ]; then
               RATE=$(( PASSED * 100 / TOTAL ))
@@ -266,7 +267,7 @@ jobs:
               ICON="🟡"
             fi
 
-            echo "| $ICON $wf | $TOTAL | $PASSED | $FAILED | ${RATE}% |" >> /tmp/report.md
+            echo "| $ICON $wf | $TOTAL | $PASSED | $FAILED | $SKIPPED | ${RATE}% |" >> /tmp/report.md
           done <<< "$WORKFLOWS"
 
           echo "" >> /tmp/report.md

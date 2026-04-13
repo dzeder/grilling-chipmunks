@@ -457,7 +457,8 @@ Enriches Item records already created from ITM2DA. Upserts on the same `VIP_Exte
 | ClassOfTrade | `06` | Account.`Market__c` | Crosswalk (Section 7.1) | |
 | ClassOfTrade | `06` | Account.`Premise_Type__c` | Derived: 01-19=Off, 21-43=On | |
 | ChainStatus | `I` | Account.`Retail_Type__c` | `C`->`Chain`, `I`->`Independent` | |
-| Salesman1 | `900` | Account.`Sales_Rep__c` | Lookup User by rep code | Requires mapping table |
+| Salesman1 | `900` | Account.`VIP_Salesman1__c` | Direct (Text). Filter: skip `999`, `HOUSE` | Distributor rep code, NOT supplier rep |
+| Salesman2 | `` | Account.`VIP_Salesman2__c` | Direct (Text) | Distributor rep code, NOT supplier rep |
 | Store | `` | Account.`Store_Number__c` | Direct | |
 | Status | `A` | Account.`Is_Active__c` | `A`->true, `I`/`O`->false | |
 | License | `WSL2100120` | Account.`ABC_License_Number__c` | Direct | |
@@ -523,23 +524,31 @@ One record per SLSDA row after filtering.
 | *(composite)* | -- | Invoice_Item__c.`VIP_External_ID__c` | `INL:{DistId}:{InvoiceNbr}:{AcctNbr}:{SuppItem}:{UOM}` | Upsert key |
 | *(composite)* | -- | Invoice_Item__c.`Invoice__c` | Lookup `INV:{DistId}:{InvoiceNbr}:{InvoiceDate}` | Parent invoice |
 
-#### 5.6c Distributor_Placement__c
+#### 5.6c ohfy__Placement__c (Account × Item aggregation)
 
-Same source rows, mapped to the depletion tracking object.
+SLSDA rows aggregated into one record per Account+Item combination. Tracks placement lifecycle (new distribution, reorder alerts, volume).
+
+**Note:** This is the managed `ohfy__Placement__c` object (59+ fields), NOT `ohfy__Account_Item__c` or a custom `Distributor_Placement__c`. Master-detail to Account and Item (create-only).
 
 | Derived From | Ohanafy Object.Field | Transform | Notes |
 |-------------|---------------------|-----------|-------|
-| *(composite)* | `Integration_ID__c` | `DPL:{DistId}:{InvoiceNbr}:{AcctNbr}:{SuppItem}:{UOM}` | Upsert key |
-| AcctNbr | `ohanafy__Customer__c` | Lookup `ACT:{DistId}:{AcctNbr}` | |
-| SuppItem | `ohanafy__Item__c` | Lookup `ITM:{SuppItem}` | |
-| Qty | `ohanafy__Quantity__c` | Direct | Negative = return |
-| InvoiceDate | `ohanafy__Date__c` | `YYYYMMDD` -> `YYYY-MM-DD` | |
-| NetPrice | `Price__c` | Direct | |
-| FromDate | `VIP_From_Date__c` | `YYYYMMDD` -> `YYYY-MM-DD` | For stale cleanup |
-| ToDate | `VIP_To_Date__c` | `YYYYMMDD` -> `YYYY-MM-DD` | For stale cleanup |
-| *(filename)* | `VIP_File_Date__c` | `N20260408` -> `2026-04-08` | For stale cleanup |
+| *(composite)* | `VIP_External_ID__c` | `PLC:{DistId}:{AcctNbr}:{SuppItem}` | Upsert key (one per Account×Item) |
+| AcctNbr | `ohfy__Account__r` | Lookup `ACT:{DistId}:{AcctNbr}` | Master-detail, create-only |
+| SuppItem | `ohfy__Item__r` | Lookup `ITM:{SuppItem}` | Master-detail, create-only |
+| *(aggregated)* | `ohfy__First_Sold_Date__c` | MIN(InvoiceDate) across all rows for this Account+Item | |
+| *(aggregated)* | `ohfy__Last_Sold_Date__c` | MAX(InvoiceDate) across all rows for this Account+Item | |
+| *(latest row)* | `ohfy__Last_Purchase_Date__c` | InvoiceDate from latest row | |
+| *(latest row)* | `ohfy__Last_Purchase_Quantity__c` | Qty from latest row | |
+| *(latest row)* | `ohfy__Last_Invoice_Price__c` | NetPrice from latest row | |
+| -- | `ohfy__Is_Active__c` | Hardcode `true` | Active placement |
+| -- | `ohfy__Is_New_Placement__c` | Hardcode `true` | Flags recent activity |
+| -- | `ohfy__Lost_Placement_After_Days__c` | Hardcode `60` | CSO reorder alert threshold (days) |
+| *(filename)* | `VIP_File_Date__c` | Date of pipeline run | For stale cleanup |
 
-**Negative quantities:** Rows with negative Qty are credits/returns. Load with negative quantity. Suffix the Integration_ID with `:NEG` for Distributor_Placement__c.
+**Formula fields (auto-computed, not set by pipeline):**
+- `ohfy__Days_Since_Last_Order__c` = `TODAY() - Last_Sold_Date__c`
+- `ohfy__Lost_Placement_Date__c` = `Last_Sold_Date__c + Lost_Placement_After_Days__c`
+- `ohfy__Item_Subtype__c` = `TEXT(Item__r.Package_Type__c)`
 
 ---
 
@@ -635,7 +644,7 @@ Keys use only **immutable business identifiers**. No quantities, prices, or name
 | Inventory_History__c | `IVH` | DistId, SupplierItem, PostingDate, UOM | `IVH:FL01:102312102:20260403:C` |
 | Inventory_Adjustment__c | `IVA` | DistId, SupplierItem, TransCode, TransDate, UOM | `IVA:FL01:102312102:20:20260403:C` |
 | Allocation__c | `ALC` | DistId, SupplierItem, ControlDate, UOM | `ALC:FL01:102312102:202604:C` |
-| Distributor_Placement__c | `DPL` | DistId, InvoiceNbr, AcctNbr, SuppItem, UOM | `DPL:FL01:0699528:21159:102312102:C` |
+| ohfy__Placement__c | `PLC` | DistId, AcctNbr, SuppItem | `PLC:FL01:21159:102312102` |
 
 ### Design Principles
 
@@ -962,13 +971,13 @@ After each run, generate:
 
 ## 13. Open Questions
 
-1. **Distributor_Placement__c vs Invoice_Item__c** -- Load SLSDA to both, or just one? Existing integrations use Distributor_Placement for depletion reporting. The Invoice model gives richer financial data. Recommend both.
+1. ~~**Distributor_Placement__c vs Invoice_Item__c**~~ **RESOLVED (2026-04-13):** Use `ohfy__Placement__c` (managed, 59+ fields) for Account×Item aggregation. Use `ohfy__Depletion__c` for per-transaction records. Invoice__c is for supplier→distributor billing — separate data source, not from VIP files. No Invoice__c from VIP data.
 
 2. **MTD inventory codes** -- TransCodes 50-59 are month-to-date aggregates that overlap daily codes 20-41. Loading both would double-count. Recommend skipping MTD.
 
 3. **Historical backfill** -- Sample data covers 11 business days. For a new customer, do we backfill all historical data or start from a cutover date?
 
-4. **Sales Rep mapping** -- VIP provides rep codes (`056`, `SB4`, `SS6`). Ohanafy needs Salesforce User IDs. Requires a manual mapping table per distributor.
+4. ~~**Sales Rep mapping**~~ **PARTIALLY RESOLVED (2026-04-13):** VIP `Salesman1`/`Salesman2` are **distributor rep codes** (ROSM1/ROSM2), NOT supplier reps. Stored as `VIP_Salesman1__c`/`VIP_Salesman2__c` text fields on Account. Filtered: `999` (unassigned) and `HOUSE` excluded. Supplier's own reps are Salesforce Users, manually assigned in Ohanafy — not from VIP data.
 
 5. **Market picklist values** -- The Class of Trade crosswalk (Section 7.1) maps to Market values that may not exist in the target org's `Account_Sub_Type` value set. Need to validate and add missing values.
 

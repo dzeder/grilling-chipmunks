@@ -4,6 +4,51 @@ Running notes from debugging sessions, design decisions, and gotchas.
 
 <!-- Add entries with dates. Most recent first. -->
 
+## 2026-04-13 — E2E Data Load + Three Enhancements
+
+Re-ran full VIP SRS E2E pipeline against ROS2 sandbox with `--file-date 2026-04-13`. Implemented three enhancements and fixed the Inventory duplicate validation blocker.
+
+**Prerequisites:**
+- Finished Good RT exists (`012am0000050BVKAA2`)
+- Transformation_Setting__c recreated: Each → Fluid Ounce(s), Volume, Beer (`a1FWF000001SLXB2A4`)
+
+**Enhancements implemented:**
+1. **Placement fields:** Added `Is_New_Placement__c = true` + `Lost_Placement_After_Days__c = 60` to Script 07b. Formula fields auto-compute: Days_Since_Last_Order (10), Lost_Placement_Date (2026-06-02).
+2. **Account rep codes:** Deployed `VIP_Salesman1__c` + `VIP_Salesman2__c` (Text(8)) to ROS2. Mapped in Script 05, filtering `999`/`HOUSE`. These are distributor rep codes (ROSM1/ROSM2), NOT supplier reps.
+3. **Inventory fix:** Three-layer pre-query pattern (see below).
+
+**Final results (after all fixes):**
+
+| Phase | Object | Count | Status |
+|-------|--------|-------|--------|
+| 1 | Account (Chains CHN:*) | 12 | ✅ create / ❌ update (AccountTrigger) |
+| 1 | Item (ITM:*) | 63 | ✅ |
+| 1 | Location (LOC:*) | 12 | ✅ |
+| 2 | Item Enrichment | 95 | ✅ |
+| 2 | Account (Outlets ACT:*) | 27 | ✅ VIP_Salesman1__c populated |
+| 2 | Contact (CON:*) | 25 | ✅ |
+| 3 | Inventory stamp | 264 | ✅ VIP_External_ID__c batch-stamped |
+| 3 | Inventory (IVT:*) | 12 | ✅ updated via PATCH-by-ID |
+| 3 | Inventory History (IVH:*) | 485 | ✅ |
+| 3 | Inventory Adjustments (IVA:*) | 5 | ✅ |
+| 4 | Depletion (DEP:*) | 40 | ✅ |
+| 4 | Placement (PLC:*) | 40 | ✅ Is_New_Placement + Lost_Placement_After_Days |
+| 4 | Allocation (ALC:*) | 23 | ✅ |
+
+- **Phase 3+4 total: 612 succeeded, 0 failures**
+- Phase 1 Chain Banner UPDATES fail (AccountTriggerMethods — pre-existing known issue). Creates work fine.
+
+**Inventory fix: Three-layer pre-query pattern**
+The managed package has a "Duplicate Record Blocked" validation rule on Inventory__c. ROS2 has 264 pre-existing records. Fix:
+1. **Lazy pre-query** — runs after Phase 1 stamps VIP_External_ID__c on Items (not at startup, where it finds 0)
+2. **Batch-stamp** — PATCHes VIP_External_ID__c on all 264 existing records so History/Adjustments can reference them
+3. **Master-detail strip** — removes Item__r/Location__r from PATCH body (read-only on update)
+
+**Key decision: ohfy__Placement__c IS the right object**
+- Managed object with 59+ fields including formula fields for CSO features (new placement detection, reorder alerts, volume tracking)
+- `ohfy__Account_Item__c` exists in source-index but has 0 deployed fields in ROS2 — not the right choice
+- CSO rep/territory/commission features (Territory__c, Goal__c, Goal_Tracking__c) exist as managed objects — may be leveraged later
+
 ## 2026-04-13 — CSO Requirements: Sales Rep Tracking & Commission System
 
 Email from ROS chief sales officer outlining core requirements for a rep tracking and commission system built on VIP data.

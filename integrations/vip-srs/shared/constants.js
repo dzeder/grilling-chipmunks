@@ -36,6 +36,10 @@ var SF_CONFIG = {
   namespacePrefix: 'ohfy'
 };
 
+// Placement threshold: days without a reorder before flagging as lost placement
+// CSO requirement: 60-day reorder alert window
+var LOST_PLACEMENT_DAYS = 60;
+
 // =============================================================================
 // 7.1 CLASS OF TRADE CROSSWALK
 // OUTDA.ClassOfTrade → Account.Market__c + Account.Premise_Type__c
