@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.7.5] - 2026-04-13
+
+### Fixed
+- Contact records now correctly send `ohfy__Is_Billing_Contact__c` to Salesforce (was silently dropping the field due to namespace mismatch in batch builder)
+- Run summary now includes Placements in the daily report (07b-placements was missing from scripts array)
+- ROADMAP corrected: `ohfy__Type__c` on Depletion intentionally skipped (org picklist uses display types, not transaction types)
+
+### Changed
+- Shared modules updated: added `DEPLETION` prefix and `depletionKey()` generator, removed stale `INVOICE`/`INVOICE_LINE` references (Invoice__c is not built from VIP data)
+
 ## [0.0.7.4] - 2026-04-13
 
 ### Changed
