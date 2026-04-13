@@ -66,7 +66,10 @@ jobs:
           if [ -n "$EXISTING_PR" ]; then
             echo "PR #${EXISTING_PR} already exists for ${BRANCH}, updating..."
             git checkout -b "$BRANCH"
-            git add .claude/skills/gstack/ .claude/skills/*/SKILL.md
+            git add .claude/skills/gstack/
+            for f in .claude/skills/*/SKILL.md; do
+              [ ! -L "$(dirname "$f")" ] && git add "$f"
+            done
             git commit -m "chore: update gstack from ${LOCAL_VER} to ${UPSTREAM_VER}"
             git push origin "$BRANCH" --force
             echo "Updated existing PR #${EXISTING_PR}"
@@ -77,7 +80,10 @@ jobs:
           git push origin --delete "$BRANCH" 2>/dev/null || true
 
           git checkout -b "$BRANCH"
-          git add .claude/skills/gstack/ .claude/skills/*/SKILL.md
+          git add .claude/skills/gstack/
+          for f in .claude/skills/*/SKILL.md; do
+            [ ! -L "$(dirname "$f")" ] && git add "$f"
+          done
           git commit -m "chore: update gstack from ${LOCAL_VER} to ${UPSTREAM_VER}"
           git push origin "$BRANCH"
           {
