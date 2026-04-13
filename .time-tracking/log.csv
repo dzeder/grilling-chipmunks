@@ -2,3 +2,4 @@ date,pr_number,branch,description,type,human_estimate_hrs,ai_actual_min,tokens_u
 2026-04-08,51,dzeder/tray-project-skill,feat(tray): Draft Order Item Cleanup project + tray-project skill,feat,6,45,120000,12,87.5,,,,,,tray-project-builder,
 2026-04-13,105,dzeder/pr-telemetry,feat(ci): PR telemetry dashboard and automated metrics,feat,4,20,,,92,0,0,0,0,0,ship,Explore (x2); Plan (x1)
 2026-04-13,106,dzeder/fix-item-line-type,fix(vip-srs): wire Item_Line/Item_Type lookups and collapse 99Z placeholders,fix,,,,,,0,0,0,0,0,,
+2026-04-13,107,dzeder/ros-vip-data-load,feat(vip-srs): multi-customer tooling and ROS2 sandbox validation,feat,,,,,,0,0,0,0,0,,
