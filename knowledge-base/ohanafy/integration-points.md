@@ -88,6 +88,52 @@
 | `lookup-maps.js` | Map/Set factories, status mapping |
 | `output-structuring.js` | Success/error envelopes, summaries |
 
+## Managed Package Data Loading Constraints
+
+Hard-won lessons from loading data into subscriber orgs with the Ohanafy managed package installed. These apply to ANY integration, not just VIP SRS.
+
+See `knowledge-base/ohanafy/objects/` for per-object details.
+
+### Master-detail fields are create-only
+
+Many managed objects (Inventory__c, Placement__c, Depletion__c) use master-detail relationships. These fields can only be set on INSERT, not UPDATE. Use `__r` relationship syntax in Composite API body. When updating existing records by SF ID, **strip master-detail fields from the PATCH body** or get `INVALID_FIELD_FOR_INSERT_UPDATE`.
+
+### External ID field names vary by object
+
+| Object | External ID Field | Managed? |
+|--------|------------------|----------|
+| Account | `ohfy__External_ID__c` | Yes |
+| Contact | `External_ID__c` | No |
+| Item__c | `ohfy__VIP_External_ID__c` | Yes |
+| Location__c | `VIP_External_ID__c` | No |
+| Inventory__c, History, Adjustment | `VIP_External_ID__c` | No |
+| Placement__c | `VIP_External_ID__c` | No |
+| Depletion__c | `VIP_External_ID__c` | No |
+| Allocation__c | `VIP_External_ID__c` | No |
+
+Never assume consistency — always check the field name per object.
+
+### Validation rules may block upserts
+
+The managed package has validation rules that enforce natural key uniqueness (e.g., Inventory__c blocks duplicate Item+Location combos). Standard upsert by external ID can INSERT when a record already exists under a different key, triggering the validation rule.
+
+**Pre-query pattern:** Query existing records by relationship fields (not external ID), build a map of external ID → SF record ID, then PATCH by SF record ID. Stamp the external ID on existing records so future upserts work normally.
+
+### AccountTrigger / ServiceLocator pattern
+
+`ohfy.AccountTrigger` fires on AfterUpdate and calls `AccountTriggerMethods` via ServiceLocator. If the implementation class is missing in the subscriber org:
+- **Inserts work** (first load succeeds)
+- **Updates fail** (re-upserts on same data fail with ServiceLocatorException)
+- Requires Ohanafy engineering to deploy the missing class
+
+### Restricted picklists vary by org and record type
+
+`ohfy__Market__c`, `ohfy__Packaging_Type__c`, and others are restricted picklists. Always describe the field via API before building crosswalks — values differ between orgs and record types. Generic human-friendly names (e.g., "Bar") fail if the org uses a different label (e.g., "Bars/Clubs/Taverns").
+
+### Item prerequisite chain for Depletion__c
+
+Depletion__c has a mandatory Item lookup filter requiring 5 prerequisites on the Item. See `knowledge-base/ohanafy/objects/depletion.md` for the full chain. This is the most common failure when loading depletions into a new org.
+
 ## Key Integration Principles
 
 1. **Tray-first** — always check existing Tray workflows before building new
@@ -97,3 +143,5 @@
 5. **Error envelope pattern** — structured success/error responses
 6. **Watermark/delta sync** — use Tray Data Storage for tracking last sync point
 7. **No credentials in code** — AWS Secrets Manager only
+8. **Pre-query before upsert** — when managed validation rules enforce natural key uniqueness, query existing records first
+9. **Load order matters** — reference data (Items, Locations) before enrichment before transactions; pre-queries must run after dependencies are stamped

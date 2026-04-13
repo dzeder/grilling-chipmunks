@@ -120,4 +120,14 @@
         <field>Contact.External_ID__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Account.VIP_Salesman1__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Account.VIP_Salesman2__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
 </Profile>

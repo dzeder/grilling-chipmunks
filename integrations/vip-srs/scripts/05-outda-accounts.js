@@ -187,6 +187,16 @@ function transformAccount(row, distId) {
   var license = clean(row.License);
   if (license) record.ohfy__ABC_License_Number__c = license;
 
+  // Distributor rep codes (ROSM1/ROSM2) — NOT Shipyard's own reps
+  var salesman1 = clean(row.Salesman1);
+  if (salesman1 && salesman1 !== '999' && salesman1 !== 'HOUSE') {
+    record.VIP_Salesman1__c = salesman1;
+  }
+  var salesman2 = clean(row.Salesman2);
+  if (salesman2) {
+    record.VIP_Salesman2__c = salesman2;
+  }
+
   if (isDist) {
     // --- Distributor/Wholesaler: who the supplier sells to ---
     record.Type = 'Customer';

@@ -138,6 +138,14 @@ function transformPlacement(entry) {
   // Active — has sales activity
   record[NS + 'Is_Active__c'] = true;
 
+  // New placement flag — set true on every upsert (placement has recent activity)
+  record[NS + 'Is_New_Placement__c'] = true;
+
+  // Lost placement threshold (days) — CSO requires 60-day reorder alert window
+  // Feeds formula: Lost_Placement_Date__c = Last_Sold_Date + 60
+  // Days_Since_Last_Order__c = TODAY() - Last_Sold_Date (auto-formula)
+  record[NS + 'Lost_Placement_After_Days__c'] = 60;
+
   // Stale cleanup date
   if (entry.fileDate) record.VIP_File_Date__c = entry.fileDate;
 
