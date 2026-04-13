@@ -55,25 +55,15 @@ function locationKey(distId) {
 }
 
 /**
- * Invoice__c: INV:{DistId}:{InvoiceNbr}:{InvoiceDate}
- * @param {string} distId - Distributor code
- * @param {string} invoiceNbr - Invoice number
- * @param {string} invoiceDate - Invoice date (YYYYMMDD)
- */
-function invoiceKey(distId, invoiceNbr, invoiceDate) {
-  return PREFIX.INVOICE + ':' + distId + ':' + invoiceNbr + ':' + invoiceDate;
-}
-
-/**
- * Invoice_Item__c: INL:{DistId}:{InvoiceNbr}:{AcctNbr}:{SuppItem}:{UOM}
+ * Depletion__c: DEP:{DistId}:{InvoiceNbr}:{AcctNbr}:{SuppItem}:{UOM}
  * @param {string} distId - Distributor code
  * @param {string} invoiceNbr - Invoice number
  * @param {string} acctNbr - Account number
  * @param {string} suppItem - Supplier item number
  * @param {string} uom - Unit of measure (C or B)
  */
-function invoiceLineKey(distId, invoiceNbr, acctNbr, suppItem, uom) {
-  return PREFIX.INVOICE_LINE + ':' + distId + ':' + invoiceNbr + ':' + acctNbr + ':' + suppItem + ':' + uom;
+function depletionKey(distId, invoiceNbr, acctNbr, suppItem, uom) {
+  return PREFIX.DEPLETION + ':' + distId + ':' + invoiceNbr + ':' + acctNbr + ':' + suppItem + ':' + uom;
 }
 
 /**
@@ -159,8 +149,7 @@ if (typeof module !== 'undefined' && module.exports) {
     itemLineKey: itemLineKey,
     itemTypeKey: itemTypeKey,
     locationKey: locationKey,
-    invoiceKey: invoiceKey,
-    invoiceLineKey: invoiceLineKey,
+    depletionKey: depletionKey,
     inventoryKey: inventoryKey,
     inventoryHistoryKey: inventoryHistoryKey,
     inventoryAdjustmentKey: inventoryAdjustmentKey,

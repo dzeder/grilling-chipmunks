@@ -96,7 +96,7 @@
 - [x] All phase 4 objects (Depletions, Placements, Allocations) verified with correct file date
 
 ### Phase 5d: Quick Wins + Cleanup Hardening (2026-04-10)
-- [x] Script 07 (depletions): Set `ohfy__Type__c = 'Sale'` — depletions now visible in Type-filtered reports
+- [x] Script 07 (depletions): Investigated `ohfy__Type__c` — org picklist has display types (Cold Box, Draft Line, Shelf), not transaction types. Intentionally skipped; VIP sales data doesn't map to these values
 - [x] Script 08 (allocations): Set `ohfy__End_Date__c` (last day of month) + `ohfy__Location__r` (distributor warehouse lookup)
 - [x] Script 05 (accounts): Set `ohfy__Fulfillment_Location__r` on retailer accounts (links to `LOC:{DistId}`)
 - [x] Script 06 (inventory): Set `ohfy__Status__c = 'Complete'` on Inventory_Adjustment__c records
