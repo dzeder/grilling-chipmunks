@@ -1,0 +1,23 @@
+name: watchers
+version: "1.0.0"
+description: "Monitors 50+ external repos for releases and patterns relevant to Ohanafy"
+
+model:
+  scoring: "claude-haiku-4-5-20251001"
+
+thresholds:
+  auto_issue: 0.85
+  notify: 0.60
+
+schedule:
+  cron: "0 8 * * MON"
+  pipeline: ".github/workflows/watchers.yml"
+
+slack:
+  channel: "#ai-ops-updates"
+  digest_format: weekly
+
+github:
+  repo: "dzeder/daniels-ohanafy"
+  issue_label: "ai-ops-adoption"
+  auto_adopt_label: "auto-adopt-candidate"

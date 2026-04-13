@@ -1,0 +1,177 @@
+{
+  "anthropics/anthropic-cookbook": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "pydantic/pydantic-ai": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "langchain-ai/langgraph": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "microsoft/autogen": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "BerriAI/litellm": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "addyosmani/agent-skills": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "shanraisshan/claude-code-best-practice": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "dxatscale/sfpowerscripts": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "forcedotcom/salesforcedx-vscode": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "forcedotcom/source-deploy-retrieve": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "trailheadapps/lwc-recipes": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "Jaganpro/sf-skills": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "n8n-io/n8n": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "temporalio/temporal": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "zapier/zapier-platform": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "prefecthq/prefect": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "aws/aws-cdk": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "aws-powertools/powertools-lambda-python": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "localstack/localstack": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "bridgecrewio/checkov": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "aws-samples/aws-cdk-examples": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "shelfio/datadog-mcp": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "DataDog/datadog-agent": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "DataDog/integrations-core": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "DataDog/datadog-lambda-python": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "squidfunk/mkdocs-material": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "facebook/docusaurus": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "python-openxml/python-docx": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "semantic-release/semantic-release": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "astral-sh/uv": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "nektos/act": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "garrytan/gstack": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "trufflesecurity/trufflehog": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "gitleaks/gitleaks": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  },
+  "openai/evals": {
+    "last_checked_at": "2026-04-13T14:08:01.267267+00:00",
+    "last_release_tag": null,
+    "last_commit_sha": null
+  }
+}
