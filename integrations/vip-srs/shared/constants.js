@@ -21,7 +21,9 @@ var PREFIX = {
   INVENTORY_HISTORY: 'IVH',
   INVENTORY_ADJUSTMENT: 'IVA',
   ALLOCATION: 'ALC',
-  PLACEMENT: 'PLC'
+  PLACEMENT: 'PLC',
+  ITEM_LINE: 'ILN',
+  ITEM_TYPE: 'ITY'
 };
 
 // =============================================================================

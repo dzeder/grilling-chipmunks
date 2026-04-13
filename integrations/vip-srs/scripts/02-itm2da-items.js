@@ -17,7 +17,7 @@
 // INLINE SHARED (for Tray Script connector — no require())
 // =============================================================================
 
-var PREFIX = { ITEM: 'ITM' };
+var PREFIX = { ITEM: 'ITM', ITEM_LINE: 'ILN', ITEM_TYPE: 'ITY' };
 var SF_CONFIG = { apiVersion: 'v62.0', batchSize: 25, namespacePrefix: 'ohfy' };
 
 var CONTAINER_TYPE = {
@@ -32,6 +32,8 @@ var VOLUME_UOM = { 'ML': 'Metric Volume', 'LTR': 'Metric Volume', 'OZ': 'US Volu
 var ML_TO_FLOZ = 0.033814;
 
 function itemKey(supplierItem) { return PREFIX.ITEM + ':' + supplierItem; }
+function itemLineKey(name) { return PREFIX.ITEM_LINE + ':' + name; }
+function itemTypeKey(name) { return PREFIX.ITEM_TYPE + ':' + name; }
 
 function clean(v) { if (v === undefined || v === null) return ''; return String(v).trim(); }
 function isBlankOrZeros(v) { if (!v) return true; var t = String(v).trim(); return t === '' || /^0+$/.test(t); }
@@ -65,7 +67,9 @@ var CONFIG = {
   itemSobject: NS + 'Item__c',
   itemExternalIdField: NS + 'VIP_External_ID__c',
   itemLineSobject: NS + 'Item_Line__c',
-  itemTypeSobject: NS + 'Item_Type__c'
+  itemLineExternalIdField: 'VIP_External_ID__c',
+  itemTypeSobject: NS + 'Item_Type__c',
+  itemTypeExternalIdField: 'VIP_External_ID__c'
 };
 
 // =============================================================================
@@ -153,6 +157,9 @@ exports.step = function(input) {
   // Finished Good record type ID (required for dependent picklist validation)
   var finishedGoodRtId = input.finishedGoodRecordTypeId || null;
 
+  // File date for VIP_File_Date__c (date of pipeline run, not from file contents)
+  var fileDate = input.fileDate || null;
+
   // Collect existing Item_Line and Item_Type lookups if provided
   var existingItemLines = input.existingItemLines || {};   // { name: sfId }
   var existingItemTypes = input.existingItemTypes || {};    // { name: sfId }
@@ -196,18 +203,54 @@ exports.step = function(input) {
     if (genericCat3) itemTypeNames[genericCat3] = true;
   });
 
-  // Build Item_Line__c records (create-if-missing approach)
-  var newItemLines = Object.keys(itemLineNames).filter(function(name) {
-    return !existingItemLines[name];
-  }).map(function(name) {
-    return { Name: name };
+  // Build Item_Line__c upsert records (Composite API PATCH by external ID)
+  var itemLineRecords = Object.keys(itemLineNames).map(function(name) {
+    var record = { Name: name, VIP_External_ID__c: itemLineKey(name) };
+    if (fileDate) record.VIP_File_Date__c = fileDate;
+    return record;
   });
 
-  // Build Item_Type__c records (create-if-missing approach)
-  var newItemTypes = Object.keys(itemTypeNames).filter(function(name) {
-    return !existingItemTypes[name];
-  }).map(function(name) {
-    return { Name: name };
+  var itemLineChunks = chunkArray(itemLineRecords);
+  var itemLineBatches = itemLineChunks.map(function(chunk) {
+    return {
+      compositeRequest: chunk.map(function(record, idx) {
+        var extId = record.VIP_External_ID__c;
+        var body = { Name: record.Name };
+        if (record.VIP_File_Date__c) body.VIP_File_Date__c = record.VIP_File_Date__c;
+        return {
+          method: 'PATCH',
+          url: '/services/data/' + SF_CONFIG.apiVersion + '/sobjects/' +
+            CONFIG.itemLineSobject + '/' + CONFIG.itemLineExternalIdField + '/' + sanitizeForUrl(extId),
+          referenceId: 'itemLine_' + idx,
+          body: body
+        };
+      })
+    };
+  });
+
+  // Build Item_Type__c upsert records (Composite API PATCH by external ID)
+  var itemTypeRecords = Object.keys(itemTypeNames).map(function(name) {
+    var record = { Name: name, VIP_External_ID__c: itemTypeKey(name) };
+    if (fileDate) record.VIP_File_Date__c = fileDate;
+    return record;
+  });
+
+  var itemTypeChunks = chunkArray(itemTypeRecords);
+  var itemTypeBatches = itemTypeChunks.map(function(chunk) {
+    return {
+      compositeRequest: chunk.map(function(record, idx) {
+        var extId = record.VIP_External_ID__c;
+        var body = { Name: record.Name };
+        if (record.VIP_File_Date__c) body.VIP_File_Date__c = record.VIP_File_Date__c;
+        return {
+          method: 'PATCH',
+          url: '/services/data/' + SF_CONFIG.apiVersion + '/sobjects/' +
+            CONFIG.itemTypeSobject + '/' + CONFIG.itemTypeExternalIdField + '/' + sanitizeForUrl(extId),
+          referenceId: 'itemType_' + idx,
+          body: body
+        };
+      })
+    };
   });
 
   // 3. TRANSFORM Item__c records
@@ -262,11 +305,13 @@ exports.step = function(input) {
 
   // 5. OUTPUT
   return {
-    // Item_Line and Item_Type records to create (processed before items)
-    newItemLines: newItemLines,
-    newItemLineCount: newItemLines.length,
-    newItemTypes: newItemTypes,
-    newItemTypeCount: newItemTypes.length,
+    // Item_Line and Item_Type upsert batches (Composite API, processed before items)
+    itemLineBatches: itemLineBatches,
+    itemLineBatchCount: itemLineBatches.length,
+    itemLineRecordCount: itemLineRecords.length,
+    itemTypeBatches: itemTypeBatches,
+    itemTypeBatchCount: itemTypeBatches.length,
+    itemTypeRecordCount: itemTypeRecords.length,
     // Item batches
     batches: itemBatches,
     batchCount: itemBatches.length,
@@ -287,8 +332,8 @@ exports.step = function(input) {
       invalid: invalid.length,
       skipped: skipped.length,
       transformErrors: transformErrors.length,
-      newItemLines: newItemLines.length,
-      newItemTypes: newItemTypes.length,
+      itemLines: itemLineRecords.length,
+      itemTypes: itemTypeRecords.length,
       batches: itemBatches.length,
       timestamp: new Date().toISOString()
     }

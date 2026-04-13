@@ -115,6 +115,15 @@
 - [x] **Full E2E: 612 records, 0 failures** (Phase 3 + Phase 4)
 - [x] Phase 1 Chain Banner UPDATES still blocked by AccountTriggerMethods (pre-existing known issue; creates work fine)
 
+### Phase 5f: Item_Line / Item_Type Duplicate Fix (2026-04-13)
+- [x] Root cause: Script 02 used Name-only creates with no external ID — re-runs without Tray lookup maps created duplicates
+- [x] Added `VIP_External_ID__c` (Text 255, unique, external ID) + `VIP_File_Date__c` (Date) to both `Item_Line__c` and `Item_Type__c`
+- [x] External ID formats: `ILN:{BrandDesc}` for Item_Line, `ITY:{GenericCat3}` for Item_Type
+- [x] Script 02: replaced Name-only create with Composite API PATCH upsert by external ID (same pattern as Item__c)
+- [x] Script 09: added Item_Line__c and Item_Type__c to cleanup targets with `perDistributor: false` flag (global reference data, not scoped by distributor)
+- [x] Updated permset + Admin profile FLS for 4 new fields
+- [x] Added `ITEM_LINE: 'ILN'` and `ITEM_TYPE: 'ITY'` prefixes to shared/constants.js + external-ids.js
+
 ## Next Up
 
 ### Phase 6: Tray.io Project Build
@@ -180,4 +189,4 @@
 16. **Inventory pre-query must run AFTER Phase 1:** The pre-query matches existing Inventory records by `Item__r.VIP_External_ID__c LIKE 'ITM:%'`. But Items don't have VIP_External_ID__c until Phase 1 stamps them. Running the pre-query at pipeline startup finds 0 records. Use lazy execution — trigger when Phase 3 starts.
 17. **ALL existing Inventory records need VIP_External_ID__c batch-stamped:** History and Adjustment rows reference parent Inventory by VIP_External_ID__c. Even if the Inventory transform only outputs 12 records, History may reference hundreds of different DistId:Item combos. Stamp VIP_External_ID__c on ALL existing records (264 in ROS2) before loading children, not just the records in your current file.
 18. **Inventory__c master-detail fields are read-only on update:** When PATCHing an existing Inventory record by SF record ID, strip `ohfy__Item__r` and `ohfy__Location__r` from the request body. These are master-detail (create-only) fields. Including them returns `INVALID_FIELD_FOR_INSERT_UPDATE`.
-19. **Item_Line__c has no upsert key:** Created via `sf data create record` / direct insert. Re-runs of ITM2DA create duplicate Item_Line__c records. Minor issue for sandbox testing; for production, add a dedup pre-check query.
+19. **Item_Line__c and Item_Type__c need external IDs for upsert:** These lookup objects use `VIP_External_ID__c` with formats `ILN:{BrandDesc}` and `ITY:{GenericCat3}`. Without external IDs, re-running Script 02 creates duplicates. The Tray workflow should still pre-query and pass `existingItemLines`/`existingItemTypes` maps for efficiency, but the upsert provides a safety net.

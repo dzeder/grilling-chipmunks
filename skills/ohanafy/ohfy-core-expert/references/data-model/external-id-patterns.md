@@ -95,23 +95,33 @@ edi_UPC-012345678901   # EDI UPC code
 
 ### Item_Line__c (Brand)
 
-**Field**: `ohfy__Mapping_Key__c`
+**Fields**: `ohfy__Mapping_Key__c` (general), `VIP_External_ID__c` (VIP SRS)
 
 **Examples**:
 ```
+# Mapping_Key__c (ecommerce, GP Analytics)
 gpa_brand_abc          # GP Analytics brand
-ILN:Shipyard IPA       # VIP SRS product line (colon-delimited prefix)
 shopify_vendor_123     # Shopify vendor
+
+# VIP_External_ID__c (VIP SRS — colon-delimited prefix)
+ILN:Original Vodka     # ILN:{BrandDesc from ITM2DA}
 ```
 
-**Upsert**:
+**Upsert** (general):
 ```javascript
 {
     "method": "PATCH",
     "url": "/services/data/v62.0/sobjects/ohfy__Item_Line__c/ohfy__Mapping_Key__c/gpa_brand_abc",
-    "body": {
-        "Name": "ABC Brewery"
-    }
+    "body": { "Name": "ABC Brewery" }
+}
+```
+
+**Upsert** (VIP SRS):
+```javascript
+{
+    "method": "PATCH",
+    "url": "/services/data/v62.0/sobjects/ohfy__Item_Line__c/VIP_External_ID__c/ILN:Original%20Vodka",
+    "body": { "Name": "Original Vodka", "VIP_File_Date__c": "2026-04-13" }
 }
 ```
 
@@ -119,23 +129,34 @@ shopify_vendor_123     # Shopify vendor
 
 ### Item_Type__c (Category)
 
-**Field**: `ohfy__Mapping_Key__c`
+**Fields**: `ohfy__Mapping_Key__c` (general), `VIP_External_ID__c` (VIP SRS)
 
 **Examples**:
 ```
+# Mapping_Key__c (ecommerce, GP Analytics)
 gpa_type_lager         # GP Analytics type
 shopify_cat_beer       # Shopify category
 woo_cat_123            # WooCommerce category ID
+
+# VIP_External_ID__c (VIP SRS — colon-delimited prefix)
+ITY:Vodka              # ITY:{GenericCat3 from ITM2DA}
 ```
 
-**Upsert**:
+**Upsert** (general):
 ```javascript
 {
     "method": "PATCH",
     "url": "/services/data/v62.0/sobjects/ohfy__Item_Type__c/ohfy__Mapping_Key__c/gpa_type_lager",
-    "body": {
-        "Name": "Lager"
-    }
+    "body": { "Name": "Lager" }
+}
+```
+
+**Upsert** (VIP SRS):
+```javascript
+{
+    "method": "PATCH",
+    "url": "/services/data/v62.0/sobjects/ohfy__Item_Type__c/VIP_External_ID__c/ITY:Vodka",
+    "body": { "Name": "Vodka", "VIP_File_Date__c": "2026-04-13" }
 }
 ```
 

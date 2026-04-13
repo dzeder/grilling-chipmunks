@@ -355,7 +355,7 @@ VIP delivers 9 gzipped CSV files per business day. Filename format: `{TYPE}.N{YY
 | AlcoholPct | `40.0` | -- | Not mapped | No standard field; custom if needed |
 | PackageCode | `102312102` | -- | Not mapped | |
 | BrandCode | `11083076` | -- | Not mapped | Use BrandDesc instead |
-| BrandDesc | `Original Vodka` | Item_Line__c (lookup) | Lookup/create by name | Create Item_Line if missing |
+| BrandDesc | `Original Vodka` | Item_Line__c (lookup) | Upsert by `ILN:{BrandDesc}` | External ID: `VIP_External_ID__c` |
 | GeoCode | `` | -- | Not mapped | Always empty |
 | PackageType | `BTL` | Item__c.`Package_Type__c` | `BTL` -> `Packaged` | |
 | PackageSize | `SNGL 1L` | Item__c.`Packaging_Type__c` | Direct | |
@@ -365,7 +365,7 @@ VIP delivers 9 gzipped CSV files per business day. Filename format: `{TYPE}.N{YY
 | ContainerType | `S` | Item__c.`Type__c` | `S` -> `Finished Good` | See SRSVALUE ITCTYP |
 | TerritoryPtr | `01` | -- | Not mapped | |
 | GenericCat1-2 | `` | -- | Not mapped | |
-| GenericCat3 | `Vodka` | Item_Type__c (lookup) | Lookup/create by name | Create Item_Type if missing |
+| GenericCat3 | `Vodka` | Item_Type__c (lookup) | Upsert by `ITY:{GenericCat3}` | External ID: `VIP_External_ID__c` |
 | GenericCat4-6 | `` | -- | Not mapped | |
 | ExtOZpCase | `202.884` | -- | Not mapped | |
 | ExtMLpCase | `6000.000` | -- | Not mapped | Reference only |

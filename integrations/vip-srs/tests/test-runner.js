@@ -157,14 +157,18 @@ if (result.errors && result.errors.length > 0) {
   console.log('');
 }
 
-// Extra outputs (for ITM2DA)
-if (result.newItemLines) {
-  console.log('New Item Lines:', result.newItemLineCount);
-  result.newItemLines.slice(0, 5).forEach(function(il) { console.log('  -', il.Name); });
+// Extra outputs (for ITM2DA — Item_Line/Item_Type upsert batches)
+if (result.itemLineBatches && result.itemLineBatches.length > 0) {
+  console.log('Item Line batches:', result.itemLineBatchCount, '(' + result.itemLineRecordCount + ' records)');
+  var firstIL = result.itemLineBatches[0].compositeRequest[0];
+  console.log('  First:', firstIL.method, firstIL.url);
+  console.log('  Body:', JSON.stringify(firstIL.body));
 }
-if (result.newItemTypes) {
-  console.log('New Item Types:', result.newItemTypeCount);
-  result.newItemTypes.slice(0, 5).forEach(function(it) { console.log('  -', it.Name); });
+if (result.itemTypeBatches && result.itemTypeBatches.length > 0) {
+  console.log('Item Type batches:', result.itemTypeBatchCount, '(' + result.itemTypeRecordCount + ' records)');
+  var firstIT = result.itemTypeBatches[0].compositeRequest[0];
+  console.log('  First:', firstIT.method, firstIT.url);
+  console.log('  Body:', JSON.stringify(firstIT.body));
 }
 
 // Assertions
