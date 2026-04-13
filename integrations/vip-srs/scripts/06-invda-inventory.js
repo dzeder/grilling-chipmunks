@@ -89,11 +89,13 @@ var TRANS_CODE = {
 // =============================================================================
 
 function transformInventory(distId, supplierItem, casesOnHand, unitsOnHand) {
+  // Collapse 99Z generic volume placeholders to single item
+  var itemSuppItem = supplierItem.indexOf('99Z') === 0 ? '99Z-GENERIC' : supplierItem;
   var record = {};
   record.VIP_External_ID__c = inventoryKey(distId, supplierItem);
   // Item lookup (master-detail — set on create, ignored on update)
   record[NS + 'Item__r'] = {};
-  record[NS + 'Item__r'][NS + 'VIP_External_ID__c'] = itemKey(supplierItem);
+  record[NS + 'Item__r'][NS + 'VIP_External_ID__c'] = itemKey(itemSuppItem);
   // Location lookup via VIP_External_ID__c
   record[NS + 'Location__r'] = { VIP_External_ID__c: locationKey(distId) };
   // Quantity_On_Hand__c is the writable case quantity field
@@ -104,6 +106,8 @@ function transformInventory(distId, supplierItem, casesOnHand, unitsOnHand) {
 
 function transformHistory(row, distId, fileDate) {
   var supplierItem = clean(row.SupplierItem);
+  // Collapse 99Z generic volume placeholders to single item
+  var itemSuppItem = supplierItem.indexOf('99Z') === 0 ? '99Z-GENERIC' : supplierItem;
   var postingDate = clean(row.PostingDate);
   var uom = clean(row.UnitOfMeasure);
   var record = {};
@@ -112,7 +116,7 @@ function transformHistory(row, distId, fileDate) {
   record[NS + 'Stamped_Date__c'] = toSfDate(postingDate);
   // Item lookup (relationship syntax)
   record[NS + 'Item__r'] = {};
-  record[NS + 'Item__r'][NS + 'VIP_External_ID__c'] = itemKey(supplierItem);
+  record[NS + 'Item__r'][NS + 'VIP_External_ID__c'] = itemKey(itemSuppItem);
   record[NS + 'Quantity_On_Hand__c'] = toInt(row.Quantity);
   // Parent Inventory lookup (relationship syntax)
   record[NS + 'Inventory__r'] = { VIP_External_ID__c: inventoryKey(distId, supplierItem) };

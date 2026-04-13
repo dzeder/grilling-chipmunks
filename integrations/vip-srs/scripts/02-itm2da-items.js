@@ -168,6 +168,7 @@ exports.step = function(input) {
   var valid = [];
   var invalid = [];
   var skipped = [];
+  var seen99Z = false;
 
   rows.forEach(function(row, idx) {
     var recordType = clean(row.RecordId);
@@ -185,6 +186,20 @@ exports.step = function(input) {
     // Skip zero-volume placeholder
     if (supplierItem === 'XXXXXX') {
       skipped.push({ rowIndex: idx, reason: 'Zero-volume placeholder' });
+      return;
+    }
+
+    // Collapse 99Z generic volume placeholders into a single item
+    if (supplierItem.indexOf('99Z') === 0) {
+      if (!seen99Z) {
+        seen99Z = true;
+        var collapsed = {};
+        Object.keys(row).forEach(function(k) { collapsed[k] = row[k]; });
+        collapsed.SupplierItem = '99Z-GENERIC';
+        collapsed.Desc = 'Generic Volume (Unmapped)';
+        valid.push(collapsed);
+      }
+      skipped.push({ rowIndex: idx, reason: '99Z placeholder (collapsed)' });
       return;
     }
 

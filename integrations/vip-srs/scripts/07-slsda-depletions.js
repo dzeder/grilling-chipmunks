@@ -64,6 +64,8 @@ function transformDepletion(row, distId, fileDate) {
   var invoiceNbr = clean(row.InvoiceNbr);
   var acctNbr = clean(row.AcctNbr);
   var suppItem = clean(row.SuppItem);
+  // Collapse 99Z generic volume placeholders to single item
+  var itemSuppItem = suppItem.indexOf('99Z') === 0 ? '99Z-GENERIC' : suppItem;
   var uom = clean(row.UOM);
   var qty = toNumber(row.Qty);
   var invoiceDate = clean(row.InvoiceDate);
@@ -79,7 +81,7 @@ function transformDepletion(row, distId, fileDate) {
 
   // Item lookup (relationship syntax)
   record[NS + 'Item__r'] = {};
-  record[NS + 'Item__r'][NS + 'VIP_External_ID__c'] = itemKey(suppItem);
+  record[NS + 'Item__r'][NS + 'VIP_External_ID__c'] = itemKey(itemSuppItem);
 
   // Depletion type — org picklist has display types (Cold Box, Draft Line, etc.),
   // not transaction types. Skip for VIP sales data.

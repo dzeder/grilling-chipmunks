@@ -122,8 +122,10 @@ function transformPlacement(entry) {
   // Master-detail lookups (create-only — Composite API ignores on update)
   record[NS + 'Account__r'] = { ohfy__External_ID__c: accountKey(entry.distId, entry.acctNbr) };
 
+  // Collapse 99Z generic volume placeholders to single item
+  var itemSuppItem = entry.suppItem.indexOf('99Z') === 0 ? '99Z-GENERIC' : entry.suppItem;
   var itemRef = {};
-  itemRef[NS + 'VIP_External_ID__c'] = itemKey(entry.suppItem);
+  itemRef[NS + 'VIP_External_ID__c'] = itemKey(itemSuppItem);
   record[NS + 'Item__r'] = itemRef;
 
   // Dates
