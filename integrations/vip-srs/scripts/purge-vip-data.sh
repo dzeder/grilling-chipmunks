@@ -168,11 +168,13 @@ echo "=== Phase 1: Transaction Records ==="
 echo ""
 
 if [[ -n "$DIST_ID" ]]; then
+  delete_records "ohfy__Placement__c" "Placements (PLC:${DIST_ID})" "VIP_External_ID__c LIKE 'PLC:${DIST_ID}:%'"
   delete_records "ohfy__Depletion__c" "Depletions (DEP:${DIST_ID})" "VIP_External_ID__c LIKE 'DEP:${DIST_ID}:%'"
   delete_records "ohfy__Allocation__c" "Allocations (ALC:${DIST_ID})" "VIP_External_ID__c LIKE 'ALC:${DIST_ID}:%'"
   delete_records "ohfy__Inventory_Adjustment__c" "Inventory Adjustments (IVA:${DIST_ID})" "VIP_External_ID__c LIKE 'IVA:${DIST_ID}:%'"
   delete_records "ohfy__Inventory_History__c" "Inventory History (IVH:${DIST_ID})" "VIP_External_ID__c LIKE 'IVH:${DIST_ID}:%'"
 else
+  delete_records "ohfy__Placement__c" "Placements (PLC:*)" "VIP_External_ID__c LIKE 'PLC:%'"
   delete_records "ohfy__Depletion__c" "Depletions (DEP:*)" "VIP_External_ID__c LIKE 'DEP:%'"
   delete_records "ohfy__Allocation__c" "Allocations (ALC:*)" "VIP_External_ID__c LIKE 'ALC:%'"
   delete_records "ohfy__Inventory_Adjustment__c" "Inventory Adjustments (IVA:*)" "VIP_External_ID__c LIKE 'IVA:%'"

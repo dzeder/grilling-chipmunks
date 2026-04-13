@@ -55,7 +55,11 @@
   - `02-itm2da`: `Packaging_Type__c` → `Packaging_Type_Short_Name__c` (text field); deferred Type__c + Packaging_Type__c pending record type assignment
   - `03-distda`: `Location_Type__c` → `Type__c`; `Location_Code__c` stores raw dist ID (max 5 chars, not prefixed key)
   - `05-outda`: Full Market crosswalk remapped to match `ohfy__Market__c` restricted picklist values (also synced to shared/constants.js)
-- [ ] Verify stale cleanup queries (Script 09) return expected records after multi-file run
+- [x] Verify stale cleanup queries (Script 09) return expected records after multi-file run
+  - Added Placement__c as 5th cleanup target (simplified query — file date only, no from/to window)
+  - Added Placement__c to purge-vip-data.sh
+  - Verified against ROS2 sandbox: load with file-date 2026-04-08 → stale queries detect all records; re-load with 2026-04-09 → stale counts drop to 0
+  - Note: Each file type has its own from/to window (SLSDA=daily, CTLDA=monthly) — Tray workflow calls Script 09 per file type with matching dates
 
 ### Phase 5b: Account Model Refinement (2026-04-10)
 - [x] **Supplier perspective clarified:** ROS is a supplier. Distributors/wholesalers = Customers (who the supplier sells to). Retailers = Distributed Customers (who the supplier's customer sells to).

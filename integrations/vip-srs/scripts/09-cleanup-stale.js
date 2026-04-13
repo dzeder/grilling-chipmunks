@@ -33,6 +33,16 @@ var CLEANUP_TARGETS = [
     toDateField: 'VIP_To_Date__c'
   },
   {
+    sobject: NS + 'Placement__c',
+    externalIdField: 'VIP_External_ID__c',
+    prefix: 'PLC',
+    fileDateField: 'VIP_File_Date__c',
+    // Placement has no From/To date fields — one record per Account×Item,
+    // rebuilt each run. Stale = older file date for this distributor.
+    fromDateField: null,
+    toDateField: null
+  },
+  {
     sobject: NS + 'Inventory_History__c',
     externalIdField: 'VIP_External_ID__c',
     prefix: 'IVH',
@@ -63,19 +73,25 @@ var CLEANUP_TARGETS = [
 // =============================================================================
 
 function buildStaleQuery(target, distId, currentFileDate, fromDate, toDate) {
-  return 'SELECT Id FROM ' + target.sobject +
-    ' WHERE ' + target.fileDateField + ' < ' + currentFileDate +
-    ' AND ' + target.fromDateField + ' >= ' + fromDate +
-    ' AND ' + target.toDateField + ' <= ' + toDate +
-    " AND " + target.externalIdField + " LIKE '" + target.prefix + ':' + distId + ":%'";
+  var sql = 'SELECT Id FROM ' + target.sobject +
+    ' WHERE ' + target.fileDateField + ' < ' + currentFileDate;
+  if (target.fromDateField && target.toDateField) {
+    sql += ' AND ' + target.fromDateField + ' >= ' + fromDate +
+      ' AND ' + target.toDateField + ' <= ' + toDate;
+  }
+  sql += " AND " + target.externalIdField + " LIKE '" + target.prefix + ':' + distId + ":%'";
+  return sql;
 }
 
 function buildCountQuery(target, distId, currentFileDate, fromDate, toDate) {
-  return 'SELECT COUNT() FROM ' + target.sobject +
-    ' WHERE ' + target.fileDateField + ' < ' + currentFileDate +
-    ' AND ' + target.fromDateField + ' >= ' + fromDate +
-    ' AND ' + target.toDateField + ' <= ' + toDate +
-    " AND " + target.externalIdField + " LIKE '" + target.prefix + ':' + distId + ":%'";
+  var sql = 'SELECT COUNT() FROM ' + target.sobject +
+    ' WHERE ' + target.fileDateField + ' < ' + currentFileDate;
+  if (target.fromDateField && target.toDateField) {
+    sql += ' AND ' + target.fromDateField + ' >= ' + fromDate +
+      ' AND ' + target.toDateField + ' <= ' + toDate;
+  }
+  sql += " AND " + target.externalIdField + " LIKE '" + target.prefix + ':' + distId + ":%'";
+  return sql;
 }
 
 // =============================================================================
