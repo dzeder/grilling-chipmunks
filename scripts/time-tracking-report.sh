@@ -47,20 +47,34 @@ if [ -z "$DATA" ]; then
   exit 0
 fi
 
-TOTAL_HUMAN=$(echo "$DATA" | awk -F',' '{sum += $5} END {printf "%.1f", sum}')
-TOTAL_AI=$(echo "$DATA" | awk -F',' '{sum += $6} END {printf "%.1f", sum}')
+# CSV columns (1-indexed):
+# 1=date, 2=pr_number, 3=branch, 4=description, 5=type,
+# 6=human_estimate_hrs, 7=ai_actual_min, 8=tokens_used, 9=est_cost_usd, 10=time_saved_pct,
+# 11=files_changed, 12=files_added, 13=files_deleted, 14=lines_added, 15=lines_deleted,
+# 16=skills_used, 17=agents_used
+
+TOTAL_HUMAN=$(echo "$DATA" | awk -F',' '{sum += $6} END {printf "%.1f", sum}')
+TOTAL_AI_MIN=$(echo "$DATA" | awk -F',' '{sum += $7} END {printf "%.0f", sum}')
+TOTAL_AI_HRS=$(echo "$DATA" | awk -F',' '{sum += $7/60} END {printf "%.1f", sum}')
+TOTAL_TOKENS=$(echo "$DATA" | awk -F',' '{sum += $8} END {printf "%.0f", sum}')
+TOTAL_COST=$(echo "$DATA" | awk -F',' '{sum += $9} END {printf "%.2f", sum}')
+TOTAL_LINES_ADDED=$(echo "$DATA" | awk -F',' '{sum += $14} END {printf "%.0f", sum}')
+TOTAL_LINES_DELETED=$(echo "$DATA" | awk -F',' '{sum += $15} END {printf "%.0f", sum}')
 ENTRIES=$(echo "$DATA" | wc -l | tr -d ' ')
 
 if [ "$(echo "$TOTAL_HUMAN > 0" | bc)" -eq 1 ]; then
-  SAVINGS=$(echo "scale=1; (1 - $TOTAL_AI / $TOTAL_HUMAN) * 100" | bc)
+  SAVINGS=$(echo "scale=1; (1 - $TOTAL_AI_HRS / $TOTAL_HUMAN) * 100" | bc)
 else
   SAVINGS="N/A"
 fi
 
 echo "Entries:            $ENTRIES"
 echo "Human Estimate:     ${TOTAL_HUMAN}h"
-echo "AI Actual:          ${TOTAL_AI}h"
+echo "AI Actual:          ${TOTAL_AI_MIN}min (${TOTAL_AI_HRS}h)"
 echo "Time Saved:         ${SAVINGS}%"
+echo "Tokens Used:        $TOTAL_TOKENS"
+echo "Est. Cost:          \$$TOTAL_COST"
+echo "Lines:              +$TOTAL_LINES_ADDED / -$TOTAL_LINES_DELETED"
 echo ""
 echo "--- Details ---"
-echo "$DATA" | awk -F',' '{printf "#%-4s %-40s %6sh human / %6sh AI (%s%%)\n", $2, $3, $5, $6, $7}'
+echo "$DATA" | awk -F',' '{printf "#%-4s %-45s %5sh human / %4smin AI  +%s/-%s lines  skills: %s\n", $2, $4, $6, $7, $14, $15, $16}'
