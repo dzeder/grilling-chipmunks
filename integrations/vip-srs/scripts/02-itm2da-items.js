@@ -261,16 +261,16 @@ exports.step = function(input) {
     try {
       var record = transformItem(row, finishedGoodRtId);
 
-      // Add Item_Line__c lookup reference (by name)
+      // Wire Item_Line__c lookup via external ID relationship reference
       var brandDesc = clean(row.BrandDesc);
       if (brandDesc) {
-        record._itemLineName = brandDesc;  // Used for post-processing lookup
+        record[NS + 'Item_Line__r'] = { VIP_External_ID__c: itemLineKey(brandDesc) };
       }
 
-      // Add Item_Type__c lookup reference (by name)
+      // Wire Item_Type__c lookup via external ID relationship reference
       var genericCat3 = clean(row.GenericCat3);
       if (genericCat3) {
-        record._itemTypeName = genericCat3;  // Used for post-processing lookup
+        record[NS + 'Item_Type__r'] = { VIP_External_ID__c: itemTypeKey(genericCat3) };
       }
 
       itemRecords.push(record);
