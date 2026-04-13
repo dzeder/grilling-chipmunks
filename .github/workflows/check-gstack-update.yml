@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '0 8 * * 1'  # Every Monday at 8am UTC
   workflow_dispatch:
+    inputs:
+      skip_auto_merge:
+        description: 'Skip auto-merge even for non-breaking bumps'
+        type: boolean
+        default: false
   push:
     paths:
       - '.github/workflows/check-gstack-update.yml'
@@ -32,6 +37,15 @@ jobs:
             echo "needs_update=true" >> "$GITHUB_OUTPUT"
           else
             echo "needs_update=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Determine if this is a major version bump
+          LOCAL_MAJOR=$(echo "$LOCAL_VERSION" | cut -d. -f1)
+          UPSTREAM_MAJOR=$(echo "$UPSTREAM_VERSION" | cut -d. -f1)
+          if [ "$LOCAL_MAJOR" != "$UPSTREAM_MAJOR" ]; then
+            echo "is_major=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_major=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Update gstack
@@ -105,6 +119,24 @@ jobs:
             echo "- [ ] Verify skill names haven't changed"
             echo "- [ ] Rebuild browser binary and normalize symlinks after merge"
           } > /tmp/pr-body.md
-          gh pr create \
+          PR_URL=$(gh pr create \
             --title "Update gstack to ${UPSTREAM_VER}" \
-            --body-file /tmp/pr-body.md
+            --body-file /tmp/pr-body.md)
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Auto-merge non-breaking upgrade
+        if: >-
+          steps.check.outputs.needs_update == 'true' &&
+          steps.check.outputs.is_major == 'false' &&
+          github.event_name != 'push' &&
+          (github.event_name != 'workflow_dispatch' || inputs.skip_auto_merge != true)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPSTREAM_VER: ${{ steps.check.outputs.upstream }}
+        run: |
+          BRANCH="chore/update-gstack-${UPSTREAM_VER}"
+          PR_NUMBER=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number')
+          if [ -n "$PR_NUMBER" ]; then
+            echo "Auto-merging non-breaking gstack upgrade PR #${PR_NUMBER}..."
+            gh pr merge "$PR_NUMBER" --auto --merge --delete-branch
+          fi
