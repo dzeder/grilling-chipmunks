@@ -2392,7 +2392,32 @@ gh pr view --json url,number,state -q 'if .state == "OPEN" then "PR #\(.number):
 glab mr view -F json 2>/dev/null | jq -r 'if .state == "opened" then "MR_EXISTS" else "NO_MR" end' 2>/dev/null || echo "NO_MR"
 ```
 
-If an **open** PR/MR already exists: **update** the PR body using `gh pr edit --body "..."` (GitHub) or `glab mr update -d "..."` (GitLab). Always regenerate the PR body from scratch using this run's fresh results (test output, coverage audit, review findings, adversarial review, TODOS summary). Never reuse stale PR body content from a prior run. Print the existing URL and continue to Step 8.5.
+**Telemetry harvest (before building PR body) — DO NOT SKIP:**
+
+Run the harvest script to collect diff stats and gstack timeline data:
+```bash
+TELEMETRY_JSON=$(bash scripts/pr-telemetry-harvest.sh --json 2>/dev/null || echo '{}')
+echo "$TELEMETRY_JSON"
+```
+
+Extract values from the JSON output to populate the AI Telemetry table:
+- `diff.files_changed`, `diff.files_added`, `diff.files_deleted` → Files Changed / Added / Deleted
+- `diff.lines_added`, `diff.lines_deleted` → Lines Added / Deleted
+- `skills_used` → Skills Used
+- `timing.ai_actual_min` → AI Actual (min)
+
+If the harvest script fails or returns empty data, fall back to the diff stats from Step 1.
+
+For the remaining fields:
+- **Human Estimate (hrs):** Estimate based on diff complexity. Small fix (<50 lines) = 1-2 hrs. Medium feature (50-200 lines) = 3-6 hrs. Large feature (200+ lines) = 8-16 hrs. Write "N/A" only if you truly cannot estimate.
+- **Tokens Used / Est. Cost ($):** Write "N/A" (not reliably available).
+- **Time Saved (%):** If both Human Estimate and AI Actual are available, compute `(1 - ai_actual_hrs / human_estimate_hrs) * 100`. Otherwise "N/A".
+- **Suggested Improvements:** One sentence on what could have been more efficient.
+- **Suggested Skills/Agents:** One sentence on tools that could have helped.
+
+Use all of the above to populate the `## AI Telemetry` section in the PR body below. **Every field must have a value — use "N/A" for unavailable data, never leave cells empty.**
+
+If an **open** PR/MR already exists: **update** the PR body using `gh pr edit --body "..."` (GitHub) or `glab mr update -d "..."` (GitLab). Always regenerate the PR body from scratch using this run's fresh results (test output, coverage audit, review findings, adversarial review, TODOS summary, telemetry). Never reuse stale PR body content from a prior run. Print the existing URL and continue to Step 8.5.
 
 If no PR/MR exists: create a pull request (GitHub) or merge request (GitLab) using the platform detected in Step 0.
 
@@ -2446,6 +2471,20 @@ you missed it.>
 <If TODOS.md created or reorganized: note that>
 <If TODOS.md doesn't exist and user skipped: omit this section>
 
+## AI Telemetry
+| Metric | Value |
+|--------|-------|
+| Human Estimate (hrs) | <from AskUserQuestion — see Step 8 telemetry harvest below> |
+| AI Actual (min) | <total skill duration from timeline harvest> |
+| Files Changed / Added / Deleted | <from git diff --shortstat and --diff-filter> |
+| Lines Added / Deleted | <+insertions / -deletions from git diff --shortstat> |
+| Skills Used | <unique skill names from timeline harvest> |
+| Agents Used | <if known from conversation context, otherwise "N/A"> |
+| Tokens Used | <if known, otherwise "N/A"> |
+| Time Saved (%) | <computed: (1 - ai_actual_hrs / human_estimate_hrs) * 100> |
+| Suggested Improvements | <brief AI analysis: what could have been done more efficiently> |
+| Suggested Skills/Agents | <skills/agents that could have helped but weren't used> |
+
 ## Test plan
 - [x] All Rails tests pass (N runs, 0 failures)
 - [x] All Vitest tests pass (N tests)
@@ -2474,7 +2513,17 @@ EOF
 **If neither CLI is available:**
 Print the branch name, remote URL, and instruct the user to create the PR/MR manually via the web UI. Do not stop — the code is pushed and ready.
 
-**Output the PR/MR URL** — then proceed to Step 8.5.
+**Output the PR/MR URL.**
+
+**Post-PR telemetry injection (safety net):**
+
+After creating or updating the PR, run the injection script to fill any telemetry fields
+that were missed or left empty in the PR body:
+```bash
+bash scripts/pr-telemetry-inject.sh 2>/dev/null || true
+```
+This fills empty fields using locally available gstack timeline data. Safe to run multiple
+times — only fills empty fields, never overwrites. Proceed to Step 8.5.
 
 ---
 

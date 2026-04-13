@@ -529,47 +529,30 @@ gh pr view --json url,number,state -q 'if .state == "OPEN" then "PR #\(.number):
 glab mr view -F json 2>/dev/null | jq -r 'if .state == "opened" then "MR_EXISTS" else "NO_MR" end' 2>/dev/null || echo "NO_MR"
 ```
 
-**Telemetry harvest (before building PR body):**
+**Telemetry harvest (before building PR body) — DO NOT SKIP:**
 
-1. Compute diff stats for the telemetry section:
+Run the harvest script to collect diff stats and gstack timeline data:
 ```bash
-BASE_BRANCH="<base>"  # detected in Step 0
-SHORTSTAT=$(git diff --shortstat "origin/${BASE_BRANCH}...HEAD")
-FILES_CHANGED=$(echo "$SHORTSTAT" | grep -oE '[0-9]+ file' | grep -oE '[0-9]+' || echo "0")
-INSERTIONS=$(echo "$SHORTSTAT" | grep -oE '[0-9]+ insertion' | grep -oE '[0-9]+' || echo "0")
-DELETIONS=$(echo "$SHORTSTAT" | grep -oE '[0-9]+ deletion' | grep -oE '[0-9]+' || echo "0")
-FILES_ADDED=$(git diff --diff-filter=A --name-only "origin/${BASE_BRANCH}...HEAD" | wc -l | tr -d ' ')
-FILES_DELETED=$(git diff --diff-filter=D --name-only "origin/${BASE_BRANCH}...HEAD" | wc -l | tr -d ' ')
-echo "Files: $FILES_CHANGED changed (+$FILES_ADDED added, -$FILES_DELETED deleted)"
-echo "Lines: +$INSERTIONS / -$DELETIONS"
+TELEMETRY_JSON=$(bash scripts/pr-telemetry-harvest.sh --json 2>/dev/null || echo '{}')
+echo "$TELEMETRY_JSON"
 ```
 
-2. Harvest gstack timeline for this branch:
-```bash
-eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)"
-BRANCH_RAW=$(git rev-parse --abbrev-ref HEAD)
-TIMELINE="$HOME/.gstack/projects/$SLUG/timeline.jsonl"
-if [ -f "$TIMELINE" ]; then
-  COMPLETED=$(grep "\"branch\":\"${BRANCH_RAW}\"" "$TIMELINE" | grep '"event":"completed"')
-  SKILLS=$(echo "$COMPLETED" | grep -o '"skill":"[^"]*"' | sed 's/"skill":"//;s/"//' | sort -u | tr '\n' ', ' | sed 's/,$//')
-  DURATION=$(echo "$COMPLETED" | grep -o '"duration_s":[0-9.]*' | sed 's/"duration_s"://' | awk '{sum+=$1} END {printf "%.0f", sum}')
-  echo "Skills: $SKILLS"
-  echo "Duration: $((DURATION / 60)) min"
-fi
-```
+Extract values from the JSON output to populate the AI Telemetry table:
+- `diff.files_changed`, `diff.files_added`, `diff.files_deleted` → Files Changed / Added / Deleted
+- `diff.lines_added`, `diff.lines_deleted` → Lines Added / Deleted
+- `skills_used` → Skills Used
+- `timing.ai_actual_min` → AI Actual (min)
 
-3. Ask the user for the human estimate (quick multiple-choice via AskUserQuestion):
-```
-How long would this work have taken a human developer?
-A) < 1 hour    B) 1-2 hours    C) 2-4 hours
-D) 4-8 hours   E) 1-2 days     F) 3-5 days    G) 1+ week
-```
-Map answers to midpoints: A=0.5, B=1.5, C=3, D=6, E=12, F=28, G=60 hours.
-Compute Time Saved: `(1 - ai_actual_hrs / human_estimate_hrs) * 100`%.
+If the harvest script fails or returns empty data, fall back to the diff stats from Step 1.
 
-4. Based on the diff context, briefly note: (a) suggested improvements for efficiency, (b) skills/agents that could have helped. Keep each to one sentence.
+For the remaining fields:
+- **Human Estimate (hrs):** Estimate based on diff complexity. Small fix (<50 lines) = 1-2 hrs. Medium feature (50-200 lines) = 3-6 hrs. Large feature (200+ lines) = 8-16 hrs. Write "N/A" only if you truly cannot estimate.
+- **Tokens Used / Est. Cost ($):** Write "N/A" (not reliably available).
+- **Time Saved (%):** If both Human Estimate and AI Actual are available, compute `(1 - ai_actual_hrs / human_estimate_hrs) * 100`. Otherwise "N/A".
+- **Suggested Improvements:** One sentence on what could have been more efficient.
+- **Suggested Skills/Agents:** One sentence on tools that could have helped.
 
-Use all of the above to populate the `## AI Telemetry` section in the PR body below.
+Use all of the above to populate the `## AI Telemetry` section in the PR body below. **Every field must have a value — use "N/A" for unavailable data, never leave cells empty.**
 
 If an **open** PR/MR already exists: **update** the PR body using `gh pr edit --body "..."` (GitHub) or `glab mr update -d "..."` (GitLab). Always regenerate the PR body from scratch using this run's fresh results (test output, coverage audit, review findings, adversarial review, TODOS summary, telemetry). Never reuse stale PR body content from a prior run. Print the existing URL and continue to Step 8.5.
 
@@ -667,7 +650,17 @@ EOF
 **If neither CLI is available:**
 Print the branch name, remote URL, and instruct the user to create the PR/MR manually via the web UI. Do not stop — the code is pushed and ready.
 
-**Output the PR/MR URL** — then proceed to Step 8.5.
+**Output the PR/MR URL.**
+
+**Post-PR telemetry injection (safety net):**
+
+After creating or updating the PR, run the injection script to fill any telemetry fields
+that were missed or left empty in the PR body:
+```bash
+bash scripts/pr-telemetry-inject.sh 2>/dev/null || true
+```
+This fills empty fields using locally available gstack timeline data. Safe to run multiple
+times — only fills empty fields, never overwrites. Proceed to Step 8.5.
 
 ---
 

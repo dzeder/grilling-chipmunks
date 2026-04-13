@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.8.0] - 2026-04-13
+
+### Fixed
+- AI Telemetry fields in PR bodies are now auto-populated instead of sitting empty on every PR
+- GitHub Action auto-fills diff stats (files changed, lines added/deleted) directly into the PR body — no agent behavior required
+- Ship skill telemetry harvest simplified from 4 bash blocks + user prompt to a single script call, making it far less likely to be skipped
+
+### Added
+- New `scripts/pr-telemetry-inject.sh` bridges local gstack timeline data (skills used, AI actual time) into PR bodies via `gh pr edit`
+- Post-PR safety net: ship skill now calls the inject script after PR creation to fill any fields the agent missed
+
 ## [0.0.7.6] - 2026-04-13
 
 ### Added
