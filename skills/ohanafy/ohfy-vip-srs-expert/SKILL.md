@@ -51,6 +51,58 @@ for all 22 VIP file types at a glance.
 - **Sales transaction types** (retail, breakage, credit, sample, transfer)
 - **Data quality:** Non-reporters, zero sales records, control/balancing files
 
+## Learned From
+
+### Account/Contact Trigger Cascade (ROS2, 2026-04-13)
+- `AccountTriggerMethods` class missing in managed package blocks ALL Account updates AND all Contact inserts
+- Contact insert → ContactTrigger AfterInsert → Account update → AccountTriggerMethods → failure
+- Workaround: purge before loading (inserts work, updates don't); Contacts have NO workaround
+- See: `customers/shipyard/known-issues.md`
+
+### Item Prerequisite Chain for Depletions (ROS2, 2026-04-10)
+- Depletion__c.Item__c has a non-optional lookup filter requiring ALL 5:
+  1. Item has `Finished_Good` record type
+  2. `ohfy__Type__c = 'Finished Good'`
+  3. `ohfy__UOM__c` set (e.g., 'US Count')
+  4. `ohfy__Packaging_Type__c` set (dependent picklist, e.g., 'Each')
+  5. `ohfy__Transformation_Setting__c` record linking Packaging_Type → Volume UOM
+- Missing ANY prerequisite → `FIELD_FILTER_VALIDATION_EXCEPTION` on all depletions
+- Script 02 sets prerequisites 1-4; Transformation_Setting__c must exist in org
+
+### Stock_UOM_Sub_Type__c Validation (ROS2, 2026-04-13)
+- Managed validation rule requires `ohfy__Stock_UOM_Sub_Type__c` when `ohfy__Packaging_Type__c` is set on Finished Goods
+- Script 04 (ITMDA enrichment) hits this; Script 02 (ITM2DA) does not
+
+### Placement__c is the Correct Object (ROS2, 2026-04-10)
+- Use `ohfy__Placement__c` (managed, 59+ fields) for Account x Item aggregation
+- NOT `Distributor_Placement__c` (stale reference in older docs)
+- NOT `Account_Item__c` (exists in source-index but 0 deployed fields)
+- Master-detail fields (Account__c, Item__c) are create-only — set via `__r` relationship syntax
+
+### VIP Data is Depletions, Not Invoices (2026-04-10)
+- VIP SLSDA = distributor→retailer depletions → `Depletion__c` + `Placement__c`
+- Invoice__c is for supplier→distributor billing — different data source, NOT from VIP files
+
+### Supplier vs Distributor Perspective (2026-04-10)
+- Account mappings depend on customer role in supply chain
+- Supplier (e.g., ROS): Distributors = Customers (RT: Customer), Retailers = Distributed Customers
+- ClassOfTrade 06/07/50 = Distributors; all others = Retailers
+
+## Operational Context
+
+### Data Load Procedure
+1. Verify org connection: `sf org display --target-org <alias>`
+2. Purge existing data: `bash purge-vip-data.sh --dist-id <ID> --include-references --execute`
+3. Verify Transformation_Setting__c exists (required for depletions)
+4. Run pipeline: `node e2e-sandbox-runner.js --dist-id <ID> --file-date <YYYY-MM-DD>`
+5. Verify: SOQL count queries for all 14 object types
+
+### Key Config
+- E2E runner: `integrations/vip-srs/scripts/e2e-sandbox-runner.js`
+- Customer config: `integrations/vip-srs/config/shipyard.json`
+- Purge utility: `integrations/vip-srs/scripts/purge-vip-data.sh`
+- Test fixtures: `integrations/vip-srs/tests/fixtures/`
+
 ## Related Skills
 
 - **ohfy-core-expert** — Salesforce objects (Account, Product2, Depletion__c, Placement__c, etc.)

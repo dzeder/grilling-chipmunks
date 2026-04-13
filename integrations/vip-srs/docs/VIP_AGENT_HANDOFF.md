@@ -303,9 +303,9 @@ VIP delivers 9 gzipped CSV files per business day. Filename format: `{TYPE}.N{YY
 | 5 | Item_Line__c | -- | ITM2DA | Brand groupings |
 | 6 | Item_Type__c | -- | ITM2DA | Product categories |
 | 7 | Location__c | Warehouse | DISTDA | Distributor warehouse(s) |
-| 8 | Invoice__c | -- | SLSDA | Invoice headers |
-| 9 | Invoice_Item__c | -- | SLSDA | Invoice line items |
-| 10 | Distributor_Placement__c | -- | SLSDA | Depletion/sell-through records |
+| 8 | Depletion__c | -- | SLSDA | Per-transaction depletion records (distributor→retailer sales) |
+| 9 | Placement__c | -- | SLSDA | Account x Item aggregation (one per Account+Item) |
+| 10 | ~~Distributor_Placement__c~~ | -- | -- | **STALE** — replaced by Depletion__c (#8) + Placement__c (#9). See Section 5.6. |
 | 11 | Inventory__c | -- | INVDA | Current stock levels |
 | 12 | Inventory_History__c | -- | INVDA | Daily inventory snapshots |
 | 13 | Inventory_Adjustment__c | -- | INVDA | Inventory movements |
@@ -479,7 +479,7 @@ Only created when Buyer field is non-blank.
 
 ---
 
-### 5.6 SLSDA -> Invoice__c + Invoice_Item__c + Distributor_Placement__c
+### 5.6 SLSDA -> Depletion__c + Placement__c (was: Invoice__c + Distributor_Placement__c)
 
 #### Pre-filter
 
@@ -667,7 +667,8 @@ Keys use only **immutable business identifiers**. No quantities, prices, or name
 | Inventory_History__c | `VIP_External_ID__c` | **New** |
 | Inventory_Adjustment__c | `VIP_External_ID__c` | **New** |
 | Allocation__c | `VIP_External_ID__c` | **New** |
-| Distributor_Placement__c | `Integration_ID__c` | Yes |
+| Depletion__c | `VIP_External_ID__c` | **New** |
+| Placement__c | `VIP_External_ID__c` | **New** (was: Distributor_Placement__c / Integration_ID__c) |
 
 ---
 
@@ -816,9 +817,9 @@ Phase 3: Inventory (depends on Phases 1 + 2)
   3d. CLEANUP stale inventory records
 
 Phase 4: Transactions (depends on Phases 1 + 2)
-  4a. SLSDA     -> Invoice__c (headers)
-  4b. SLSDA     -> Invoice_Item__c (line items)
-  4c. SLSDA     -> Distributor_Placement__c (depletions)
+  4a. SLSDA     -> Depletion__c (per-transaction depletions)
+  4b. SLSDA     -> Placement__c (Account x Item aggregation)
+  4c. (was: Distributor_Placement__c — now split into 4a + 4b)
   4d. CTLDA     -> Allocation__c
   4e. CLEANUP stale sales/allocation records
 ```
@@ -889,9 +890,8 @@ WHERE Invoice_Number__c LIKE 'INV:{DistId}:%'
 
 | Object | Cleanup? | Reason |
 |--------|----------|--------|
-| Invoice_Item__c | Yes | Voided invoices disappear from next file |
-| Invoice__c | Yes | Orphaned headers after line item cleanup |
-| Distributor_Placement__c | Yes | Same as Invoice_Item |
+| Depletion__c | Yes | Depletions from previous file date replaced |
+| Placement__c | Yes | Stale placements from previous file date |
 | Inventory_History__c | Yes | Snapshot replaced by newer file |
 | Inventory_Adjustment__c | Yes | Corrections replace previous |
 | Allocation__c | Yes | Allocation changes replace previous |
@@ -921,7 +921,7 @@ WHERE Invoice_Number__c LIKE 'INV:{DistId}:%'
 
 | Field | Type | Added To |
 |-------|------|----------|
-| `VIP_File_Date__c` | Date | Invoice__c, Invoice_Item__c, Distributor_Placement__c, Inventory_History__c, Inventory_Adjustment__c, Allocation__c |
+| `VIP_File_Date__c` | Date | Depletion__c, Placement__c, Inventory_History__c, Inventory_Adjustment__c, Allocation__c |
 | `VIP_From_Date__c` | Date | Same as above |
 | `VIP_To_Date__c` | Date | Same as above |
 
