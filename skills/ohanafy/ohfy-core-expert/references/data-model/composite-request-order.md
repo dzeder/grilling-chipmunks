@@ -57,8 +57,8 @@ WRONG:
 
 ```
 1. Account (Customer) - PATCH via External_ID__c
-2. Item_Line__c (Brand) - PATCH via Mapping_Key__c
-3. Item_Type__c (Category) - PATCH via Mapping_Key__c
+2. Item_Line__c (Brand) - PATCH via Mapping_Key__c or VIP_External_ID__c
+3. Item_Type__c (Category) - PATCH via Mapping_Key__c or VIP_External_ID__c
 4. Item__c (Product) - PATCH via External_ID__c
 5. Order__c (Invoice) - PATCH via External_ID__c, reference Account
 6. Order_Item__c (Line Item) - PATCH via External_ID__c, reference Order__c and Item__c

@@ -25,6 +25,26 @@ var NS = SF_CONFIG.namespacePrefix + '__';
 
 var CLEANUP_TARGETS = [
   {
+    sobject: NS + 'Item_Line__c',
+    externalIdField: 'VIP_External_ID__c',
+    prefix: 'ILN',
+    fileDateField: 'VIP_File_Date__c',
+    fromDateField: null,
+    toDateField: null,
+    // Reference data — global to the org, not per-distributor
+    perDistributor: false
+  },
+  {
+    sobject: NS + 'Item_Type__c',
+    externalIdField: 'VIP_External_ID__c',
+    prefix: 'ITY',
+    fileDateField: 'VIP_File_Date__c',
+    fromDateField: null,
+    toDateField: null,
+    // Reference data — global to the org, not per-distributor
+    perDistributor: false
+  },
+  {
     sobject: NS + 'Depletion__c',
     externalIdField: 'VIP_External_ID__c',
     prefix: 'DEP',
@@ -79,7 +99,12 @@ function buildStaleQuery(target, distId, currentFileDate, fromDate, toDate) {
     sql += ' AND ' + target.fromDateField + ' >= ' + fromDate +
       ' AND ' + target.toDateField + ' <= ' + toDate;
   }
-  sql += " AND " + target.externalIdField + " LIKE '" + target.prefix + ':' + distId + ":%'";
+  // Global reference data (Item_Line, Item_Type) — filter by prefix only, not per-distributor
+  if (target.perDistributor === false) {
+    sql += " AND " + target.externalIdField + " LIKE '" + target.prefix + ":%'";
+  } else {
+    sql += " AND " + target.externalIdField + " LIKE '" + target.prefix + ':' + distId + ":%'";
+  }
   return sql;
 }
 
@@ -90,7 +115,11 @@ function buildCountQuery(target, distId, currentFileDate, fromDate, toDate) {
     sql += ' AND ' + target.fromDateField + ' >= ' + fromDate +
       ' AND ' + target.toDateField + ' <= ' + toDate;
   }
-  sql += " AND " + target.externalIdField + " LIKE '" + target.prefix + ':' + distId + ":%'";
+  if (target.perDistributor === false) {
+    sql += " AND " + target.externalIdField + " LIKE '" + target.prefix + ":%'";
+  } else {
+    sql += " AND " + target.externalIdField + " LIKE '" + target.prefix + ':' + distId + ":%'";
+  }
   return sql;
 }
 

@@ -120,6 +120,22 @@ function allocationKey(distId, supplierItem, controlDate, uom) {
 }
 
 /**
+ * Item_Line__c: ILN:{BrandDesc}
+ * @param {string} name - Brand description (BrandDesc from ITM2DA)
+ */
+function itemLineKey(name) {
+  return PREFIX.ITEM_LINE + ':' + name;
+}
+
+/**
+ * Item_Type__c: ITY:{GenericCat3}
+ * @param {string} name - Category name (GenericCat3 from ITM2DA)
+ */
+function itemTypeKey(name) {
+  return PREFIX.ITEM_TYPE + ':' + name;
+}
+
+/**
  * Placement__c: PLC:{DistId}:{AcctNbr}:{SuppItem}
  * One per Account×Item pair — aggregated from SLSDA invoice lines.
  * @param {string} distId - Distributor code
@@ -140,6 +156,8 @@ if (typeof module !== 'undefined' && module.exports) {
     accountKey: accountKey,
     contactKey: contactKey,
     itemKey: itemKey,
+    itemLineKey: itemLineKey,
+    itemTypeKey: itemTypeKey,
     locationKey: locationKey,
     invoiceKey: invoiceKey,
     invoiceLineKey: invoiceLineKey,

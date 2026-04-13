@@ -103,6 +103,15 @@
 - [x] Script 09 (cleanup): Added `countQuery` (SELECT COUNT()) per target for sanity check — Tray workflow should compare stale count vs upsert count before deleting; if stale > upserted, skip delete (possible truncated/partial file)
 - [x] **Key decision documented:** Invoice__c/Invoice_Item__c is NOT built from VIP data. VIP SLSDA = distributor→retailer depletions (Depletion__c + Placement__c). Invoice objects are for supplier→distributor invoicing — a separate data source entirely.
 
+### Phase 5e: Item_Line / Item_Type Duplicate Fix (2026-04-13)
+- [x] Root cause: Script 02 used Name-only creates with no external ID — re-runs without Tray lookup maps created duplicates
+- [x] Added `VIP_External_ID__c` (Text 255, unique, external ID) + `VIP_File_Date__c` (Date) to both `Item_Line__c` and `Item_Type__c`
+- [x] External ID formats: `ILN:{BrandDesc}` for Item_Line, `ITY:{GenericCat3}` for Item_Type
+- [x] Script 02: replaced Name-only create with Composite API PATCH upsert by external ID (same pattern as Item__c)
+- [x] Script 09: added Item_Line__c and Item_Type__c to cleanup targets with `perDistributor: false` flag (global reference data, not scoped by distributor)
+- [x] Updated permset + Admin profile FLS for 4 new fields
+- [x] Added `ITEM_LINE: 'ILN'` and `ITEM_TYPE: 'ITY'` prefixes to shared/constants.js + external-ids.js
+
 ## Next Up
 
 ### Phase 6: Tray.io Project Build
@@ -161,4 +170,5 @@
 12. **SRSCHAIN records are chain banners** even if names seem small (e.g., "Horizon Market"). They're parent accounts that OUTDA outlets link to via `Chain_Banner__r`. The detail (address, market, etc.) lives on the outlets, not the chains.
 13. **AccountSource 'VIP SRS' not in picklist:** The field is not restricted so the API accepts it, but the value won't appear in picklist dropdowns until added via Setup.
 14. **Item lookup filter chain on Depletion__c.Item__c:** The lookup filter (`optionalFilter: false`) requires the Item to have: (a) Finished Good record type, (b) `Type__c = 'Finished Good'`, (c) `UOM__c` set (e.g., 'US Count'), (d) `Packaging_Type__c` set (dependent on UOM, e.g., 'Each'), and (e) a `Transformation_Setting__c` record linking the Packaging_Type to a Volume UOM (e.g., Each → Fluid Ounce(s)). Missing any of these causes `FIELD_FILTER_VALIDATION_EXCEPTION`. Script 02 must ensure items meet all prerequisites before depletions can load.
-15. **Placement__c master-detail fields are create-only:** `ohfy__Account__c` and `ohfy__Item__c` are master-detail and can only be set on initial create (updateable=false). Use `__r` relationship syntax in Composite API body. On subsequent upserts, the API silently ignores these fields — the record stays parented to the original Account×Item.
+15. **Item_Line__c and Item_Type__c need external IDs for upsert:** These lookup objects use `VIP_External_ID__c` with formats `ILN:{BrandDesc}` and `ITY:{GenericCat3}`. Without external IDs, re-running Script 02 creates duplicates. The Tray workflow should still pre-query and pass `existingItemLines`/`existingItemTypes` maps for efficiency, but the upsert provides a safety net.
+16. **Placement__c master-detail fields are create-only:** `ohfy__Account__c` and `ohfy__Item__c` are master-detail and can only be set on initial create (updateable=false). Use `__r` relationship syntax in Composite API body. On subsequent upserts, the API silently ignores these fields — the record stays parented to the original Account×Item.

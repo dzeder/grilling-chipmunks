@@ -148,23 +148,28 @@ try {
 **API Name**: `ohfy__Item_Line__c`
 
 **Key External IDs**:
-- `Mapping_Key__c` - Legacy mapping identifier
+- `Mapping_Key__c` - General mapping identifier (ecommerce, GP Analytics)
+- `VIP_External_ID__c` - VIP SRS external ID (format: `ILN:{BrandDesc}`)
 
 **Critical Fields**:
 - `Name` - Brand/line name
 - `Active__c` - Boolean
 - `Vendor__c` - Vendor (lookup)
+- `VIP_File_Date__c` - Date of VIP pipeline run (for stale cleanup)
 
 **Integration Pattern**:
 ```javascript
-// Upsert via Mapping_Key__c
+// Upsert via Mapping_Key__c (general)
 {
     "method": "PATCH",
     "url": "/services/data/v62.0/sobjects/ohfy__Item_Line__c/ohfy__Mapping_Key__c/brand_abc",
-    "body": {
-        "Name": "ABC Brewery",
-        "ohfy__Active__c": true
-    }
+    "body": { "Name": "ABC Brewery", "ohfy__Active__c": true }
+}
+// Upsert via VIP_External_ID__c (VIP SRS)
+{
+    "method": "PATCH",
+    "url": "/services/data/v62.0/sobjects/ohfy__Item_Line__c/VIP_External_ID__c/ILN:Original%20Vodka",
+    "body": { "Name": "Original Vodka", "VIP_File_Date__c": "2026-04-13" }
 }
 ```
 
@@ -177,22 +182,27 @@ try {
 **API Name**: `ohfy__Item_Type__c`
 
 **Key External IDs**:
-- `Mapping_Key__c` - Legacy mapping identifier
+- `Mapping_Key__c` - General mapping identifier (ecommerce, GP Analytics)
+- `VIP_External_ID__c` - VIP SRS external ID (format: `ITY:{GenericCat3}`)
 
 **Critical Fields**:
 - `Name` - Type/category name
 - `Active__c` - Boolean
+- `VIP_File_Date__c` - Date of VIP pipeline run (for stale cleanup)
 
 **Integration Pattern**:
 ```javascript
-// Upsert via Mapping_Key__c
+// Upsert via Mapping_Key__c (general)
 {
     "method": "PATCH",
     "url": "/services/data/v62.0/sobjects/ohfy__Item_Type__c/ohfy__Mapping_Key__c/type_lager",
-    "body": {
-        "Name": "Lager",
-        "ohfy__Active__c": true
-    }
+    "body": { "Name": "Lager", "ohfy__Active__c": true }
+}
+// Upsert via VIP_External_ID__c (VIP SRS)
+{
+    "method": "PATCH",
+    "url": "/services/data/v62.0/sobjects/ohfy__Item_Type__c/VIP_External_ID__c/ITY:Vodka",
+    "body": { "Name": "Vodka", "VIP_File_Date__c": "2026-04-13" }
 }
 ```
 

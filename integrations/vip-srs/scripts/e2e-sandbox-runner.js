@@ -254,19 +254,13 @@ var PIPELINE = [
     script: '02-itm2da-items.js',
     fixture: 'itm2da-sample.csv',
     run: function(result) {
-      // Create Item_Lines first
-      if (result.newItemLines && result.newItemLines.length > 0) {
-        console.log('  Creating ' + result.newItemLines.length + ' Item Lines...');
-        result.newItemLines.forEach(function(il) {
-          createRecordByName('ohfy__Item_Line__c', il.Name);
-        });
+      // Upsert Item_Lines by external ID (ILN:{BrandDesc})
+      if (result.itemLineBatches && result.itemLineBatches.length > 0) {
+        sendBatches(result.itemLineBatches, 'Item Lines');
       }
-      // Create Item_Types
-      if (result.newItemTypes && result.newItemTypes.length > 0) {
-        console.log('  Creating ' + result.newItemTypes.length + ' Item Types...');
-        result.newItemTypes.forEach(function(it) {
-          createRecordByName('ohfy__Item_Type__c', it.Name);
-        });
+      // Upsert Item_Types by external ID (ITY:{GenericCat3})
+      if (result.itemTypeBatches && result.itemTypeBatches.length > 0) {
+        sendBatches(result.itemTypeBatches, 'Item Types');
       }
       // Upsert Items
       return sendBatches(result.batches, 'Items');

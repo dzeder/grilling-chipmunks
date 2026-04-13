@@ -82,6 +82,8 @@ Keys use only immutable business identifiers. Colon-delimited, prefixed, determi
 | Account (Outlet) | ACT | `ACT:FL01:00015` |
 | Contact | CON | `CON:FL01:00015` |
 | Item__c | ITM | `ITM:102312102` |
+| Item_Line__c | ILN | `ILN:Original Vodka` |
+| Item_Type__c | ITY | `ITY:Vodka` |
 | Location__c | LOC | `LOC:FL01` |
 | Depletion__c | DEP | `DEP:FL01:0699528:21159:102312102:C` |
 | Inventory__c | IVT | `IVT:FL01:102312102` |
