@@ -1,3 +1,4 @@
 date,pr_number,branch,description,type,human_estimate_hrs,ai_actual_min,tokens_used,est_cost_usd,time_saved_pct,files_changed,files_added,files_deleted,lines_added,lines_deleted,skills_used,agents_used
 2026-04-08,51,dzeder/tray-project-skill,feat(tray): Draft Order Item Cleanup project + tray-project skill,feat,6,45,120000,12,87.5,,,,,,tray-project-builder,
 2026-04-13,105,dzeder/pr-telemetry,feat(ci): PR telemetry dashboard and automated metrics,feat,4,20,,,92,0,0,0,0,0,ship,Explore (x2); Plan (x1)
+2026-04-13,106,dzeder/fix-item-line-type,fix(vip-srs): wire Item_Line/Item_Type lookups and collapse 99Z placeholders,fix,,,,,,0,0,0,0,0,,
