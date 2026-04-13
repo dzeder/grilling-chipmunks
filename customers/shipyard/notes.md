@@ -4,6 +4,21 @@ Running notes from debugging sessions, design decisions, and gotchas.
 
 <!-- Add entries with dates. Most recent first. -->
 
+## 2026-04-13 — CSO Requirements: Sales Rep Tracking & Commission System
+
+Email from ROS chief sales officer outlining core requirements for a rep tracking and commission system built on VIP data.
+
+- **Rep territory management:** Reps assigned by geography (counties and zip codes). New placements and ongoing monthly sales tracked within those defined territories.
+- **New placement detection:** Identify new points of distribution (accounts that did not exist before a defined timeline), classify as new sellers, and assign to the appropriate rep.
+- **Data source:** Reps do not place orders — distributors handle all ordering and fulfillment. All sales data originates from distributor activity accessed through VIP SRS. This is the sole data source for tracking and reporting.
+- **Commission reporting:** Must support flexible commission structures:
+  - Case volume-based (set case targets)
+  - Revenue per case based on distributor FOB pricing (not retail)
+- **Sales opportunity alerts:**
+  - Cross-sell: identify accounts that bought one product but not another (e.g., bought Shipyard but not Ice Pik)
+  - Reorder alerts: flag accounts that purchase but do not reorder within a 60-day window
+- **Takeaway:** This maps directly to Placement__c (new distribution tracking), Depletion__c (monthly sales by rep territory), and a new rep/territory assignment model. Commission structures imply a custom object or flexible metadata. The 60-day reorder alert is a time-based flow or scheduled job against Placement__c.Last_Purchase_Date__c.
+
 ## 2026-04-10 — Depletions, Placements, and File Date Logic (evening session)
 
 - Loaded curated 25-row SLSDA fixture with all supporting data (accounts, chains, items, transformation settings)
