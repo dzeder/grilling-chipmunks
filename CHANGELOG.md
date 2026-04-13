@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.7.3] - 2026-04-13
+
+### Added
+- Shipyard (ROS) CSO requirements captured in customer notes: sales rep territory tracking, new placement detection, flexible commission structures, and cross-sell/reorder alerts — all sourced from VIP SRS data
+
 ## [0.0.7.2] - 2026-04-10
 
 ### Added
