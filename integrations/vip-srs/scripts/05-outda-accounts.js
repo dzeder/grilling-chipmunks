@@ -349,7 +349,7 @@ exports.step = function(input) {
         var body = {
           FirstName: record.FirstName,
           LastName: record.LastName,
-          Is_Billing_Contact__c: record.Is_Billing_Contact__c
+          ohfy__Is_Billing_Contact__c: record.ohfy__Is_Billing_Contact__c
         };
         // Link to parent account via external ID relationship
         body.Account = { ohfy__External_ID__c: record._parentAccountKey };

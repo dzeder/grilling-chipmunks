@@ -32,6 +32,7 @@ exports.step = function(input) {
     { name: '06-invda-history', label: 'Inventory History', key: 'history' },
     { name: '06-invda-adjustments', label: 'Inventory Adjustments', key: 'adjustments' },
     { name: '07-slsda-depletions', label: 'Depletions', key: 'depletions' },
+    { name: '07b-slsda-placements', label: 'Placements', key: 'placements' },
     { name: '08-ctlda', label: 'Allocations', key: 'allocations' },
     { name: '09-cleanup', label: 'Stale Cleanup', key: 'cleanup' }
   ];
