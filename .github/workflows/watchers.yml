@@ -1,11 +1,9 @@
-# Trigger: cron "0 8 * * MON"
 # Jobs: scan all repos in repos.yaml, post digest to Slack
+# TODO: Re-enable cron schedule once agents/watchers/agent.py and requirements.txt exist (see #89)
 
 name: Repo Watchers
 
 on:
-  schedule:
-    - cron: '0 8 * * MON'
   workflow_dispatch:
 
 jobs:
