@@ -35,6 +35,16 @@ Running log of known issues, workarounds, and resolutions for this customer.
 - **Workaround:** AccountSource is not a restricted picklist, so the API accepts 'VIP SRS' as a value. However, it won't appear in picklist dropdowns until added.
 - **Description:** The VIP SRS integration sets `AccountSource = 'VIP SRS'` for traceability. The value doesn't exist in the org's picklist. Recommended: add 'VIP SRS' to the AccountSource picklist values via Setup > Object Manager > Account > Fields > Account Source.
 
+### ~~Inventory "Duplicate Record Blocked" validation rule (ROS2)~~ RESOLVED
+- **Severity:** High
+- **Resolved:** 2026-04-13
+- **Fix:** Three-layer pre-query pattern implemented in `e2e-sandbox-runner.js` + `06-invda-inventory.js`:
+  1. **Lazy pre-query:** Runs after Phase 1 (not at startup) so Items have VIP_External_ID__c stamped. Queries existing Inventory by Item/Location relationships, builds VIP key → SF record ID map.
+  2. **Batch-stamp:** PATCHes VIP_External_ID__c on ALL 264 existing Inventory records so History/Adjustment children can reference any of them by external ID.
+  3. **Master-detail strip:** When PATCHing existing records by SF ID, removes `ohfy__Item__r` and `ohfy__Location__r` from body (master-detail, read-only on update).
+- **Result:** 264 stamped, 12 inventory updated, 489 history created, 8 adjustments created — 0 failures.
+- **For Tray (Phase 6):** Pre-query becomes a SOQL connector step before the Script 06 connector. Same pattern, Tray-native.
+
 ### ohfy__Market__c restricted picklist gaps
 - **Severity:** Low
 - **Affected area:** Integration — Account (Outlet) upserts

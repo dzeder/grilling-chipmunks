@@ -273,7 +273,12 @@ exports.step = function(input) {
     }
   });
 
-  // 3. BATCH — Inventory__c (uses unmanaged VIP_External_ID__c)
+  // 3. BATCH — Inventory__c
+  // If existingInventoryMap is provided, match by Item VIP_External_ID__c + Location
+  // to find pre-existing records and PATCH by record ID (stamps VIP_External_ID__c).
+  // This avoids the managed "Duplicate Record Blocked" validation rule.
+  var existingMap = input.existingInventoryMap || {};
+
   var inventoryChunks = chunkArray(inventoryRecords);
   var inventoryBatches = inventoryChunks.map(function(chunk) {
     return {
@@ -283,6 +288,26 @@ exports.step = function(input) {
         Object.keys(record).forEach(function(key) {
           if (key !== 'VIP_External_ID__c') body[key] = record[key];
         });
+
+        // Check if a pre-existing Inventory record matches this Item+Location
+        var existingId = existingMap[extId];
+        if (existingId) {
+          // PATCH by record ID — update existing record and stamp VIP_External_ID__c.
+          // Strip master-detail relationship fields (Item__r, Location__r) — they're
+          // read-only on update and already correct on the existing record.
+          delete body[NS + 'Item__r'];
+          delete body[NS + 'Location__r'];
+          body.VIP_External_ID__c = extId;
+          return {
+            method: 'PATCH',
+            url: '/services/data/' + SF_CONFIG.apiVersion + '/sobjects/' +
+              NS + 'Inventory__c/' + existingId,
+            referenceId: 'inv_' + idx,
+            body: body
+          };
+        }
+
+        // Normal upsert by VIP_External_ID__c (for new records or re-runs)
         return {
           method: 'PATCH',
           url: '/services/data/' + SF_CONFIG.apiVersion + '/sobjects/' +

@@ -103,6 +103,18 @@
 - [x] Script 09 (cleanup): Added `countQuery` (SELECT COUNT()) per target for sanity check — Tray workflow should compare stale count vs upsert count before deleting; if stale > upserted, skip delete (possible truncated/partial file)
 - [x] **Key decision documented:** Invoice__c/Invoice_Item__c is NOT built from VIP data. VIP SLSDA = distributor→retailer depletions (Depletion__c + Placement__c). Invoice objects are for supplier→distributor invoicing — a separate data source entirely.
 
+### Phase 5e: Enhanced E2E Validation (2026-04-13)
+- [x] **Placement__c enhancements:** Added `Is_New_Placement__c = true` + `Lost_Placement_After_Days__c = 60` to Script 07b. Formula fields auto-compute: `Days_Since_Last_Order__c` (10 days), `Lost_Placement_Date__c` (Last_Sold + 60).
+- [x] **Account distributor rep codes:** Created + deployed `VIP_Salesman1__c` and `VIP_Salesman2__c` (Text(8)) on Account with FLS. Mapped in Script 05, filtering out `999` (unassigned) and `HOUSE` (house account). These are distributor rep codes (ROSM1/ROSM2), NOT supplier reps.
+- [x] **Inventory "Duplicate Record Blocked" fix:** Three-layer pre-query pattern in e2e-sandbox-runner.js + Script 06:
+  1. Lazy pre-query (runs after Phase 1 stamps VIP_External_ID__c on Items, not at startup)
+  2. Batch-stamp VIP_External_ID__c on all 264 existing Inventory records (so History/Adjustments can reference them)
+  3. Script 06 PATCHes existing records by SF ID, stripping master-detail fields (Item__r, Location__r)
+- [x] Phase 3 result: 264 stamped + 12 inv + 489 history + 8 adjustments = 509 succeeded, 0 failed
+- [x] Phase 4 result: 40 depletions + 40 placements + 23 allocations = 103 succeeded, 0 failed
+- [x] **Full E2E: 612 records, 0 failures** (Phase 3 + Phase 4)
+- [x] Phase 1 Chain Banner UPDATES still blocked by AccountTriggerMethods (pre-existing known issue; creates work fine)
+
 ## Next Up
 
 ### Phase 6: Tray.io Project Build
@@ -144,6 +156,9 @@
 | **Placement__c keyed by Account×Item** (not per invoice line) | One placement per distributor+account+item. Aggregated from SLSDA rows: earliest/latest sold dates, latest price/qty. External ID: `PLC:{DistId}:{AcctNbr}:{SuppItem}` |
 | **No Invoice__c from VIP data** | VIP SLSDA = distributor→retailer depletions (Depletion__c + Placement__c). Invoice__c is for supplier→distributor invoicing — different data source, not from VIP files |
 | **VIP_File_Date__c = date of pipeline run** | Not derived from file contents. FromDate/ToDate capture the file's reporting window. File date stamps when a record was last refreshed, enabling stale cleanup. |
+| **ohfy__Placement__c is the right object** (not Account_Item__c) | Managed object with 59+ fields including formula fields for CSO features. Account_Item__c exists in source-index but has 0 deployed fields in ROS2. |
+| **VIP Salesman1/2 = distributor rep codes** (not supplier reps) | OUTDA Salesman1/Salesman2 are ROSM1/ROSM2 (distributor employee codes). Stored as `VIP_Salesman1__c`/`VIP_Salesman2__c` text fields on Account. Supplier reps are SF Users, manually assigned in Ohanafy. |
+| **Lost_Placement_After_Days = 60** | CSO requirement for reorder alert window. Feeds formula: `Lost_Placement_Date__c = Last_Sold_Date + 60`. After that date, `Days_Since_Last_Order > 60` flags it as a lost placement. |
 
 ## Gotchas
 
@@ -162,3 +177,7 @@
 13. **AccountSource 'VIP SRS' not in picklist:** The field is not restricted so the API accepts it, but the value won't appear in picklist dropdowns until added via Setup.
 14. **Item lookup filter chain on Depletion__c.Item__c:** The lookup filter (`optionalFilter: false`) requires the Item to have: (a) Finished Good record type, (b) `Type__c = 'Finished Good'`, (c) `UOM__c` set (e.g., 'US Count'), (d) `Packaging_Type__c` set (dependent on UOM, e.g., 'Each'), and (e) a `Transformation_Setting__c` record linking the Packaging_Type to a Volume UOM (e.g., Each → Fluid Ounce(s)). Missing any of these causes `FIELD_FILTER_VALIDATION_EXCEPTION`. Script 02 must ensure items meet all prerequisites before depletions can load.
 15. **Placement__c master-detail fields are create-only:** `ohfy__Account__c` and `ohfy__Item__c` are master-detail and can only be set on initial create (updateable=false). Use `__r` relationship syntax in Composite API body. On subsequent upserts, the API silently ignores these fields — the record stays parented to the original Account×Item.
+16. **Inventory pre-query must run AFTER Phase 1:** The pre-query matches existing Inventory records by `Item__r.VIP_External_ID__c LIKE 'ITM:%'`. But Items don't have VIP_External_ID__c until Phase 1 stamps them. Running the pre-query at pipeline startup finds 0 records. Use lazy execution — trigger when Phase 3 starts.
+17. **ALL existing Inventory records need VIP_External_ID__c batch-stamped:** History and Adjustment rows reference parent Inventory by VIP_External_ID__c. Even if the Inventory transform only outputs 12 records, History may reference hundreds of different DistId:Item combos. Stamp VIP_External_ID__c on ALL existing records (264 in ROS2) before loading children, not just the records in your current file.
+18. **Inventory__c master-detail fields are read-only on update:** When PATCHing an existing Inventory record by SF record ID, strip `ohfy__Item__r` and `ohfy__Location__r` from the request body. These are master-detail (create-only) fields. Including them returns `INVALID_FIELD_FOR_INSERT_UPDATE`.
+19. **Item_Line__c has no upsert key:** Created via `sf data create record` / direct insert. Re-runs of ITM2DA create duplicate Item_Line__c records. Minor issue for sandbox testing; for production, add a dedup pre-check query.

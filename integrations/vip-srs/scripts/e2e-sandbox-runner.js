@@ -379,6 +379,64 @@ if (FINISHED_GOOD_RT_ID) {
 }
 console.log('');
 
+// Pre-query existing Inventory records to handle "Duplicate Record Blocked" validation rule.
+// Maps VIP inventory key (IVT:{DistId}:{SuppItem}) → existing Salesforce record ID.
+// NOTE: Runs lazily before Phase 3 (not at startup) because Phase 1 must stamp
+// VIP_External_ID__c on Items first for the SOQL relationship filter to match.
+var existingInventoryMap = {};
+var _NS = 'ohfy__';
+var _inventoryPreQueryDone = false;
+
+function runInventoryPreQuery() {
+  if (_inventoryPreQueryDone) return;
+  _inventoryPreQueryDone = true;
+  console.log('Pre-query: Checking for existing Inventory records...');
+  var invRecords = sfQuery(
+    "SELECT Id, " + _NS + "Item__r." + _NS + "VIP_External_ID__c, " +
+    _NS + "Location__r.VIP_External_ID__c " +
+    "FROM " + _NS + "Inventory__c " +
+    "WHERE " + _NS + "Item__r." + _NS + "VIP_External_ID__c LIKE 'ITM:%'"
+  );
+  invRecords.forEach(function(r) {
+    var itemRef = r[_NS + 'Item__r'];
+    var locRef = r[_NS + 'Location__r'];
+    var itemExtId = itemRef ? itemRef[_NS + 'VIP_External_ID__c'] : null;
+    var locExtId = locRef ? locRef['VIP_External_ID__c'] : null;
+    if (itemExtId && locExtId) {
+      var distId = locExtId.replace('LOC:', '');
+      var suppItem = itemExtId.replace('ITM:', '');
+      var vipKey = 'IVT:' + distId + ':' + suppItem;
+      existingInventoryMap[vipKey] = r.Id;
+    }
+  });
+  var mapKeys = Object.keys(existingInventoryMap);
+  console.log('  Found ' + mapKeys.length + ' existing Inventory records with VIP items');
+
+  // Batch-stamp VIP_External_ID__c on all existing records that don't have it yet.
+  // This ensures History/Adjustment rows can reference ANY existing Inventory by VIP key.
+  if (mapKeys.length > 0) {
+    console.log('  Stamping VIP_External_ID__c on existing Inventory records...');
+    var stampBatches = [];
+    for (var si = 0; si < mapKeys.length; si += 25) {
+      var chunk = mapKeys.slice(si, si + 25);
+      stampBatches.push({
+        compositeRequest: chunk.map(function(vipKey, idx) {
+          return {
+            method: 'PATCH',
+            url: '/services/data/' + API_VERSION + '/sobjects/' +
+              _NS + 'Inventory__c/' + existingInventoryMap[vipKey],
+            referenceId: 'stamp_' + idx,
+            body: { VIP_External_ID__c: vipKey }
+          };
+        })
+      });
+    }
+    var stampResult = sendBatches(stampBatches, 'Inventory stamp');
+    console.log('  Stamped: ' + stampResult.success + ' succeeded, ' + stampResult.fail + ' failed');
+  }
+  console.log('');
+}
+
 var totalSuccess = 0;
 var totalFail = 0;
 var stepResults = [];
@@ -416,6 +474,14 @@ PIPELINE.forEach(function(step) {
 
   // Inject record type IDs for item scripts
   if (FINISHED_GOOD_RT_ID) input.finishedGoodRecordTypeId = FINISHED_GOOD_RT_ID;
+
+  // Inject existing Inventory map for Script 06 (avoids duplicate validation rule)
+  if (step.script === '06-invda-inventory.js') {
+    runInventoryPreQuery();
+    if (Object.keys(existingInventoryMap).length > 0) {
+      input.existingInventoryMap = existingInventoryMap;
+    }
+  }
 
   var result;
   try {
