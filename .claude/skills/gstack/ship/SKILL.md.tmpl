@@ -529,7 +529,49 @@ gh pr view --json url,number,state -q 'if .state == "OPEN" then "PR #\(.number):
 glab mr view -F json 2>/dev/null | jq -r 'if .state == "opened" then "MR_EXISTS" else "NO_MR" end' 2>/dev/null || echo "NO_MR"
 ```
 
-If an **open** PR/MR already exists: **update** the PR body using `gh pr edit --body "..."` (GitHub) or `glab mr update -d "..."` (GitLab). Always regenerate the PR body from scratch using this run's fresh results (test output, coverage audit, review findings, adversarial review, TODOS summary). Never reuse stale PR body content from a prior run. Print the existing URL and continue to Step 8.5.
+**Telemetry harvest (before building PR body):**
+
+1. Compute diff stats for the telemetry section:
+```bash
+BASE_BRANCH="<base>"  # detected in Step 0
+SHORTSTAT=$(git diff --shortstat "origin/${BASE_BRANCH}...HEAD")
+FILES_CHANGED=$(echo "$SHORTSTAT" | grep -oE '[0-9]+ file' | grep -oE '[0-9]+' || echo "0")
+INSERTIONS=$(echo "$SHORTSTAT" | grep -oE '[0-9]+ insertion' | grep -oE '[0-9]+' || echo "0")
+DELETIONS=$(echo "$SHORTSTAT" | grep -oE '[0-9]+ deletion' | grep -oE '[0-9]+' || echo "0")
+FILES_ADDED=$(git diff --diff-filter=A --name-only "origin/${BASE_BRANCH}...HEAD" | wc -l | tr -d ' ')
+FILES_DELETED=$(git diff --diff-filter=D --name-only "origin/${BASE_BRANCH}...HEAD" | wc -l | tr -d ' ')
+echo "Files: $FILES_CHANGED changed (+$FILES_ADDED added, -$FILES_DELETED deleted)"
+echo "Lines: +$INSERTIONS / -$DELETIONS"
+```
+
+2. Harvest gstack timeline for this branch:
+```bash
+eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)"
+BRANCH_RAW=$(git rev-parse --abbrev-ref HEAD)
+TIMELINE="$HOME/.gstack/projects/$SLUG/timeline.jsonl"
+if [ -f "$TIMELINE" ]; then
+  COMPLETED=$(grep "\"branch\":\"${BRANCH_RAW}\"" "$TIMELINE" | grep '"event":"completed"')
+  SKILLS=$(echo "$COMPLETED" | grep -o '"skill":"[^"]*"' | sed 's/"skill":"//;s/"//' | sort -u | tr '\n' ', ' | sed 's/,$//')
+  DURATION=$(echo "$COMPLETED" | grep -o '"duration_s":[0-9.]*' | sed 's/"duration_s"://' | awk '{sum+=$1} END {printf "%.0f", sum}')
+  echo "Skills: $SKILLS"
+  echo "Duration: $((DURATION / 60)) min"
+fi
+```
+
+3. Ask the user for the human estimate (quick multiple-choice via AskUserQuestion):
+```
+How long would this work have taken a human developer?
+A) < 1 hour    B) 1-2 hours    C) 2-4 hours
+D) 4-8 hours   E) 1-2 days     F) 3-5 days    G) 1+ week
+```
+Map answers to midpoints: A=0.5, B=1.5, C=3, D=6, E=12, F=28, G=60 hours.
+Compute Time Saved: `(1 - ai_actual_hrs / human_estimate_hrs) * 100`%.
+
+4. Based on the diff context, briefly note: (a) suggested improvements for efficiency, (b) skills/agents that could have helped. Keep each to one sentence.
+
+Use all of the above to populate the `## AI Telemetry` section in the PR body below.
+
+If an **open** PR/MR already exists: **update** the PR body using `gh pr edit --body "..."` (GitHub) or `glab mr update -d "..."` (GitLab). Always regenerate the PR body from scratch using this run's fresh results (test output, coverage audit, review findings, adversarial review, TODOS summary, telemetry). Never reuse stale PR body content from a prior run. Print the existing URL and continue to Step 8.5.
 
 If no PR/MR exists: create a pull request (GitHub) or merge request (GitLab) using the platform detected in Step 0.
 
@@ -582,6 +624,20 @@ you missed it.>
 <If no items completed: "No TODO items completed in this PR.">
 <If TODOS.md created or reorganized: note that>
 <If TODOS.md doesn't exist and user skipped: omit this section>
+
+## AI Telemetry
+| Metric | Value |
+|--------|-------|
+| Human Estimate (hrs) | <from AskUserQuestion — see Step 8 telemetry harvest below> |
+| AI Actual (min) | <total skill duration from timeline harvest> |
+| Files Changed / Added / Deleted | <from git diff --shortstat and --diff-filter> |
+| Lines Added / Deleted | <+insertions / -deletions from git diff --shortstat> |
+| Skills Used | <unique skill names from timeline harvest> |
+| Agents Used | <if known from conversation context, otherwise "N/A"> |
+| Tokens Used | <if known, otherwise "N/A"> |
+| Time Saved (%) | <computed: (1 - ai_actual_hrs / human_estimate_hrs) * 100> |
+| Suggested Improvements | <brief AI analysis: what could have been done more efficiently> |
+| Suggested Skills/Agents | <skills/agents that could have helped but weren't used> |
 
 ## Test plan
 - [x] All Rails tests pass (N runs, 0 failures)
