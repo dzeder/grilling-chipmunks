@@ -1,0 +1,282 @@
+name: PR Telemetry
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+concurrency:
+  group: pr-telemetry-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  diff-stats:
+    name: Diff Stats & Telemetry
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        with:
+          fetch-depth: 0
+
+      - name: Compute diff stats
+        id: diff
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          BASE="origin/${BASE_REF}"
+
+          # Shortstat
+          SHORTSTAT=$(git diff --shortstat "${BASE}...HEAD")
+          FILES_CHANGED=$(echo "$SHORTSTAT" | grep -oE '[0-9]+ file' | grep -oE '[0-9]+' || echo "0")
+          INSERTIONS=$(echo "$SHORTSTAT" | grep -oE '[0-9]+ insertion' | grep -oE '[0-9]+' || echo "0")
+          DELETIONS=$(echo "$SHORTSTAT" | grep -oE '[0-9]+ deletion' | grep -oE '[0-9]+' || echo "0")
+          NET_LOC=$((INSERTIONS - DELETIONS))
+
+          # File breakdown by diff filter
+          FILES_ADDED=$(git diff --diff-filter=A --name-only "${BASE}...HEAD" | wc -l | tr -d ' ')
+          FILES_MODIFIED=$(git diff --diff-filter=M --name-only "${BASE}...HEAD" | wc -l | tr -d ' ')
+          FILES_DELETED=$(git diff --diff-filter=D --name-only "${BASE}...HEAD" | wc -l | tr -d ' ')
+
+          # By file extension (top 10)
+          EXT_TABLE=$(git diff --numstat "${BASE}...HEAD" | awk '
+            {
+              ext = $3
+              sub(/.*\./, "", ext)
+              if (ext == $3) ext = "(no ext)"
+              added[ext] += $1
+              deleted[ext] += $2
+            }
+            END {
+              for (e in added) print e, added[e], deleted[e]
+            }
+          ' | sort -k2 -rn | head -10)
+
+          # Format extension table as markdown rows
+          EXT_ROWS=""
+          while IFS=' ' read -r ext add del; do
+            [ -z "$ext" ] && continue
+            EXT_ROWS="${EXT_ROWS}| \`.${ext}\` | +${add} | -${del} |"$'\n'
+          done <<< "$EXT_TABLE"
+
+          {
+            echo "files_changed=${FILES_CHANGED}"
+            echo "insertions=${INSERTIONS}"
+            echo "deletions=${DELETIONS}"
+            echo "net_loc=${NET_LOC}"
+            echo "files_added=${FILES_ADDED}"
+            echo "files_modified=${FILES_MODIFIED}"
+            echo "files_deleted=${FILES_DELETED}"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "EXT_ROWS<<EOF" >> "$GITHUB_ENV"
+          echo "$EXT_ROWS" >> "$GITHUB_ENV"
+          echo "EOF" >> "$GITHUB_ENV"
+
+      - name: Parse PR body telemetry
+        id: telemetry
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          parse_field() {
+            local field="$1"
+            local value
+            value=$(echo "$PR_BODY" | grep -i "| *${field}" | sed 's/.*|[^|]*| *\(.*\) *|/\1/' | sed 's/^ *//;s/ *$//')
+            if [ -z "$value" ] || [ "$value" = "|" ]; then
+              echo "_not provided_"
+            else
+              echo "$value"
+            fi
+          }
+
+          {
+            echo "human_estimate=$(parse_field 'Human Estimate')"
+            echo "ai_actual=$(parse_field 'AI Actual')"
+            echo "tokens_used=$(parse_field 'Tokens Used')"
+            echo "est_cost=$(parse_field 'Est. Cost')"
+            echo "time_saved=$(parse_field 'Time Saved')"
+            echo "skills_used=$(parse_field 'Skills Used')"
+            echo "agents_used=$(parse_field 'Agents Used')"
+            echo "suggested_improvements=$(parse_field 'Suggested Improvements')"
+            echo "suggested_skills=$(parse_field 'Suggested Skills')"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Post telemetry comment
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8
+        env:
+          FILES_CHANGED: ${{ steps.diff.outputs.files_changed }}
+          INSERTIONS: ${{ steps.diff.outputs.insertions }}
+          DELETIONS: ${{ steps.diff.outputs.deletions }}
+          NET_LOC: ${{ steps.diff.outputs.net_loc }}
+          FILES_ADDED: ${{ steps.diff.outputs.files_added }}
+          FILES_MODIFIED: ${{ steps.diff.outputs.files_modified }}
+          FILES_DELETED: ${{ steps.diff.outputs.files_deleted }}
+          HUMAN_ESTIMATE: ${{ steps.telemetry.outputs.human_estimate }}
+          AI_ACTUAL: ${{ steps.telemetry.outputs.ai_actual }}
+          TOKENS_USED: ${{ steps.telemetry.outputs.tokens_used }}
+          EST_COST: ${{ steps.telemetry.outputs.est_cost }}
+          TIME_SAVED: ${{ steps.telemetry.outputs.time_saved }}
+          SKILLS_USED: ${{ steps.telemetry.outputs.skills_used }}
+          AGENTS_USED: ${{ steps.telemetry.outputs.agents_used }}
+          SUGGESTED_IMPROVEMENTS: ${{ steps.telemetry.outputs.suggested_improvements }}
+          SUGGESTED_SKILLS: ${{ steps.telemetry.outputs.suggested_skills }}
+        with:
+          script: |
+            const marker = '<!-- pr-telemetry -->';
+            const extRows = process.env.EXT_ROWS || '';
+            const now = new Date().toISOString();
+
+            const body = `${marker}
+            ## PR Telemetry Dashboard
+
+            ### Diff Stats
+            | Metric | Value |
+            |--------|-------|
+            | Files Changed | ${process.env.FILES_CHANGED} |
+            | Files Added | +${process.env.FILES_ADDED} |
+            | Files Modified | ${process.env.FILES_MODIFIED} |
+            | Files Deleted | -${process.env.FILES_DELETED} |
+            | Lines Added | +${process.env.INSERTIONS} |
+            | Lines Deleted | -${process.env.DELETIONS} |
+            | Net LOC Change | ${process.env.NET_LOC > 0 ? '+' : ''}${process.env.NET_LOC} |
+
+            ### By File Type
+            | Extension | Added | Deleted |
+            |-----------|-------|---------|
+            ${extRows}
+            ### AI Metrics (from PR body)
+            | Metric | Value |
+            |--------|-------|
+            | Human Estimate (hrs) | ${process.env.HUMAN_ESTIMATE} |
+            | AI Actual (min) | ${process.env.AI_ACTUAL} |
+            | Tokens Used | ${process.env.TOKENS_USED} |
+            | Est. Cost ($) | ${process.env.EST_COST} |
+            | Time Saved (%) | ${process.env.TIME_SAVED} |
+            | Skills Used | ${process.env.SKILLS_USED} |
+            | Agents Used | ${process.env.AGENTS_USED} |
+            | Suggested Improvements | ${process.env.SUGGESTED_IMPROVEMENTS} |
+            | Suggested Skills/Agents | ${process.env.SUGGESTED_SKILLS} |
+
+            ---
+            _Updated: ${now}_`;
+
+            // Find existing telemetry comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body,
+              });
+            }
+
+      - name: Add label
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['telemetry'],
+            });
+
+  log-on-merge:
+    name: Log Telemetry to CSV
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Extract metrics and append CSV
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        run: |
+          TODAY=$(date -u +%Y-%m-%d)
+
+          # Parse type from PR title (feat|fix|docs|ci|etc)
+          TYPE=$(echo "$PR_TITLE" | grep -oE '^(feat|fix|docs|ci|chore|agent|skill|eval|refactor)' || echo "other")
+
+          # Parse telemetry from PR body
+          parse_field() {
+            local field="$1"
+            echo "$PR_BODY" | grep -i "| *${field}" | sed 's/.*|[^|]*| *\(.*\) *|/\1/' | sed 's/^ *//;s/ *$//'
+          }
+
+          HUMAN_EST=$(parse_field 'Human Estimate')
+          AI_ACTUAL=$(parse_field 'AI Actual')
+          TOKENS=$(parse_field 'Tokens Used')
+          COST=$(parse_field 'Est. Cost')
+          TIME_SAVED=$(parse_field 'Time Saved')
+          SKILLS=$(parse_field 'Skills Used')
+          AGENTS=$(parse_field 'Agents Used')
+
+          # Compute diff stats from merge
+          MERGE_BASE=$(git merge-base "origin/${BASE_REF}" "${MERGE_SHA}" 2>/dev/null || echo "")
+          if [ -n "$MERGE_BASE" ]; then
+            SHORTSTAT=$(git diff --shortstat "${MERGE_BASE}...${MERGE_SHA}" 2>/dev/null || echo "")
+            FILES_CHANGED=$(echo "$SHORTSTAT" | grep -oE '[0-9]+ file' | grep -oE '[0-9]+' || echo "0")
+            LINES_ADDED=$(echo "$SHORTSTAT" | grep -oE '[0-9]+ insertion' | grep -oE '[0-9]+' || echo "0")
+            LINES_DELETED=$(echo "$SHORTSTAT" | grep -oE '[0-9]+ deletion' | grep -oE '[0-9]+' || echo "0")
+            FILES_ADDED=$(git diff --diff-filter=A --name-only "${MERGE_BASE}...${MERGE_SHA}" 2>/dev/null | wc -l | tr -d ' ')
+            FILES_DELETED=$(git diff --diff-filter=D --name-only "${MERGE_BASE}...${MERGE_SHA}" 2>/dev/null | wc -l | tr -d ' ')
+          else
+            FILES_CHANGED=0; LINES_ADDED=0; LINES_DELETED=0; FILES_ADDED=0; FILES_DELETED=0
+          fi
+
+          # Clean values (strip non-numeric chars for numeric fields, keep text for text fields)
+          clean_num() { echo "$1" | tr -dc '0-9.' || echo ""; }
+
+          HUMAN_EST_CLEAN=$(clean_num "$HUMAN_EST")
+          AI_ACTUAL_CLEAN=$(clean_num "$AI_ACTUAL")
+          TOKENS_CLEAN=$(clean_num "$TOKENS")
+          COST_CLEAN=$(clean_num "$COST")
+          TIME_SAVED_CLEAN=$(clean_num "$TIME_SAVED")
+
+          # Escape commas in text fields
+          DESCRIPTION=$(echo "$PR_TITLE" | tr ',' ';')
+          SKILLS_CLEAN=$(echo "$SKILLS" | tr ',' ';')
+          AGENTS_CLEAN=$(echo "$AGENTS" | tr ',' ';')
+
+          # Append to CSV
+          echo "${TODAY},${PR_NUMBER},${PR_BRANCH},${DESCRIPTION},${TYPE},${HUMAN_EST_CLEAN},${AI_ACTUAL_CLEAN},${TOKENS_CLEAN},${COST_CLEAN},${TIME_SAVED_CLEAN},${FILES_CHANGED},${FILES_ADDED},${FILES_DELETED},${LINES_ADDED},${LINES_DELETED},${SKILLS_CLEAN},${AGENTS_CLEAN}" >> .time-tracking/log.csv
+
+      - name: Commit telemetry log
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .time-tracking/log.csv
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "ci(telemetry): log PR #${{ github.event.pull_request.number }} metrics [skip ci]"
+            git push
+          fi

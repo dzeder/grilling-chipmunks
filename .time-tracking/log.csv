@@ -1,2 +1,2 @@
-date,pr_number,branch,description,type,human_estimate_hrs,ai_actual_min,tokens_used,est_cost_usd,time_saved_pct
-51,feat(tray): Draft Order Item Cleanup project + tray-project skill,6,45,120000,12,87.5,2026-04-08
+date,pr_number,branch,description,type,human_estimate_hrs,ai_actual_min,tokens_used,est_cost_usd,time_saved_pct,files_changed,files_added,files_deleted,lines_added,lines_deleted,skills_used,agents_used
+2026-04-08,51,dzeder/tray-project-skill,feat(tray): Draft Order Item Cleanup project + tray-project skill,feat,6,45,120000,12,87.5,,,,,,tray-project-builder,

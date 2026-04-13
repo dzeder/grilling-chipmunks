@@ -84,13 +84,12 @@ jobs:
           elif ! echo "$PR_BODY" | grep -qE 'Closes #|Fixes #'; then
             WARNINGS="$WARNINGS\n- PR uses \`Relates to\` but no \`Closes #N\` or \`Fixes #N\`. Issues won't auto-close on merge."
           fi
-          if ! echo "$PR_BODY" | grep -q 'Time Tracking'; then
-            WARNINGS="$WARNINGS\n- Time tracking section not found."
+          if ! echo "$PR_BODY" | grep -qE 'AI Telemetry|Time Tracking'; then
+            WARNINGS="$WARNINGS\n- AI Telemetry section not found."
           elif ! echo "$PR_BODY" | grep -E 'Human Estimate.*\|.*[0-9]' <<< "$PR_BODY" 2>/dev/null; then
-            # Check if Time Tracking values are actually populated (not just empty placeholders)
             HAS_VALUES=$(echo "$PR_BODY" | grep -cE '\|.*[0-9]+.*\|' || true)
             if [ "$HAS_VALUES" -lt 3 ]; then
-              WARNINGS="$WARNINGS\n- Time tracking section found but values appear empty. Please fill in Human Estimate, AI Actual, Tokens Used, Est. Cost, and Time Saved."
+              WARNINGS="$WARNINGS\n- AI Telemetry section found but values appear empty. Please fill in Human Estimate, AI Actual, Skills Used, and other metrics."
             fi
           fi
           echo "PR_WARNINGS<<EOF" >> $GITHUB_ENV

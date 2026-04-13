@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.7.6] - 2026-04-13
+
+### Added
+- PR telemetry dashboard: new GitHub Action (`pr-telemetry.yml`) auto-posts diff stats (files, lines, by-extension breakdown) as a PR comment on every push
+- Telemetry auto-logged to CSV on merge: the `log-on-merge` job appends metrics to `.time-tracking/log.csv` when PRs land
+- Local telemetry harvester script (`scripts/pr-telemetry-harvest.sh`) reads gstack timeline data for the current branch, outputs skills used, session time, and diff stats
+- Ship skill now collects AI telemetry during PR creation: diff stats, timeline harvest, human estimate prompt, and efficiency suggestions
+
+### Changed
+- PR template expanded from "Time Tracking" (5 fields) to "AI Telemetry" (11 fields) covering files, lines, skills, agents, tokens, and improvement suggestions
+- PR review agent updated to recognize both "AI Telemetry" and legacy "Time Tracking" section names
+- Time tracking CSV schema expanded with 7 new columns (files, lines, skills, agents) and fixed column ordering bug in existing data
+- Report script updated to handle expanded schema, now shows tokens, cost, and line counts
+
 ## [0.0.7.5] - 2026-04-13
 
 ### Fixed

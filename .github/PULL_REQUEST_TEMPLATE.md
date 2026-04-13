@@ -29,14 +29,20 @@ Closes #
 - [ ] Demo HTML updated
 - [ ] N/A - no doc changes needed
 
-## Time Tracking
+## AI Telemetry
 | Metric | Value |
 |--------|-------|
 | Human Estimate (hrs) | |
 | AI Actual (min) | |
+| Files Changed / Added / Deleted | |
+| Lines Added / Deleted | |
+| Skills Used | |
+| Agents Used | |
 | Tokens Used | |
 | Est. Cost ($) | |
 | Time Saved (%) | |
+| Suggested Improvements | |
+| Suggested Skills/Agents | |
 
 ## Screenshots / Demo
 <!-- If applicable, add screenshots or link to demo HTML -->
