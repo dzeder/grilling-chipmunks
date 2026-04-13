@@ -76,11 +76,61 @@ jobs:
           echo "$EXT_ROWS" >> "$GITHUB_ENV"
           echo "EOF" >> "$GITHUB_ENV"
 
+      - name: Auto-fill empty telemetry fields in PR body
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8
+        env:
+          FILES_CHANGED: ${{ steps.diff.outputs.files_changed }}
+          INSERTIONS: ${{ steps.diff.outputs.insertions }}
+          DELETIONS: ${{ steps.diff.outputs.deletions }}
+          FILES_ADDED: ${{ steps.diff.outputs.files_added }}
+          FILES_DELETED: ${{ steps.diff.outputs.files_deleted }}
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+
+            let body = pr.body || '';
+            if (!body.includes('AI Telemetry')) return;
+
+            // Fill a telemetry field only if its value cell is empty or whitespace
+            function fillIfEmpty(text, fieldName, value) {
+              const regex = new RegExp(
+                `(\\|\\s*${fieldName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\|)\\s*\\|`,
+                'i'
+              );
+              if (regex.test(text)) {
+                return text.replace(regex, `$1 ${value} |`);
+              }
+              return text;
+            }
+
+            let updated = body;
+            updated = fillIfEmpty(updated, 'Files Changed / Added / Deleted',
+              `${process.env.FILES_CHANGED} (${process.env.FILES_ADDED} added, ${process.env.FILES_DELETED} deleted)`);
+            updated = fillIfEmpty(updated, 'Lines Added / Deleted',
+              `+${process.env.INSERTIONS} / -${process.env.DELETIONS}`);
+
+            if (updated !== body) {
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                body: updated,
+              });
+              core.info('Auto-filled empty telemetry fields in PR body');
+            }
+
       - name: Parse PR body telemetry
         id: telemetry
         env:
+          GH_TOKEN: ${{ github.token }}
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
+          # Re-fetch PR body in case auto-fill step updated it
+          PR_BODY=$(gh pr view ${{ github.event.pull_request.number }} --json body -q .body 2>/dev/null || echo "$PR_BODY")
           parse_field() {
             local field="$1"
             local value
