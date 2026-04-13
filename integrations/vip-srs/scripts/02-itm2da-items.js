@@ -33,7 +33,7 @@ var ML_TO_FLOZ = 0.033814;
 
 function itemKey(supplierItem) { return PREFIX.ITEM + ':' + supplierItem; }
 function itemLineKey(name) { return PREFIX.ITEM_LINE + ':' + name; }
-function itemTypeKey(name) { return PREFIX.ITEM_TYPE + ':' + name; }
+function itemTypeKey(brandDesc, name) { return PREFIX.ITEM_TYPE + ':' + brandDesc + ':' + name; }
 
 function clean(v) { if (v === undefined || v === null) return ''; return String(v).trim(); }
 function isBlankOrZeros(v) { if (!v) return true; var t = String(v).trim(); return t === '' || /^0+$/.test(t); }
@@ -168,6 +168,7 @@ exports.step = function(input) {
   var valid = [];
   var invalid = [];
   var skipped = [];
+  var seen99Z = false;
 
   rows.forEach(function(row, idx) {
     var recordType = clean(row.RecordId);
@@ -188,19 +189,38 @@ exports.step = function(input) {
       return;
     }
 
+    // Collapse 99Z generic volume placeholders into a single item
+    if (supplierItem.indexOf('99Z') === 0) {
+      if (!seen99Z) {
+        seen99Z = true;
+        var collapsed = {};
+        Object.keys(row).forEach(function(k) { collapsed[k] = row[k]; });
+        collapsed.SupplierItem = '99Z-GENERIC';
+        collapsed.Desc = 'Generic Volume (Unmapped)';
+        valid.push(collapsed);
+      }
+      skipped.push({ rowIndex: idx, reason: '99Z placeholder (collapsed)' });
+      return;
+    }
+
     valid.push(row);
   });
 
   // 2. EXTRACT unique Item_Line and Item_Type values
+  // Item_Type is scoped per Item_Line because the Item_Type lookup on Item__c
+  // has a dependent filter (optionalFilter: false) requiring
+  // Item_Type__r.Item_Line__c = Item__c.Item_Line__c.
   var itemLineNames = {};  // { brandDesc: true }
-  var itemTypeNames = {};  // { genericCat3: true }
+  var itemTypePairs = {};  // { 'brandDesc\tbrandDesc': genericCat3 }
 
   valid.forEach(function(row) {
     var brandDesc = clean(row.BrandDesc);
     if (brandDesc) itemLineNames[brandDesc] = true;
 
     var genericCat3 = clean(row.GenericCat3);
-    if (genericCat3) itemTypeNames[genericCat3] = true;
+    if (brandDesc && genericCat3) {
+      itemTypePairs[brandDesc + '\t' + genericCat3] = true;
+    }
   });
 
   // Build Item_Line__c upsert records (Composite API PATCH by external ID)
@@ -229,8 +249,16 @@ exports.step = function(input) {
   });
 
   // Build Item_Type__c upsert records (Composite API PATCH by external ID)
-  var itemTypeRecords = Object.keys(itemTypeNames).map(function(name) {
-    var record = { Name: name, VIP_External_ID__c: itemTypeKey(name) };
+  // Each Item_Type is scoped to an Item_Line via ohfy__Item_Line__r.
+  var itemTypeRecords = Object.keys(itemTypePairs).map(function(pairKey) {
+    var parts = pairKey.split('\t');
+    var brandDesc = parts[0];
+    var genericCat3 = parts[1];
+    var record = {
+      Name: genericCat3,
+      VIP_External_ID__c: itemTypeKey(brandDesc, genericCat3)
+    };
+    record[NS + 'Item_Line__r'] = { VIP_External_ID__c: itemLineKey(brandDesc) };
     if (fileDate) record.VIP_File_Date__c = fileDate;
     return record;
   });
@@ -241,6 +269,7 @@ exports.step = function(input) {
       compositeRequest: chunk.map(function(record, idx) {
         var extId = record.VIP_External_ID__c;
         var body = { Name: record.Name };
+        body[NS + 'Item_Line__r'] = record[NS + 'Item_Line__r'];
         if (record.VIP_File_Date__c) body.VIP_File_Date__c = record.VIP_File_Date__c;
         return {
           method: 'PATCH',
@@ -261,16 +290,17 @@ exports.step = function(input) {
     try {
       var record = transformItem(row, finishedGoodRtId);
 
-      // Add Item_Line__c lookup reference (by name)
+      // Wire Item_Line__c lookup via external ID relationship reference
       var brandDesc = clean(row.BrandDesc);
       if (brandDesc) {
-        record._itemLineName = brandDesc;  // Used for post-processing lookup
+        record[NS + 'Item_Line__r'] = { VIP_External_ID__c: itemLineKey(brandDesc) };
       }
 
-      // Add Item_Type__c lookup reference (by name)
+      // Wire Item_Type__c lookup via external ID relationship reference
+      // Uses compound key (brandDesc + genericCat3) to match the per-Item_Line scoping
       var genericCat3 = clean(row.GenericCat3);
-      if (genericCat3) {
-        record._itemTypeName = genericCat3;  // Used for post-processing lookup
+      if (brandDesc && genericCat3) {
+        record[NS + 'Item_Type__r'] = { VIP_External_ID__c: itemTypeKey(brandDesc, genericCat3) };
       }
 
       itemRecords.push(record);
@@ -317,9 +347,9 @@ exports.step = function(input) {
     batchCount: itemBatches.length,
     records: itemRecords,
     recordCount: itemRecords.length,
-    // Lookup references (for wiring Item_Line/Item_Type IDs in a subsequent step)
+    // Lookup references
     itemLineNames: Object.keys(itemLineNames),
-    itemTypeNames: Object.keys(itemTypeNames),
+    itemTypePairs: Object.keys(itemTypePairs),
     // Errors
     errors: invalid.concat(transformErrors.map(function(e) {
       return { rowIndex: e.rowIndex, reason: 'Transform error: ' + e.error };
