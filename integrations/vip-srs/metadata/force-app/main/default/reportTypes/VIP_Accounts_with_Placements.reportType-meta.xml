@@ -3,12 +3,12 @@
     <baseObject>Account</baseObject>
     <category>other</category>
     <deployed>true</deployed>
-    <description>Accounts with their depletion records. Use for depletion analysis by account, market, and chain banner.</description>
+    <description>Accounts with their placement records. Use for placement analysis by account, market, geography, and distribution coverage.</description>
     <join>
         <outerJoin>false</outerJoin>
-        <relationship>ohfy__Depletions__r</relationship>
+        <relationship>ohfy__Placements__r</relationship>
     </join>
-    <label>VIP Accounts with Depletions</label>
+    <label>VIP Accounts with Placements</label>
     <sections>
         <columns>
             <checkedByDefault>true</checkedByDefault>
@@ -81,53 +81,73 @@
         <columns>
             <checkedByDefault>true</checkedByDefault>
             <field>Name</field>
-            <table>Account.ohfy__Depletions__r</table>
+            <table>Account.ohfy__Placements__r</table>
         </columns>
         <columns>
             <checkedByDefault>true</checkedByDefault>
             <field>ohfy__Item__c</field>
-            <table>Account.ohfy__Depletions__r</table>
+            <table>Account.ohfy__Placements__r</table>
         </columns>
         <columns>
             <checkedByDefault>true</checkedByDefault>
-            <field>ohfy__Case_Quantity__c</field>
-            <table>Account.ohfy__Depletions__r</table>
-        </columns>
-        <columns>
-            <checkedByDefault>true</checkedByDefault>
-            <field>VIP_Net_Price__c</field>
-            <table>Account.ohfy__Depletions__r</table>
-        </columns>
-        <columns>
-            <checkedByDefault>true</checkedByDefault>
-            <field>ohfy__Date__c</field>
-            <table>Account.ohfy__Depletions__r</table>
+            <field>ohfy__Is_Active__c</field>
+            <table>Account.ohfy__Placements__r</table>
         </columns>
         <columns>
             <checkedByDefault>false</checkedByDefault>
-            <field>VIP_Unit_Quantity__c</field>
-            <table>Account.ohfy__Depletions__r</table>
+            <field>ohfy__Is_New_Placement__c</field>
+            <table>Account.ohfy__Placements__r</table>
         </columns>
         <columns>
             <checkedByDefault>false</checkedByDefault>
-            <field>ohfy__Type__c</field>
-            <table>Account.ohfy__Depletions__r</table>
+            <field>ohfy__Days_Since_Last_Order__c</field>
+            <table>Account.ohfy__Placements__r</table>
         </columns>
         <columns>
             <checkedByDefault>false</checkedByDefault>
-            <field>VIP_File_Date__c</field>
-            <table>Account.ohfy__Depletions__r</table>
+            <field>ohfy__Last_30_Days_Volume__c</field>
+            <table>Account.ohfy__Placements__r</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>ohfy__Last_30_Days_Profit__c</field>
+            <table>Account.ohfy__Placements__r</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>ohfy__All_Time_Volume__c</field>
+            <table>Account.ohfy__Placements__r</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>ohfy__All_Time_Profit__c</field>
+            <table>Account.ohfy__Placements__r</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>ohfy__First_Sold_Date__c</field>
+            <table>Account.ohfy__Placements__r</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>ohfy__Last_Sold_Date__c</field>
+            <table>Account.ohfy__Placements__r</table>
         </columns>
         <columns>
             <checkedByDefault>false</checkedByDefault>
             <field>VIP_External_ID__c</field>
-            <table>Account.ohfy__Depletions__r</table>
+            <table>Account.ohfy__Placements__r</table>
+        </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>VIP_File_Date__c</field>
+            <table>Account.ohfy__Placements__r</table>
         </columns>
         <columns>
             <checkedByDefault>false</checkedByDefault>
             <field>CreatedDate</field>
-            <table>Account.ohfy__Depletions__r</table>
+            <table>Account.ohfy__Placements__r</table>
         </columns>
-        <masterLabel>Depletions</masterLabel>
+        <masterLabel>Placements</masterLabel>
     </sections>
 </ReportType>

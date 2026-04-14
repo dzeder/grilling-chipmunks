@@ -20,6 +20,15 @@
         <field>ohfy__Item__c.ohfy__Inventory_Items__r$ohfy__Inventory_Value__c</field>
     </columns>
     <description>Current inventory levels grouped by item, showing quantity on hand and value across locations.</description>
+    <filter>
+        <criteriaItems>
+            <column>ohfy__Item__c.ohfy__Inventory_Items__r$ohfy__Quantity_On_Hand__c</column>
+            <columnToColumn>false</columnToColumn>
+            <isUnlocked>true</isUnlocked>
+            <operator>greaterThan</operator>
+            <value>0</value>
+        </criteriaItems>
+    </filter>
     <format>Summary</format>
     <groupingsDown>
         <dateGranularity>Day</dateGranularity>

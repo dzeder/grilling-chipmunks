@@ -37,7 +37,7 @@ One report per VIP-loaded object. Each uses OR logic across all VIP-populated fi
 | Duplicate Account Names | `AccountList` | Type = Distributed Customer |
 | Duplicate Chain Banner Names | `AccountList` | Type = Chain Banner |
 
-### Supplier Metrics (6 reports)
+### Supplier Metrics (12 reports)
 
 | Report | Report Type | Description |
 |--------|-------------|-------------|
@@ -46,14 +46,26 @@ One report per VIP-loaded object. Each uses OR logic across all VIP-populated fi
 | Active Placements Summary | `VIP_Placements_with_Items__c` | Active placements grouped by brand |
 | Lost Placements Alert | `VIP_Placements_with_Items__c` | Accounts exceeding lost placement threshold |
 | Inventory Levels by Item | `VIP_Inventory_with_Items__c` | Current quantity on hand by SKU |
-| Stale Record Monitor | `VIP_Depletions_with_Items__c` | VIP_File_Date__c freshness check |
+| Depletions by Market | `VIP_Accounts_with_Depletions__c` | Cases/revenue by market and state |
+| Top Accounts by Volume | `VIP_Accounts_with_Depletions__c` | Accounts ranked by depletion case volume |
+| New Placements This Month | `VIP_Placements_with_Items__c` | New points of distribution by brand |
+| Depletions by Salesman | `VIP_Accounts_with_Depletions__c` | Cases/revenue by distributor rep code |
+| Depletions Trend by Month | `VIP_Depletions_with_Items__c` | MoM depletion trend (Matrix format, configure chart in UI) |
+| Distribution Coverage by Brand | `VIP_Accounts_with_Placements__c` | Active accounts per item/brand |
+| Declining Accounts | `VIP_Accounts_with_Placements__c` | Lowest L30D volume accounts for retention |
+
+### Integration Health (1 report)
+
+| Report | Report Type | Description |
+|--------|-------------|-------------|
+| Stale Record Monitor | `VIP_Depletions_with_Items__c` | VIP_File_Date__c freshness check (on Data Quality dashboard) |
 
 ### Dashboards
 
 | Dashboard | Layout |
 |-----------|--------|
 | **Data Quality Overview** | Left: Items, Item Lines, Item Types / Middle: Customers, Chain Banners, Retailers / Right: Depletions, Placements, Inventory |
-| **Supplier Overview** | Left: Depletions by Brand, Active Placements / Middle: Depletions by Account, Lost Placements / Right: Inventory Levels, Stale Records |
+| **Supplier Overview** | Left: Depletions by Brand, Active Placements, New Placements, Depletions Trend / Middle: Depletions by Account, Top Accounts, Lost Placements, Coverage by Brand / Right: Inventory Levels, Depletions by Market, Depletions by Salesman, Declining Accounts |
 
 ### Superseded Reports (still in repo for reference)
 
@@ -75,11 +87,12 @@ These were replaced during development. They remain in the metadata but are NOT 
 
 | Report Type | Base Object | Join | Purpose |
 |-------------|-------------|------|---------|
-| VIP_Depletions_with_Items | `ohfy__Item__c` | → `ohfy__Depletions__r` (Outer) | Supplier depletion metrics |
-| VIP_Placements_with_Items | `ohfy__Item__c` | → `ohfy__Placements__r` (Outer) | Supplier placement metrics |
-| VIP_Inventory_with_Items | `ohfy__Item__c` | → `ohfy__Inventory_Items__r` (Outer) | Supplier inventory metrics |
+| VIP_Depletions_with_Items | `ohfy__Item__c` | → `ohfy__Depletions__r` (Inner) | Supplier depletion metrics |
+| VIP_Placements_with_Items | `ohfy__Item__c` | → `ohfy__Placements__r` (Inner) | Supplier placement metrics |
+| VIP_Inventory_with_Items | `ohfy__Item__c` | → `ohfy__Inventory_Items__r` (Inner) | Supplier inventory metrics |
 | VIP_Items_with_Lines | `ohfy__Item_Line__c` | → `ohfy__Items__r` (Outer) | Item catalog analysis |
-| VIP_Accounts_with_Depletions | `Account` | → `ohfy__Depletions__r` (Outer) | Account-level depletion metrics |
+| VIP_Accounts_with_Depletions | `Account` | → `ohfy__Depletions__r` (Inner) | Account-level depletion metrics |
+| VIP_Accounts_with_Placements | `Account` | → `ohfy__Placements__r` (Inner) | Account-level placement metrics, coverage, declining accounts |
 | VIP_Placements | `ohfy__Placement__c` | None (standalone) | Placement data quality |
 
 ### Built-in Managed Package (no metadata needed)

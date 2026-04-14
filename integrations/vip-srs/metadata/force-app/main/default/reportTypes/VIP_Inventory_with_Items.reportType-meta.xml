@@ -5,7 +5,7 @@
     <deployed>true</deployed>
     <description>Items with their inventory records. Use for stock level analysis by item and location.</description>
     <join>
-        <outerJoin>true</outerJoin>
+        <outerJoin>false</outerJoin>
         <relationship>ohfy__Inventory_Items__r</relationship>
     </join>
     <label>VIP Items with Inventory</label>

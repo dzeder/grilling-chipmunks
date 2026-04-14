@@ -4,7 +4,7 @@
     <backgroundFadeDirection>Diagonal</backgroundFadeDirection>
     <backgroundStartColor>#FFFFFF</backgroundStartColor>
     <dashboardType>SpecifiedUser</dashboardType>
-    <description>Supplier overview of VIP distributor data: depletions, placements, inventory, and integration health.</description>
+    <description>Supplier overview of VIP distributor data: depletions, placements, inventory, geographic performance, and rep metrics.</description>
     <isGridLayout>false</isGridLayout>
     <leftSection>
         <columnSize>Medium</columnSize>
@@ -41,6 +41,39 @@
             <showPicturesOnTables>true</showPicturesOnTables>
             <sortBy>RowLabelAscending</sortBy>
         </components>
+        <components>
+            <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
+            <componentType>Table</componentType>
+            <drillEnabled>true</drillEnabled>
+            <drillToDetailEnabled>false</drillToDetailEnabled>
+            <groupingSortProperties/>
+            <header>New Placements This Month</header>
+            <indicatorHighColor>#54C254</indicatorHighColor>
+            <indicatorLowColor>#C25454</indicatorLowColor>
+            <indicatorMiddleColor>#C2C254</indicatorMiddleColor>
+            <report>VIP_Data/New_Placements_This_Month</report>
+            <showPicturesOnTables>true</showPicturesOnTables>
+            <sortBy>RowLabelAscending</sortBy>
+        </components>
+        <components>
+            <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
+            <chartAxisRange>Auto</chartAxisRange>
+            <componentType>Bar</componentType>
+            <displayUnits>Auto</displayUnits>
+            <drillEnabled>true</drillEnabled>
+            <drillToDetailEnabled>false</drillToDetailEnabled>
+            <enableHover>true</enableHover>
+            <expandOthers>false</expandOthers>
+            <groupingSortProperties/>
+            <header>Depletions Trend by Month</header>
+            <legendPosition>Bottom</legendPosition>
+            <report>VIP_Data/Depletions_Trend_by_Month</report>
+            <showPercentage>false</showPercentage>
+            <showPicturesOnCharts>false</showPicturesOnCharts>
+            <showValues>true</showValues>
+            <sortBy>RowLabelAscending</sortBy>
+            <useReportChart>true</useReportChart>
+        </components>
     </leftSection>
     <middleSection>
         <columnSize>Medium</columnSize>
@@ -69,6 +102,20 @@
             <drillEnabled>true</drillEnabled>
             <drillToDetailEnabled>false</drillToDetailEnabled>
             <groupingSortProperties/>
+            <header>Top Accounts by Volume</header>
+            <indicatorHighColor>#54C254</indicatorHighColor>
+            <indicatorLowColor>#C25454</indicatorLowColor>
+            <indicatorMiddleColor>#C2C254</indicatorMiddleColor>
+            <report>VIP_Data/Top_Accounts_by_Volume</report>
+            <showPicturesOnTables>true</showPicturesOnTables>
+            <sortBy>RowLabelAscending</sortBy>
+        </components>
+        <components>
+            <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
+            <componentType>Table</componentType>
+            <drillEnabled>true</drillEnabled>
+            <drillToDetailEnabled>false</drillToDetailEnabled>
+            <groupingSortProperties/>
             <header>Lost Placements</header>
             <indicatorHighColor>#C25454</indicatorHighColor>
             <indicatorLowColor>#54C254</indicatorLowColor>
@@ -76,6 +123,25 @@
             <report>VIP_Data/Lost_Placements_Alert</report>
             <showPicturesOnTables>true</showPicturesOnTables>
             <sortBy>RowLabelAscending</sortBy>
+        </components>
+        <components>
+            <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
+            <chartAxisRange>Auto</chartAxisRange>
+            <componentType>Bar</componentType>
+            <displayUnits>Auto</displayUnits>
+            <drillEnabled>true</drillEnabled>
+            <drillToDetailEnabled>false</drillToDetailEnabled>
+            <enableHover>true</enableHover>
+            <expandOthers>false</expandOthers>
+            <groupingSortProperties/>
+            <header>Distribution Coverage by Brand</header>
+            <legendPosition>Bottom</legendPosition>
+            <report>VIP_Data/Distribution_Coverage_by_Brand</report>
+            <showPercentage>false</showPercentage>
+            <showPicturesOnCharts>false</showPicturesOnCharts>
+            <showValues>true</showValues>
+            <sortBy>RowLabelAscending</sortBy>
+            <useReportChart>false</useReportChart>
         </components>
     </middleSection>
     <owner>integrations@ohanafy.ros</owner>
@@ -102,15 +168,53 @@
         </components>
         <components>
             <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
+            <chartAxisRange>Auto</chartAxisRange>
+            <componentType>Bar</componentType>
+            <displayUnits>Auto</displayUnits>
+            <drillEnabled>true</drillEnabled>
+            <drillToDetailEnabled>false</drillToDetailEnabled>
+            <enableHover>true</enableHover>
+            <expandOthers>false</expandOthers>
+            <groupingSortProperties/>
+            <header>Depletions by Market</header>
+            <legendPosition>Bottom</legendPosition>
+            <report>VIP_Data/Depletions_by_Market</report>
+            <showPercentage>false</showPercentage>
+            <showPicturesOnCharts>false</showPicturesOnCharts>
+            <showValues>true</showValues>
+            <sortBy>RowLabelAscending</sortBy>
+            <useReportChart>false</useReportChart>
+        </components>
+        <components>
+            <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
+            <chartAxisRange>Auto</chartAxisRange>
+            <componentType>Bar</componentType>
+            <displayUnits>Auto</displayUnits>
+            <drillEnabled>true</drillEnabled>
+            <drillToDetailEnabled>false</drillToDetailEnabled>
+            <enableHover>true</enableHover>
+            <expandOthers>false</expandOthers>
+            <groupingSortProperties/>
+            <header>Depletions by Salesman</header>
+            <legendPosition>Bottom</legendPosition>
+            <report>VIP_Data/Depletions_by_Salesman</report>
+            <showPercentage>false</showPercentage>
+            <showPicturesOnCharts>false</showPicturesOnCharts>
+            <showValues>true</showValues>
+            <sortBy>RowLabelAscending</sortBy>
+            <useReportChart>false</useReportChart>
+        </components>
+        <components>
+            <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
             <componentType>Table</componentType>
             <drillEnabled>true</drillEnabled>
             <drillToDetailEnabled>false</drillToDetailEnabled>
             <groupingSortProperties/>
-            <header>Stale Record Monitor</header>
+            <header>Declining Accounts</header>
             <indicatorHighColor>#C25454</indicatorHighColor>
             <indicatorLowColor>#54C254</indicatorLowColor>
             <indicatorMiddleColor>#C2C254</indicatorMiddleColor>
-            <report>VIP_Data/Stale_Record_Monitor</report>
+            <report>VIP_Data/Declining_Accounts</report>
             <showPicturesOnTables>true</showPicturesOnTables>
             <sortBy>RowLabelAscending</sortBy>
         </components>

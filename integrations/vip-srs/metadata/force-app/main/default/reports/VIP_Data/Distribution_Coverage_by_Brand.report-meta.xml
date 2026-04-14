@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>Account$Name</field>
+    </columns>
+    <columns>
+        <field>Account.ohfy__Placements__r$ohfy__Last_30_Days_Volume__c</field>
+    </columns>
+    <columns>
+        <field>Account.ohfy__Placements__r$ohfy__First_Sold_Date__c</field>
+    </columns>
+    <description>Count of accounts with active placements per brand (Item). Shows distribution breadth across the portfolio.</description>
+    <filter>
+        <criteriaItems>
+            <column>Account$Type</column>
+            <columnToColumn>false</columnToColumn>
+            <isUnlocked>true</isUnlocked>
+            <operator>equals</operator>
+            <value>Distributed Customer</value>
+        </criteriaItems>
+        <criteriaItems>
+            <column>Account.ohfy__Placements__r$ohfy__Is_Active__c</column>
+            <columnToColumn>false</columnToColumn>
+            <isUnlocked>true</isUnlocked>
+            <operator>equals</operator>
+            <value>1</value>
+        </criteriaItems>
+    </filter>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>Account.ohfy__Placements__r$ohfy__Item__c</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Distribution Coverage by Brand</name>
+    <params>
+        <name>co</name>
+        <value>1</value>
+    </params>
+    <reportType>VIP_Accounts_with_Placements__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <timeFrameFilter>
+        <dateColumn>Account.ohfy__Placements__r$CreatedDate</dateColumn>
+        <interval>INTERVAL_CUSTOM</interval>
+    </timeFrameFilter>
+</Report>
