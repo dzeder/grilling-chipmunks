@@ -43,10 +43,15 @@ Missing ANY prerequisite causes `FIELD_FILTER_VALIDATION_EXCEPTION`. This is the
 
 | Field | Notes |
 |-------|-------|
-| `ohfy__Type__c` | Set to `'Sale'` for standard depletions — makes them visible in type-filtered reports |
+| `ohfy__Type__c` | Restricted picklist: Cold Box, Draft Line, Menu, Shelf. NOT transaction types — skip for VIP sales data. |
 | `ohfy__Date__c` | Invoice/transaction date |
-| `ohfy__Quantity__c` | Quantity sold (negative = return/credit) |
-| `ohfy__Net_Amount__c` | Net dollar amount |
+| `ohfy__Case_Quantity__c` | Case quantity (when UOM=C) |
+| `VIP_Unit_Quantity__c` | Bottle quantity (when UOM=B) — custom unmanaged field |
+| `VIP_Net_Price__c` | Per-unit net price — custom unmanaged field |
+| `VIP_Net_Amount__c` | Extended net amount (Qty × NetPrice) — custom unmanaged field. **Use this for revenue reporting.** |
+| `VIP_Invoice_Number__c` | Invoice number from VIP SLSDA |
+
+> **Note:** `ohfy__Net_Amount__c` and `ohfy__Quantity__c` are documented in some knowledge sources but do NOT exist in the ROS2 sandbox as of 2026-04-14. Custom unmanaged fields (`VIP_*`) are used instead.
 
 ## Depletion vs Invoice
 

@@ -34,10 +34,11 @@ for all 22 VIP file types at a glance.
 
 `integrations/vip-srs/` — Ohanafy-specific scripts and mappings
 
-- `integrations/vip-srs/docs/VIP_AGENT_HANDOFF.md` — THE source of truth for VIP-to-Ohanafy mapping
+- `integrations/vip-srs/docs/VIP_DATA_DICTIONARY.md` — **Complete field reference** for all 16 SF objects (currency fields, dates, crosswalks, relationships). Use this for reports/dashboards.
+- `integrations/vip-srs/docs/VIP_AGENT_HANDOFF.md` — Original mapping spec (STALE in places — scripts are authoritative, see ROADMAP Gotcha #22)
 - `integrations/vip-srs/CLAUDE.md` — Technical implementation context
 - `integrations/vip-srs/shared/constants.js` — Crosswalk maps and external ID prefixes
-- `integrations/vip-srs/scripts/*.js` — Production transform scripts
+- `integrations/vip-srs/scripts/*.js` — Production transform scripts (source of truth for field mappings)
 
 ## Domain Coverage
 
@@ -80,6 +81,12 @@ for all 22 VIP file types at a glance.
 - VIP `GenericCat3` values sometimes match Ohanafy picklist values exactly (e.g., "Flavored Vodka")
 - Some VIP codes are NOT valid picklist values (e.g., "GENERIC VOL") — need a `CATEGORY_MAP` crosswalk
 - GenericCat3 serves dual purpose: Item_Type name AND Category value — mapping must happen at Category assignment, NOT on the source field
+
+### Managed Depletion Fields Don't Exist in ROS2 (2026-04-14)
+- `ohfy__Net_Amount__c` and `ohfy__Quantity__c` are documented in knowledge base but DO NOT EXIST in ROS2 sandbox
+- `ohfy__Type__c` EXISTS but is a restricted picklist (Cold Box, Draft Line, Menu, Shelf) — NOT transaction types like `Sale`
+- Created custom unmanaged `VIP_Net_Amount__c` (Currency 16,2) = Qty × NetPrice for revenue reporting
+- **Always verify managed fields via `sf sobject describe` before assuming they exist** — knowledge base may reflect a different org version
 
 ### Supplier-as-Config Pattern (ROS2, 2026-04-14)
 - Supplier identity comes from customer config JSON (`supplier` block), NOT prompted per-run

@@ -37,7 +37,7 @@
 | Ohanafy Apex Triggers | 34 (all Active) |
 | Active Flows | 47 (9 AutoLaunchedFlow) |
 | Ohanafy Record Types | 30 |
-| VIP Custom Fields Deployed | 29 |
+| VIP Custom Fields Deployed | 30 |
 | Transformation_Setting__c Records | 1 |
 
 ## Ohanafy Apex Triggers (34)
@@ -82,7 +82,7 @@ TaskTrigger, TierSettingTrigger, TransferGroupTrigger, TransferTrigger
 | ohfy__Item_Type__c | VIP_External_ID__c, VIP_File_Date__c |
 | ohfy__Item_Line__c | VIP_External_ID__c, VIP_File_Date__c |
 | ohfy__Placement__c | VIP_External_ID__c, VIP_File_Date__c |
-| ohfy__Depletion__c | VIP_External_ID__c, VIP_File_Date__c, VIP_From_Date__c, VIP_To_Date__c, VIP_Invoice_Number__c, VIP_Net_Price__c, VIP_Unit_Quantity__c |
+| ohfy__Depletion__c | VIP_External_ID__c, VIP_File_Date__c, VIP_From_Date__c, VIP_To_Date__c, VIP_Invoice_Number__c, VIP_Net_Price__c, VIP_Net_Amount__c, VIP_Unit_Quantity__c |
 | ohfy__Allocation__c | VIP_External_ID__c, VIP_File_Date__c, VIP_From_Date__c, VIP_To_Date__c |
 
 ## VIP SRS Data Load Status (as of 2026-04-13)

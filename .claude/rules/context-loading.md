@@ -41,6 +41,7 @@ If the task mentions OMS, WMS, REX, EDI, Ecom, Payments, Configure, Platform, Co
 If the task mentions VIP, SRS, SLSDA, OUTDA, INVDA, CTLDA, DISTDA, ITM2DA, ITMDA, SRSCHAIN, SRSVALUE, or any VIP file type:
 - Read `skills/ohanafy/ohfy-vip-srs-expert/SKILL.md` for domain coverage and routing
 - Read `integrations/vip-srs/CLAUDE.md` for implementation context
+- For reports/dashboards/field questions: read `integrations/vip-srs/docs/VIP_DATA_DICTIONARY.md`
 - For file format questions: read `knowledge-base/vip-srs/isv-spec-overview.md`
 - For coded values: read `knowledge-base/vip-srs/valid-values.md`
 - For specific file types: read `knowledge-base/vip-srs/file-types/{FILE_TYPE}.md`

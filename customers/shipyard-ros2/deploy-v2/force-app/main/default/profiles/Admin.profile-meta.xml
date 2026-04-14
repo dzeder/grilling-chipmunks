@@ -27,6 +27,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>ohfy__Depletion__c.VIP_Net_Amount__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>ohfy__Depletion__c.VIP_Net_Price__c</field>
         <readable>true</readable>
     </fieldPermissions>
