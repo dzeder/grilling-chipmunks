@@ -69,6 +69,28 @@ for all 22 VIP file types at a glance.
 - Missing ANY prerequisite → `FIELD_FILTER_VALIDATION_EXCEPTION` on all depletions
 - Script 02 sets prerequisites 1-4; Transformation_Setting__c must exist in org
 
+### Managed RT Picklist Targeting (ROS2, 2026-04-14)
+- Managed package record types have namespace prefix: `ohfy__Finished_Good`, not `Finished_Good`
+- Deploying `Finished_Good.recordType-meta.xml` creates a **new subscriber RT** instead of updating the managed one
+- File must be named `ohfy__Finished_Good.recordType-meta.xml` with `<fullName>ohfy__Finished_Good</fullName>`
+- The `sobject describe` shows two RTs with the same name — check `NamespacePrefix` to distinguish
+- Subscriber RT has `available=False`; managed RT has `available=True`
+
+### Category Crosswalk Pattern (ROS2, 2026-04-14)
+- VIP `GenericCat3` values sometimes match Ohanafy picklist values exactly (e.g., "Flavored Vodka")
+- Some VIP codes are NOT valid picklist values (e.g., "GENERIC VOL") — need a `CATEGORY_MAP` crosswalk
+- GenericCat3 serves dual purpose: Item_Type name AND Category value — mapping must happen at Category assignment, NOT on the source field
+
+### Supplier-as-Config Pattern (ROS2, 2026-04-14)
+- Supplier identity comes from customer config JSON (`supplier` block), NOT prompted per-run
+- Phase 0 creates Supplier Account before all other phases; external ID: `SUP:{supplierCode}`
+- Different customers have different suppliers — config-driven, not hardcoded
+
+### Distributor Account + Contact from DISTDA (ROS2, 2026-04-14)
+- Script 03 creates Account (Customer RT) + Contact + Location from DISTDA (not just Location)
+- Distributors are the supplier's Customers; external IDs: `DST:{DistId}`, `CON:{DistId}:DIST`
+- Contact creation is blocked by AccountTriggerMethods cascade (same root cause)
+
 ### Stock_UOM_Sub_Type__c Validation (ROS2, 2026-04-13)
 - Managed validation rule requires `ohfy__Stock_UOM_Sub_Type__c` when `ohfy__Packaging_Type__c` is set on Finished Goods
 - Script 04 (ITMDA enrichment) hits this; Script 02 (ITM2DA) does not

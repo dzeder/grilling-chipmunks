@@ -22,7 +22,8 @@ var PREFIX = {
   ALLOCATION: 'ALC',
   PLACEMENT: 'PLC',
   ITEM_LINE: 'ILN',
-  ITEM_TYPE: 'ITY'
+  ITEM_TYPE: 'ITY',
+  DISTRIBUTOR: 'DST'
 };
 
 // =============================================================================

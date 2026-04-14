@@ -241,6 +241,7 @@ echo ""
 
 if [[ -n "$DIST_ID" ]]; then
   delete_records "Account" "Accounts — Outlets (ACT:${DIST_ID})" "ohfy__External_ID__c LIKE 'ACT:${DIST_ID}:%'"
+  delete_records "Account" "Accounts — Distributors (DST:${DIST_ID})" "ohfy__External_ID__c = 'DST:${DIST_ID}'"
   # Chains are not distributor-specific, only delete if no dist filter
   echo "--- Chains (CHN:*) ---"
   echo "  Skipped: Chains are not distributor-specific. Run without --dist-id to include."
@@ -249,6 +250,8 @@ if [[ -n "$DIST_ID" ]]; then
   delete_records "ohfy__Item__c" "Items (ITM:*)" "ohfy__VIP_External_ID__c LIKE 'ITM:%'"
 else
   delete_records "Account" "Accounts — Outlets (ACT:*)" "ohfy__External_ID__c LIKE 'ACT:%'"
+  delete_records "Account" "Accounts — Distributors (DST:*)" "ohfy__External_ID__c LIKE 'DST:%'"
+  delete_records "Account" "Accounts — Supplier (SUP:*)" "ohfy__External_ID__c LIKE 'SUP:%'"
   delete_records "Account" "Accounts — Chains (CHN:*)" "ohfy__External_ID__c LIKE 'CHN:%'"
   delete_records "ohfy__Location__c" "Locations (LOC:*)" "VIP_External_ID__c LIKE 'LOC:%'"
   delete_records "ohfy__Item__c" "Items (ITM:*)" "ohfy__VIP_External_ID__c LIKE 'ITM:%'"

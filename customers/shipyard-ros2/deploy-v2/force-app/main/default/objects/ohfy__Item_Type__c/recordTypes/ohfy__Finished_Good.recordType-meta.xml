@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RecordType xmlns="http://soap.sforce.com/2006/09/metadata">
+    <fullName>ohfy__Finished_Good</fullName>
+    <active>true</active>
+    <label>Finished Good</label>
+    <picklistValues>
+        <picklist>ohfy__Category__c</picklist>
+        <values>
+            <fullName>Blonde Ale</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Brown Ale</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Flavored Vodka</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>India Pale Ale</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Lager</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Pale Ale</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Porter</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Stout</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Vodka</fullName>
+            <default>false</default>
+        </values>
+        <values>
+            <fullName>Wheat</fullName>
+            <default>false</default>
+        </values>
+    </picklistValues>
+</RecordType>

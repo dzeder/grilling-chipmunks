@@ -129,6 +129,22 @@ function itemTypeKey(brandDesc, name) {
 }
 
 /**
+ * Account (Distributor/Customer): DST:{DistId}
+ * @param {string} distId - Distributor code
+ */
+function distributorKey(distId) {
+  return PREFIX.DISTRIBUTOR + ':' + distId;
+}
+
+/**
+ * Contact (Distributor primary): CON:{DistId}:DIST
+ * @param {string} distId - Distributor code
+ */
+function distributorContactKey(distId) {
+  return PREFIX.CONTACT + ':' + distId + ':DIST';
+}
+
+/**
  * Placement__c: PLC:{DistId}:{AcctNbr}:{SuppItem}
  * One per Account×Item pair — aggregated from SLSDA invoice lines.
  * @param {string} distId - Distributor code
@@ -157,6 +173,8 @@ if (typeof module !== 'undefined' && module.exports) {
     inventoryHistoryKey: inventoryHistoryKey,
     inventoryAdjustmentKey: inventoryAdjustmentKey,
     allocationKey: allocationKey,
-    placementKey: placementKey
+    placementKey: placementKey,
+    distributorKey: distributorKey,
+    distributorContactKey: distributorContactKey
   };
 }

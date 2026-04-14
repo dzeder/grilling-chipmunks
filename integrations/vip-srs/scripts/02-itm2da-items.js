@@ -31,6 +31,10 @@ var VOLUME_UOM = { 'ML': 'Metric Volume', 'LTR': 'Metric Volume', 'OZ': 'US Volu
 
 var ML_TO_FLOZ = 0.033814;
 
+// VIP GenericCat3 → Ohanafy Category__c picklist crosswalk
+// Values that match the picklist pass through; VIP-specific codes get mapped here
+var CATEGORY_MAP = { 'GENERIC VOL': 'Vodka' };
+
 function itemKey(supplierItem) { return PREFIX.ITEM + ':' + supplierItem; }
 function itemLineKey(name) { return PREFIX.ITEM_LINE + ':' + name; }
 function itemTypeKey(brandDesc, name) { return PREFIX.ITEM_TYPE + ':' + brandDesc + ':' + name; }
@@ -160,6 +164,9 @@ exports.step = function(input) {
   // File date for VIP_File_Date__c (date of pipeline run, not from file contents)
   var fileDate = input.fileDate || null;
 
+  // Supplier external ID — links Item_Lines to Supplier Account via relationship
+  var supplierExternalId = input.supplierExternalId || null;
+
   // Collect existing Item_Line and Item_Type lookups if provided
   var existingItemLines = input.existingItemLines || {};   // { name: sfId }
   var existingItemTypes = input.existingItemTypes || {};    // { name: sfId }
@@ -197,6 +204,7 @@ exports.step = function(input) {
         Object.keys(row).forEach(function(k) { collapsed[k] = row[k]; });
         collapsed.SupplierItem = '99Z-GENERIC';
         collapsed.Desc = 'Generic Volume (Unmapped)';
+        // GenericCat3 stays as-is for Item_Type name; Category mapped separately
         valid.push(collapsed);
       }
       skipped.push({ rowIndex: idx, reason: '99Z placeholder (collapsed)' });
@@ -226,6 +234,7 @@ exports.step = function(input) {
   // Build Item_Line__c upsert records (Composite API PATCH by external ID)
   var itemLineRecords = Object.keys(itemLineNames).map(function(name) {
     var record = { Name: name, VIP_External_ID__c: itemLineKey(name) };
+    record[NS + 'Type__c'] = 'Finished Good';
     if (fileDate) record.VIP_File_Date__c = fileDate;
     return record;
   });
@@ -236,7 +245,13 @@ exports.step = function(input) {
       compositeRequest: chunk.map(function(record, idx) {
         var extId = record.VIP_External_ID__c;
         var body = { Name: record.Name };
+        body[NS + 'Type__c'] = 'Finished Good';
         if (record.VIP_File_Date__c) body.VIP_File_Date__c = record.VIP_File_Date__c;
+        if (supplierExternalId) {
+          var supplierRef = {};
+          supplierRef[NS + 'External_ID__c'] = supplierExternalId;
+          body[NS + 'Supplier__r'] = supplierRef;
+        }
         return {
           method: 'PATCH',
           url: '/services/data/' + SF_CONFIG.apiVersion + '/sobjects/' +
@@ -259,6 +274,9 @@ exports.step = function(input) {
       VIP_External_ID__c: itemTypeKey(brandDesc, genericCat3)
     };
     record[NS + 'Item_Line__r'] = { VIP_External_ID__c: itemLineKey(brandDesc) };
+    record[NS + 'Type__c'] = 'Finished Good';
+    // GenericCat3 from ITM2DA → Category picklist (with crosswalk for VIP codes)
+    if (genericCat3) record[NS + 'Category__c'] = CATEGORY_MAP[genericCat3] || genericCat3;
     if (fileDate) record.VIP_File_Date__c = fileDate;
     return record;
   });
@@ -270,6 +288,8 @@ exports.step = function(input) {
         var extId = record.VIP_External_ID__c;
         var body = { Name: record.Name };
         body[NS + 'Item_Line__r'] = record[NS + 'Item_Line__r'];
+        body[NS + 'Type__c'] = 'Finished Good';
+        if (record[NS + 'Category__c']) body[NS + 'Category__c'] = record[NS + 'Category__c'];
         if (record.VIP_File_Date__c) body.VIP_File_Date__c = record.VIP_File_Date__c;
         return {
           method: 'PATCH',

@@ -335,11 +335,26 @@ var PIPELINE = [
   },
   {
     phase: 1,
-    name: '03-distda → Location',
+    name: '03-distda → Account (Distributor) + Contact + Location',
     script: '03-distda-locations.js',
     fixture: 'distda-sample.csv',
     run: function(result) {
-      return sendBatches(result.batches, 'Locations');
+      // Accounts first (parent)
+      var acctResult = { success: 0, fail: 0 };
+      if (result.accountBatches && result.accountBatches.length > 0) {
+        acctResult = sendBatches(result.accountBatches, 'Distributors (Accounts)');
+      }
+      // Contacts second (child — needs Account to exist)
+      var contResult = { success: 0, fail: 0 };
+      if (result.contactBatches && result.contactBatches.length > 0) {
+        contResult = sendBatches(result.contactBatches, 'Distributor Contacts');
+      }
+      // Locations last
+      var locResult = sendBatches(result.locationBatches || result.batches, 'Locations');
+      return {
+        success: acctResult.success + contResult.success + locResult.success,
+        fail: acctResult.fail + contResult.fail + locResult.fail
+      };
     }
   },
   // Phase 2: Enrichment
@@ -440,7 +455,55 @@ if (FINISHED_GOOD_RT_ID) {
 } else {
   console.log('WARNING: Finished_Good RecordType not found on ohfy__Item__c');
 }
+
+var CUSTOMER_RT_ID = getRecordTypeId('Account', 'Customer');
+if (CUSTOMER_RT_ID) {
+  console.log('Customer RT: ' + CUSTOMER_RT_ID);
+} else {
+  console.log('WARNING: Customer RecordType not found on Account');
+}
 console.log('');
+
+// =============================================================================
+// PHASE 0: SUPPLIER ACCOUNT (from config)
+// =============================================================================
+
+var SUPPLIER_ID = null; // populated if config.supplier exists
+if (_cfg.supplier && _cfg.supplier.name && (!PHASE_FILTER || PHASE_FILTER <= 1)) {
+  console.log('=== Phase 0: Supplier Account ===');
+  var supplierExtId = _cfg.supplier.externalId || ('SUP:' + (_cfg.supplierCode || 'UNKNOWN'));
+  var supplierRT = _cfg.supplier.recordType || 'Supplier';
+  var supplierType = _cfg.supplier.type || 'Supplier';
+
+  // Resolve Supplier record type ID
+  var supplierRtId = getRecordTypeId('Account', supplierRT);
+  if (!supplierRtId) {
+    console.log('  WARNING: RecordType "' + supplierRT + '" not found on Account. Skipping RT.');
+  }
+
+  // Upsert by external ID
+  var supplierBody = {
+    Name: _cfg.supplier.name,
+    Type: supplierType,
+    AccountSource: 'VIP SRS'
+  };
+  if (supplierRtId) supplierBody.RecordTypeId = supplierRtId;
+
+  var supplierEndpoint = '/services/data/' + API_VERSION + '/sobjects/Account/ohfy__External_ID__c/' + supplierExtId;
+
+  if (DRY_RUN) {
+    console.log('  [DRY RUN] Would upsert Supplier: ' + _cfg.supplier.name + ' (' + supplierExtId + ')');
+  } else {
+    var supplierResp = sfApiPatch(supplierEndpoint, supplierBody);
+    if (supplierResp.success || supplierResp.id || (supplierResp.httpStatusCode && supplierResp.httpStatusCode < 300)) {
+      console.log('  Supplier upserted: ' + _cfg.supplier.name + ' (' + supplierExtId + ')');
+      SUPPLIER_ID = supplierResp.id || null;
+    } else {
+      console.log('  ERROR upserting Supplier: ' + JSON.stringify(supplierResp).substring(0, 200));
+    }
+  }
+  console.log('');
+}
 
 // Pre-query existing Inventory records to handle "Duplicate Record Blocked" validation rule.
 // Maps VIP inventory key (IVT:{DistId}:{SuppItem}) → existing Salesforce record ID.
@@ -535,8 +598,14 @@ PIPELINE.forEach(function(step) {
   var fileDate = FILE_DATE || new Date().toISOString().substring(0, 10);
   input.fileDate = fileDate;
 
-  // Inject record type IDs for item scripts
+  // Inject record type IDs
   if (FINISHED_GOOD_RT_ID) input.finishedGoodRecordTypeId = FINISHED_GOOD_RT_ID;
+  if (CUSTOMER_RT_ID) input.customerRecordTypeId = CUSTOMER_RT_ID;
+
+  // Inject supplier external ID for Script 02 (links Item_Lines to Supplier Account)
+  if (_cfg.supplier && _cfg.supplier.externalId) {
+    input.supplierExternalId = _cfg.supplier.externalId;
+  }
 
   // Inject existing Inventory map for Script 06 (avoids duplicate validation rule)
   if (step.script === '06-invda-inventory.js') {
