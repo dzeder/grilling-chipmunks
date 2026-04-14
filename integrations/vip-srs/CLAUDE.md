@@ -51,6 +51,15 @@ These are source files for development/testing. For Tray deployment, inline the 
 - **Placement__c** is Account×Item (not per transaction). External ID: `PLC:{DistId}:{AcctNbr}:{SuppItem}`. Master-detail fields are create-only.
 - **Item lookup filter on Depletion__c.Item__c**: Items need Finished Good RT + Type__c + UOM__c + Packaging_Type__c + Transformation_Setting__c record. See ROADMAP.md Gotcha #14.
 
+## Reports & Dashboards
+
+Shared Salesforce reports and dashboards for VIP data live in `metadata/`. See `metadata/README.md` for the full catalog.
+
+- Report types define object joins (e.g., Depletions with Items)
+- Reports and dashboards deploy into a `VIP Data` folder in Salesforce
+- Includes both supplier metrics (depletions, placements, inventory) and dirty data reports (orphans, stale records, missing fields)
+- Development workflow: build in sandbox UI → retrieve → commit here → deploy to any VIP customer org
+
 ## Testing
 
 ```bash

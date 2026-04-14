@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>ohfy__Item__c.ohfy__Depletions__r$Name</field>
+    </columns>
+    <columns>
+        <field>ohfy__Item__c.ohfy__Depletions__r$ohfy__Customer__c</field>
+    </columns>
+    <columns>
+        <field>ohfy__Item__c.ohfy__Depletions__r$VIP_File_Date__c</field>
+    </columns>
+    <columns>
+        <field>ohfy__Item__c.ohfy__Depletions__r$ohfy__Date__c</field>
+    </columns>
+    <columns>
+        <field>ohfy__Item__c.ohfy__Depletions__r$ohfy__Case_Quantity__c</field>
+    </columns>
+    <description>Depletion records where VIP File Date is older than today, indicating the record was not refreshed in the latest integration run.</description>
+    <filter>
+        <criteriaItems>
+            <column>ohfy__Item__c.ohfy__Depletions__r$VIP_File_Date__c</column>
+            <columnToColumn>false</columnToColumn>
+            <isUnlocked>true</isUnlocked>
+            <operator>notEqual</operator>
+            <value>TODAY</value>
+        </criteriaItems>
+        <criteriaItems>
+            <column>ohfy__Item__c.ohfy__Depletions__r$VIP_File_Date__c</column>
+            <columnToColumn>false</columnToColumn>
+            <isUnlocked>true</isUnlocked>
+            <operator>notEqual</operator>
+            <value></value>
+        </criteriaItems>
+    </filter>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>ohfy__Item__c$Name</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Stale Record Monitor</name>
+    <params>
+        <name>co</name>
+        <value>1</value>
+    </params>
+    <reportType>VIP_Depletions_with_Items__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <timeFrameFilter>
+        <dateColumn>ohfy__Item__c.ohfy__Depletions__r$VIP_File_Date__c</dateColumn>
+        <interval>INTERVAL_CUSTOM</interval>
+    </timeFrameFilter>
+</Report>
