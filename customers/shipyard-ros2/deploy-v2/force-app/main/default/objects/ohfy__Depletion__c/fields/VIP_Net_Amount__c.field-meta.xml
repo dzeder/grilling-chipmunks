@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/09/metadata">
+    <fullName>VIP_Net_Amount__c</fullName>
+    <description>Extended net amount (Qty × NetPrice). The revenue line total from VIP SLSDA depletion data.</description>
+    <externalId>false</externalId>
+    <label>VIP Net Amount</label>
+    <precision>16</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <type>Currency</type>
+</CustomField>

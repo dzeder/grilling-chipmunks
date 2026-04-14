@@ -98,6 +98,7 @@ function transformDepletion(row, distId, fileDate) {
 
   // VIP-specific custom fields
   record.VIP_Net_Price__c = toNumber(row.NetPrice);
+  record.VIP_Net_Amount__c = qty * toNumber(row.NetPrice);
   record.VIP_Invoice_Number__c = invoiceNbr;
 
   // Stale cleanup dates (unmanaged)
