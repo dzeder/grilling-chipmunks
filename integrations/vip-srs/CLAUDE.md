@@ -51,6 +51,10 @@ These are source files for development/testing. For Tray deployment, inline the 
 - **Placement__c** is Account×Item (not per transaction). External ID: `PLC:{DistId}:{AcctNbr}:{SuppItem}`. Master-detail fields are create-only.
 - **Item lookup filter on Depletion__c.Item__c**: Items need Finished Good RT + Type__c + UOM__c + Packaging_Type__c + Transformation_Setting__c record. See ROADMAP.md Gotcha #14.
 
+## Data Dictionary
+
+`docs/VIP_DATA_DICTIONARY.md` — comprehensive field reference for report/dashboard builders. Covers all 16 SF objects, currency fields, date fields, crosswalks, relationships, and unmapped SLSDA fields. **Use this when building reports or answering "what data do we have?" questions.**
+
 ## Reports & Dashboards
 
 Shared Salesforce reports and dashboards for VIP data live in `metadata/`. See `metadata/README.md` for the full catalog.

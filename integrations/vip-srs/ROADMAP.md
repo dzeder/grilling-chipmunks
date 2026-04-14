@@ -173,6 +173,11 @@
   - [ ] OUTDA production chunking — DistId filtering handles sandbox volume; add Loop chunking for 36K+ row production files
   - [ ] Script 09 (cleanup) delete execution — queries generated but deletes require post-import safety threshold tuning
 
+### Phase 5i: Revenue Field + Data Dictionary (2026-04-14)
+- [x] **VIP_Net_Amount__c on Depletion__c:** New Currency(16,2) field = Qty × NetPrice. Deployed with Admin profile FLS + permset. Script 07 updated. This is the extended line total for revenue reporting.
+- [x] **Org field verification:** `ohfy__Net_Amount__c` and `ohfy__Quantity__c` do NOT exist in ROS2. `ohfy__Type__c` exists but is restricted picklist (Cold Box/Draft Line/Menu/Shelf) — `Sale` not valid. Used unmanaged `VIP_Net_Amount__c` instead.
+- [x] **VIP Data Dictionary:** `docs/VIP_DATA_DICTIONARY.md` — comprehensive field reference for report/dashboard builders. Covers all 16 SF objects, currency fields, date fields, crosswalks, relationships, and unmapped SLSDA fields.
+
 ## Next Up
 
 ### Phase 7: Multi-Day Sequence Test
@@ -233,3 +238,4 @@
 21. **GenericCat3 serves dual purpose (Item_Type name + Category):** The VIP `GenericCat3` value becomes both the Item_Type `Name` and the `Category__c` picklist value. When GenericCat3 doesn't match a valid picklist value (e.g., "GENERIC VOL"), use a `CATEGORY_MAP` crosswalk at Category assignment time — do NOT change GenericCat3 itself (that would create a new Item_Type instead of updating the existing one).
 22. **HANDOFF doc has stale crosswalk values:** Class of Trade (Section 7.1), UOM__c (Section 5.2), Packaging_Type__c (Section 5.2), and Account Type for chain banners (Section 5.1) differ between the HANDOFF spec and the org-validated script values. Scripts are the source of truth for actual API values. HANDOFF is stale — see GitHub issue #114.
 23. **Inventory Units_On_Hand__c not mapped (data loss):** Script 06 computes both `entry.cases` and `entry.units` but only writes `Quantity_On_Hand__c` from cases. Bottle-level inventory quantities are silently dropped. See GitHub issue #111.
+24. **Managed Depletion fields don't exist in ROS2:** Knowledge base documents `ohfy__Net_Amount__c` and `ohfy__Quantity__c` on Depletion__c but neither exists in the ROS2 sandbox. `ohfy__Type__c` exists but is a restricted picklist (Cold Box, Draft Line, Menu, Shelf) — not transaction types. Created unmanaged `VIP_Net_Amount__c` (Currency) for extended net amount instead.

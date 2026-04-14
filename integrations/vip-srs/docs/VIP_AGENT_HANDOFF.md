@@ -4,6 +4,8 @@
 **Date:** 2026-04-09
 **Status:** Draft / Pending Signoff
 
+> **IMPORTANT:** Several field mappings in this document are stale (see ROADMAP Gotcha #22). The **scripts in `scripts/*.js`** are the source of truth for actual API field names and crosswalk values. For a current, comprehensive field reference, see **[VIP_DATA_DICTIONARY.md](VIP_DATA_DICTIONARY.md)**.
+
 ---
 
 ## 1. Objective
