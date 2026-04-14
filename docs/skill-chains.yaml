@@ -1,0 +1,202 @@
+# Skill Chains — named multi-step workflows for the orchestrator agent
+# Each chain defines a sequence of skills with dependencies and trigger phrases
+# Consumed by: agents/orchestrator.md, .claude/rules/skill-discovery.md
+
+chains:
+
+  vip-data-pipeline:
+    description: "End-to-end VIP SRS data integration for a customer"
+    trigger_phrases:
+      - "build VIP pipeline"
+      - "VIP data integration"
+      - "set up VIP ingestion"
+      - "VIP end-to-end"
+      - "distributor data pipeline"
+    steps:
+      - skill: kickoff
+        purpose: "Establish customer and integration context"
+      - skill: ohfy-vip-srs-expert
+        purpose: "Load VIP domain knowledge and field mappings"
+        requires: [kickoff]
+      - skill: tray-expert
+        purpose: "Design the Tray workflow architecture"
+        requires: [ohfy-vip-srs-expert]
+      - skill: tray-script-generator
+        purpose: "Generate transform scripts for each VIP file type"
+        requires: [tray-expert]
+      - skill: test-script
+        purpose: "Validate scripts against patterns and test data"
+        requires: [tray-script-generator]
+      - skill: deploy-prep
+        purpose: "Prepare for Tray deployment"
+        requires: [test-script]
+
+  ship-and-document:
+    description: "Ship code and update documentation"
+    trigger_phrases:
+      - "ship and document"
+      - "deploy and update docs"
+      - "merge, push, and document"
+      - "ship it and update the changelog"
+    steps:
+      - skill: review
+        purpose: "Pre-landing code review"
+      - skill: ship
+        purpose: "Merge base, bump version, push, create PR"
+        requires: [review]
+      - skill: document-release
+        purpose: "Update docs with shipped changes"
+        requires: [ship]
+
+  full-review-pipeline:
+    description: "Run all review perspectives on a plan or feature"
+    trigger_phrases:
+      - "full review"
+      - "run all reviews"
+      - "review gauntlet"
+      - "comprehensive review"
+      - "all perspectives"
+    steps:
+      - skill: plan-ceo-review
+        purpose: "CEO/founder-mode business viability review"
+      - skill: plan-eng-review
+        purpose: "Engineering manager technical review"
+        composable_with: [plan-ceo-review]
+      - skill: plan-design-review
+        purpose: "Designer's eye UX/visual review"
+        composable_with: [plan-ceo-review, plan-eng-review]
+      - skill: plan-devex-review
+        purpose: "Developer experience review"
+        composable_with: [plan-ceo-review, plan-eng-review, plan-design-review]
+
+  salesforce-feature:
+    description: "Build a complete Salesforce feature end-to-end"
+    trigger_phrases:
+      - "build a Salesforce feature"
+      - "new SF feature"
+      - "Salesforce feature end-to-end"
+      - "build the full SF stack"
+    steps:
+      - skill: sf-metadata
+        purpose: "Define custom objects, fields, and validation rules"
+      - skill: sf-apex
+        purpose: "Write Apex classes, triggers, and services"
+        requires: [sf-metadata]
+      - skill: sf-flow
+        purpose: "Create automation flows"
+        composable_with: [sf-apex]
+      - skill: sf-lwc
+        purpose: "Build Lightning Web Components UI"
+        requires: [sf-apex]
+      - skill: sf-testing
+        purpose: "Write and run Apex tests (85%+ coverage)"
+        requires: [sf-apex, sf-flow]
+      - skill: sf-deploy
+        purpose: "Deploy to target org"
+        requires: [sf-testing]
+
+  customer-onboard:
+    description: "Onboard a new customer end-to-end"
+    trigger_phrases:
+      - "onboard customer"
+      - "new customer setup"
+      - "set up a new customer"
+      - "customer onboarding"
+    steps:
+      - skill: kickoff
+        purpose: "Create customer context and workspace"
+      - skill: org-connect
+        purpose: "Connect to customer Salesforce org"
+        requires: [kickoff]
+      - skill: ohfy-data-model-expert
+        purpose: "Understand data model requirements and mappings"
+        requires: [org-connect]
+      - skill: data-harmonizer
+        purpose: "Import and harmonize initial data"
+        requires: [ohfy-data-model-expert]
+
+  tray-workflow:
+    description: "Design, build, and test a Tray.io integration workflow"
+    trigger_phrases:
+      - "build a Tray workflow"
+      - "create Tray integration"
+      - "design and build Tray"
+      - "Tray workflow end-to-end"
+    steps:
+      - skill: tray-expert
+        purpose: "Design the workflow architecture and connector selection"
+      - skill: tray-script-generator
+        purpose: "Generate transform scripts"
+        requires: [tray-expert]
+      - skill: test-script
+        purpose: "Validate scripts against test data"
+        requires: [tray-script-generator]
+      - skill: deploy-prep
+        purpose: "Validate and prepare for Tray deployment"
+        requires: [test-script]
+
+  investigate-and-fix:
+    description: "Debug a problem, find root cause, fix, and verify"
+    trigger_phrases:
+      - "debug and fix"
+      - "find and fix the bug"
+      - "investigate and resolve"
+      - "root cause and fix"
+    steps:
+      - skill: investigate
+        purpose: "Four-phase root cause investigation"
+      - skill: review
+        purpose: "Review the fix for correctness"
+        requires: [investigate]
+      - skill: ship
+        purpose: "Ship the fix"
+        requires: [review]
+
+  datacloud-setup:
+    description: "Set up Salesforce Data Cloud end-to-end"
+    trigger_phrases:
+      - "set up Data Cloud"
+      - "Data Cloud end-to-end"
+      - "configure Data Cloud"
+      - "Data Cloud pipeline"
+    steps:
+      - skill: sf-datacloud-connect
+        purpose: "Connect data sources"
+      - skill: sf-datacloud-prepare
+        purpose: "Create data streams and DLOs"
+        requires: [sf-datacloud-connect]
+      - skill: sf-datacloud-harmonize
+        purpose: "Create DMOs and identity resolution"
+        requires: [sf-datacloud-prepare]
+      - skill: sf-datacloud-segment
+        purpose: "Build segments"
+        requires: [sf-datacloud-harmonize]
+      - skill: sf-datacloud-act
+        purpose: "Configure activations"
+        requires: [sf-datacloud-segment]
+      - skill: sf-datacloud-retrieve
+        purpose: "Query and verify data"
+        requires: [sf-datacloud-act]
+
+  agentforce-build:
+    description: "Build a Salesforce Agentforce agent end-to-end"
+    trigger_phrases:
+      - "build an Agentforce agent"
+      - "create an AI agent"
+      - "Agentforce end-to-end"
+      - "set up Agentforce"
+    steps:
+      - skill: sf-ai-agentforce-persona
+        purpose: "Design agent persona and conversation style"
+      - skill: sf-ai-agentforce
+        purpose: "Configure agent metadata (topics, actions, instructions)"
+        requires: [sf-ai-agentforce-persona]
+      - skill: sf-ai-agentscript
+        purpose: "Write Agent Scripts for deterministic flows"
+        composable_with: [sf-ai-agentforce]
+      - skill: sf-ai-agentforce-testing
+        purpose: "Test agent conversations"
+        requires: [sf-ai-agentforce, sf-ai-agentscript]
+      - skill: sf-deploy
+        purpose: "Deploy agent to target org"
+        requires: [sf-ai-agentforce-testing]

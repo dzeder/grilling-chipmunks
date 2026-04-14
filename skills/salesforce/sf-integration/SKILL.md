@@ -11,6 +11,9 @@ metadata:
   version: "1.2.0"
   author: "Jag Valaiyapathy"
   scoring: "120 points across 6 categories"
+knowledge_refs:
+  - knowledge-base/ohanafy/integration-points.md
+  - knowledge-base/salesforce/key-flows.md
 ---
 
 # sf-integration: Salesforce Integration Patterns Expert

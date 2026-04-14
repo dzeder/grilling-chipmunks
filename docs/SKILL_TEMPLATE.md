@@ -18,6 +18,13 @@ learned_from:                          # optional — upstream repos that inspir
 metadata:
   version: "1.0.0"
   scoring: "N points across M categories" (if applicable)
+knowledge_refs: []                     # optional — knowledge-base files this skill should load
+depends_on: []                         # optional — skills that MUST run before this one
+chains_to: []                          # optional — natural next skills after this one completes
+composable_with: []                    # optional — skills that can run in parallel alongside
+context_requires:                      # optional — declarative context needs
+  always: []                           #   files always loaded when skill activates
+  conditional: []                      #   files loaded when condition matches workspace context
 ---
 
 # skill-name: Full Title

@@ -11,6 +11,9 @@ metadata:
   version: "1.1.0"
   author: "Jag Valaiyapathy"
   scoring: "150 points across 8 categories"
+knowledge_refs:
+  - knowledge-base/salesforce/object-model.md
+  - knowledge-base/salesforce/key-flows.md
 ---
 
 # sf-apex: Salesforce Apex Code Generation and Review

@@ -1,6 +1,12 @@
 # Agents
 
-19 specialist agents organized into 5 teams. Create new agents from `agents/_template/`.
+20 specialist agents organized into 6 teams. Create new agents from `agents/_template/`.
+
+## Orchestration
+
+| Agent | Role |
+|-------|------|
+| **orchestrator** | General-purpose task router — routes to all agents/skills, executes skill chains |
 
 ## Salesforce / FDE Team
 

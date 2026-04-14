@@ -5,6 +5,11 @@ description: >
   from real Ohanafy integrations. TRIGGER when: user wants to generate a new Tray.io
   exports.step script, refactor an existing script to FP patterns, or build
   Salesforce composite API data transformation pipelines.
+depends_on:
+  - tray-expert
+chains_to:
+  - test-script
+  - deploy-prep
 ---
 
 # Tray.io Script Generation Skill

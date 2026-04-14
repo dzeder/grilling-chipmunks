@@ -11,6 +11,10 @@ description: |
   picklist values, object relationships, or data model design.
   Covers: 30+ custom objects spanning CRM, supply chain, retail, accounting,
   and integration tracking. Foundation for all other SKU packages.
+knowledge_refs:
+  - knowledge-base/ohanafy/product-overview.md
+  - knowledge-base/ohanafy/feature-matrix.md
+  - knowledge-base/ohanafy/integration-points.md
 ---
 
 # OHFY-Data_Model Expert Skill

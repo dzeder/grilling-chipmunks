@@ -60,3 +60,29 @@ Load BOTH customer profile AND package source index. The source index includes:
 - Service Layer Graph
 - Common Patterns (bypass, batch chains, queueable)
 - Cross-Object Relationships
+
+## Session probe context (auto-detected)
+
+If `scripts/session-context-probe.sh` output was received at session start, use it:
+- Load customer profile if `customer=<name>` was detected
+- Load integration context if `integration=<name>` was detected
+- Check stale indexes if `stale=[...]` was reported
+- Use `domains=[...]` to pre-load the most relevant routing context
+
+This replaces keyword matching when probe data is available.
+
+## Skill-activated context loading
+
+When a skill is invoked via `/skillname`:
+1. Read the skill's SKILL.md frontmatter
+2. If `context_requires.always` lists files, load them before the skill executes
+3. If `context_requires.conditional` lists files, evaluate against `.context/workspace.md`
+4. If the skill has `knowledge_refs`, load those files
+5. Total loaded context should not exceed 3 knowledge files per task
+
+## Knowledge discovery
+
+When working on a task that touches a specific domain:
+1. Check `knowledge-base/INDEX.yaml` for the domain
+2. Load files whose keywords match the task
+3. Prefer files already referenced by the active skill's `knowledge_refs`

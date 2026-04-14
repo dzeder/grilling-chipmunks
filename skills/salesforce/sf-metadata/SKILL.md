@@ -11,6 +11,10 @@ metadata:
   version: "1.2.0"
   author: "Jag Valaiyapathy"
   scoring: "120 points across 6 categories"
+chains_to:
+  - sf-apex
+  - sf-flow
+  - sf-deploy
 ---
 
 # sf-metadata: Salesforce Metadata Generation and Org Querying

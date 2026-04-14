@@ -1,0 +1,95 @@
+# Agent Compositions — reusable agent profiles as skill combinations
+# The orchestrator injects these into Task() prompts to create specialized workers
+# Consumed by: agents/orchestrator.md
+
+compositions:
+
+  vip-integration-specialist:
+    description: "Specialist for VIP SRS data integration work"
+    base_agent: fde-engineer
+    additional_skills:
+      - ohfy-vip-srs-expert
+      - tray-expert
+      - tray-script-generator
+      - data-harmonizer
+      - sf-data
+    knowledge_preload:
+      - knowledge-base/vip-srs/isv-spec-overview.md
+      - knowledge-base/ohanafy/integration-points.md
+      - integrations/vip-srs/docs/VIP_AGENT_HANDOFF.md
+    context_rules:
+      - .claude/rules/vip-srs.md
+    when: "VIP SRS integration tasks for any customer"
+
+  salesforce-fullstack:
+    description: "Full-stack Salesforce developer with all SF skills"
+    base_agent: ps-technical-architect
+    additional_skills:
+      - sf-apex
+      - sf-lwc
+      - sf-flow
+      - sf-metadata
+      - sf-deploy
+      - sf-testing
+      - sf-soql
+      - sf-permissions
+    knowledge_preload:
+      - knowledge-base/salesforce/object-model.md
+      - knowledge-base/salesforce/key-flows.md
+      - knowledge-base/ohanafy/product-overview.md
+    when: "Building complete Salesforce features across Apex, LWC, Flow, and metadata"
+
+  customer-success:
+    description: "Customer debugging and support specialist"
+    base_agent: fde-engineer
+    additional_skills:
+      - investigate
+      - org-connect
+      - sf-debug
+      - sf-testing
+      - sf-data
+      - checkpoint
+    knowledge_preload: []  # dynamically loaded from customer profile
+    when: "Customer-reported issues, debugging production problems, support escalations"
+
+  tray-builder:
+    description: "End-to-end Tray.io integration builder"
+    base_agent: tray-script-generator
+    additional_skills:
+      - tray-expert
+      - tray-errors
+      - tray-diagrams
+      - csv-output
+      - salesforce-composite
+      - deploy-prep
+    knowledge_preload:
+      - knowledge-base/tray/connector-catalog.md
+      - knowledge-base/tray/capability-matrix.md
+    when: "Designing and building Tray.io workflows from scratch"
+
+  data-pipeline-specialist:
+    description: "Data import, harmonization, and Salesforce loading"
+    base_agent: ohanafy-data-model
+    additional_skills:
+      - data-harmonizer
+      - sf-data
+      - sf-soql
+      - sf-metadata
+      - ohfy-core-expert
+      - ohfy-data-model-expert
+    knowledge_preload:
+      - knowledge-base/ohanafy/product-overview.md
+      - knowledge-base/ohanafy/integration-points.md
+    when: "Data import, CSV harmonization, bulk data loading into Salesforce"
+
+  agentforce-team:
+    description: "Full Agentforce development team (delegates to fde-strategist)"
+    base_agent: fde-strategist
+    additional_skills:
+      - sf-ai-agentforce
+      - sf-ai-agentscript
+      - sf-ai-agentforce-persona
+      - sf-ai-agentforce-testing
+      - sf-ai-agentforce-observability
+    knowledge_preload: []
+    when: "Building, testing, or deploying Salesforce Agentforce agents"

@@ -17,6 +17,18 @@ allowed-tools:
   - WebSearch
   - Agent
   - AskUserQuestion
+knowledge_refs:
+  - knowledge-base/tray/connector-catalog.md
+  - knowledge-base/tray/active-connectors.md
+  - knowledge-base/tray/capability-matrix.md
+context_requires:
+  always:
+    - path: knowledge-base/tray/connector-catalog.md
+  conditional:
+    - condition: "integration contains vip"
+      path: "integrations/vip-srs/CLAUDE.md"
+    - condition: "customer is set"
+      path: "customers/{customer}/profile.md"
 ---
 
 # Tray.io Expert Agent

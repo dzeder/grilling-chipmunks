@@ -12,6 +12,9 @@ description: |
   TRIGGER when: user asks about warehouse operations, inventory management,
   picking/packing/shipping, lot tracking, allocation logic, or WMS-specific
   Apex classes, triggers, or LWC components.
+knowledge_refs:
+  - knowledge-base/ohanafy/product-overview.md
+  - knowledge-base/ohanafy/integration-points.md
 ---
 
 # OHFY-WMS Expert Skill
