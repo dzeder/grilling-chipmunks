@@ -37,22 +37,29 @@ One report per VIP-loaded object. Each uses OR logic across all VIP-populated fi
 | Duplicate Account Names | `AccountList` | Type = Distributed Customer |
 | Duplicate Chain Banner Names | `AccountList` | Type = Chain Banner |
 
-### Supplier Metrics (12 reports)
+### Supplier Metrics (19 reports)
 
 | Report | Report Type | Description |
 |--------|-------------|-------------|
+| Channel Mix by Cases | `VIP_Accounts_with_Depletions__c` | Cases by market (channel type) for donut chart |
+| Premise Type Mix | `VIP_Accounts_with_Depletions__c` | On vs Off Premise depletion split |
 | Depletions by Brand MTD | `VIP_Depletions_with_Items__c` | Cases/revenue by brand by week |
 | Depletions by Account MTD | `VIP_Accounts_with_Depletions__c` | Total cases/revenue per retailer |
-| Active Placements Summary | `VIP_Placements_with_Items__c` | Active placements grouped by brand |
-| Lost Placements Alert | `VIP_Placements_with_Items__c` | Accounts exceeding lost placement threshold |
-| Inventory Levels by Item | `VIP_Inventory_with_Items__c` | Current quantity on hand by SKU |
-| Depletions by Market | `VIP_Accounts_with_Depletions__c` | Cases/revenue by market and state |
 | Top Accounts by Volume | `VIP_Accounts_with_Depletions__c` | Accounts ranked by depletion case volume |
-| New Placements This Month | `VIP_Placements_with_Items__c` | New points of distribution by brand |
+| Top Chains by Volume | `VIP_Accounts_with_Depletions__c` | Top chains ranked by depletion cases |
+| Depletions by State | `VIP_Accounts_with_Depletions__c` | Cases ranked by state for geographic view |
+| Depletions by Market | `VIP_Accounts_with_Depletions__c` | Cases/revenue by market and state |
+| Depletions by SKU | `VIP_Depletions_with_Items__c` | SKU-level performance by brand, volume-sorted |
+| Depletions by Category | `VIP_Depletions_with_Items__c` | Cases by product category (Item Type) for donut |
 | Depletions by Salesman | `VIP_Accounts_with_Depletions__c` | Cases/revenue by distributor rep code |
 | Depletions Trend by Month | `VIP_Depletions_with_Items__c` | MoM depletion trend (Matrix format, configure chart in UI) |
+| Chain vs Independent Mix | `VIP_Accounts_with_Depletions__c` | Chain vs Independent retailer depletion split |
+| Active Placements Summary | `VIP_Placements_with_Items__c` | Active placements grouped by brand |
+| Lost Placements Alert | `VIP_Placements_with_Items__c` | Accounts exceeding lost placement threshold |
+| New Placements This Month | `VIP_Placements_with_Items__c` | New points of distribution by brand |
 | Distribution Coverage by Brand | `VIP_Accounts_with_Placements__c` | Active accounts per item/brand |
 | Declining Accounts | `VIP_Accounts_with_Placements__c` | Lowest L30D volume accounts for retention |
+| Inventory Levels by Item | `VIP_Inventory_with_Items__c` | Current quantity on hand by SKU |
 
 ### Integration Health (1 report)
 
@@ -65,7 +72,12 @@ One report per VIP-loaded object. Each uses OR logic across all VIP-populated fi
 | Dashboard | Layout |
 |-----------|--------|
 | **Data Quality Overview** | Left: Items, Item Lines, Item Types / Middle: Customers, Chain Banners, Retailers / Right: Depletions, Placements, Inventory |
-| **Supplier Overview** | Left: Depletions by Brand, Active Placements, New Placements, Depletions Trend / Middle: Depletions by Account, Top Accounts, Lost Placements, Coverage by Brand / Right: Inventory Levels, Depletions by Market, Depletions by Salesman, Declining Accounts |
+| **Supplier Overview** | Left: Channel Mix (Donut), On vs Off Premise (Donut), Depletions by Brand, Active Placements, New Placements, Depletions Trend / Middle: Depletions by Account, Top Accounts, Top Chains, Lost Placements, Coverage by Brand, Depletions by Category (Donut) / Right: Inventory Levels, Depletions by State, Depletions by Market, Depletions by SKU, Chain vs Independent (Donut), Declining Accounts, Depletions by Salesman |
+
+**Dashboard Filters (3):**
+- **State** (`Account$BillingState`) — filters all Account-based reports by state
+- **Market (Channel)** (`Account$ohfy__Market__c`) — filters all Account-based reports by channel type
+- **Brand** (`ohfy__Item__c$ohfy__Item_Line__c`) — filters Item-based reports only (SKU, Category, Brand MTD, Trend)|
 
 ### Superseded Reports (still in repo for reference)
 

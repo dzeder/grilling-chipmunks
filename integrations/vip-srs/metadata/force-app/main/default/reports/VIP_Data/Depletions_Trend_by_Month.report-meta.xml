@@ -33,7 +33,7 @@
     </columns>
     <columns>
         <aggregateTypes>Sum</aggregateTypes>
-        <field>ohfy__Item__c.ohfy__Depletions__r$VIP_Net_Price__c</field>
+        <field>ohfy__Item__c.ohfy__Depletions__r$VIP_Net_Amount__c</field>
     </columns>
     <description>Month-over-month depletion trend by brand. Stacked bar chart: X-axis = month, color = brand, Y-axis = cases.</description>
     <format>Matrix</format>

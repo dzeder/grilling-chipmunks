@@ -84,6 +84,11 @@
             <table>ohfy__Item__c.ohfy__Depletions__r</table>
         </columns>
         <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>VIP_Net_Amount__c</field>
+            <table>ohfy__Item__c.ohfy__Depletions__r</table>
+        </columns>
+        <columns>
             <checkedByDefault>true</checkedByDefault>
             <field>ohfy__Date__c</field>
             <table>ohfy__Item__c.ohfy__Depletions__r</table>

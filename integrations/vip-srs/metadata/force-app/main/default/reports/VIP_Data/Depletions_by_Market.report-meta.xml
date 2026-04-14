@@ -9,7 +9,7 @@
     </columns>
     <columns>
         <aggregateTypes>Sum</aggregateTypes>
-        <field>Account.ohfy__Depletions__r$VIP_Net_Price__c</field>
+        <field>Account.ohfy__Depletions__r$VIP_Net_Amount__c</field>
     </columns>
     <columns>
         <field>Account$BillingCity</field>
