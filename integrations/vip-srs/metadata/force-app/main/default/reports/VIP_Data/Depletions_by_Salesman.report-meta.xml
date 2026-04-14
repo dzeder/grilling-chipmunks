@@ -1,50 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Report xmlns="http://soap.sforce.com/2006/04/metadata">
     <columns>
-        <field>ohfy__Item__c.ohfy__Placements__r$ohfy__Account__c</field>
+        <field>Account$Name</field>
     </columns>
     <columns>
-        <field>ohfy__Item__c.ohfy__Placements__r$ohfy__Days_Since_Last_Order__c</field>
+        <aggregateTypes>Sum</aggregateTypes>
+        <field>Account.ohfy__Depletions__r$ohfy__Case_Quantity__c</field>
     </columns>
     <columns>
-        <field>ohfy__Item__c.ohfy__Placements__r$ohfy__First_Sold_Date__c</field>
+        <aggregateTypes>Sum</aggregateTypes>
+        <field>Account.ohfy__Depletions__r$VIP_Net_Price__c</field>
     </columns>
-    <columns>
-        <field>ohfy__Item__c.ohfy__Placements__r$ohfy__Last_Sold_Date__c</field>
-    </columns>
-    <description>All active placements grouped by brand, showing distribution breadth and recent volume.</description>
+    <description>Depletion cases and revenue grouped by distributor salesman code for rep territory performance.</description>
     <filter>
         <criteriaItems>
-            <column>ohfy__Item__c.ohfy__Placements__r$ohfy__Is_Active__c</column>
+            <column>Account$Type</column>
             <columnToColumn>false</columnToColumn>
             <isUnlocked>true</isUnlocked>
             <operator>equals</operator>
-            <value>1</value>
+            <value>Distributed Customer</value>
         </criteriaItems>
     </filter>
     <format>Summary</format>
     <groupingsDown>
         <dateGranularity>Day</dateGranularity>
-        <field>ohfy__Item__c$ohfy__Item_Line__c</field>
+        <field>Account$VIP_Salesman1__c</field>
         <sortOrder>Asc</sortOrder>
     </groupingsDown>
     <groupingsDown>
         <dateGranularity>Day</dateGranularity>
-        <field>ohfy__Item__c$Name</field>
+        <field>Account$ohfy__Market__c</field>
         <sortOrder>Asc</sortOrder>
     </groupingsDown>
-    <name>Active Placements Summary</name>
+    <name>Depletions by Salesman</name>
     <params>
         <name>co</name>
         <value>1</value>
     </params>
-    <reportType>VIP_Placements_with_Items__c</reportType>
+    <reportType>VIP_Accounts_with_Depletions__c</reportType>
     <scope>organization</scope>
     <showDetails>true</showDetails>
     <showGrandTotal>true</showGrandTotal>
     <showSubTotals>true</showSubTotals>
     <timeFrameFilter>
-        <dateColumn>ohfy__Item__c.ohfy__Placements__r$CreatedDate</dateColumn>
+        <dateColumn>Account.ohfy__Depletions__r$ohfy__Date__c</dateColumn>
         <interval>INTERVAL_CUSTOM</interval>
     </timeFrameFilter>
 </Report>

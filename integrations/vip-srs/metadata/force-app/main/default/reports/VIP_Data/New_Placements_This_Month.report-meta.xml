@@ -4,7 +4,10 @@
         <field>ohfy__Item__c.ohfy__Placements__r$ohfy__Account__c</field>
     </columns>
     <columns>
-        <field>ohfy__Item__c.ohfy__Placements__r$ohfy__Days_Since_Last_Order__c</field>
+        <field>ohfy__Item__c$Name</field>
+    </columns>
+    <columns>
+        <field>ohfy__Item__c.ohfy__Placements__r$ohfy__First_Sold_Date__c</field>
     </columns>
     <columns>
         <field>ohfy__Item__c.ohfy__Placements__r$ohfy__First_Sold_Date__c</field>
@@ -12,10 +15,10 @@
     <columns>
         <field>ohfy__Item__c.ohfy__Placements__r$ohfy__Last_Sold_Date__c</field>
     </columns>
-    <description>All active placements grouped by brand, showing distribution breadth and recent volume.</description>
+    <description>New points of distribution identified this month. Shows where the brand is gaining shelf space.</description>
     <filter>
         <criteriaItems>
-            <column>ohfy__Item__c.ohfy__Placements__r$ohfy__Is_Active__c</column>
+            <column>ohfy__Item__c.ohfy__Placements__r$ohfy__Is_New_Placement__c</column>
             <columnToColumn>false</columnToColumn>
             <isUnlocked>true</isUnlocked>
             <operator>equals</operator>
@@ -28,12 +31,7 @@
         <field>ohfy__Item__c$ohfy__Item_Line__c</field>
         <sortOrder>Asc</sortOrder>
     </groupingsDown>
-    <groupingsDown>
-        <dateGranularity>Day</dateGranularity>
-        <field>ohfy__Item__c$Name</field>
-        <sortOrder>Asc</sortOrder>
-    </groupingsDown>
-    <name>Active Placements Summary</name>
+    <name>New Placements This Month</name>
     <params>
         <name>co</name>
         <value>1</value>

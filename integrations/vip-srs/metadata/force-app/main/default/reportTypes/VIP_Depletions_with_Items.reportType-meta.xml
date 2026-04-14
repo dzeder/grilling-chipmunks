@@ -5,7 +5,7 @@
     <deployed>true</deployed>
     <description>Items with their depletion records. Use for depletion analysis by brand, SKU, or packaging type.</description>
     <join>
-        <outerJoin>true</outerJoin>
+        <outerJoin>false</outerJoin>
         <relationship>ohfy__Depletions__r</relationship>
     </join>
     <label>VIP Items with Depletions</label>
