@@ -76,7 +76,28 @@ function countRecords(soql) {
 // =============================================================================
 
 var OBJECTS = [
+  // Phase 0: Supplier
+  {
+    phase: 0,
+    name: 'Account (Supplier)',
+    sobject: 'Account',
+    extIdField: 'ohfy__External_ID__c',
+    prefix: 'SUP',
+    distScoped: false,
+    countQuery: "SELECT COUNT() FROM Account WHERE ohfy__External_ID__c LIKE 'SUP:%'",
+    spotQuery: "SELECT Name, Type, RecordType.Name, ohfy__External_ID__c FROM Account WHERE ohfy__External_ID__c LIKE 'SUP:%' LIMIT 3"
+  },
   // Phase 1: Reference
+  {
+    phase: 1,
+    name: 'Account (Distributors)',
+    sobject: 'Account',
+    extIdField: 'ohfy__External_ID__c',
+    prefix: 'DST',
+    distScoped: true,
+    countQuery: "SELECT COUNT() FROM Account WHERE ohfy__External_ID__c LIKE 'DST:%'",
+    spotQuery: "SELECT Name, Type, RecordType.Name, Phone, ohfy__External_ID__c FROM Account WHERE ohfy__External_ID__c LIKE 'DST:%' LIMIT 3"
+  },
   {
     phase: 1,
     name: 'Account (Chain Banners)',

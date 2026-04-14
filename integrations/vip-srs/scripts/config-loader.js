@@ -57,6 +57,7 @@ function loadConfig(cliArgs) {
       if (json.targetDistributorId) config.distId = json.targetDistributorId;
       if (json.customer) config.customer = json.customer;
       if (json.supplierCode) config.supplierCode = json.supplierCode;
+      if (json.supplier) config.supplier = json.supplier;
       config._configFile = configPath;
     } catch (e) {
       console.error('WARNING: Failed to parse config ' + configPath + ': ' + e.message);

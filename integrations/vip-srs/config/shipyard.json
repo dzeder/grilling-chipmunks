@@ -2,6 +2,12 @@
   "customer": "Shipyard Brewing Company",
   "supplierCode": "ARG",
   "targetDistributorId": "FL01",
+  "supplier": {
+    "name": "Shipyard Brewing Company",
+    "externalId": "SUP:ARG",
+    "recordType": "Supplier",
+    "type": "Supplier"
+  },
   "sftpEndpoint": null,
   "sftpPath": null,
   "salesforce": {
