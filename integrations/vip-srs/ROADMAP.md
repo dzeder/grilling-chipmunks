@@ -124,17 +124,39 @@
 - [x] Updated permset + Admin profile FLS for 4 new fields
 - [x] Added `ITEM_LINE: 'ILN'` and `ITEM_TYPE: 'ITY'` prefixes to shared/constants.js + external-ids.js
 
-## Next Up
+### Phase 6: Tray.io Project Build (2026-04-13 → 2026-04-14)
+- [x] Build script (`build/build-scripts.js`) validates + collects 11 scripts to `build/output/*.tray.js`
+- [x] All 11 scripts pass validation (no require(), has exports.step, no syntax errors) and fixture tests
+- [x] Analyzed 85+ real Tray production exports from `dzeder/Integrations` repo to learn definitive JSON format
+- [x] Updated `project-json-spec.md` with comprehensive findings (connector versions, error handling strategies, callable workflows, typed value patterns, auth guidance)
+- [x] Updated `Tray-AI-Project-JSON-Structure-Guide.md` — fixed fabricated error_handling fields, trigger types, auth docs
+- [x] Updated `tray-project/SKILL.md` — auth omission rule, scoring rubric, config bare values
+- [x] Updated `connector-catalog.md` — Salesforce v8.6→v8.8, ftp-client naming, call-workflow, alerting-trigger, noop
+- [x] Updated `tray-expert-guide.md` — Salesforce v8.6→v8.8
+- [x] Generator script (`build/generate-tray-project.js`) builds project JSON programmatically:
+  - Valid UUID v4 for all IDs (`crypto.randomUUID()`)
+  - No authentication objects (icons from `connector.name`)
+  - Correct connector versions: `ftp-client@6.1`, `salesforce@8.8`, `script@3.4`, `slack@11.0`
+  - All required top-level arrays (`data_tables`, `vector_tables`, `agents`, `apim_operations`)
+  - Bare config values, typed property values
+  - Reads 11 inlined scripts from `build/output/*.tray.js`
+  - Self-validates: steps_structure ↔ steps consistency, connector names, typed values
+- [x] 2 workflows, 64 total steps:
+  - **Main Pipeline** (61 steps, scheduled daily 06:00 EST): Init → 8 SFTP downloads → 8 CSV parsers → 11 transform scripts → 14 loops → 15 SF Composite POSTs → cleanup queries → summary → Slack notification
+  - **Error Handler** (3 steps): Alerting trigger → format error → Slack DM to Daniel
+- [x] SF Composite API pattern: Script → Loop batches → `raw_http_request` POST to `services/data/v62.0/composite`
+- [x] Multi-batch scripts properly sequenced: Script 02 (itemLine→itemType→items), Script 05 (accounts→contacts), Script 06 (inventory→history→adjustments)
+- [x] Inventory pre-query + existingInventoryMap for dedup workaround
+- [x] Export to `dzeder/daniels-ohanafy-artifacts/vip-srs-supplier/v1.0/project-export.json` (180 KB)
+- **Deferred:**
+  - [ ] Gzip decompression — workflow assumes pre-decompressed CSV files on SFTP. Add Lambda endpoint or server-side decompression when SFTP is configured.
+  - [ ] SFTP auth + path configuration — configure after import in Tray UI
+  - [ ] Salesforce auth — configure after import, map to ROS2 sandbox credential
+  - [ ] Slack auth — configure after import, map to Daniel's Slack credential
+  - [ ] OUTDA production chunking — DistId filtering handles sandbox volume; add Loop chunking for 36K+ row production files
+  - [ ] Script 09 (cleanup) delete execution — queries generated but deletes require post-import safety threshold tuning
 
-### Phase 6: Tray.io Project Build
-- [ ] Create Tray project with daily schedule trigger
-- [ ] SFTP connector: pickup + decompress .gz files
-- [ ] CSV parser step per file type
-- [ ] Script connectors wired to each transform script (01-10, including 07b)
-- [ ] SF Composite API connector for each batch output
-- [ ] Phase-sequenced execution (reference data before enrichment before transactions)
-- [ ] Error handling + notification connector (Slack/email)
-- [ ] Export project JSON to `dzeder/daniels-ohanafy-artifacts`
+## Next Up
 
 ### Phase 7: Multi-Day Sequence Test
 - [ ] Process 3 consecutive days of sample data (e.g., N20260404, N20260407, N20260408)
