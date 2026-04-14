@@ -124,6 +124,23 @@
 - [x] Updated permset + Admin profile FLS for 4 new fields
 - [x] Added `ITEM_LINE: 'ILN'` and `ITEM_TYPE: 'ITY'` prefixes to shared/constants.js + external-ids.js
 
+### Phase 5g: ROS2 Data Maximization (2026-04-14)
+- [x] **Phase 0 — Supplier Account:** Config-driven supplier upsert from `config/shipyard.json` → `supplier` block. External ID `SUP:ARG`. Runs before all other phases.
+- [x] **Script 03 — Distributor Accounts + Contacts:** DISTDA now creates Account (Customer RT, `DST:{DistId}`) + Contact (`CON:{DistId}:DIST`) + Location. Phone formatting, name parsing, address mapping. `Is_Active__c = true`, `Type = 'Customer'`, `Retail_Type__c = 'Distributor'`.
+- [x] **Script 02 — Item_Line Type + Item_Type Type/Category:** All Item_Lines get `Type__c = 'Finished Good'`. All Item_Types get `Type__c = 'Finished Good'` and `Category__c` mapped from GenericCat3. Added `CATEGORY_MAP` crosswalk for VIP codes that don't match picklist values (e.g., `'GENERIC VOL' → 'Vodka'`).
+- [x] **Script 02 — Supplier linkage:** Item_Lines now include `ohfy__Supplier__r` relationship reference to the supplier account via `supplierExternalId` input.
+- [x] **Category__c restricted picklist deployed:** Field metadata + record type picklist value assignments for `ohfy__Finished_Good` RT (managed). Key learning: must target `ohfy__Finished_Good` (namespace-prefixed), NOT `Finished_Good` (creates duplicate subscriber RT).
+- [x] **12/12 Item_Types with Category populated** (was 0/12 before). All other phases: 101 succeeded, 20 failed (all known AccountTriggerMethods blocker).
+- [x] **Config portability:** `config-loader.js` passes `supplier` config through. `shipyard.json` has complete supplier block. Next customer only needs a new config file.
+- [x] **Shared modules updated:** `constants.js` → `DISTRIBUTOR: 'DST'` prefix. `external-ids.js` → `distributorKey()` + `distributorContactKey()` generators.
+- [x] **Purge script updated:** Deletes distributor accounts (`DST:%`) and supplier accounts (`SUP:%`).
+- [x] **Verify-load updated:** Checks Supplier (Phase 0) and Distributor (Phase 1) account counts.
+
+### Phase 5h: Agent Review + Issue Backlog (2026-04-14)
+- [x] **Four-agent review:** Code Quality (B-), Architecture (B+), Mapping Accuracy (B+), Production Readiness (C+). Composite: **B- (140/200)**.
+- [x] **8 GitHub issues created** (#109-#116): P0 AccountTriggerMethods, P1 build step + inventory data loss, P2 SF API extraction + tests + HANDOFF docs, P3 Bulk API + timing.
+- [x] **Ship verdict:** SHIP for sandbox, NO-SHIP for production (3 blockers).
+
 ## Next Up
 
 ### Phase 6: Tray.io Project Build
@@ -190,3 +207,7 @@
 17. **ALL existing Inventory records need VIP_External_ID__c batch-stamped:** History and Adjustment rows reference parent Inventory by VIP_External_ID__c. Even if the Inventory transform only outputs 12 records, History may reference hundreds of different DistId:Item combos. Stamp VIP_External_ID__c on ALL existing records (264 in ROS2) before loading children, not just the records in your current file.
 18. **Inventory__c master-detail fields are read-only on update:** When PATCHing an existing Inventory record by SF record ID, strip `ohfy__Item__r` and `ohfy__Location__r` from the request body. These are master-detail (create-only) fields. Including them returns `INVALID_FIELD_FOR_INSERT_UPDATE`.
 19. **Item_Line__c and Item_Type__c need external IDs for upsert:** These lookup objects use `VIP_External_ID__c` with formats `ILN:{BrandDesc}` and `ITY:{GenericCat3}`. Without external IDs, re-running Script 02 creates duplicates. The Tray workflow should still pre-query and pass `existingItemLines`/`existingItemTypes` maps for efficiency, but the upsert provides a safety net.
+20. **Managed RT picklist targeting requires namespace prefix:** Deploying `Finished_Good.recordType-meta.xml` on `ohfy__Item_Type__c` creates a NEW subscriber-level record type instead of updating the managed one. Use `ohfy__Finished_Good.recordType-meta.xml` with `<fullName>ohfy__Finished_Good</fullName>`. The `sobject describe` will show two RTs with the same display name — check `NamespacePrefix` to distinguish. Subscriber RT has `available=False`; managed RT has `available=True`.
+21. **GenericCat3 serves dual purpose (Item_Type name + Category):** The VIP `GenericCat3` value becomes both the Item_Type `Name` and the `Category__c` picklist value. When GenericCat3 doesn't match a valid picklist value (e.g., "GENERIC VOL"), use a `CATEGORY_MAP` crosswalk at Category assignment time — do NOT change GenericCat3 itself (that would create a new Item_Type instead of updating the existing one).
+22. **HANDOFF doc has stale crosswalk values:** Class of Trade (Section 7.1), UOM__c (Section 5.2), Packaging_Type__c (Section 5.2), and Account Type for chain banners (Section 5.1) differ between the HANDOFF spec and the org-validated script values. Scripts are the source of truth for actual API values. HANDOFF is stale — see GitHub issue #114.
+23. **Inventory Units_On_Hand__c not mapped (data loss):** Script 06 computes both `entry.cases` and `entry.units` but only writes `Quantity_On_Hand__c` from cases. Bottle-level inventory quantities are silently dropped. See GitHub issue #111.

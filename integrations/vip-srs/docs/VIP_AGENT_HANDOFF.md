@@ -325,7 +325,7 @@ VIP delivers 9 gzipped CSV files per business day. Filename format: `{TYPE}.N{YY
 | -- | -- | Account.`Is_Chain_Banner__c` | Hardcode `true` | |
 | -- | -- | Account.`Retail_Type__c` | Hardcode `Chain` | |
 | -- | -- | Account.`Is_Active__c` | Hardcode `true` | |
-| -- | -- | Account.`Type` | Hardcode `Retail Chain` | |
+| -- | -- | Account.`Type` | Hardcode `Retail Chain` | **STALE:** Script 01 uses `'Chain Banner'` (actual ROS2 picklist value). Update after org validation. |
 
 **Filter:** Skip rows where Chain or Desc is blank.
 
@@ -358,20 +358,20 @@ VIP delivers 9 gzipped CSV files per business day. Filename format: `{TYPE}.N{YY
 | BrandDesc | `Original Vodka` | Item_Line__c (lookup) | Upsert by `ILN:{BrandDesc}` | External ID: `VIP_External_ID__c` |
 | GeoCode | `` | -- | Not mapped | Always empty |
 | PackageType | `BTL` | Item__c.`Package_Type__c` | `BTL` -> `Packaged` | |
-| PackageSize | `SNGL 1L` | Item__c.`Packaging_Type__c` | Direct | |
+| PackageSize | `SNGL 1L` | Item__c.`Packaging_Type__c` | Direct | **STALE:** Script 02 maps to `Packaging_Type_Short_Name__c` (text); hardcodes `Packaging_Type__c = 'Each'` (dependent picklist requirement for depletion item filter). See Gotcha #14. |
 | Cube | `.00` | -- | Not mapped | |
 | LastChgDate | `00000000` | -- | Not mapped | |
 | Status | `A` | Item__c.`Is_Active__c` | `A` -> true, `I` -> false | |
 | ContainerType | `S` | Item__c.`Type__c` | `S` -> `Finished Good` | See SRSVALUE ITCTYP |
 | TerritoryPtr | `01` | -- | Not mapped | |
 | GenericCat1-2 | `` | -- | Not mapped | |
-| GenericCat3 | `Vodka` | Item_Type__c (lookup) | Upsert by `ITY:{GenericCat3}` | External ID: `VIP_External_ID__c` |
+| GenericCat3 | `Vodka` | Item_Type__c (lookup) | Upsert by `ITY:{BrandDesc}:{GenericCat3}` | External ID: `VIP_External_ID__c`. **Updated:** compound key scoped per Item_Line (required by dependent lookup filter). Also maps to `Category__c` via `CATEGORY_MAP` crosswalk. |
 | GenericCat4-6 | `` | -- | Not mapped | |
 | ExtOZpCase | `202.884` | -- | Not mapped | |
 | ExtMLpCase | `6000.000` | -- | Not mapped | Reference only |
 | VolofUnit | `1.000` | Item__c.`UOM_In_Fluid_Ounces__c` | ML: `value * 0.033814` | Convert to fl oz |
 | UnitsPerRtlPkg | `1` | -- | Not mapped | |
-| VolUOM | `LTR` | Item__c.`UOM__c` | `ML`/`LTR` -> `Metric Volume`, `OZ` -> `US Volume` | |
+| VolUOM | `LTR` | Item__c.`UOM__c` | `ML`/`LTR` -> `Metric Volume`, `OZ` -> `US Volume` | **STALE:** Script 02 hardcodes `'US Count'` for all items (required by dependent picklist chain: `UOM__c = 'US Count'` → `Packaging_Type__c = 'Each'` → Transformation_Setting__c). See Gotcha #14. |
 | PackageTypeCode | `BTL` | -- | Not mapped | Redundant with PackageType |
 | CodeDateFormat | `` | -- | Not mapped | |
 | SupplementItemDesc | `Original Vodka - 6/1L` | -- | Not mapped | Same as Desc |
@@ -386,25 +386,51 @@ VIP delivers 9 gzipped CSV files per business day. Filename format: `{TYPE}.N{YY
 
 ---
 
-### 5.3 DISTDA -> Location__c (Distributor Warehouse)
+### 5.3 DISTDA -> Account (Distributor) + Contact + Location__c (Warehouse)
+
+**Updated 2026-04-14:** Script 03 now creates three objects from DISTDA, not just Location.
+
+#### 5.3a Account (Distributor)
 
 | VIP Column | VIP Example | Ohanafy Object.Field | Transform | Notes |
 |------------|-------------|---------------------|-----------|-------|
-| RecordId | `DETAIL` | -- | Skip | |
-| Supplier ID | `ARG` | -- | Skip | |
-| Distributor ID | `FL01` | Location__c.`Location_Code__c` | Prefix: `LOC:{DistributorID}` | Upsert key |
+| Distributor ID | `FL01` | Account.`ohfy__External_ID__c` | Prefix: `DST:{DistId}` | Upsert key |
+| Distributor Name | `Gold Coast Eagle Distributing Inc.` | Account.`Name` | Direct | |
+| Street-Zip | *(address)* | Account.`BillingStreet`, etc. | Direct | Shipping = Billing |
+| Phone | `9419554700` | Account.`Phone` | Format: `(XXX) XXX-XXXX` | |
+| -- | -- | Account.`Type` | Hardcode `Customer` | Supplier perspective |
+| -- | -- | Account.`RecordTypeId` | Customer RT | Queried at runtime |
+| -- | -- | Account.`ohfy__Retail_Type__c` | Hardcode `Distributor` | |
+| -- | -- | Account.`ohfy__Is_Active__c` | Hardcode `true` | |
+| -- | -- | Account.`AccountSource` | Hardcode `VIP SRS` | |
+
+#### 5.3b Contact (Distributor Primary)
+
+| VIP Column | VIP Example | Ohanafy Object.Field | Transform | Notes |
+|------------|-------------|---------------------|-----------|-------|
+| Distributor ID | `FL01` | Contact.`External_ID__c` | Prefix: `CON:{DistId}:DIST` | Upsert key |
+| Rep Description | `John Smith` | Contact.`FirstName`, `LastName` | Parse name | Skip "Default User" |
+| Phone | `9419554700` | Contact.`Phone` | Format: `(XXX) XXX-XXXX` | |
+| -- | -- | Contact.`AccountId` | Lookup via `DST:{DistId}` | `__r` reference syntax |
+
+#### 5.3c Location (Distributor Warehouse)
+
+| VIP Column | VIP Example | Ohanafy Object.Field | Transform | Notes |
+|------------|-------------|---------------------|-----------|-------|
+| Distributor ID | `FL01` | Location__c.`Location_Code__c` | Raw dist ID (max 5 chars) | |
+| -- | -- | Location__c.`VIP_External_ID__c` | Prefix: `LOC:{DistId}` | Upsert key |
 | Distributor Name | `Gold Coast Eagle Distributing Inc.` | Location__c.`Name` | Direct | |
 | Street | `2150 47th St` | Location__c.`Location_Street__c` | Direct | |
 | City | `Sarasota` | Location__c.`Location_City__c` | Direct | |
 | State | `FL` | Location__c.`Location_State__c` | Direct | |
 | Zip | `34234` | Location__c.`Location_Postal_Code__c` | Direct | |
-| Phone-Rep Description | *(various)* | -- | Not mapped | Admin/system info |
-| -- | -- | Location__c.`Location_Type__c` | Hardcode `Warehouse` | |
+| -- | -- | Location__c.`Type__c` | Hardcode `Warehouse` | |
 | -- | -- | Location__c.`Is_Active__c` | Hardcode `true` | |
 | -- | -- | Location__c.`Is_Sellable__c` | Hardcode `true` | |
 | -- | -- | Location__c.`Is_Finished_Good__c` | Hardcode `true` | |
 
 **Filter:** Only load the row matching the target distributor ID.
+**Load order:** Account → Contact → Location (sequential, Account must exist for Contact lookup).
 
 ---
 
@@ -675,6 +701,8 @@ Keys use only **immutable business identifiers**. No quantities, prices, or name
 ## 7. Value Crosswalks
 
 ### 7.1 Class of Trade (OUTDA.ClassOfTrade -> Account.Market__c + Account.Premise_Type__c)
+
+> **STALE WARNING:** The Market values below are VIP spec canonical names. The ROS2 org uses different restricted picklist values (e.g., "Convenience" not "Convenience Store", "Club Mass Merchandiser" not "Mass Merchant"). Script 05 has the org-validated values. Always `sf sobject describe` the `ohfy__Market__c` field on the target org before mapping. See GitHub issue #114.
 
 | VIP Code | VIP Description | Ohanafy Market | Premise Type |
 |----------|----------------|----------------|-------------|
