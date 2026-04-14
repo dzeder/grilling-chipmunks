@@ -8,3 +8,4 @@ date,pr_number,branch,description,type,human_estimate_hrs,ai_actual_min,tokens_u
 2026-04-14,118,dzeder/tray-knowledge-update,docs(tray): comprehensive Tray knowledge update from 85+ real export analysis,docs,,,,,,0,0,0,0,0,,
 2026-04-14,119,dzeder/vip-srs-ros-load,feat(vip-srs): supplier/distributor accounts; Category crosswalk; managed RT targeting,feat,,,,,,0,0,0,0,0,,
 2026-04-14,120,dzeder/vip-supplier-overview,feat(vip-srs): enhance Supplier Overview dashboard (12 components),feat,,,,,,0,0,0,0,0,,
+2026-04-14,122,dzeder/vip-ros-integration,feat(vip-srs): supplier/distributor accounts; Category crosswalk; managed RT targeting (#119),feat,,,,,,0,0,0,0,0,,
