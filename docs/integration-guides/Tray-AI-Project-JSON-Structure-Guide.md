@@ -19,6 +19,11 @@ Every Tray.ai project JSON export follows this top-level structure:
   "tray_export_version": 4,
   "export_type": "project", 
   "workflows": [...],
+  "projects": [...],
+  "data_tables": [],
+  "vector_tables": [],
+  "agents": [],
+  "apim_operations": [],
   "solution": {...}
 }
 ```
@@ -26,9 +31,11 @@ Every Tray.ai project JSON export follows this top-level structure:
 ### Core Components
 
 1. **`tray_export_version`**: Integer indicating the export format version (currently 4)
-2. **`export_type`**: String, always "project" for project exports
+2. **`export_type`**: `"project"` for multi-workflow, `"workflow"` for single-workflow exports
 3. **`workflows`**: Array of workflow objects that contain the actual automation logic
-4. **`solution`** (optional): Embedded solution configuration for packaged deployments
+4. **`projects`**: Array of project objects linking workflows together. Empty `[]` for single-workflow exports
+5. **`data_tables`**, **`vector_tables`**, **`agents`**, **`apim_operations`**: Required empty arrays for newer Tray versions
+6. **`solution`** (optional): Embedded solution configuration for packaged deployments
 
 ---
 
@@ -79,11 +86,12 @@ The `steps_structure` array defines the execution flow and control logic:
 
 ### Step Types
 
-1. **`normal`**: Standard connector step (API calls, transformations, etc.)
+1. **`normal`**: Standard connector step (API calls, transformations, triggers)
 2. **`loop`**: Iteration over arrays/collections 
-3. **`branch`**: Conditional logic (if/else)
-4. **`break`**: Flow control to exit loops
-5. **`trigger`**: Workflow entry point
+3. **`branch`**: Conditional logic (boolean true/false, or manual error handling error/success)
+4. **`break`**: Flow control to exit loops (has a `target` field naming the loop to break)
+
+**Note:** Triggers use `"type": "normal"`, NOT `"trigger"`. There is no `"trigger"` type.
 
 ### Flow Control Patterns
 
@@ -177,7 +185,7 @@ exports.step = function(input, fileInput) {
 - **Purpose**: Integration with external services
 - **Key Properties**:
   - `operation`: Specific API operation (create, update, query, etc.)
-  - **Authentication**: Handled separately by Tray platform (not visible in project JSON)
+  - **Authentication**: Present in exports from Tray (when credentials were configured), but should be OMITTED when generating new JSON. Connector icons come from `connector.name`, not auth objects.
   - Request/response mapping via JSONPath
 
 #### 5. **Storage Connector** (`name: "storage"`)
@@ -185,9 +193,12 @@ exports.step = function(input, fileInput) {
 - **Operations**: `set`, `get`, `atomic_increment`, etc.
 
 #### 6. **Trigger Connectors**
-- **Scheduled** (`name: "scheduled"`): Cron-based time triggers
-- **Webhook** (`name: "webhook"`): HTTP endpoint triggers (no special security patterns required)
-- **Manual** (`name: "manual"`): User-initiated triggers via Tray UI
+- **Scheduled** (`name: "scheduled"`, version `3.5`): Time-based triggers. Operations: `daily` (day_of_week + hour/minute), `cron` (cron expression), `simple` (interval)
+- **Webhook** (`name: "webhook"`, version `2.3`): HTTP endpoint triggers
+- **Manual** (`name: "noop"`, version `1.1`): User-initiated triggers via Tray UI. Connector name is `noop`, NOT `manual`
+- **Alerting** (`name: "alerting-trigger"`, version `1.1`): Fires when another workflow errors
+- **Callable** (`name: "callable-trigger"`, version `2.0`): Receives calls from `call-workflow` steps in other workflows
+- **Form** (`name: "form-trigger"`, version `1.7`): Form-based trigger for user input
 
 ### JSONPath Usage Patterns
 
@@ -355,25 +366,32 @@ exports.step = function(input, fileInput) {
 
 ## Error Handling Patterns
 
-### Standard Error Configuration
+### Error Handling Configuration (per step)
+
+The `error_handling` field on each step controls failure behavior:
+
 ```json
-{
-  "error_handling": {
-    "continue_on_error": true,
-    "max_retries": 3,
-    "retry_delay": 1000
-  }
-}
+// Default: stop workflow on error
+{ "error_handling": {} }
+
+// Manual: step becomes a branch with error/success paths in steps_structure
+{ "error_handling": { "strategy": "manual" } }
+
+// Automatic: platform retries automatically
+{ "error_handling": { "strategy": "automatic" } }
+
+// Continue loop: skip to next iteration on error
+{ "error_handling": { "target": "loop-1", "strategy": "continueLoop" } }
 ```
 
-### Error Handling in Tray
-- **Platform-Level**: Tray automatically handles retries and rate limiting errors
-- **Workflow-Level**: Custom error handling can be configured per step
-- **Common Strategies**:
-  1. **Continue on Error**: Process next item if current fails
-  2. **Error Storage**: Log failures to storage connector for later review
-  3. **Custom Error Logic**: Use boolean conditions to handle specific error types
-  4. **Graceful Termination**: Break loops or workflows when critical errors occur
+**Note:** `continue_on_error`, `max_retries`, `retry_delay` are NOT real Tray fields.
+
+### Error Handling Strategies in Tray
+- **Default (`{}`)**: Workflow stops on unhandled error. If an alerting workflow is configured via `settings.alerting_workflow_id`, it fires.
+- **Manual**: The step becomes `"type": "branch"` in steps_structure with `error`/`success` content arrays. Error details available via `$.errors.step-name`.
+- **Automatic**: Platform retries with backoff.
+- **Continue Loop**: Only valid inside a loop. On error, skips to next iteration.
+- **Alerting Workflow**: A separate workflow with `alerting-trigger` that fires on any unhandled error in the project. Set via `settings.alerting_workflow_id` on the main workflow.
 
 ---
 

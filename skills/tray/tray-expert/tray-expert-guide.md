@@ -230,7 +230,7 @@ connector-name/
 }
 ```
 
-### 4.2 Salesforce Connector (v8.6+)
+### 4.2 Salesforce Connector (v8.8)
 
 **Auth:** OAuth 2.0 (access_token + instance_url)
 **56 operations** organized by category:
