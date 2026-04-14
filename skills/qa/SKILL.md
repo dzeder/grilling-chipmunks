@@ -12,6 +12,11 @@ description: |
   Standard (+ medium), Exhaustive (+ cosmetic). Produces before/after health scores,
   fix evidence, and a ship-readiness summary. For report-only mode, use /qa-only. (gstack)
   Voice triggers (speech-to-text aliases): "quality check", "test the app", "run QA".
+chains_to:
+  - design-review
+  - ship
+composable_with:
+  - qa-only
 allowed-tools:
   - Bash
   - Read

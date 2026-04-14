@@ -8,6 +8,8 @@ description: |
   polishes CHANGELOG voice, cleans up TODOS, and optionally bumps VERSION. Use when
   asked to "update the docs", "sync documentation", or "post-ship docs".
   Proactively suggest after a PR is merged or code is shipped. (gstack)
+depends_on:
+  - ship
 allowed-tools:
   - Bash
   - Read

@@ -11,6 +11,8 @@ metadata:
   version: "1.1.0"
   author: "Jag Valaiyapathy"
   scoring: "120 points across 6 categories"
+chains_to:
+  - sf-deploy
 ---
 
 # sf-testing: Salesforce Test Execution & Coverage Analysis

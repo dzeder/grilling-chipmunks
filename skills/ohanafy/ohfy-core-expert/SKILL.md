@@ -12,6 +12,16 @@ description: |
   external IDs, or integration errors against the Ohanafy Salesforce package.
   Covers: 143 objects, 37 triggers, bypass patterns, status validations,
   external ID patterns, and common integration error resolutions.
+knowledge_refs:
+  - knowledge-base/ohanafy/product-overview.md
+  - knowledge-base/ohanafy/integration-points.md
+  - knowledge-base/ohanafy/feature-matrix.md
+context_requires:
+  always:
+    - path: references/source-index.md
+  conditional:
+    - condition: "customer is set"
+      path: "customers/{customer}/profile.md"
 ---
 
 # OHFY-Core Expert Skill

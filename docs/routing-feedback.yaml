@@ -1,0 +1,12 @@
+# Routing Feedback Log — records mis-routes for continuous improvement
+# Updated by: /learn skill (routing feedback mode)
+# Consumed by: orchestrator agent, context-loading protocol
+# When 3+ similar entries exist, consider adding a compound routing rule to CLAUDE.md
+
+feedback: []
+# Example entry:
+# - date: "2026-04-14"
+#   request: "Build a Tray workflow for VIP data"
+#   routed_to: ohfy-vip-srs-expert
+#   should_have_been: tray-expert
+#   reason: "Request was about building, not understanding VIP data"

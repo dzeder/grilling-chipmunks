@@ -124,6 +124,22 @@ Edit skill files directly in `skills/<pillar>/<skill-name>/SKILL.md`. Commit wit
 
 When the user's request matches a skill, invoke it FIRST via the Skill tool.
 
+### Step 1: Compound Requests (check first — most specific wins)
+
+Multi-domain or multi-step requests match these patterns before falling through to single-domain:
+
+- "Design + build + test [integration]" → `/tray-expert` (drives the chain)
+- "Fix [integration/Tray] that talks to Salesforce" → `/investigate` (debugging trumps domain)
+- "Build a Tray workflow for [Ohanafy package]" → `/tray-expert` (integration leads)
+- "Set up [customer] end-to-end" → `/kickoff` (setup before implementation)
+- "Build an Agentforce agent" → invoke `fde-strategist` agent (multi-agent orchestration)
+- "Full review / review gauntlet" → `/autoplan` (runs all review perspectives)
+- "Ship and document" → `/ship` then `/document-release`
+- "Debug and fix and ship" → `/investigate` (debug first, then chain)
+- Complex multi-domain requests → invoke `orchestrator` agent (see `agents/orchestrator.md`)
+
+### Step 2: Single-Domain Routing
+
 - Product ideas, brainstorming → `/office-hours`
 - Bugs, errors → `/investigate`
 - Ship, deploy, PR → `/ship`
@@ -142,4 +158,12 @@ When the user's request matches a skill, invoke it FIRST via the Skill tool.
 - Datadog, monitoring, observability → `/datadog-expert`
 - Start new work, set up context → `/kickoff`
 
-Full routing: `docs/SKILL_ROUTING_MATRIX.md` | Context loading: `.claude/rules/context-loading.md`
+### Step 3: Ambiguity Fallback
+
+If no pattern matches or multiple patterns tie:
+1. Check `.context/workspace.md` for active customer/integration context
+2. Check current branch name for customer or domain clues
+3. Consult `docs/skill-index.yaml` for trigger keyword matching
+4. If still ambiguous, ask: "This touches [A] and [B]. Which should I focus on first?"
+
+Full routing: `docs/SKILL_ROUTING_MATRIX.md` | Skill index: `docs/skill-index.yaml` | Chains: `docs/skill-chains.yaml`

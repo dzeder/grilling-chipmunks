@@ -10,6 +10,9 @@ description: |
   refunds, payment gateway integration, or financial transaction tracking.
   Covers: Payment processing, settlement workflows, refund handling,
   payment method management, and financial transaction tracking.
+knowledge_refs:
+  - knowledge-base/ohanafy/product-overview.md
+  - knowledge-base/ohanafy/integration-points.md
 ---
 
 # OHFY-Payments Expert Skill

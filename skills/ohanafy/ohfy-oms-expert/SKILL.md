@@ -11,6 +11,9 @@ description: |
   fulfillment status transitions, or OMS-specific Apex/LWC components.
   Covers: Order creation, fulfillment workflows, order item management,
   pricing calculations, and OMS-specific business logic.
+knowledge_refs:
+  - knowledge-base/ohanafy/product-overview.md
+  - knowledge-base/ohanafy/integration-points.md
 ---
 
 # OHFY-OMS Expert Skill

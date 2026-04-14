@@ -4,6 +4,8 @@ description: >
   Validate Tray scripts against functional programming patterns, check Salesforce API compliance,
   validate CSV output format, run tests, and generate a deployment checklist. TRIGGER when: user
   says "deploy prep", "ready to deploy", "validate script", or asks for a deployment checklist.
+depends_on:
+  - tray-script-generator
 ---
 
 # Deployment Preparation

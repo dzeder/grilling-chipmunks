@@ -9,6 +9,15 @@
             "timeout": 5000
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/session-context-probe.sh 2>/dev/null || true",
+            "timeout": 5000
+          }
+        ]
       }
     ]
   }

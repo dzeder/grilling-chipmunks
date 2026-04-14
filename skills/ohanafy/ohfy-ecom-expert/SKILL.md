@@ -10,6 +10,9 @@ description: |
   order capture, online catalog sync, or cart/checkout flows in Ohanafy.
   Covers: Online storefront integration, catalog management, cart/checkout,
   e-commerce order processing, and Shopify/WooCommerce connectors.
+knowledge_refs:
+  - knowledge-base/ohanafy/product-overview.md
+  - knowledge-base/ohanafy/feature-matrix.md
 ---
 
 # OHFY-Ecom Expert Skill

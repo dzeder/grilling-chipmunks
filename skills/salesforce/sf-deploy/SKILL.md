@@ -10,6 +10,9 @@ license: MIT
 metadata:
   version: "2.3.0"
   author: "Jag Valaiyapathy"
+chains_to:
+  - sf-testing
+  - canary
 ---
 
 # sf-deploy: Comprehensive Salesforce DevOps Automation
