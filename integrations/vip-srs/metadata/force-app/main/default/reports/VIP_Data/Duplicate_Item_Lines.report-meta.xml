@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>ohfy__Item_Line__c$Id</field>
+    </columns>
+    <columns>
+        <field>ohfy__Item_Line__c$VIP_External_ID__c</field>
+    </columns>
+    <columns>
+        <field>ohfy__Item_Line__c$VIP_File_Date__c</field>
+    </columns>
+    <columns>
+        <field>ohfy__Item_Line__c$CreatedDate</field>
+    </columns>
+    <description>Item Line records grouped by name to detect duplicates created before the external ID upsert fix. Records with the same name indicate duplicates.</description>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>ohfy__Item_Line__c$Name</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Duplicate Item Lines</name>
+    <params>
+        <name>co</name>
+        <value>1</value>
+    </params>
+    <reportType>VIP_Items_with_Lines__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <timeFrameFilter>
+        <dateColumn>ohfy__Item_Line__c$VIP_File_Date__c</dateColumn>
+        <interval>INTERVAL_CUSTOM</interval>
+    </timeFrameFilter>
+</Report>

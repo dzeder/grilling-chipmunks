@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>ohfy__Item_Line__c.ohfy__Items__r$Name</field>
+    </columns>
+    <columns>
+        <field>ohfy__Item_Line__c.ohfy__Items__r$ohfy__Type__c</field>
+    </columns>
+    <columns>
+        <field>ohfy__Item_Line__c.ohfy__Items__r$ohfy__UOM__c</field>
+    </columns>
+    <columns>
+        <field>ohfy__Item_Line__c.ohfy__Items__r$ohfy__Packaging_Type__c</field>
+    </columns>
+    <columns>
+        <field>ohfy__Item_Line__c.ohfy__Items__r$ohfy__Is_Active__c</field>
+    </columns>
+    <columns>
+        <field>ohfy__Item_Line__c.ohfy__Items__r$ohfy__VIP_External_ID__c</field>
+    </columns>
+    <description>Items missing one or more of the 5 prerequisites for the Depletion Item lookup filter: Finished Good record type, Type, UOM, Packaging Type, or Transformation Setting. These will block depletion inserts.</description>
+    <filter>
+        <booleanFilter>1 OR 2 OR 3</booleanFilter>
+        <criteriaItems>
+            <column>ohfy__Item_Line__c.ohfy__Items__r$ohfy__Type__c</column>
+            <columnToColumn>false</columnToColumn>
+            <isUnlocked>true</isUnlocked>
+            <operator>equals</operator>
+            <value></value>
+        </criteriaItems>
+        <criteriaItems>
+            <column>ohfy__Item_Line__c.ohfy__Items__r$ohfy__UOM__c</column>
+            <columnToColumn>false</columnToColumn>
+            <isUnlocked>true</isUnlocked>
+            <operator>equals</operator>
+            <value></value>
+        </criteriaItems>
+        <criteriaItems>
+            <column>ohfy__Item_Line__c.ohfy__Items__r$ohfy__Packaging_Type__c</column>
+            <columnToColumn>false</columnToColumn>
+            <isUnlocked>true</isUnlocked>
+            <operator>equals</operator>
+            <value></value>
+        </criteriaItems>
+    </filter>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>ohfy__Item_Line__c$Name</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Items Missing Filter Prerequisites</name>
+    <params>
+        <name>co</name>
+        <value>1</value>
+    </params>
+    <reportType>VIP_Items_with_Lines__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <timeFrameFilter>
+        <dateColumn>ohfy__Item_Line__c.ohfy__Items__r$CreatedDate</dateColumn>
+        <interval>INTERVAL_CUSTOM</interval>
+    </timeFrameFilter>
+</Report>
