@@ -85,9 +85,11 @@ complete specification. Key rules:
 1. **Flat top-level** — no `projectId`/`version`/`exportData` wrapper
 2. **Typed values** — every property value wrapped as `{ "type": "...", "value": ... }`
 3. **Correct connector versions** — see spec for current versions
-4. **Auth objects inline** — every step that needs auth gets a full auth object
+4. **No authentication objects** — omit `authentication` on all steps. Icons come from `connector.name`. User configures auth after import.
 5. **steps_structure matches steps** — every name in structure must exist in steps object
 6. **Trigger is `"type": "normal"`** in steps_structure (not `"trigger"`)
+7. **Config values are bare** — `settings.config` uses raw primitives, NOT typed wrappers
+8. **Valid UUID v4** — every `id`, `project_id`, `group`, `creator`, `version.id` must be valid UUID v4
 
 ### Step 5: Create Supporting Files
 
@@ -129,11 +131,11 @@ After the user imports, they must:
 
 | Category | Points | Criteria |
 |----------|--------|----------|
-| Structure | 25 | Flat format, all required top-level fields, valid UUID references |
-| Typed Values | 25 | Every property value correctly wrapped, correct types for jsonpath/string/boolean/number/object/array |
-| Connectors | 20 | Correct versions, correct operations, correct property schemas |
-| Auth Objects | 15 | Full auth objects with group, title, service_icon, scopes, service_name, service_version |
-| Completeness | 15 | steps_structure matches steps, error workflow included, scripts extracted, fixtures created |
+| Structure | 25 | Flat format, all required top-level fields (incl. data_tables etc.), valid UUID v4 references, projects array links correctly |
+| Typed Values | 25 | Every property value correctly wrapped, correct types for jsonpath/string/boolean/number/integer/object/array/null. Config values bare. |
+| Connectors | 20 | Correct versions, correct operations, correct property schemas. No invalid connectors (sftp, tray-io-workflow-trigger). |
+| Auth Handling | 15 | Authentication OMITTED from all steps. No placeholder auth objects. User configures after import. |
+| Completeness | 15 | steps_structure matches steps, error workflow included, step naming convention followed, scripts extracted |
 
 | Score | Tier | Meaning |
 |-------|------|---------|

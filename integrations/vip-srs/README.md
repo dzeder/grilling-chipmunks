@@ -70,6 +70,14 @@ integrations/vip-srs/
     fixtures/              # Sample data from yangon workspace
   docs/
     VIP_AGENT_HANDOFF.md   # Complete spec
+  metadata/
+    sfdx-project.json      # SFDX project for reports/dashboards
+    README.md              # Report catalog + dev workflow
+    force-app/             # SF source format
+      main/default/
+        reportTypes/       # Custom report type definitions
+        reports/VIP_Data/  # All VIP reports (supplier + dirty data)
+        dashboards/VIP_Data/ # All VIP dashboards
 ```
 
 ## External ID Strategy

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>ohfy__Inventory__c.VIP_External_ID__c</field>
+    </columns>
+    <columns>
+        <field>ohfy__Inventory__c.ohfy__Location_Name__c</field>
+    </columns>
+    <columns>
+        <field>ohfy__Inventory__c.ohfy__Cases_On_Hand__c</field>
+    </columns>
+    <columns>
+        <field>ohfy__Inventory__c.ohfy__Units_On_Hand__c</field>
+    </columns>
+    <columns>
+        <field>ohfy__Inventory__c.ohfy__Is_Active__c</field>
+    </columns>
+    <columns>
+        <field>CHILD_CREATED_DATE</field>
+    </columns>
+    <description>Inventory records without a VIP External ID — pre-existing records that need to be stamped before VIP upsert will work correctly.</description>
+    <filter>
+        <criteriaItems>
+            <column>ohfy__Inventory__c.VIP_External_ID__c</column>
+            <columnToColumn>false</columnToColumn>
+            <isUnlocked>true</isUnlocked>
+            <operator>equals</operator>
+            <value></value>
+        </criteriaItems>
+    </filter>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>CUST_NAME</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Inventory Missing External ID</name>
+    <params>
+        <name>co</name>
+        <value>1</value>
+    </params>
+    <reportType>CustomEntityCustomEntity$ohfy__Item__c$ohfy__Inventory__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <timeFrameFilter>
+        <dateColumn>CHILD_CREATED_DATE</dateColumn>
+        <interval>INTERVAL_CUSTOM</interval>
+    </timeFrameFilter>
+</Report>

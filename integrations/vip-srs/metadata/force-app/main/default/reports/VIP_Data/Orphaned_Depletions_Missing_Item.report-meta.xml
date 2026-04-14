@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>Account.ohfy__Depletions__r$Name</field>
+    </columns>
+    <columns>
+        <field>Account.ohfy__Depletions__r$ohfy__Item__c</field>
+    </columns>
+    <columns>
+        <aggregateTypes>Sum</aggregateTypes>
+        <field>Account.ohfy__Depletions__r$ohfy__Case_Quantity__c</field>
+    </columns>
+    <columns>
+        <aggregateTypes>Sum</aggregateTypes>
+        <field>Account.ohfy__Depletions__r$VIP_Net_Price__c</field>
+    </columns>
+    <columns>
+        <field>Account.ohfy__Depletions__r$VIP_External_ID__c</field>
+    </columns>
+    <columns>
+        <field>Account.ohfy__Depletions__r$VIP_File_Date__c</field>
+    </columns>
+    <description>Depletions where the Item lookup is blank — the referenced item was not found during VIP integration load. Grouped by Account.</description>
+    <filter>
+        <criteriaItems>
+            <column>Account.ohfy__Depletions__r$ohfy__Item__c</column>
+            <columnToColumn>false</columnToColumn>
+            <isUnlocked>true</isUnlocked>
+            <operator>equals</operator>
+            <value></value>
+        </criteriaItems>
+    </filter>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>Account$Name</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Orphaned Depletions - Missing Item</name>
+    <params>
+        <name>co</name>
+        <value>1</value>
+    </params>
+    <reportType>VIP_Accounts_with_Depletions__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <timeFrameFilter>
+        <dateColumn>Account.ohfy__Depletions__r$CreatedDate</dateColumn>
+        <interval>INTERVAL_CUSTOM</interval>
+    </timeFrameFilter>
+</Report>
