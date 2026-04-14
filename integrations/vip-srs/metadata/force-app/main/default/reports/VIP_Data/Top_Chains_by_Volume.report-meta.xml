@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Report xmlns="http://soap.sforce.com/2006/04/metadata">
     <columns>
-        <field>Account$ohfy__Market__c</field>
-    </columns>
-    <columns>
-        <field>Account$BillingState</field>
-    </columns>
-    <columns>
         <aggregateTypes>Sum</aggregateTypes>
         <field>Account.ohfy__Depletions__r$ohfy__Case_Quantity__c</field>
     </columns>
@@ -14,8 +8,9 @@
         <aggregateTypes>Sum</aggregateTypes>
         <field>Account.ohfy__Depletions__r$VIP_Net_Amount__c</field>
     </columns>
-    <description>Top accounts ranked by depletion case volume for the current month.</description>
+    <description>Top retail chains ranked by depletion case volume. Excludes accounts without a chain banner.</description>
     <filter>
+        <booleanFilter>1 AND 2</booleanFilter>
         <criteriaItems>
             <column>Account$Type</column>
             <columnToColumn>false</columnToColumn>
@@ -23,14 +18,21 @@
             <operator>equals</operator>
             <value>Distributed Customer</value>
         </criteriaItems>
+        <criteriaItems>
+            <column>Account$ohfy__Chain_Banner__c</column>
+            <columnToColumn>false</columnToColumn>
+            <isUnlocked>true</isUnlocked>
+            <operator>notEqual</operator>
+            <value></value>
+        </criteriaItems>
     </filter>
     <format>Summary</format>
     <groupingsDown>
         <dateGranularity>Day</dateGranularity>
-        <field>Account$Name</field>
+        <field>Account$ohfy__Chain_Banner__c</field>
         <sortOrder>Asc</sortOrder>
     </groupingsDown>
-    <name>Top Accounts by Volume</name>
+    <name>Top Chains by Volume</name>
     <params>
         <name>co</name>
         <value>1</value>

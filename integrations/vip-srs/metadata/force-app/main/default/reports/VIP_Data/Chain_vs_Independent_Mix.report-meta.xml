@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Report xmlns="http://soap.sforce.com/2006/04/metadata">
     <columns>
-        <field>Account$ohfy__Market__c</field>
-    </columns>
-    <columns>
-        <field>Account$BillingState</field>
-    </columns>
-    <columns>
         <aggregateTypes>Sum</aggregateTypes>
         <field>Account.ohfy__Depletions__r$ohfy__Case_Quantity__c</field>
     </columns>
@@ -14,7 +8,7 @@
         <aggregateTypes>Sum</aggregateTypes>
         <field>Account.ohfy__Depletions__r$VIP_Net_Amount__c</field>
     </columns>
-    <description>Top accounts ranked by depletion case volume for the current month.</description>
+    <description>Chain vs Independent retailer depletion split for distribution concentration analysis.</description>
     <filter>
         <criteriaItems>
             <column>Account$Type</column>
@@ -27,10 +21,10 @@
     <format>Summary</format>
     <groupingsDown>
         <dateGranularity>Day</dateGranularity>
-        <field>Account$Name</field>
+        <field>Account$ohfy__Retail_Type__c</field>
         <sortOrder>Asc</sortOrder>
     </groupingsDown>
-    <name>Top Accounts by Volume</name>
+    <name>Chain vs Independent Mix</name>
     <params>
         <name>co</name>
         <value>1</value>
@@ -40,8 +34,6 @@
     <showDetails>true</showDetails>
     <showGrandTotal>true</showGrandTotal>
     <showSubTotals>true</showSubTotals>
-    <sortColumn>Account.ohfy__Depletions__r$ohfy__Case_Quantity__c</sortColumn>
-    <sortOrder>Desc</sortOrder>
     <timeFrameFilter>
         <dateColumn>Account.ohfy__Depletions__r$ohfy__Date__c</dateColumn>
         <interval>INTERVAL_CUSTOM</interval>

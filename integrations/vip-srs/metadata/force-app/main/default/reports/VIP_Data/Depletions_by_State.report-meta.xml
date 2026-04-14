@@ -4,9 +4,6 @@
         <field>Account$ohfy__Market__c</field>
     </columns>
     <columns>
-        <field>Account$BillingState</field>
-    </columns>
-    <columns>
         <aggregateTypes>Sum</aggregateTypes>
         <field>Account.ohfy__Depletions__r$ohfy__Case_Quantity__c</field>
     </columns>
@@ -14,7 +11,7 @@
         <aggregateTypes>Sum</aggregateTypes>
         <field>Account.ohfy__Depletions__r$VIP_Net_Amount__c</field>
     </columns>
-    <description>Top accounts ranked by depletion case volume for the current month.</description>
+    <description>Depletion cases ranked by state for geographic performance view.</description>
     <filter>
         <criteriaItems>
             <column>Account$Type</column>
@@ -27,10 +24,10 @@
     <format>Summary</format>
     <groupingsDown>
         <dateGranularity>Day</dateGranularity>
-        <field>Account$Name</field>
+        <field>Account$BillingState</field>
         <sortOrder>Asc</sortOrder>
     </groupingsDown>
-    <name>Top Accounts by Volume</name>
+    <name>Depletions by State</name>
     <params>
         <name>co</name>
         <value>1</value>

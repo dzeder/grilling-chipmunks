@@ -1,24 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Report xmlns="http://soap.sforce.com/2006/04/metadata">
     <columns>
-        <field>ohfy__Item__c.ohfy__Depletions__r$ohfy__Customer__c</field>
-    </columns>
-    <columns>
         <aggregateTypes>Sum</aggregateTypes>
         <field>ohfy__Item__c.ohfy__Depletions__r$ohfy__Case_Quantity__c</field>
     </columns>
     <columns>
         <aggregateTypes>Sum</aggregateTypes>
-        <field>ohfy__Item__c.ohfy__Depletions__r$VIP_Unit_Quantity__c</field>
-    </columns>
-    <columns>
-        <aggregateTypes>Sum</aggregateTypes>
         <field>ohfy__Item__c.ohfy__Depletions__r$VIP_Net_Amount__c</field>
     </columns>
-    <columns>
-        <field>ohfy__Item__c.ohfy__Depletions__r$ohfy__Date__c</field>
-    </columns>
-    <description>Depletion cases and revenue grouped by brand (Item Line) for the current month.</description>
+    <description>SKU-level depletion performance grouped by brand then item, sorted by volume.</description>
     <format>Summary</format>
     <groupingsDown>
         <dateGranularity>Day</dateGranularity>
@@ -30,7 +20,7 @@
         <field>ohfy__Item__c$Name</field>
         <sortOrder>Asc</sortOrder>
     </groupingsDown>
-    <name>Depletions by Brand MTD</name>
+    <name>Depletions by SKU</name>
     <params>
         <name>co</name>
         <value>1</value>
@@ -40,6 +30,8 @@
     <showDetails>true</showDetails>
     <showGrandTotal>true</showGrandTotal>
     <showSubTotals>true</showSubTotals>
+    <sortColumn>ohfy__Item__c.ohfy__Depletions__r$ohfy__Case_Quantity__c</sortColumn>
+    <sortOrder>Desc</sortOrder>
     <timeFrameFilter>
         <dateColumn>ohfy__Item__c.ohfy__Depletions__r$ohfy__Date__c</dateColumn>
         <interval>INTERVAL_CUSTOM</interval>

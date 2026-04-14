@@ -4,14 +4,55 @@
     <backgroundFadeDirection>Diagonal</backgroundFadeDirection>
     <backgroundStartColor>#FFFFFF</backgroundStartColor>
     <dashboardType>SpecifiedUser</dashboardType>
-    <description>Supplier overview of VIP distributor data: depletions, placements, inventory, geographic performance, and rep metrics.</description>
+    <description>Supplier overview of VIP distributor data: channel mix, depletions, placements, inventory, geographic performance, chain rankings, and rep metrics.</description>
     <isGridLayout>false</isGridLayout>
     <leftSection>
         <columnSize>Medium</columnSize>
+        <!-- NEW: Channel Mix donut — the headline view -->
+        <components>
+            <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
+            <chartAxisRange>Auto</chartAxisRange>
+            <componentType>Donut</componentType>
+
+
+            <drillEnabled>true</drillEnabled>
+            <drillToDetailEnabled>false</drillToDetailEnabled>
+            <enableHover>true</enableHover>
+            <expandOthers>false</expandOthers>
+            <groupingSortProperties/>
+            <header>Channel Mix (Cases)</header>
+            <legendPosition>Bottom</legendPosition>
+            <report>VIP_Data/Channel_Mix_by_Cases</report>
+            <showPercentage>true</showPercentage>
+            <showValues>true</showValues>
+            <sortBy>RowLabelAscending</sortBy>
+            <useReportChart>false</useReportChart>
+        </components>
+        <!-- NEW: Premise Type donut -->
+        <components>
+            <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
+            <chartAxisRange>Auto</chartAxisRange>
+            <componentType>Donut</componentType>
+
+            <drillEnabled>true</drillEnabled>
+            <drillToDetailEnabled>false</drillToDetailEnabled>
+            <enableHover>true</enableHover>
+            <expandOthers>false</expandOthers>
+            <groupingSortProperties/>
+            <header>On vs Off Premise</header>
+            <legendPosition>Bottom</legendPosition>
+            <report>VIP_Data/Premise_Type_Mix</report>
+            <showPercentage>true</showPercentage>
+            <showValues>true</showValues>
+            <sortBy>RowLabelAscending</sortBy>
+            <useReportChart>false</useReportChart>
+        </components>
+        <!-- EXISTING: Depletions by Brand MTD -->
         <components>
             <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
             <chartAxisRange>Auto</chartAxisRange>
             <componentType>Bar</componentType>
+
             <displayUnits>Auto</displayUnits>
             <drillEnabled>true</drillEnabled>
             <drillToDetailEnabled>false</drillToDetailEnabled>
@@ -27,6 +68,7 @@
             <sortBy>RowLabelAscending</sortBy>
             <useReportChart>false</useReportChart>
         </components>
+        <!-- EXISTING: Active Placements -->
         <components>
             <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
             <componentType>Table</componentType>
@@ -41,6 +83,7 @@
             <showPicturesOnTables>true</showPicturesOnTables>
             <sortBy>RowLabelAscending</sortBy>
         </components>
+        <!-- EXISTING: New Placements This Month -->
         <components>
             <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
             <componentType>Table</componentType>
@@ -55,10 +98,12 @@
             <showPicturesOnTables>true</showPicturesOnTables>
             <sortBy>RowLabelAscending</sortBy>
         </components>
+        <!-- EXISTING: Depletions Trend by Month -->
         <components>
             <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
             <chartAxisRange>Auto</chartAxisRange>
             <componentType>Bar</componentType>
+
             <displayUnits>Auto</displayUnits>
             <drillEnabled>true</drillEnabled>
             <drillToDetailEnabled>false</drillToDetailEnabled>
@@ -77,10 +122,13 @@
     </leftSection>
     <middleSection>
         <columnSize>Medium</columnSize>
+        <!-- EXISTING: Depletions by Account MTD -->
         <components>
             <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
             <chartAxisRange>Auto</chartAxisRange>
             <componentType>Bar</componentType>
+
+
             <displayUnits>Auto</displayUnits>
             <drillEnabled>true</drillEnabled>
             <drillToDetailEnabled>false</drillToDetailEnabled>
@@ -96,9 +144,12 @@
             <sortBy>RowLabelAscending</sortBy>
             <useReportChart>false</useReportChart>
         </components>
+        <!-- EXISTING: Top Accounts by Volume -->
         <components>
             <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
             <componentType>Table</componentType>
+
+
             <drillEnabled>true</drillEnabled>
             <drillToDetailEnabled>false</drillToDetailEnabled>
             <groupingSortProperties/>
@@ -110,6 +161,24 @@
             <showPicturesOnTables>true</showPicturesOnTables>
             <sortBy>RowLabelAscending</sortBy>
         </components>
+        <!-- NEW: Top Chains by Volume -->
+        <components>
+            <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
+            <componentType>Table</componentType>
+
+
+            <drillEnabled>true</drillEnabled>
+            <drillToDetailEnabled>false</drillToDetailEnabled>
+            <groupingSortProperties/>
+            <header>Top Chains by Volume</header>
+            <indicatorHighColor>#54C254</indicatorHighColor>
+            <indicatorLowColor>#C25454</indicatorLowColor>
+            <indicatorMiddleColor>#C2C254</indicatorMiddleColor>
+            <report>VIP_Data/Top_Chains_by_Volume</report>
+            <showPicturesOnTables>true</showPicturesOnTables>
+            <sortBy>RowLabelAscending</sortBy>
+        </components>
+        <!-- EXISTING: Lost Placements -->
         <components>
             <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
             <componentType>Table</componentType>
@@ -124,6 +193,7 @@
             <showPicturesOnTables>true</showPicturesOnTables>
             <sortBy>RowLabelAscending</sortBy>
         </components>
+        <!-- EXISTING: Distribution Coverage by Brand -->
         <components>
             <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
             <chartAxisRange>Auto</chartAxisRange>
@@ -143,10 +213,30 @@
             <sortBy>RowLabelAscending</sortBy>
             <useReportChart>false</useReportChart>
         </components>
+        <!-- NEW: Depletions by Category donut -->
+        <components>
+            <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
+            <chartAxisRange>Auto</chartAxisRange>
+            <componentType>Donut</componentType>
+
+            <drillEnabled>true</drillEnabled>
+            <drillToDetailEnabled>false</drillToDetailEnabled>
+            <enableHover>true</enableHover>
+            <expandOthers>false</expandOthers>
+            <groupingSortProperties/>
+            <header>Depletions by Category</header>
+            <legendPosition>Bottom</legendPosition>
+            <report>VIP_Data/Depletions_by_Category</report>
+            <showPercentage>true</showPercentage>
+            <showValues>true</showValues>
+            <sortBy>RowLabelAscending</sortBy>
+            <useReportChart>false</useReportChart>
+        </components>
     </middleSection>
     <owner>integrations@ohanafy.ros</owner>
     <rightSection>
         <columnSize>Medium</columnSize>
+        <!-- EXISTING: Inventory Levels by Item -->
         <components>
             <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
             <chartAxisRange>Auto</chartAxisRange>
@@ -166,10 +256,35 @@
             <sortBy>RowLabelAscending</sortBy>
             <useReportChart>false</useReportChart>
         </components>
+        <!-- NEW: Depletions by State -->
         <components>
             <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
             <chartAxisRange>Auto</chartAxisRange>
             <componentType>Bar</componentType>
+
+
+            <displayUnits>Auto</displayUnits>
+            <drillEnabled>true</drillEnabled>
+            <drillToDetailEnabled>false</drillToDetailEnabled>
+            <enableHover>true</enableHover>
+            <expandOthers>false</expandOthers>
+            <groupingSortProperties/>
+            <header>Depletions by State</header>
+            <legendPosition>Bottom</legendPosition>
+            <report>VIP_Data/Depletions_by_State</report>
+            <showPercentage>false</showPercentage>
+            <showPicturesOnCharts>false</showPicturesOnCharts>
+            <showValues>true</showValues>
+            <sortBy>RowLabelAscending</sortBy>
+            <useReportChart>false</useReportChart>
+        </components>
+        <!-- EXISTING: Depletions by Market -->
+        <components>
+            <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
+            <chartAxisRange>Auto</chartAxisRange>
+            <componentType>Bar</componentType>
+
+
             <displayUnits>Auto</displayUnits>
             <drillEnabled>true</drillEnabled>
             <drillToDetailEnabled>false</drillToDetailEnabled>
@@ -185,25 +300,48 @@
             <sortBy>RowLabelAscending</sortBy>
             <useReportChart>false</useReportChart>
         </components>
+        <!-- NEW: Depletions by SKU -->
         <components>
             <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
             <chartAxisRange>Auto</chartAxisRange>
             <componentType>Bar</componentType>
+
             <displayUnits>Auto</displayUnits>
             <drillEnabled>true</drillEnabled>
             <drillToDetailEnabled>false</drillToDetailEnabled>
             <enableHover>true</enableHover>
             <expandOthers>false</expandOthers>
             <groupingSortProperties/>
-            <header>Depletions by Salesman</header>
+            <header>Depletions by SKU</header>
             <legendPosition>Bottom</legendPosition>
-            <report>VIP_Data/Depletions_by_Salesman</report>
+            <report>VIP_Data/Depletions_by_SKU</report>
             <showPercentage>false</showPercentage>
             <showPicturesOnCharts>false</showPicturesOnCharts>
             <showValues>true</showValues>
             <sortBy>RowLabelAscending</sortBy>
             <useReportChart>false</useReportChart>
         </components>
+        <!-- NEW: Chain vs Independent donut -->
+        <components>
+            <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
+            <chartAxisRange>Auto</chartAxisRange>
+            <componentType>Donut</componentType>
+
+
+            <drillEnabled>true</drillEnabled>
+            <drillToDetailEnabled>false</drillToDetailEnabled>
+            <enableHover>true</enableHover>
+            <expandOthers>false</expandOthers>
+            <groupingSortProperties/>
+            <header>Chain vs Independent</header>
+            <legendPosition>Bottom</legendPosition>
+            <report>VIP_Data/Chain_vs_Independent_Mix</report>
+            <showPercentage>true</showPercentage>
+            <showValues>true</showValues>
+            <sortBy>RowLabelAscending</sortBy>
+            <useReportChart>false</useReportChart>
+        </components>
+        <!-- EXISTING: Declining Accounts -->
         <components>
             <autoselectColumnsFromReport>true</autoselectColumnsFromReport>
             <componentType>Table</componentType>
