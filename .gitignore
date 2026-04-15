@@ -43,6 +43,9 @@ credentials.json
 .claude/skills/gstack/browse/dist/
 .claude/skills/gstack/design/dist/
 
+# VIP SRS downloaded data files (real SFTP data, too large for git)
+integrations/vip-srs/data/
+
 # Tray built artifacts (exports go to dzeder/daniels-ohanafy-artifacts)
 integrations/tray/**/raw-exports/
 integrations/tray/**/versions/

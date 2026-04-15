@@ -8,7 +8,7 @@ Running log of known issues, workarounds, and resolutions for this customer.
 - **Severity:** High
 - **Affected area:** Integration — any Account DML
 - **Reported:** 2026-04-10
-- **Workaround:** First insert succeeds; only AfterUpdate (re-upsert) fails. Avoid re-upserting Accounts in the same run. In Tray, handle allOrNone=false and log these errors.
+- **Workaround:** **CMDT trigger bypass** — deploy `ohfy__Trigger_Configuration__mdt` with `ohfy__Is_Bypassed__c = true` before bulk operations, restore to false after. Packages at `/tmp/cmdt-bypass/` (enable) and `/tmp/cmdt-restore/` (disable). Note: ~8 batch cache propagation delay after deploy — first batches may still fail. Alternative: first insert succeeds; only AfterUpdate (re-upsert) fails. In Tray, handle allOrNone=false and log these errors.
 - **Description:** `ohfy.AccountTrigger` AfterUpdate fires `ServiceLocator.ServiceLocatorException: Invalid implementation class: AccountTriggerMethods`. The managed package class `AccountTriggerMethods` is not found. This blocks Account updates but not inserts. Ohanafy engineering needs to either deploy the missing class or update the ServiceLocator config in ROS2.
 
 ### Item lookup filter chain on Depletion__c.Item__c
@@ -72,4 +72,11 @@ Running log of known issues, workarounds, and resolutions for this customer.
 
 ## Recurring Patterns
 
-<!-- Issues that keep coming back. Document the pattern so agents recognize it faster. -->
+### CMDT cache propagation delay
+When deploying `ohfy__Trigger_Configuration__mdt` changes (bypass on/off), the first ~8 API batches may still use cached CMDT values. This is a Salesforce platform behavior, not a bug. Accept early failures or add a small delay after deploy.
+
+### Standard picklist field metadata
+Standard fields like Account.Type use `StandardValueSet` metadata, not `CustomObject` field definitions or `GlobalValueSet`. Must retrieve ALL existing values first and include them in the deploy XML — omitting a value removes it.
+
+### Managed package trigger cascades
+Contact DML triggers Account DML (Contact AfterInsert → Account update → AccountTriggerMethods). Any new child object with a managed trigger that touches the parent Account will hit the same AccountTriggerMethods blocker. Check trigger dependencies before loading new object types.

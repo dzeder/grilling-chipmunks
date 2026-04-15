@@ -178,6 +178,18 @@
 - [x] **Org field verification:** `ohfy__Net_Amount__c` and `ohfy__Quantity__c` do NOT exist in ROS2. `ohfy__Type__c` exists but is restricted picklist (Cold Box/Draft Line/Menu/Shelf) — `Sale` not valid. Used unmanaged `VIP_Net_Amount__c` instead.
 - [x] **VIP Data Dictionary:** `docs/VIP_DATA_DICTIONARY.md` — comprehensive field reference for report/dashboard builders. Covers all 16 SF objects, currency fields, date fields, crosswalks, relationships, and unmapped SLSDA fields.
 
+### Phase 5j: ROS2 Mass Data Load (2026-04-15)
+- [x] **SObject Collections API upgrade:** Replaced Composite API (25/batch) with Collections API (200/batch) for all flat SObject upserts. 8x throughput: 183 batches vs 1,464 for 36K outlets. Endpoint: `PATCH /composite/sobjects/{SObject}/{ExternalIdField}`. Kept Composite for Contacts (parent-linked), Item Lines/Types (batch builder), and Inventory stamp (record-ID patches).
+- [x] **All-distributor processing:** `--dist-id ""` (empty string) processes all distributors. Previous `targetDistributorId: FL01` in config limited to 1,701 of ~36K outlets. 9 distributors total: FL01-FL07, MA01-MA05.
+- [x] **CMDT trigger bypass pattern:** Deploy `ohfy__Trigger_Configuration__mdt` with `Is_Bypassed__c = true` before bulk operations; restore to false after. ~8 batch cache propagation delay. Packages at `/tmp/cmdt-bypass/` and `/tmp/cmdt-restore/`.
+- [x] **COT-based account classification:** VIP ClassOfTrade 06 (Employee/Special), 07 (Distributor House), 50 (Distributor House) → RecordType=Wholesaler (`012am0000050BVaAAM`), Type='Distributor', Is_Active=false, Retail_Type='Distributor'. All others → RecordType=Distributed_Customer, Type='Distributed Customer'.
+- [x] **Market crosswalk expanded:** 34 COT codes mapped to `ohfy__Market__c` values. "No Market" for unmapped codes. Full `CLASS_OF_TRADE` map in Script 05.
+- [x] **Chain banner defaults:** Outlets without SRSCHAIN match get a default banner per distributor (`No Chain Off:{DistId}` or `No Chain On:{DistId}`).
+- [x] **StandardValueSet for Account.Type:** Added "Distributor" and "Wholesaler" values via StandardValueSet metadata (standard fields can't use GlobalValueSet or CustomObject field definitions).
+- [x] **Script 03 raw record arrays:** Added `accountRecords`, `contactRecords`, `locationRecords` to output for Collections API consumption in runner.
+- [x] **Mass load results:** 36,596 accounts (0 fail), 6,637 chain banners, 1 supplier, 9 distributors. 1,816 Wholesaler/Distributor accounts, 34,791 Distributed Customer accounts. 55 accounts on "Retailers Missing Fields" report — left for dirty data dashboard demo.
+- [x] **Contacts skipped:** `--skip-contacts` flag used due to AccountTriggerMethods cascade blocker on Contact inserts.
+
 ## Next Up
 
 ### Phase 7: Multi-Day Sequence Test
@@ -212,18 +224,22 @@
 | **ohfy__Placement__c is the right object** (not Account_Item__c) | Managed object with 59+ fields including formula fields for CSO features. Account_Item__c exists in source-index but has 0 deployed fields in ROS2. |
 | **VIP Salesman1/2 = distributor rep codes** (not supplier reps) | OUTDA Salesman1/Salesman2 are ROSM1/ROSM2 (distributor employee codes). Stored as `VIP_Salesman1__c`/`VIP_Salesman2__c` text fields on Account. Supplier reps are SF Users, manually assigned in Ohanafy. |
 | **Lost_Placement_After_Days = 60** | CSO requirement for reorder alert window. Feeds formula: `Lost_Placement_Date__c = Last_Sold_Date + 60`. After that date, `Days_Since_Last_Order > 60` flags it as a lost placement. |
+| **SObject Collections API over Composite** | 200 records/batch vs 25 — 8x throughput. Used for all flat SObject upserts (Items, Accounts, Locations, Depletions, Placements, Allocations, Inventory). Composite kept for parent-linked (Contacts), batch-builders (Item Lines/Types), and record-ID patches. |
+| **COT 06/07/50 = Wholesaler RT + Type='Distributor'** | House/employee/distributor accounts are non-retail. Wholesaler RecordType exists in org for this purpose. Type='Distributor' (not 'Wholesaler') per business preference. Is_Active=false, Retail_Type='Distributor'. |
+| **CMDT bypass for AccountTriggerMethods** | Deploy `ohfy__Trigger_Configuration__mdt` with `Is_Bypassed__c = true` before bulk operations, restore after. ~8 batch cache delay. Only viable workaround until managed package is fixed. |
+| **55 "missing fields" accounts left for demo** | Dirty data dashboard is a selling point. 55/36,596 (0.15%) have blank Premise_Type/Chain_Banner — venues, events, distributor branches. Intentionally unfixed. |
 
 ## Gotchas
 
 1. **SF Metadata API + managed package objects:** Deploys report "Succeeded" but fields aren't API-accessible unless Admin profile FLS is included in the same package. Always deploy fields + profiles together.
 2. **Master-detail fields are set on create only:** Customer__c on Depletion, Item__c on Inventory, etc. Use `__r` relationship syntax in Composite API body, not `__c` field.
 3. **Namespace prefix:** All managed package fields need `ohfy__` prefix. Unmanaged custom fields (VIP_*) do NOT get the prefix.
-4. **Composite API batch limit:** 25 subrequests max per batch. Scripts chunk accordingly.
+4. **Composite API batch limit:** 25 subrequests max per batch. **Prefer SObject Collections API (200/batch) for flat upserts.** See gotcha #25.
 5. **DistId filtering:** Scripts filter rows by `targetDistId`. Test fixtures use `FL01`.
 6. **Restricted picklists need exact org values:** `ohfy__Market__c`, `ohfy__Packaging_Type__c` are restricted picklists. The script crosswalk must use exact values from the target org — describe the field first. Generic/human-friendly names (e.g., "Bar") will fail if the org uses a different label (e.g., "Bars/Clubs/Taverns").
 7. **Record type gates picklist values:** `ohfy__Packaging_Type__c` on Item__c accepts different values per record type. The integration user must have the "Finished Good" record type assigned, and the Composite body must include `RecordTypeId`. Without it, the default Master record type rejects valid Finished Good picklist values.
 8. **Location_Code__c max length = 5:** The `ohfy__Location_Code__c` field is only 5 characters. Store the raw dist ID (e.g., `FL01`), not the prefixed external key (`LOC:FL01`).
-9. **AccountTriggerMethods missing in ROS2:** The managed package trigger `ohfy.AccountTrigger` fires on AfterUpdate but the `AccountTriggerMethods` class is not found. First insert succeeds; re-upsert (update) fails. This is a managed package configuration issue, not a script bug. **Hard blocker for production daily sync.**
+9. **AccountTriggerMethods missing in ROS2:** The managed package trigger `ohfy.AccountTrigger` fires on AfterUpdate but the `AccountTriggerMethods` class is not found. First insert succeeds; re-upsert (update) fails. **Workaround: CMDT trigger bypass** (see gotcha #26). Still a hard blocker for production daily sync without automation.
 10. **External ID field names vary by object:** Account uses `ohfy__External_ID__c` (managed), Contact uses `External_ID__c` (unmanaged custom), most VIP objects use `VIP_External_ID__c` (unmanaged). Always check the field name per object — don't assume.
 11. **Supplier vs Distributor perspective matters:** ROS is a supplier. OUTDA accounts split into two types: distributors/wholesalers (ClassOfTrade 06/07/50) are the supplier's **Customers** (record type Customer); retailers are the distributor's customers → **Distributed Customers**. This affects record type, account type, retail type, and premise type mappings.
 12. **SRSCHAIN records are chain banners** even if names seem small (e.g., "Horizon Market"). They're parent accounts that OUTDA outlets link to via `Chain_Banner__r`. The detail (address, market, etc.) lives on the outlets, not the chains.
@@ -239,3 +255,9 @@
 22. **HANDOFF doc has stale crosswalk values:** Class of Trade (Section 7.1), UOM__c (Section 5.2), Packaging_Type__c (Section 5.2), and Account Type for chain banners (Section 5.1) differ between the HANDOFF spec and the org-validated script values. Scripts are the source of truth for actual API values. HANDOFF is stale — see GitHub issue #114.
 23. **Inventory Units_On_Hand__c not mapped (data loss):** Script 06 computes both `entry.cases` and `entry.units` but only writes `Quantity_On_Hand__c` from cases. Bottle-level inventory quantities are silently dropped. See GitHub issue #111.
 24. **Managed Depletion fields don't exist in ROS2:** Knowledge base documents `ohfy__Net_Amount__c` and `ohfy__Quantity__c` on Depletion__c but neither exists in the ROS2 sandbox. `ohfy__Type__c` exists but is a restricted picklist (Cold Box, Draft Line, Menu, Shelf) — not transaction types. Created unmanaged `VIP_Net_Amount__c` (Currency) for extended net amount instead.
+25. **SObject Collections API preferred over Composite:** `PATCH /composite/sobjects/{SObject}/{ExternalIdField}` accepts 200 records/batch (vs Composite's 25). Use for all flat SObject upserts. Keep Composite for parent-linked records (Contacts need parent Account), batch builders that add fields per-subrequest (Item Lines/Types), and record-ID patches (Inventory stamp). Response is an array of `{success, errors}` objects — one per record.
+26. **CMDT trigger bypass has cache propagation delay:** After deploying `ohfy__Trigger_Configuration__mdt` with `Is_Bypassed__c = true`, first ~8 API batches may still fail because app servers cache CMDT values. Accept early failures or add a delay. Always restore bypass to false after operations.
+27. **Standard picklist fields use StandardValueSet:** Account.Type, Account.Industry, etc. cannot be modified via CustomObject field definitions or GlobalValueSet. Use `StandardValueSet` metadata type. Must include ALL existing values in the XML — omitting a value removes it from the org.
+28. **Wholesaler = Distributor in Ohanafy:** These are synonymous in beverage supply chain context. Always use `Type = 'Distributor'` on house accounts (COT 06/07/50), never `Type = 'Wholesaler'` — even though the RecordType is named "Wholesaler" and both picklist values exist.
+29. **`--dist-id ""` for all distributors:** Pass empty string to process all distributors (falsy, skips filter). Passing literal `"ALL"` matches nothing because no DistId equals "ALL". `--dist-id "FL01"` processes a single distributor.
+30. **`| head` kills background Node processes:** Piping long-running `node` output to `head -N` sends SIGPIPE that terminates the Node process after N lines. Run without pipe as a background command instead.

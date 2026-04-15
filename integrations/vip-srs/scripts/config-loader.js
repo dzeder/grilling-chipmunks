@@ -58,6 +58,7 @@ function loadConfig(cliArgs) {
       if (json.customer) config.customer = json.customer;
       if (json.supplierCode) config.supplierCode = json.supplierCode;
       if (json.supplier) config.supplier = json.supplier;
+      if (json.sftpPath) config.sftpPath = json.sftpPath;
       config._configFile = configPath;
     } catch (e) {
       console.error('WARNING: Failed to parse config ' + configPath + ': ' + e.message);

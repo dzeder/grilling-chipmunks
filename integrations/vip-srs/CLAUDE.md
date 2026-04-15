@@ -42,7 +42,7 @@ These are source files for development/testing. For Tray deployment, inline the 
 
 ## Key constraints
 
-- SF Composite API: max 25 subrequests per batch
+- **SObject Collections API: 200 records/batch** for flat upserts (`PATCH /composite/sobjects/{SObject}/{ExternalIdField}`). Use for Items, Accounts, Locations, Depletions, Placements, Allocations, Inventory. Keep Composite API (25/batch) for parent-linked records (Contacts) and batch builders (Item Lines/Types).
 - Tray Script connector: memory limits — chunk large files (OUTDA ~36K rows)
 - External IDs: only immutable business identifiers, colon-delimited, prefixed
 - Load order: Phase 1 (references) → Phase 2 (enrichment) → Phase 3 (inventory) → Phase 4 (transactions)
@@ -50,6 +50,9 @@ These are source files for development/testing. For Tray deployment, inline the 
 - **VIP_File_Date__c = date of pipeline run** (not from file contents). FromDate/ToDate capture the reporting window. File date is for stale cleanup.
 - **Placement__c** is Account×Item (not per transaction). External ID: `PLC:{DistId}:{AcctNbr}:{SuppItem}`. Master-detail fields are create-only.
 - **Item lookup filter on Depletion__c.Item__c**: Items need Finished Good RT + Type__c + UOM__c + Packaging_Type__c + Transformation_Setting__c record. See ROADMAP.md Gotcha #14.
+- **CMDT trigger bypass**: Deploy `ohfy__Trigger_Configuration__mdt` with `Is_Bypassed__c = true` to skip managed triggers (e.g., AccountTriggerMethods). Has ~8 batch cache propagation delay. Always restore to false after operations.
+- **COT 06/07/50 = distributor house accounts**: RecordType=Wholesaler, Type='Distributor', Is_Active=false, Retail_Type='Distributor'. NOT retail outlets.
+- **`--dist-id ""` for all distributors**: Empty string skips the dist-id filter. `--dist-id "FL01"` processes one distributor only.
 
 ## Data Dictionary
 

@@ -310,11 +310,14 @@ exports.step = function(input) {
     accountBatches: accountBatches,
     contactBatches: contactBatches,
     locationBatches: locationBatches,
-    // Records
+    // Records (raw — used by Collections API in runner)
     records: locationRecords,
     recordCount: locationRecords.length,
+    accountRecords: accountRecords,
     accountRecordCount: accountRecords.length,
+    contactRecords: contactRecords,
     contactRecordCount: contactRecords.length,
+    locationRecords: locationRecords,
     errors: invalid.concat(transformErrors.map(function(e) {
       return { rowIndex: e.rowIndex, reason: 'Transform error: ' + e.error };
     })),

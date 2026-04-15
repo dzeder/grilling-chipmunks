@@ -33,6 +33,8 @@ var DRY_RUN = false;
 var PHASE_FILTER = null; // null = all phases
 var FILE_DATE = ''; // YYYY-MM-DD — set via --file-date, defaults to today (date of run)
 var OUTPUT_JSON = ''; // path to write structured JSON report
+var DATA_DIR = ''; // path to real VIP data files (overrides FIXTURES_DIR)
+var SKIP_CONTACTS = false; // skip all Contact DML (workaround for AccountTriggerMethods)
 var MAX_RETRIES = 3; // retry attempts for transient API failures
 
 // CLI args override config values
@@ -45,9 +47,11 @@ for (var i = 0; i < args.length; i++) {
     case '--phase': PHASE_FILTER = parseInt(args[++i], 10); break;
     case '--file-date': FILE_DATE = args[++i]; break;
     case '--output-json': OUTPUT_JSON = args[++i]; break;
+    case '--data-dir': DATA_DIR = args[++i]; break;
+    case '--skip-contacts': SKIP_CONTACTS = true; break;
     case '--config': i++; break; // already consumed by config-loader
     case '--help': case '-h':
-      console.log('Usage: node e2e-sandbox-runner.js [--config FILE] [--target-org ORG] [--dist-id ID] [--phase N] [--file-date YYYY-MM-DD] [--output-json FILE] [--dry-run]');
+      console.log('Usage: node e2e-sandbox-runner.js [--config FILE] [--target-org ORG] [--dist-id ID] [--phase N] [--file-date YYYY-MM-DD] [--output-json FILE] [--data-dir DIR] [--dry-run]');
       process.exit(0);
   }
 }
@@ -58,6 +62,58 @@ for (var i = 0; i < args.length; i++) {
 
 var SCRIPTS_DIR = path.join(__dirname);
 var FIXTURES_DIR = path.join(__dirname, '..', 'tests', 'fixtures');
+
+// When --data-dir is set, resolve real VIP filenames instead of test fixtures.
+// VIP files on SFTP follow {TYPE}.N{MMDDYYYY}.gz naming; after download they're {TYPE}.csv
+// or may retain the original name sans .gz. We check multiple patterns.
+function resolveDataFile(fixtureFile) {
+  if (!DATA_DIR) return path.join(FIXTURES_DIR, fixtureFile);
+
+  var dataDir = path.isAbsolute(DATA_DIR)
+    ? DATA_DIR
+    : path.join(__dirname, '..', DATA_DIR);
+
+  // Map fixture filenames to VIP file type prefixes
+  var FIXTURE_TO_TYPE = {
+    'srschain-sample.csv': 'SRSCHAIN',
+    'itm2da-sample.csv': 'ITM2DA',
+    'distda-sample.csv': 'DISTDA',
+    'itmda-sample.csv': 'ITMDA',
+    'outda-sample.csv': 'OUTDA',
+    'invda-sample.csv': 'INVDA',
+    'slsda-25.csv': 'SLSDA',
+    'slsda-sample.csv': 'SLSDA',
+    'ctlda-sample.csv': 'CTLDA'
+  };
+
+  var vipType = FIXTURE_TO_TYPE[fixtureFile];
+  if (!vipType) return path.join(dataDir, fixtureFile); // unknown fixture, try as-is
+
+  // Try multiple filename patterns in order of likelihood
+  var candidates = [
+    vipType + '.csv',                           // TYPE.csv (standard after download)
+    vipType + 'DA.csv',                         // TYPEDA.csv (some have DA suffix already)
+    fixtureFile                                 // original fixture name as fallback
+  ];
+
+  // Also check for files matching TYPE*.csv (covers TYPE.N04082026.csv etc.)
+  try {
+    var dirFiles = fs.readdirSync(dataDir);
+    dirFiles.forEach(function(f) {
+      if (f.toUpperCase().indexOf(vipType) === 0 && f.toLowerCase().endsWith('.csv')) {
+        if (candidates.indexOf(f) === -1) candidates.unshift(f); // prioritize actual matches
+      }
+    });
+  } catch (_) { /* directory may not exist yet */ }
+
+  for (var ci = 0; ci < candidates.length; ci++) {
+    var candidatePath = path.join(dataDir, candidates[ci]);
+    if (fs.existsSync(candidatePath)) return candidatePath;
+  }
+
+  // Nothing found — return the standard name so the "not found" error is clear
+  return path.join(dataDir, vipType + '.csv');
+}
 
 // =============================================================================
 // CSV PARSER (same as test-runner.js)
@@ -258,6 +314,87 @@ function sendBatches(batches, label) {
   return { success: totalSuccess, fail: totalFail };
 }
 
+/**
+ * SObject Collections upsert — 200 records per batch (8x faster than Composite).
+ * PATCH /composite/sobjects/{SObject}/{ExternalIdField}
+ * Body: { allOrNone: false, records: [{ attributes: {type}, ...fields }] }
+ * Response: [{id, success, errors, created}, ...]
+ */
+function sendCollectionsUpsert(records, sobjectName, externalIdField, label) {
+  if (!records || records.length === 0) {
+    console.log('  ' + label + ': 0 records, skipping');
+    return { success: 0, fail: 0 };
+  }
+
+  var BATCH_SIZE = 200;
+  var totalSuccess = 0;
+  var totalFail = 0;
+
+  var chunks = [];
+  for (var i = 0; i < records.length; i += BATCH_SIZE) {
+    chunks.push(records.slice(i, i + BATCH_SIZE));
+  }
+
+  for (var ci = 0; ci < chunks.length; ci++) {
+    var chunk = chunks[ci];
+    console.log('  ' + label + ' batch ' + (ci + 1) + '/' + chunks.length + ' (' + chunk.length + ' records)');
+
+    if (DRY_RUN) {
+      console.log('    [DRY RUN] Would upsert ' + chunk.length + ' ' + sobjectName + ' records');
+      totalSuccess += chunk.length;
+      continue;
+    }
+
+    var payload = {
+      allOrNone: false,
+      records: chunk.map(function(rec) {
+        var r = { attributes: { type: sobjectName } };
+        Object.keys(rec).forEach(function(key) {
+          if (key[0] !== '_') r[key] = rec[key];
+        });
+        return r;
+      })
+    };
+
+    var endpoint = '/services/data/' + API_VERSION + '/composite/sobjects/' +
+      sobjectName + '/' + externalIdField;
+    var response = sfApiPatch(endpoint, payload);
+
+    if (Array.isArray(response)) {
+      var batchOk = 0, batchFail = 0;
+      response.forEach(function(r, idx) {
+        if (r.success) {
+          batchOk++;
+        } else {
+          batchFail++;
+          var errMsg = r.errors ? JSON.stringify(r.errors) : 'Unknown error';
+          var category = categorizeError(errMsg);
+          console.log('    ' + category + ' [' + idx + ']: ' + errMsg.substring(0, 200));
+          errorDetails.push({
+            step: label,
+            index: (ci * BATCH_SIZE) + idx,
+            httpStatus: 400,
+            category: category,
+            referenceId: null,
+            message: errMsg.substring(0, 500)
+          });
+        }
+      });
+      totalSuccess += batchOk;
+      totalFail += batchFail;
+      console.log('    Result: ' + batchOk + ' ok, ' + batchFail + ' fail');
+    } else if (response && (response.success || (response.httpStatusCode && response.httpStatusCode < 300))) {
+      totalSuccess += chunk.length;
+      console.log('    Result: ' + chunk.length + ' ok');
+    } else {
+      totalFail += chunk.length;
+      console.log('    ERROR: ' + JSON.stringify(response).substring(0, 200));
+    }
+  }
+
+  return { success: totalSuccess, fail: totalFail };
+}
+
 function sfQuery(soql) {
   try {
     var result = execSync(
@@ -312,7 +449,7 @@ var PIPELINE = [
     script: '01-srschain-chains.js',
     fixture: 'srschain-sample.csv',
     run: function(result) {
-      return sendBatches(result.batches, 'Chain Banners');
+      return sendCollectionsUpsert(result.records, 'Account', 'ohfy__External_ID__c', 'Chain Banners');
     }
   },
   {
@@ -321,16 +458,16 @@ var PIPELINE = [
     script: '02-itm2da-items.js',
     fixture: 'itm2da-sample.csv',
     run: function(result) {
-      // Upsert Item_Lines by external ID (ILN:{BrandDesc})
+      // Upsert Item_Lines — Composite (small set, batch builder adds Supplier__r)
       if (result.itemLineBatches && result.itemLineBatches.length > 0) {
         sendBatches(result.itemLineBatches, 'Item Lines');
       }
-      // Upsert Item_Types by external ID (ITY:{GenericCat3})
+      // Upsert Item_Types — Composite (small set, restricted picklist field selection)
       if (result.itemTypeBatches && result.itemTypeBatches.length > 0) {
         sendBatches(result.itemTypeBatches, 'Item Types');
       }
-      // Upsert Items
-      return sendBatches(result.batches, 'Items');
+      // Upsert Items — Collections (200/batch)
+      return sendCollectionsUpsert(result.records, 'ohfy__Item__c', 'ohfy__VIP_External_ID__c', 'Items');
     }
   },
   {
@@ -339,18 +476,17 @@ var PIPELINE = [
     script: '03-distda-locations.js',
     fixture: 'distda-sample.csv',
     run: function(result) {
-      // Accounts first (parent)
-      var acctResult = { success: 0, fail: 0 };
-      if (result.accountBatches && result.accountBatches.length > 0) {
-        acctResult = sendBatches(result.accountBatches, 'Distributors (Accounts)');
-      }
-      // Contacts second (child — needs Account to exist)
+      // Accounts first (parent) — Collections (200/batch)
+      var acctResult = sendCollectionsUpsert(result.accountRecords || [], 'Account', 'ohfy__External_ID__c', 'Distributors (Accounts)');
+      // Contacts second (child) — Composite (parent-linking in batch builder)
       var contResult = { success: 0, fail: 0 };
-      if (result.contactBatches && result.contactBatches.length > 0) {
+      if (!SKIP_CONTACTS && result.contactBatches && result.contactBatches.length > 0) {
         contResult = sendBatches(result.contactBatches, 'Distributor Contacts');
+      } else if (SKIP_CONTACTS && result.contactRecords && result.contactRecords.length > 0) {
+        console.log('    SKIP: ' + result.contactRecords.length + ' contacts (--skip-contacts)');
       }
-      // Locations last
-      var locResult = sendBatches(result.locationBatches || result.batches, 'Locations');
+      // Locations — Collections (200/batch)
+      var locResult = sendCollectionsUpsert(result.locationRecords || [], 'ohfy__Location__c', 'VIP_External_ID__c', 'Locations');
       return {
         success: acctResult.success + contResult.success + locResult.success,
         fail: acctResult.fail + contResult.fail + locResult.fail
@@ -364,7 +500,7 @@ var PIPELINE = [
     script: '04-itmda-enrichment.js',
     fixture: 'itmda-sample.csv',
     run: function(result) {
-      return sendBatches(result.batches, 'Item Enrichment');
+      return sendCollectionsUpsert(result.records, 'ohfy__Item__c', 'ohfy__VIP_External_ID__c', 'Item Enrichment');
     }
   },
   {
@@ -373,10 +509,15 @@ var PIPELINE = [
     script: '05-outda-accounts.js',
     fixture: 'outda-sample.csv',
     run: function(result) {
-      // Accounts first (parent)
-      var acctResult = sendBatches(result.accountBatches, 'Accounts (Outlets)');
-      // Contacts second (child — needs Account to exist)
-      var contResult = sendBatches(result.contactBatches, 'Contacts (Buyers)');
+      // Accounts — Collections (200/batch)
+      var acctResult = sendCollectionsUpsert(result.accountRecords, 'Account', 'ohfy__External_ID__c', 'Accounts (Outlets)');
+      // Contacts — Composite (parent-linking in batch builder, skipped due to AccountTriggerMethods)
+      var contResult = { success: 0, fail: 0 };
+      if (!SKIP_CONTACTS) {
+        contResult = sendBatches(result.contactBatches, 'Contacts (Buyers)');
+      } else {
+        console.log('    SKIP: ' + (result.contactRecords ? result.contactRecords.length : 0) + ' contacts (--skip-contacts)');
+      }
       return {
         success: acctResult.success + contResult.success,
         fail: acctResult.fail + contResult.fail
@@ -390,11 +531,11 @@ var PIPELINE = [
     script: '06-invda-inventory.js',
     fixture: 'invda-sample.csv',
     run: function(result) {
-      // Inventory first (parent)
-      var invResult = sendBatches(result.inventoryBatches, 'Inventory');
-      // History + Adjustments (children)
-      var histResult = sendBatches(result.historyBatches, 'Inventory History');
-      var adjResult = sendBatches(result.adjustmentBatches, 'Inventory Adjustments');
+      // Inventory — Collections (200/batch)
+      var invResult = sendCollectionsUpsert(result.inventoryRecords || [], 'ohfy__Inventory__c', 'VIP_External_ID__c', 'Inventory');
+      // History + Adjustments — Collections (200/batch)
+      var histResult = sendCollectionsUpsert(result.historyRecords || [], 'ohfy__Inventory_History__c', 'VIP_External_ID__c', 'Inventory History');
+      var adjResult = sendCollectionsUpsert(result.adjustmentRecords || [], 'ohfy__Inventory_Adjustment__c', 'VIP_External_ID__c', 'Inventory Adjustments');
       return {
         success: invResult.success + histResult.success + adjResult.success,
         fail: invResult.fail + histResult.fail + adjResult.fail
@@ -408,7 +549,7 @@ var PIPELINE = [
     script: '07-slsda-depletions.js',
     fixture: 'slsda-25.csv',
     run: function(result) {
-      return sendBatches(result.batches, 'Depletions');
+      return sendCollectionsUpsert(result.records, 'ohfy__Depletion__c', 'VIP_External_ID__c', 'Depletions');
     }
   },
   {
@@ -417,7 +558,7 @@ var PIPELINE = [
     script: '07b-slsda-placements.js',
     fixture: 'slsda-25.csv',
     run: function(result) {
-      return sendBatches(result.batches, 'Placements');
+      return sendCollectionsUpsert(result.records, 'ohfy__Placement__c', 'VIP_External_ID__c', 'Placements');
     }
   },
   {
@@ -426,7 +567,7 @@ var PIPELINE = [
     script: '08-ctlda-allocations.js',
     fixture: 'ctlda-sample.csv',
     run: function(result) {
-      return sendBatches(result.batches, 'Allocations');
+      return sendCollectionsUpsert(result.records, 'ohfy__Allocation__c', 'VIP_External_ID__c', 'Allocations');
     }
   }
 ];
@@ -442,6 +583,7 @@ if (_cfg.customer) console.log('Customer:    ' + _cfg.customer + (_cfg.supplierC
 if (_cfg._configFile) console.log('Config:      ' + path.basename(_cfg._configFile));
 console.log('Target org:  ' + TARGET_ORG);
 console.log('Dist ID:     ' + (DIST_ID || '(all distributors)'));
+console.log('Data dir:    ' + (DATA_DIR || '(test fixtures)'));
 console.log('File date:   ' + (FILE_DATE || '(today: ' + new Date().toISOString().substring(0, 10) + ')'));
 console.log('Mode:        ' + (DRY_RUN ? 'DRY RUN' : 'LIVE'));
 console.log('Phase:       ' + (PHASE_FILTER ? PHASE_FILTER : 'ALL'));
@@ -572,18 +714,18 @@ PIPELINE.forEach(function(step) {
 
   console.log('=== Phase ' + step.phase + ': ' + step.name + ' ===');
 
-  // Load fixture
-  var fixturePath = path.join(FIXTURES_DIR, step.fixture);
+  // Load data file (real VIP data via --data-dir, or test fixtures)
+  var fixturePath = resolveDataFile(step.fixture);
   if (!fs.existsSync(fixturePath)) {
-    console.log('  SKIP: Fixture not found: ' + step.fixture);
+    console.log('  SKIP: Data file not found: ' + fixturePath);
     console.log('');
-    stepResults.push({ name: step.name, status: 'skipped', reason: 'No fixture' });
+    stepResults.push({ name: step.name, status: 'skipped', reason: 'No data file' });
     return;
   }
 
   var csvContent = fs.readFileSync(fixturePath, 'utf8');
   var rows = parseCSV(csvContent);
-  console.log('  Parsed ' + rows.length + ' rows from ' + step.fixture);
+  console.log('  Parsed ' + rows.length + ' rows from ' + path.basename(fixturePath));
 
   // Load and run script
   var scriptPath = path.join(SCRIPTS_DIR, step.script);

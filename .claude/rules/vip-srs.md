@@ -6,13 +6,13 @@ When working on VIP SRS tasks, load these files in order:
 1. `integrations/vip-srs/CLAUDE.md` — implementation context
 2. `integrations/vip-srs/docs/VIP_AGENT_HANDOFF.md` — field mappings (source of truth)
 3. `customers/shipyard/known-issues.md` — active blockers and workarounds
-4. `integrations/vip-srs/ROADMAP.md` — completion status and gotchas (19 documented)
+4. `integrations/vip-srs/ROADMAP.md` — completion status and gotchas (24 documented)
 
 ## Active Blockers (ROS2)
 
 These affect EVERY data load until Ohanafy engineering fixes the managed package:
 
-1. **AccountTriggerMethods missing** — Account updates fail. Contact inserts also fail (cascade: Contact AfterInsert → Account update → missing class). Workaround: purge before loading so all DML is INSERT, not UPDATE. Contacts have NO workaround.
+1. **AccountTriggerMethods missing** — Account updates fail. Contact inserts also fail (cascade: Contact AfterInsert → Account update → missing class). **Workaround: CMDT trigger bypass** — deploy `ohfy__Trigger_Configuration__mdt` with `Is_Bypassed__c = true` before bulk operations, restore to false after. ~8 batch cache propagation delay after deploy. Contacts still need bypass to load.
 
 2. **Item lookup filter chain on Depletion__c.Item__c** — Items need 5 prerequisites before depletions can load. Script 02 sets 4 of 5. The 5th (Transformation_Setting__c record) must exist in the org. Always verify before Phase 4.
 
@@ -25,8 +25,19 @@ Always follow this sequence:
 2. `bash purge-vip-data.sh --dist-id <ID> --include-references` — dry-run first
 3. `bash purge-vip-data.sh --dist-id <ID> --include-references --execute` — clean slate
 4. Verify Transformation_Setting__c: `SELECT Id FROM ohfy__Transformation_Setting__c WHERE ohfy__UOM__c = 'Each'`
-5. `node e2e-sandbox-runner.js --dist-id <ID> --file-date <YYYY-MM-DD>` — run pipeline
-6. SOQL count queries for all 14 object types to verify
+5. Deploy CMDT bypass: `sf project deploy start --metadata-dir /tmp/cmdt-bypass/ --target-org <alias>`
+6. `node e2e-sandbox-runner.js --dist-id <ID> --file-date <YYYY-MM-DD>` — run pipeline (use `--dist-id ""` for all distributors)
+7. Restore CMDT bypass: `sf project deploy start --metadata-dir /tmp/cmdt-restore/ --target-org <alias>`
+8. SOQL count queries for all 14 object types to verify
+
+### SObject Collections API (preferred for bulk)
+
+Use Collections API (200/batch) instead of Composite (25/batch) for flat SObject upserts:
+```
+PATCH /services/data/v62.0/composite/sobjects/{SObject}/{ExternalIdField}
+Body: { allOrNone: false, records: [{ attributes: { type: SObject }, ...fields }] }
+```
+Keep Composite for parent-linked records (Contacts) and batch builders (Item Lines/Types).
 
 ## Pipeline Phase Order (must be sequential)
 
@@ -45,6 +56,10 @@ Always follow this sequence:
 - **Location_Code__c max 5 chars** — Store raw dist ID (FL01), not prefixed key (LOC:FL01).
 - **Restricted picklists need exact org values** — Market__c, Packaging_Type__c, Premise_Type__c. Describe the field first.
 - **External ID field names vary by object** — Account uses `ohfy__External_ID__c` (managed), Contact uses `External_ID__c` (unmanaged), most VIP objects use `VIP_External_ID__c`.
+- **COT 06/07/50 = non-retail house accounts** — RecordType=Wholesaler, Type='Distributor' (not 'Wholesaler'), Is_Active=false, Retail_Type='Distributor'. All other outlets: Distributed_Customer RT, Type='Distributed Customer'.
+- **Standard picklist fields use StandardValueSet** — Account.Type can't be modified via CustomObject or GlobalValueSet. Use StandardValueSet metadata with ALL existing values included.
+- **`--dist-id ""` for all distributors** — Empty string skips filter. Literal "ALL" matches nothing.
+- **`| head` kills Node background processes** — Piping to `head -N` sends SIGPIPE. Run without pipe.
 
 ## Artifact Routing
 
