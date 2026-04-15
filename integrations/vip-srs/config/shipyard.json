@@ -9,7 +9,7 @@
     "type": "Supplier"
   },
   "sftpEndpoint": null,
-  "sftpPath": null,
+  "sftpPath": "/",
   "salesforce": {
     "apiVersion": "v62.0",
     "batchSize": 25,

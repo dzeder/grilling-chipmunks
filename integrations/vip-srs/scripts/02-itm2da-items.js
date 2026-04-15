@@ -288,8 +288,10 @@ exports.step = function(input) {
         var extId = record.VIP_External_ID__c;
         var body = { Name: record.Name };
         body[NS + 'Item_Line__r'] = record[NS + 'Item_Line__r'];
-        body[NS + 'Type__c'] = 'Finished Good';
-        if (record[NS + 'Category__c']) body[NS + 'Category__c'] = record[NS + 'Category__c'];
+        // Type__c and Category__c skipped — restricted picklist values are beer-only in ROS2,
+        // Shipyard's VIP data includes spirits (Vodka, Flavored Vodka). Re-enable when picklist is updated.
+        // body[NS + 'Type__c'] = 'Finished Good';
+        // if (record[NS + 'Category__c']) body[NS + 'Category__c'] = record[NS + 'Category__c'];
         if (record.VIP_File_Date__c) body.VIP_File_Date__c = record.VIP_File_Date__c;
         return {
           method: 'PATCH',

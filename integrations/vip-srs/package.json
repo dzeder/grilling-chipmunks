@@ -1,0 +1,17 @@
+{
+  "name": "vip-srs-integration",
+  "version": "1.0.0",
+  "private": true,
+  "description": "VIP SRS SFTP-to-Salesforce integration for Ohanafy",
+  "scripts": {
+    "download": "node scripts/download-vip-files.js",
+    "load": "node scripts/e2e-sandbox-runner.js",
+    "verify": "node scripts/verify-load.js",
+    "test": "node tests/test-runner.js",
+    "purge": "bash scripts/purge-vip-data.sh"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "ssh2-sftp-client": "^11.0.0"
+  }
+}
