@@ -109,11 +109,18 @@ Use agent definitions from `agents/` as Copilot personas and skill content in `.
 </details>
 
 <details>
+  <summary><b>Kiro IDE & CLI </b></summary>
+  Skills for Kiro reside under ".kiro/skills/" and can be stored under Project or Global level. Kiro also supports Agents.md. See Kiro docs at https://kiro.dev/docs/skills/
+</details>
+
+<details>
 <summary><b>Codex / Other Agents</b></summary>
 
 Skills are plain Markdown - they work with any agent that accepts system prompts or instruction files. See [docs/getting-started.md](docs/getting-started.md).
 
 </details>
+
+
 
 ---
 
@@ -203,21 +210,21 @@ Quick-reference material that skills pull in when needed:
 Every skill follows a consistent anatomy:
 
 ```
-┌─────────────────────────────────────────────┐
-│  SKILL.md                                   │
-│                                             │
-│  ┌─ Frontmatter ─────────────────────────┐  │
-│  │ name: lowercase-hyphen-name           │  │
-│  │ description: Use when [trigger]       │  │
-│  └───────────────────────────────────────┘  │
-│                                             │
-│  Overview         → What this skill does    │
-│  When to Use      → Triggering conditions   │
-│  Process          → Step-by-step workflow   │
-│  Rationalizations → Excuses + rebuttals     │
-│  Red Flags        → Signs something's wrong │
-│  Verification     → Evidence requirements   │
-└─────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────┐
+│  SKILL.md                                       │
+│                                                 │
+│  ┌─ Frontmatter ─────────────────────────────┐  │
+│  │ name: lowercase-hyphen-name               │  │
+│  │ description: Guides agents through [task].│  │
+│  │              Use when…                    │  │
+│  └───────────────────────────────────────────┘  │                                                                                                
+│  Overview         → What this skill does        │
+│  When to Use      → Triggering conditions       │
+│  Process          → Step-by-step workflow       │
+│  Rationalizations → Excuses + rebuttals         │
+│  Red Flags        → Signs something's wrong     │
+│  Verification     → Evidence requirements       │
+└─────────────────────────────────────────────────┘
 ```
 
 **Key design choices:**
