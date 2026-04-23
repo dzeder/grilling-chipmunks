@@ -84,7 +84,26 @@ function transformEnrichment(row) {
     record[NS + 'Unit_UPC__c'] = distItemGTIN;
   }
 
+  // Structural defaults — idempotent with Script 02 ITM2DA, required to satisfy
+  // validation rule E003_Volume_Type when an item is first created via ITMDA.
+  record[NS + 'Type__c'] = 'Finished Good';
+  record[NS + 'UOM__c'] = 'US Count';
+  record[NS + 'Packaging_Type__c'] = 'Each';
+
   return record;
+}
+
+// Dedup helper: keep last occurrence by external ID (latest row wins on conflict)
+function dedupByExternalId(records, externalIdField) {
+  var seen = {};
+  var ordered = [];
+  for (var i = records.length - 1; i >= 0; i--) {
+    var key = records[i][externalIdField];
+    if (!key || seen[key]) continue;
+    seen[key] = true;
+    ordered.push(records[i]);
+  }
+  return ordered.reverse();
 }
 
 // =============================================================================
@@ -154,6 +173,13 @@ exports.step = function(input) {
     }
   });
 
+  // 2b. DEDUP — same SupplierItem can appear multiple times in one ITMDA file
+  // (distributor re-stated the item). Collections API rejects duplicate external
+  // IDs in a single batch, so keep only the last occurrence.
+  var preDedupCount = records.length;
+  records = dedupByExternalId(records, CONFIG.externalIdField);
+  var dedupedCount = preDedupCount - records.length;
+
   // 3. BATCH
   var chunks = chunkArray(records);
   var batches = chunks.map(function(chunk) {
@@ -196,6 +222,7 @@ exports.step = function(input) {
       orphaned: orphaned.length,
       skipped: skipped.length,
       transformErrors: transformErrors.length,
+      deduped: dedupedCount,
       batches: batches.length,
       timestamp: new Date().toISOString()
     }

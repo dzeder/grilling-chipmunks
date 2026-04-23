@@ -20,26 +20,30 @@ var path = require('path');
 var loadConfig = require('./config-loader');
 
 // =============================================================================
-// CONFIG
+// CONFIG (only parsed when run as CLI — not when imported as module)
 // =============================================================================
 
-var _cfg = loadConfig(process.argv.slice(2));
-var TARGET_ORG = _cfg.targetOrg;
-var DIST_ID = _cfg.distId;
-var OUTPUT_JSON = '';
-var SPOT_CHECKS = false;
+var _cfg, TARGET_ORG, DIST_ID, OUTPUT_JSON, SPOT_CHECKS;
 
-var args = process.argv.slice(2);
-for (var i = 0; i < args.length; i++) {
-  switch (args[i]) {
-    case '--target-org': TARGET_ORG = args[++i]; break;
-    case '--dist-id': DIST_ID = args[++i]; break;
-    case '--output-json': OUTPUT_JSON = args[++i]; break;
-    case '--spot-checks': SPOT_CHECKS = true; break;
-    case '--config': i++; break; // already consumed by config-loader
-    case '--help': case '-h':
-      console.log('Usage: node verify-load.js [--config FILE] [--target-org ORG] [--dist-id ID] [--output-json FILE] [--spot-checks]');
-      process.exit(0);
+if (require.main === module) {
+  _cfg = loadConfig(process.argv.slice(2));
+  TARGET_ORG = _cfg.targetOrg;
+  DIST_ID = _cfg.distId;
+  OUTPUT_JSON = '';
+  SPOT_CHECKS = false;
+
+  var args = process.argv.slice(2);
+  for (var i = 0; i < args.length; i++) {
+    switch (args[i]) {
+      case '--target-org': TARGET_ORG = args[++i]; break;
+      case '--dist-id': DIST_ID = args[++i]; break;
+      case '--output-json': OUTPUT_JSON = args[++i]; break;
+      case '--spot-checks': SPOT_CHECKS = true; break;
+      case '--config': i++; break; // already consumed by config-loader
+      case '--help': case '-h':
+        console.log('Usage: node verify-load.js [--config FILE] [--target-org ORG] [--dist-id ID] [--output-json FILE] [--spot-checks]');
+        process.exit(0);
+    }
   }
 }
 
@@ -271,6 +275,12 @@ var OBJECTS = [
     spotQuery: "SELECT VIP_External_ID__c, ohfy__End_Date__c FROM ohfy__Allocation__c WHERE VIP_External_ID__c LIKE 'ALC:%' LIMIT 3"
   }
 ];
+
+// When required as a module, export OBJECTS + helpers and skip main
+if (require.main !== module) {
+  module.exports = { OBJECTS: OBJECTS };
+  return;
+}
 
 // =============================================================================
 // MAIN

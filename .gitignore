@@ -45,6 +45,8 @@ credentials.json
 
 # VIP SRS downloaded data files (real SFTP data, too large for git)
 integrations/vip-srs/data/
+# VIP SRS runtime logs (burst snapshots, error reports) — artifacts, not source
+integrations/vip-srs/logs/
 
 # Tray built artifacts (exports go to dzeder/daniels-ohanafy-artifacts)
 integrations/tray/**/raw-exports/

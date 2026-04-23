@@ -58,6 +58,19 @@ function chunkArray(array, size) {
   return chunks;
 }
 
+// Dedup: same external ID twice in one batch → keep last occurrence
+function dedupByExternalId(records, externalIdField) {
+  var seen = {};
+  var ordered = [];
+  for (var i = records.length - 1; i >= 0; i--) {
+    var key = records[i][externalIdField];
+    if (!key || seen[key]) continue;
+    seen[key] = true;
+    ordered.push(records[i]);
+  }
+  return ordered.reverse();
+}
+
 // =============================================================================
 // CROSSWALKS
 // =============================================================================
@@ -89,10 +102,13 @@ var TRANS_CODE = {
 // =============================================================================
 
 function transformInventory(distId, supplierItem, casesOnHand, unitsOnHand) {
-  // Collapse 99Z generic volume placeholders to single item
+  // Collapse 99Z generic volume placeholders to single item — the Item link and
+  // the Inventory external ID MUST use the same supplier item, otherwise multiple
+  // 99Z variants would all point to Item 99Z-GENERIC + same Location with different
+  // external IDs and trigger the org's "Duplicate Record Blocked" validator.
   var itemSuppItem = supplierItem.indexOf('99Z') === 0 ? '99Z-GENERIC' : supplierItem;
   var record = {};
-  record.VIP_External_ID__c = inventoryKey(distId, supplierItem);
+  record.VIP_External_ID__c = inventoryKey(distId, itemSuppItem);
   // Item lookup (master-detail — set on create, ignored on update)
   record[NS + 'Item__r'] = {};
   record[NS + 'Item__r'][NS + 'VIP_External_ID__c'] = itemKey(itemSuppItem);
@@ -106,20 +122,21 @@ function transformInventory(distId, supplierItem, casesOnHand, unitsOnHand) {
 
 function transformHistory(row, distId, fileDate) {
   var supplierItem = clean(row.SupplierItem);
-  // Collapse 99Z generic volume placeholders to single item
+  // Collapse 99Z generic volume placeholders to single item. Keys and parent
+  // lookup must use the collapsed value to stay consistent with Inventory__c.
   var itemSuppItem = supplierItem.indexOf('99Z') === 0 ? '99Z-GENERIC' : supplierItem;
   var postingDate = clean(row.PostingDate);
   var uom = clean(row.UnitOfMeasure);
   var record = {};
 
-  record.VIP_External_ID__c = historyKey(distId, supplierItem, postingDate, uom);
+  record.VIP_External_ID__c = historyKey(distId, itemSuppItem, postingDate, uom);
   record[NS + 'Stamped_Date__c'] = toSfDate(postingDate);
   // Item lookup (relationship syntax)
   record[NS + 'Item__r'] = {};
   record[NS + 'Item__r'][NS + 'VIP_External_ID__c'] = itemKey(itemSuppItem);
   record[NS + 'Quantity_On_Hand__c'] = toInt(row.Quantity);
   // Parent Inventory lookup (relationship syntax)
-  record[NS + 'Inventory__r'] = { VIP_External_ID__c: inventoryKey(distId, supplierItem) };
+  record[NS + 'Inventory__r'] = { VIP_External_ID__c: inventoryKey(distId, itemSuppItem) };
 
   // Stale cleanup dates (unmanaged custom fields)
   record.VIP_From_Date__c = toSfDate(row.FromDate);
@@ -131,19 +148,22 @@ function transformHistory(row, distId, fileDate) {
 
 function transformAdjustment(row, distId, transCodeInfo, fileDate) {
   var supplierItem = clean(row.SupplierItem);
+  // Collapse 99Z generic volume placeholders to single item. Keys and parent
+  // lookup must use the collapsed value to stay consistent with Inventory__c.
+  var itemSuppItem = supplierItem.indexOf('99Z') === 0 ? '99Z-GENERIC' : supplierItem;
   var transCode = clean(row.TransCode);
   var transDate = clean(row.TransDate);
   var uom = clean(row.UnitOfMeasure);
   var record = {};
 
-  record.VIP_External_ID__c = adjustmentKey(distId, supplierItem, transCode, transDate, uom);
+  record.VIP_External_ID__c = adjustmentKey(distId, itemSuppItem, transCode, transDate, uom);
   record[NS + 'Type__c'] = transCodeInfo.type;
   record[NS + 'Reason__c'] = transCodeInfo.reason;
   record[NS + 'Status__c'] = 'Complete';
   record[NS + 'Date__c'] = toSfDate(transDate);
   record[NS + 'Quantity_Change__c'] = toInt(row.Quantity);
   // Parent Inventory lookup (relationship syntax)
-  record[NS + 'Inventory__r'] = { VIP_External_ID__c: inventoryKey(distId, supplierItem) };
+  record[NS + 'Inventory__r'] = { VIP_External_ID__c: inventoryKey(distId, itemSuppItem) };
 
   // Stale cleanup dates (unmanaged custom fields)
   record.VIP_From_Date__c = toSfDate(row.FromDate);
@@ -220,7 +240,10 @@ exports.step = function(input) {
     var itemMap = {}; // { supplierItem: { latestDate, cases, units, distId } }
 
     inventoryRows.forEach(function(row) {
-      var supplierItem = clean(row.SupplierItem);
+      var rawSupplierItem = clean(row.SupplierItem);
+      // Collapse 99Z variants into one bucket so the generic volume placeholders
+      // merge to a single Inventory record per distributor.
+      var supplierItem = rawSupplierItem.indexOf('99Z') === 0 ? '99Z-GENERIC' : rawSupplierItem;
       var postingDate = clean(row.PostingDate);
       var uom = clean(row.UnitOfMeasure);
       var qty = toInt(row.Quantity);
@@ -253,6 +276,11 @@ exports.step = function(input) {
     transformErrors.push({ stream: 'inventory', error: e.message });
   }
 
+  // 2a-b. DEDUP Inventory — same IVT:{DistId}:{SupplierItem} in one batch
+  var invPreDedup = inventoryRecords.length;
+  inventoryRecords = dedupByExternalId(inventoryRecords, 'VIP_External_ID__c');
+  var invDeduped = invPreDedup - inventoryRecords.length;
+
   // 2b. TRANSFORM — Inventory_History__c
   var historyRecords = [];
   historyRows.forEach(function(row, idx) {
@@ -263,6 +291,11 @@ exports.step = function(input) {
       transformErrors.push({ stream: 'history', rowIndex: idx, error: e.message });
     }
   });
+
+  // 2b-b. DEDUP History — same IVH:{DistId}:{SupplierItem}:{Date}:{UOM} in one batch
+  var histPreDedup = historyRecords.length;
+  historyRecords = dedupByExternalId(historyRecords, 'VIP_External_ID__c');
+  var histDeduped = histPreDedup - historyRecords.length;
 
   // 2c. TRANSFORM — Inventory_Adjustment__c
   var adjustmentRecords = [];
@@ -276,6 +309,11 @@ exports.step = function(input) {
       transformErrors.push({ stream: 'adjustment', rowIndex: idx, error: e.message });
     }
   });
+
+  // 2c-b. DEDUP Adjustments — same IVA:{DistId}:{SupplierItem}:{TransCode}:{Date}:{UOM} in one batch
+  var adjPreDedup = adjustmentRecords.length;
+  adjustmentRecords = dedupByExternalId(adjustmentRecords, 'VIP_External_ID__c');
+  var adjDeduped = adjPreDedup - adjustmentRecords.length;
 
   // 3. BATCH — Inventory__c
   // If existingInventoryMap is provided, match by Item VIP_External_ID__c + Location
@@ -397,6 +435,9 @@ exports.step = function(input) {
       invalid: invalid.length,
       skipped: skipped.length,
       transformErrors: transformErrors.length,
+      inventoryDeduped: invDeduped,
+      historyDeduped: histDeduped,
+      adjustmentDeduped: adjDeduped,
       inventoryBatches: inventoryBatches.length,
       historyBatches: historyBatches.length,
       adjustmentBatches: adjustmentBatches.length,

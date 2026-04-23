@@ -56,6 +56,18 @@ function chunkArray(array, size) {
   return chunks;
 }
 
+function dedupByExternalId(records, externalIdField) {
+  var seen = {};
+  var ordered = [];
+  for (var i = records.length - 1; i >= 0; i--) {
+    var key = records[i][externalIdField];
+    if (!key || seen[key]) continue;
+    seen[key] = true;
+    ordered.push(records[i]);
+  }
+  return ordered.reverse();
+}
+
 // =============================================================================
 // TRANSFORM
 // =============================================================================
@@ -179,6 +191,11 @@ exports.step = function(input) {
     }
   });
 
+  // 2b. DEDUP — same DEP external ID can appear twice in one SLSDA file
+  var depPreDedup = records.length;
+  records = dedupByExternalId(records, 'VIP_External_ID__c');
+  var depDeduped = depPreDedup - records.length;
+
   // 3. BATCH — Depletion__c (unmanaged VIP_External_ID__c)
   var chunks = chunkArray(records);
   var batches = chunks.map(function(chunk) {
@@ -217,6 +234,7 @@ exports.step = function(input) {
       invalid: invalid.length,
       skipped: skipped.length,
       transformErrors: transformErrors.length,
+      deduped: depDeduped,
       batches: batches.length,
       timestamp: new Date().toISOString()
     }
