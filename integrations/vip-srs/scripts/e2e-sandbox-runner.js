@@ -238,6 +238,39 @@ var KNOWN_ERRORS = {
 // Global error tracker for JSON output
 var errorDetails = [];
 
+// Global transaction log keyed by step label ("Depletions", "Placements", etc.)
+// Each entry: { added, updated, failed, examples: { added: [...3], updated: [...3], failed: [...3] } }
+var transactionLog = {};
+var EXAMPLE_LIMIT = 3;
+
+function recordTxn(label, bucket, example) {
+  if (!transactionLog[label]) {
+    transactionLog[label] = {
+      added: 0, updated: 0, failed: 0,
+      examples: { added: [], updated: [], failed: [] }
+    };
+  }
+  transactionLog[label][bucket]++;
+  if (example && transactionLog[label].examples[bucket].length < EXAMPLE_LIMIT) {
+    transactionLog[label].examples[bucket].push(example);
+  }
+}
+
+function extractExampleFields(rec, externalIdField) {
+  var out = {};
+  if (externalIdField && rec[externalIdField] !== undefined) out[externalIdField] = rec[externalIdField];
+  // Include up to 8 small fields (skip relationships/attributes)
+  var keys = Object.keys(rec).filter(function(k) {
+    if (k === externalIdField || k === 'attributes' || k[0] === '_') return false;
+    var v = rec[k];
+    if (v === null || v === undefined) return false;
+    if (typeof v === 'object') return false;
+    return true;
+  }).slice(0, 8);
+  keys.forEach(function(k) { out[k] = rec[k]; });
+  return out;
+}
+
 function categorizeError(bodyStr) {
   for (var key in KNOWN_ERRORS) {
     if (KNOWN_ERRORS[key].test(bodyStr)) return key;
@@ -299,19 +332,48 @@ function sendCompositeBatch(batch, label) {
 function sendBatches(batches, label) {
   var totalSuccess = 0;
   var totalFail = 0;
+  var totalAdded = 0;
+  var totalUpdated = 0;
 
   for (var i = 0; i < batches.length; i++) {
     console.log('  ' + label + ' batch ' + (i + 1) + '/' + batches.length);
     var response = sendCompositeBatch(batches[i], label);
     if (response.compositeResponse) {
-      response.compositeResponse.forEach(function(r) {
-        if (r.httpStatusCode >= 200 && r.httpStatusCode < 300) totalSuccess++;
-        else totalFail++;
+      response.compositeResponse.forEach(function(r, idx) {
+        var req = batches[i].compositeRequest && batches[i].compositeRequest[idx];
+        var refId = req ? req.referenceId : null;
+        if (r.httpStatusCode >= 200 && r.httpStatusCode < 300) {
+          totalSuccess++;
+          // 201 = created, 204 = updated (per SF REST API upsert semantics)
+          // Body may also carry { created: true|false } for composite upserts
+          var isCreated = (r.httpStatusCode === 201) ||
+                          (r.body && r.body.created === true);
+          var ex = { referenceId: refId };
+          if (req && req.body) {
+            Object.keys(req.body).forEach(function(k) {
+              if (k === 'attributes') return;
+              var v = req.body[k];
+              if (v !== null && v !== undefined && typeof v !== 'object') ex[k] = v;
+            });
+          }
+          if (isCreated) {
+            totalAdded++;
+            recordTxn(label, 'added', ex);
+          } else {
+            totalUpdated++;
+            recordTxn(label, 'updated', ex);
+          }
+        } else {
+          totalFail++;
+          var failEx = { referenceId: refId, _httpStatus: r.httpStatusCode };
+          if (r.body) failEx._error = JSON.stringify(r.body).substring(0, 300);
+          recordTxn(label, 'failed', failEx);
+        }
       });
     }
   }
 
-  return { success: totalSuccess, fail: totalFail };
+  return { success: totalSuccess, fail: totalFail, added: totalAdded, updated: totalUpdated, failed: totalFail };
 }
 
 /**
@@ -323,12 +385,14 @@ function sendBatches(batches, label) {
 function sendCollectionsUpsert(records, sobjectName, externalIdField, label) {
   if (!records || records.length === 0) {
     console.log('  ' + label + ': 0 records, skipping');
-    return { success: 0, fail: 0 };
+    return { success: 0, fail: 0, added: 0, updated: 0, failed: 0 };
   }
 
   var BATCH_SIZE = 200;
   var totalSuccess = 0;
   var totalFail = 0;
+  var totalAdded = 0;
+  var totalUpdated = 0;
 
   var chunks = [];
   for (var i = 0; i < records.length; i += BATCH_SIZE) {
@@ -361,10 +425,17 @@ function sendCollectionsUpsert(records, sobjectName, externalIdField, label) {
     var response = sfApiPatch(endpoint, payload);
 
     if (Array.isArray(response)) {
-      var batchOk = 0, batchFail = 0;
+      var batchOk = 0, batchFail = 0, batchAdded = 0, batchUpdated = 0;
       response.forEach(function(r, idx) {
         if (r.success) {
           batchOk++;
+          if (r.created) {
+            batchAdded++;
+            recordTxn(label, 'added', extractExampleFields(chunk[idx], externalIdField));
+          } else {
+            batchUpdated++;
+            recordTxn(label, 'updated', extractExampleFields(chunk[idx], externalIdField));
+          }
         } else {
           batchFail++;
           var errMsg = r.errors ? JSON.stringify(r.errors) : 'Unknown error';
@@ -378,21 +449,27 @@ function sendCollectionsUpsert(records, sobjectName, externalIdField, label) {
             referenceId: null,
             message: errMsg.substring(0, 500)
           });
+          var failEx = extractExampleFields(chunk[idx], externalIdField);
+          failEx._error = errMsg.substring(0, 300);
+          failEx._category = category;
+          recordTxn(label, 'failed', failEx);
         }
       });
       totalSuccess += batchOk;
       totalFail += batchFail;
-      console.log('    Result: ' + batchOk + ' ok, ' + batchFail + ' fail');
+      totalAdded += batchAdded;
+      totalUpdated += batchUpdated;
+      console.log('    Result: ' + batchAdded + ' added, ' + batchUpdated + ' updated, ' + batchFail + ' fail');
     } else if (response && (response.success || (response.httpStatusCode && response.httpStatusCode < 300))) {
       totalSuccess += chunk.length;
-      console.log('    Result: ' + chunk.length + ' ok');
+      console.log('    Result: ' + chunk.length + ' ok (no per-record detail)');
     } else {
       totalFail += chunk.length;
       console.log('    ERROR: ' + JSON.stringify(response).substring(0, 200));
     }
   }
 
-  return { success: totalSuccess, fail: totalFail };
+  return { success: totalSuccess, fail: totalFail, added: totalAdded, updated: totalUpdated, failed: totalFail };
 }
 
 function sfQuery(soql) {
@@ -479,7 +556,7 @@ var PIPELINE = [
       // Accounts first (parent) — Collections (200/batch)
       var acctResult = sendCollectionsUpsert(result.accountRecords || [], 'Account', 'ohfy__External_ID__c', 'Distributors (Accounts)');
       // Contacts second (child) — Composite (parent-linking in batch builder)
-      var contResult = { success: 0, fail: 0 };
+      var contResult = { success: 0, fail: 0, added: 0, updated: 0 };
       if (!SKIP_CONTACTS && result.contactBatches && result.contactBatches.length > 0) {
         contResult = sendBatches(result.contactBatches, 'Distributor Contacts');
       } else if (SKIP_CONTACTS && result.contactRecords && result.contactRecords.length > 0) {
@@ -489,7 +566,9 @@ var PIPELINE = [
       var locResult = sendCollectionsUpsert(result.locationRecords || [], 'ohfy__Location__c', 'VIP_External_ID__c', 'Locations');
       return {
         success: acctResult.success + contResult.success + locResult.success,
-        fail: acctResult.fail + contResult.fail + locResult.fail
+        fail: acctResult.fail + contResult.fail + locResult.fail,
+        added: (acctResult.added || 0) + (contResult.added || 0) + (locResult.added || 0),
+        updated: (acctResult.updated || 0) + (contResult.updated || 0) + (locResult.updated || 0)
       };
     }
   },
@@ -512,7 +591,7 @@ var PIPELINE = [
       // Accounts — Collections (200/batch)
       var acctResult = sendCollectionsUpsert(result.accountRecords, 'Account', 'ohfy__External_ID__c', 'Accounts (Outlets)');
       // Contacts — Composite (parent-linking in batch builder, skipped due to AccountTriggerMethods)
-      var contResult = { success: 0, fail: 0 };
+      var contResult = { success: 0, fail: 0, added: 0, updated: 0 };
       if (!SKIP_CONTACTS) {
         contResult = sendBatches(result.contactBatches, 'Contacts (Buyers)');
       } else {
@@ -520,7 +599,9 @@ var PIPELINE = [
       }
       return {
         success: acctResult.success + contResult.success,
-        fail: acctResult.fail + contResult.fail
+        fail: acctResult.fail + contResult.fail,
+        added: (acctResult.added || 0) + (contResult.added || 0),
+        updated: (acctResult.updated || 0) + (contResult.updated || 0)
       };
     }
   },
@@ -538,7 +619,9 @@ var PIPELINE = [
       var adjResult = sendCollectionsUpsert(result.adjustmentRecords || [], 'ohfy__Inventory_Adjustment__c', 'VIP_External_ID__c', 'Inventory Adjustments');
       return {
         success: invResult.success + histResult.success + adjResult.success,
-        fail: invResult.fail + histResult.fail + adjResult.fail
+        fail: invResult.fail + histResult.fail + adjResult.fail,
+        added: (invResult.added || 0) + (histResult.added || 0) + (adjResult.added || 0),
+        updated: (invResult.updated || 0) + (histResult.updated || 0) + (adjResult.updated || 0)
       };
     }
   },
@@ -774,9 +857,15 @@ PIPELINE.forEach(function(step) {
     var sendResult = step.run(result);
     var s = sendResult.success || 0;
     var f = sendResult.fail || 0;
+    var a = sendResult.added || 0;
+    var u = sendResult.updated || 0;
     totalSuccess += s;
     totalFail += f;
-    stepResults.push({ name: step.name, status: f > 0 ? 'partial' : 'success', success: s, fail: f });
+    stepResults.push({
+      name: step.name,
+      status: f > 0 ? 'partial' : 'success',
+      success: s, fail: f, added: a, updated: u
+    });
   } catch (e) {
     console.log('  ERROR: Send failed: ' + e.message);
     stepResults.push({ name: step.name, status: 'error', reason: e.message });
@@ -838,6 +927,7 @@ if (OUTPUT_JSON) {
       totalFail: totalFail,
       steps: stepResults
     },
+    transactionLog: transactionLog,
     errors: errorDetails,
     errorsByCategory: {}
   };
