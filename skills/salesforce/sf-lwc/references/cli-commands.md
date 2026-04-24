@@ -292,10 +292,21 @@ const { jestConfig } = require('@salesforce/sfdx-lwc-jest/config');
 
 module.exports = {
     ...jestConfig,
+    roots: ['<rootDir>/force-app'],
     modulePathIgnorePatterns: ['<rootDir>/.localdevserver'],
+    testPathIgnorePatterns: [
+        '<rootDir>/node_modules/',
+        '<rootDir>/.sfdx/',
+        '<rootDir>/.agents/',
+        '<rootDir>/.cursor/',
+        '<rootDir>/.claude/',
+        '<rootDir>/.pi/'
+    ],
     testTimeout: 10000
 };
 ```
+
+If you copy example tests from `sf-lwc/assets/`, rename the `.example` file after placing it in your component's `__tests__` folder.
 
 ---
 
@@ -369,6 +380,8 @@ sf project deploy start \
 ```
 
 ### Jest Tests Not Finding Component
+
+If Jest reports errors from `.agents/`, `.cursor/`, `.claude/`, or `.pi/`, it is discovering files outside your real Salesforce source tree. Scope Jest to `force-app` and ignore agent folders.
 
 ```bash
 # Clear Jest cache

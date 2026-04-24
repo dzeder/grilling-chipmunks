@@ -6,7 +6,12 @@
  * - Typed event assertions
  * - Interface-based test data
  *
- * Run: sf force lightning lwc test run --spec force-app/main/default/lwc/typescriptComponent/__tests__
+ * This file ships with a .example suffix so Jest does not auto-discover it
+ * inside installed skill folders. Copy it into your project and rename it to:
+ * force-app/main/default/lwc/typescriptComponent/__tests__/typescriptComponent.test.ts
+ *
+ * Run after copying:
+ * sf force lightning lwc test run --spec force-app/main/default/lwc/typescriptComponent/__tests__/typescriptComponent.test.ts
  */
 import { createElement, LightningElement } from 'lwc';
 import TypescriptComponent from 'c/typescriptComponent';

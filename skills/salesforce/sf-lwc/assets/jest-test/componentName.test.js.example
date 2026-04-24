@@ -9,6 +9,10 @@
  * - DOM queries
  * - Async testing
  *
+ * This file ships with a .example suffix so Jest does not auto-discover it
+ * inside installed skill folders. Copy it into your project and rename it to:
+ * force-app/main/default/lwc/<yourComponent>/__tests__/<yourComponent>.test.js
+ *
  * Replace: componentName → yourComponentName
  * Replace: ComponentName → YourComponentName
  */

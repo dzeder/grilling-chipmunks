@@ -42,6 +42,7 @@ const { jestConfig } = require('@salesforce/sfdx-lwc-jest/config');
 
 module.exports = {
     ...jestConfig,
+    roots: ['<rootDir>/force-app'],
     moduleNameMapper: {
         '^@salesforce/apex$': '<rootDir>/force-app/test/jest-mocks/apex',
         '^@salesforce/schema$': '<rootDir>/force-app/test/jest-mocks/schema',
@@ -51,7 +52,11 @@ module.exports = {
     setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
     testPathIgnorePatterns: [
         '<rootDir>/node_modules/',
-        '<rootDir>/.sfdx/'
+        '<rootDir>/.sfdx/',
+        '<rootDir>/.agents/',
+        '<rootDir>/.cursor/',
+        '<rootDir>/.claude/',
+        '<rootDir>/.pi/'
     ],
     coverageThreshold: {
         global: {
@@ -63,6 +68,10 @@ module.exports = {
     }
 };
 ```
+
+`roots: ['<rootDir>/force-app']` keeps Jest focused on real Salesforce source. The ignore list adds defense-in-depth for agent/tool folders that may contain copied examples or generated artifacts.
+
+Example test assets in `sf-lwc/assets/` ship with a `.example` suffix. Copy them into `force-app/main/default/lwc/<component>/__tests__/` and rename them to `*.test.js` or `*.test.ts` before running Jest.
 
 ### Setup File
 
