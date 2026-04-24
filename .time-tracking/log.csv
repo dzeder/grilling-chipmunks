@@ -16,3 +16,4 @@ date,pr_number,branch,description,type,human_estimate_hrs,ai_actual_min,tokens_u
 2026-04-24,155,dependabot/github_actions/bridgecrewio/checkov-action-12.3099.0,build(deps): bump bridgecrewio/checkov-action from 12.3096.0 to 12.3099.0,other,,,,,,0,0,0,0,0,,
 2026-04-24,137,dependabot/github_actions/actions/upload-artifact-7.0.1,build(deps): bump actions/upload-artifact from 7.0.0 to 7.0.1,other,,,,,,0,0,0,0,0,,
 2026-04-24,129,dependabot/github_actions/actions/github-script-9.0.0,build(deps): bump actions/github-script from 8.0.0 to 9.0.0,other,,,,,,0,0,0,0,0,,
+2026-04-24,136,dependabot/github_actions/softprops/action-gh-release-3.0.0,build(deps): bump softprops/action-gh-release from 2.6.1 to 3.0.0,other,,,,,,0,0,0,0,0,,
