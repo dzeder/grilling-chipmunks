@@ -13,3 +13,4 @@ date,pr_number,branch,description,type,human_estimate_hrs,ai_actual_min,tokens_u
 2026-04-14,124,dzeder/vip-supplier-dash-review,feat(vip-srs): add 7 new reports; fix revenue field; expand Supplier Overview to 18 components,feat,,,,,,0,0,0,0,0,,
 2026-04-15,127,dzeder/vip-ros-data-load,feat(vip-srs): Collections API; COT classification; ROS2 mass data load,feat,,,,,,0,0,0,0,0,,
 2026-04-23,143,dzeder/vip-ohanafy-supplier,feat(vip-srs): Phase 7 nightly burst + 99Z fix + end-user error reports,feat,,,,,,0,0,0,0,0,,
+2026-04-24,155,dependabot/github_actions/bridgecrewio/checkov-action-12.3099.0,build(deps): bump bridgecrewio/checkov-action from 12.3096.0 to 12.3099.0,other,,,,,,0,0,0,0,0,,
