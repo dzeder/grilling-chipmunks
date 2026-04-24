@@ -74,7 +74,7 @@ anthropic>=0.40.0
 pydantic>=2.9.0
 
 # Salesforce
-simple-salesforce>=1.12.0
+simple-salesforce>=1.12.9
 
 # AWS
 boto3>=1.35.0
