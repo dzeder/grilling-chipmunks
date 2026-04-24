@@ -13,6 +13,10 @@ description: |
   gauntlet without answering 15-30 intermediate questions. (gstack)
   Voice triggers (speech-to-text aliases): "auto plan", "automatic review".
 benefits-from: [office-hours]
+triggers:
+  - run all reviews
+  - automatic review pipeline
+  - auto plan review
 allowed-tools:
   - Bash
   - Read

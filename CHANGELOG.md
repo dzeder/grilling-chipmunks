@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.9.0] - 2026-04-24
+
+### Added
+- New `sf-ai-agentforce-grid` skill cherry-picked from upstream `Jaganpro/sf-skills@2b23e63` — builds, inspects, debugs, and publishes Agentforce Grid / AI Workbench workflows via the Grid MCP or direct REST fallbacks
+- Pattern 6 (description contracts) added to `sf-ai-agentscript` from upstream `89ba799`, including multi-step workflow hardening (rollback, immutability, resume detection, show-then-accept, non-interactive stages, Step Guard pattern)
+- 5 new gstack skill stubs (`benchmark-models`, `context-restore`, `context-save`, `make-pdf`, `plan-tune`) regenerated after the gstack 1.4.0.0 upgrade landed in PR #141
+
+### Changed
+- `sf-lwc` Jest templates renamed to `.example` so Jest auto-discovery doesn't execute skill templates after install (upstream `ff1ab74`); README, `cli-commands.md`, and `jest-testing.md` updated to reflect the new convention
+- 36 gstack skill stubs refreshed to match the updated `.claude/skills/gstack/` source from the 1.4.0.0 upgrade
+- sf-skills upstream version marker advanced to `595e0f6a` (reviewed through current upstream HEAD)
+
+### Fixed
+- Broken relative link in `sf-ai-agentforce/references/builder-workflow.md` (was `../sf-permissions`, now correctly `../../sf-permissions` to reach the sibling skill under `skills/salesforce/`)
+
 ## [0.0.8.0] - 2026-04-13
 
 ### Fixed

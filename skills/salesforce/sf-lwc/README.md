@@ -105,6 +105,29 @@ S → Security     │ Enforce permissions, FLS, and data protection
 - [Accessibility Guide](references/accessibility-guide.md)
 - [Jest Testing](references/jest-testing.md)
 
+## Jest Configuration for SFDX Projects
+
+If your project uses Jest, scope discovery to your Salesforce source so example assets in agent folders are not picked up during `npm test`.
+
+```javascript
+const { jestConfig } = require('@salesforce/sfdx-lwc-jest/config');
+
+module.exports = {
+    ...jestConfig,
+    roots: ['<rootDir>/force-app'],
+    testPathIgnorePatterns: [
+        '<rootDir>/node_modules/',
+        '<rootDir>/.sfdx/',
+        '<rootDir>/.agents/',
+        '<rootDir>/.cursor/',
+        '<rootDir>/.claude/',
+        '<rootDir>/.pi/'
+    ]
+};
+```
+
+Example test assets in this skill now ship with a `.example` suffix. Copy them into your project and rename them before running Jest.
+
 ## Requirements
 
 - sf CLI v2

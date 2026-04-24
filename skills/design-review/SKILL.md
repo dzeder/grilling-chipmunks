@@ -19,4 +19,8 @@ allowed-tools:
   - Grep
   - AskUserQuestion
   - WebSearch
+triggers:
+  - visual design audit
+  - design qa
+  - fix design issues
 ---

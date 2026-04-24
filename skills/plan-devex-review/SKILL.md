@@ -21,4 +21,8 @@ allowed-tools:
   - Bash
   - AskUserQuestion
   - WebSearch
+triggers:
+  - developer experience review
+  - dx plan review
+  - check developer onboarding
 ---

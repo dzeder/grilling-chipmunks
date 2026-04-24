@@ -9,6 +9,10 @@ description: |
   Use when: "performance", "benchmark", "page speed", "lighthouse", "web vitals",
   "bundle size", "load time". (gstack)
   Voice triggers (speech-to-text aliases): "speed test", "check performance".
+triggers:
+  - performance benchmark
+  - check page speed
+  - detect performance regression
 allowed-tools:
   - Bash
   - Read

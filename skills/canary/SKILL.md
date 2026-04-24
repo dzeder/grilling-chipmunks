@@ -14,4 +14,8 @@ allowed-tools:
   - Write
   - Glob
   - AskUserQuestion
+triggers:
+  - monitor after deploy
+  - canary check
+  - watch for errors post-deploy
 ---
