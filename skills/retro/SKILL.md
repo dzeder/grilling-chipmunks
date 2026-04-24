@@ -14,4 +14,8 @@ allowed-tools:
   - Write
   - Glob
   - AskUserQuestion
+triggers:
+  - weekly retro
+  - what did we ship
+  - engineering retrospective
 ---

@@ -19,4 +19,8 @@ allowed-tools:
   - Agent
   - WebSearch
   - AskUserQuestion
+triggers:
+  - security audit
+  - check for vulnerabilities
+  - owasp review
 ---

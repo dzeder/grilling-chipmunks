@@ -14,10 +14,6 @@ description: |
   through design decisions for something that doesn't exist yet, or is exploring
   a concept before any code is written.
   Use before /plan-ceo-review or /plan-eng-review. (gstack)
-chains_to:
-  - plan-ceo-review
-  - plan-eng-review
-  - plan-design-review
 allowed-tools:
   - Bash
   - Read
@@ -27,8 +23,9 @@ allowed-tools:
   - Edit
   - AskUserQuestion
   - WebSearch
-knowledge_refs:
-  - knowledge-base/industry-insights/competitive-landscape.md
-  - knowledge-base/industry-insights/distribution-trends.md
-  - knowledge-base/ohanafy/product-overview.md
+triggers:
+  - brainstorm this
+  - is this worth building
+  - help me think through
+  - office hours
 ---

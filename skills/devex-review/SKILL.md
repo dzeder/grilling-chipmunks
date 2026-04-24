@@ -11,6 +11,10 @@ description: |
   "test the DX", "DX audit", "developer experience test", or "try the
   onboarding". Proactively suggest after shipping a developer-facing feature. (gstack)
   Voice triggers (speech-to-text aliases): "dx audit", "test the developer experience", "try the onboarding", "developer experience test".
+triggers:
+  - live dx audit
+  - test developer experience
+  - measure onboarding time
 allowed-tools:
   - Read
   - Edit

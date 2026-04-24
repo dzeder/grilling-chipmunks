@@ -8,9 +8,6 @@ description: |
   "push to main", "create a PR", "merge and push", or "get it deployed".
   Proactively invoke this skill (do NOT push/PR directly) when the user says code
   is ready, asks about deploying, wants to push code up, or asks to create a PR. (gstack)
-chains_to:
-  - document-release
-  - canary
 allowed-tools:
   - Bash
   - Read
@@ -21,4 +18,9 @@ allowed-tools:
   - Agent
   - AskUserQuestion
   - WebSearch
+triggers:
+  - ship it
+  - create a pr
+  - push to main
+  - deploy this
 ---

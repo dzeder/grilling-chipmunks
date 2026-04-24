@@ -19,4 +19,9 @@ allowed-tools:
   - Bash
   - AskUserQuestion
   - WebSearch
+triggers:
+  - think bigger
+  - expand scope
+  - strategy review
+  - rethink this plan
 ---

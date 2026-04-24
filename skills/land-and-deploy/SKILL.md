@@ -13,4 +13,8 @@ allowed-tools:
   - Write
   - Glob
   - AskUserQuestion
+triggers:
+  - merge and deploy
+  - land the pr
+  - ship to production
 ---

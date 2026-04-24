@@ -10,15 +10,6 @@ description: |
   Proactively invoke this skill (do NOT debug directly) when the user reports
   errors, 500 errors, stack traces, unexpected behavior, "it was working
   yesterday", or is troubleshooting why something stopped working. (gstack)
-chains_to:
-  - review
-  - ship
-context_requires:
-  conditional:
-    - condition: "customer is set"
-      path: "customers/{customer}/known-issues.md"
-    - condition: "customer is set"
-      path: "customers/{customer}/profile.md"
 allowed-tools:
   - Bash
   - Read
@@ -28,6 +19,12 @@ allowed-tools:
   - Glob
   - AskUserQuestion
   - WebSearch
+triggers:
+  - debug this
+  - fix this bug
+  - why is this broken
+  - root cause analysis
+  - investigate this error
 hooks:
   PreToolUse:
     - matcher: "Edit"

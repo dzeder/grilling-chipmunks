@@ -17,4 +17,8 @@ allowed-tools:
   - Glob
   - Bash
   - AskUserQuestion
+triggers:
+  - design plan review
+  - review ux plan
+  - check design decisions
 ---

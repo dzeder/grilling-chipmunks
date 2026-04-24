@@ -19,4 +19,8 @@ allowed-tools:
   - AskUserQuestion
   - Bash
   - WebSearch
+triggers:
+  - review architecture
+  - eng plan review
+  - check the implementation plan
 ---

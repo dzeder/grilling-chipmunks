@@ -8,6 +8,10 @@ description: |
   Use when asked to "open gstack browser", "launch browser", "connect chrome",
   "open chrome", "real browser", "launch chrome", "side panel", or "control my browser".
   Voice triggers (speech-to-text aliases): "show me the browser".
+triggers:
+  - open gstack browser
+  - launch chromium
+  - show me the browser
 allowed-tools:
   - Bash
   - Read

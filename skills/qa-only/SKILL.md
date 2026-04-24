@@ -15,4 +15,8 @@ allowed-tools:
   - Write
   - AskUserQuestion
   - WebSearch
+triggers:
+  - qa report only
+  - just report bugs
+  - test but dont fix
 ---
