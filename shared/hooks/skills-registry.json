@@ -243,6 +243,30 @@
       "triggerWhen": "user configures agents in Agent Builder, creates topics/actions, writes PromptTemplates, or touches .genAiFunction/.genAiPlugin/.promptTemplate metadata XML",
       "doNotTriggerWhen": "Agent Script DSL .agent files (use sf-ai-agentscript), agent testing (use sf-ai-agentforce-testing), or persona design (use sf-ai-agentforce-persona)"
     },
+    "sf-ai-agentforce-grid": {
+      "keywords": [
+        "agentforce grid",
+        "ai workbench",
+        "grid studio",
+        "grid mcp",
+        "workbook",
+        "worksheet",
+        "apply_grid",
+        "grid connect"
+      ],
+      "intentPatterns": [
+        "build.*workbook",
+        "create.*worksheet",
+        "grid.*workbook",
+        "grid.*worksheet",
+        "apply.grid",
+        "ai workbench"
+      ],
+      "priority": "medium",
+      "description": "Agentforce Grid / AI Workbench skill for building, inspecting, debugging, and publishing Grid workflows via the Grid MCP or direct Grid REST fallbacks",
+      "triggerWhen": "user creates or debugs Grid workbooks/worksheets, designs Object/Reference/AI/Agent/AgentTest/Evaluation/PromptTemplate/InvocableAction columns, writes apply_grid YAML specs, or hits Grid API / Windows setup issues",
+      "doNotTriggerWhen": "Agentforce Builder metadata work outside Grid (use sf-ai-agentforce), Agent Script DSL (use sf-ai-agentscript), or agent persona design (use sf-ai-agentforce-persona)"
+    },
     "sf-metadata": {
       "keywords": [
         "custom object",

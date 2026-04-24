@@ -12,7 +12,9 @@ on:
 
 concurrency:
   group: fix-symlinks-${{ github.ref }}
-  cancel-in-progress: true
+  # Queue subsequent runs instead of cancelling — a half-run fix can leave
+  # main with inconsistent symlinks that the next run has to untangle.
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -45,7 +47,19 @@ jobs:
           git add .claude/skills/ skills/
           if git diff --staged --quiet; then
             echo "No changes to commit."
-          else
-            git commit -m "chore: auto-fix gstack symlinks [skip ci]"
-            git push
+            exit 0
           fi
+          git commit -m "chore: auto-fix gstack symlinks [skip ci]"
+          # Retry push with pull --rebase to handle concurrent writes to main
+          attempt=0
+          max_attempts=5
+          until git push; do
+            attempt=$((attempt + 1))
+            if [ $attempt -ge $max_attempts ]; then
+              echo "::error::Failed to push symlink fixes after $max_attempts attempts"
+              exit 1
+            fi
+            echo "Push rejected (attempt $attempt/$max_attempts) — pulling rebased and retrying"
+            sleep $((attempt * 2))
+            git pull --rebase origin main
+          done

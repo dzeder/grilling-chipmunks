@@ -326,7 +326,19 @@ jobs:
           git add .time-tracking/log.csv
           if git diff --cached --quiet; then
             echo "No changes to commit"
-          else
-            git commit -m "ci(telemetry): log PR #${{ github.event.pull_request.number }} metrics [skip ci]"
-            git push
+            exit 0
           fi
+          git commit -m "ci(telemetry): log PR #${{ github.event.pull_request.number }} metrics [skip ci]"
+          # Retry push with pull --rebase to handle concurrent writes to main
+          attempt=0
+          max_attempts=5
+          until git push; do
+            attempt=$((attempt + 1))
+            if [ $attempt -ge $max_attempts ]; then
+              echo "::error::Failed to push telemetry log after $max_attempts attempts"
+              exit 1
+            fi
+            echo "Push rejected (attempt $attempt/$max_attempts) — pulling rebased and retrying"
+            sleep $((attempt * 2))
+            git pull --rebase origin main
+          done

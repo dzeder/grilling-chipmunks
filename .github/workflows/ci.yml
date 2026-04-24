@@ -66,12 +66,20 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
       - name: Check gstack symlinks are relative
         run: |
-          if ! bash scripts/fix-gstack-symlinks.sh --check; then
-            echo ""
-            echo "::error::Symlinks are out of sync. This will be auto-fixed on merge to main."
-            echo "To fix locally: bash scripts/fix-gstack-symlinks.sh"
-            exit 1
+          if bash scripts/fix-gstack-symlinks.sh --check; then
+            exit 0
           fi
+          echo ""
+          # On push to main the fix-symlinks.yml workflow auto-corrects drift
+          # (typically right after a gstack upgrade merges). Treat as a warning
+          # so we don't fail CI on a condition that resolves itself seconds later.
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "::warning::Symlinks out of sync on main — fix-symlinks.yml will auto-correct."
+            exit 0
+          fi
+          echo "::error::Symlinks are out of sync."
+          echo "To fix locally: bash scripts/fix-gstack-symlinks.sh"
+          exit 1
 
   test:
     name: Unit Tests
