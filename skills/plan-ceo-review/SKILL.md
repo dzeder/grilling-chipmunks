@@ -1,6 +1,7 @@
 ---
 name: plan-ceo-review
 preamble-tier: 3
+interactive: true
 version: 1.0.0
 description: |
   CEO/founder-mode plan review. Rethink the problem, find the 10-star product,
