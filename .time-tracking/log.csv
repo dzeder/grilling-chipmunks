@@ -21,3 +21,4 @@ date,pr_number,branch,description,type,human_estimate_hrs,ai_actual_min,tokens_u
 2026-04-24,141,chore/update-gstack-1.4.0.0,Update gstack to 1.4.0.0,other,,,,,,0,0,0,0,0,,
 2026-04-24,156,dzeder/merge-open-prs,feat: sync sf-skills upstream (3 commits) + gstack stub refresh,feat,1.5,35,,,61,0,0,0,0,0,ship,
 2026-04-24,157,dzeder/ci-push-race-fix,ci: harden workflow pushes against race conditions,ci,,,,,,0,0,0,0,0,,
+2026-04-27,160,dzeder/fix-actions-2runs,fix: prevent failing gstack auto-merge and dependabot postcss runs,fix,,,,,,0,0,0,0,0,,
