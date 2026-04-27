@@ -24,3 +24,4 @@ date,pr_number,branch,description,type,human_estimate_hrs,ai_actual_min,tokens_u
 2026-04-27,160,dzeder/fix-actions-2runs,fix: prevent failing gstack auto-merge and dependabot postcss runs,fix,,,,,,0,0,0,0,0,,
 2026-04-27,161,dzeder/issue-159-flow-fixes,fix(ci): clean up watcher and gstack-update workflows for issue #159,fix,,,,,,0,0,0,0,0,,
 2026-04-27,158,chore/update-gstack-1.15.0.0,Update gstack to 1.15.0.0,other,,,,,,0,0,0,0,0,,
+2026-04-27,162,dzeder/lima-v1,chore: resync 5 skill stubs after gstack 1.15.0.0 upgrade,chore,,,,,,0,0,0,0,0,,
