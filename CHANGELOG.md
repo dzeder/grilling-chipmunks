@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.9.1] - 2026-04-27
+
+### Fixed
+- `check-gstack-update` workflow now tolerates repos that don't have auto-merge enabled — falls back to a comment on the PR instead of failing the run (issue #159)
+- Repo Watchers no longer exits 1 when `ANTHROPIC_API_KEY` is unset; scoring phase is skipped cleanly with a single warning so release detection and state persistence still complete (issue #159)
+
 ## [0.0.9.0] - 2026-04-24
 
 ### Added

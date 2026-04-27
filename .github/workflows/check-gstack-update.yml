@@ -137,6 +137,10 @@ jobs:
           BRANCH="chore/update-gstack-${UPSTREAM_VER}"
           PR_NUMBER=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number')
           if [ -n "$PR_NUMBER" ]; then
-            echo "Auto-merging non-breaking gstack upgrade PR #${PR_NUMBER}..."
-            gh pr merge "$PR_NUMBER" --auto --merge --delete-branch
+            echo "Attempting auto-merge for PR #${PR_NUMBER}..."
+            if ! gh pr merge "$PR_NUMBER" --auto --merge --delete-branch 2>&1; then
+              # Repo may not have enablePullRequestAutoMerge=true. Don't fail the workflow.
+              echo "::warning::Auto-merge unavailable for PR #${PR_NUMBER} (likely auto-merge disabled in repo settings). Leaving PR open for manual merge."
+              gh pr comment "$PR_NUMBER" --body "Auto-merge is not enabled on this repository — please merge manually." || true
+            fi
           fi
