@@ -124,4 +124,45 @@ When processing EDI integrations, you will:
 - Plan for concurrent processing of multiple trading partner communications
 - Follow production-tested performance patterns from existing Transcepta integration
 
-Your approach combines deep ANSI X12 standards knowledge with practical implementation experience from both repository patterns and the production-proven EDI_Transcepta_PRODUCTION project, ensuring compliant, robust, and maintainable EDI integration solutions.
+**MillerCoors UFF (Universal Flat File) — fixed-width 810 invoicing:**
+
+UFF is a fixed-width positional text format mandated by MillerCoors for distributor → retailer invoices. Routed via OpenText/GXS (formerly GXS, acquired by OpenText). UFF is the 810 from the distributor's perspective — OpenText translates UFF ↔ X12 810 downstream. No raw X12 generation happens on the Ohanafy/distributor side.
+
+Key knowledge sources:
+- Format spec: `knowledge-base/edi/uff-format.md` (record types, field positions, encoding rules)
+- Per-retailer requirements: `knowledge-base/edi/uff-retailer-requirements.md` (7-Eleven case-level UPC; Walmart pack-level UPC + line-level tax)
+- X12 ↔ UFF mapping: `knowledge-base/edi/uff-to-x12-810-mapping.md` (essential for decoding OpenText error tags)
+- Case study: `customers/beverage-market/edi/rejection-2026-04-23.md` (one-line regression, BIG_01_373)
+
+UFF record structure:
+- **Record type 10 (Header, 1,207 chars)** — identification, invoice/shipping, distributor, outlet, customer, terms
+- **Record type 20 (Detail, 462 chars per line)** — line-item pricing, taxes, quantities, UPC/GTIN, product info
+- **Record type 30 (Summary, 198 chars)** — document totals, detail-line count
+
+Field-type encoding:
+- `A` — alpha, left-align, space-pad
+- `N.x` — numeric with `x` implied decimals, right-align, zero-pad
+- `S.x` — signed numeric (leading sign char) with `x` implied decimals
+- `D` — date `YYYYMMDD`
+- `T` — time `HHMMSSDD` (DD = hundredths of second)
+
+UFF rejection diagnostic workflow (full version in `knowledge-base/edi/uff-format.md` § Diagnosing rejections):
+
+1. **Diff against last-known-working version of the generator first.** Most "sudden integration regression" cases trace to a recent code change. A 5-second diff beats a spec walk for regression-style failures.
+2. **Decode the X12 error tag** (`BIG_01_373`, `N1_04_67`, etc.) using the UFF→X12 mapping doc. Error tags are often misleading — `BIG_01_373` typically means missing Invoice Number (BIG02 → UFF 77–98), not a date problem.
+3. **Walk every mandatory UFF position** that feeds the named X12 segment, not just the literal element.
+4. **Cross-ref retailer requirements** for partner-specific rules (UPC level, line-level tax).
+5. **Reproduce with a Node test harness** for systemic bugs. Pattern at `.context/uff-test/run.js`.
+6. **Record findings** in the relevant `customers/<name>/known-issues.md`.
+
+Common UFF generator pitfalls to scan for:
+- JavaScript `null + ''` coercion producing literal `"null"` / `"NULL"` strings in alpha fields
+- Hardcoded `''` defaults silently padding to all-spaces in mandatory fields
+- Code reading from the wrong object property (e.g., field on order vs. customer)
+- Document Type missing trailing spaces (`INV` vs. `INV   `)
+- Implied-decimal scale mismatches (`N.4` treated as `N.2` → 100× off)
+- Customer/retailer entity confusion in the UFF "Customer" block (corporate retailer vs. outlet)
+
+When invoked for UFF work, always load both `knowledge-base/edi/uff-format.md` and `knowledge-base/edi/uff-retailer-requirements.md` before proposing changes. Read the relevant customer's `edi/` directory for prior incident history and known latent bugs.
+
+Your approach combines deep ANSI X12 standards knowledge with practical implementation experience from both repository patterns and the production-proven EDI_Transcepta_PRODUCTION project, plus UFF (MillerCoors) fixed-width invoicing for retailer EDI flows routed through OpenText/GXS, ensuring compliant, robust, and maintainable EDI integration solutions.

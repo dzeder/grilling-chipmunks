@@ -10,6 +10,20 @@ domains:
         heading: "Beverage Supply Chain Glossary"
         summary: "Core domain terminology for Ohanafy's beverage supply chain platform. Supplier → Distributor → Retailer. Ohanafy customers are suppliers."
 
+  edi:
+    description: "Electronic Data Interchange — UFF (MillerCoors fixed-width), X12 810/850/856, OpenText/GXS translation"
+    relevant_skills: [ohfy-edi-expert, tray-expert, edi-processing-specialist]
+    files:
+      - path: "knowledge-base/edi/uff-format.md"
+        heading: "UFF — Universal Flat File (MillerCoors 810 Invoice Format)"
+        summary: "Fixed-width positional text format for MillerCoors distributor → retailer invoices. Record types 10/header/1207, 20/detail/462, 30/summary/198. Field-type encoding, full position tables, common pitfalls."
+      - path: "knowledge-base/edi/uff-retailer-requirements.md"
+        heading: "UFF Per-Retailer Requirement Matrix"
+        summary: "Per-trading-partner required field sets. 7-Eleven wants case-level UPC/GTIN and summary detail count; Walmart wants pack-level UPC/GTIN and line-level state/county/city tax. Differences-at-a-glance table."
+      - path: "knowledge-base/edi/uff-to-x12-810-mapping.md"
+        heading: "UFF → X12 810 Translation Mapping"
+        summary: "How OpenText/GXS maps UFF positions to X12 BIG/N1/IT1/TDS segments. Critical for reading rejection errors that reference X12 segment names (e.g. BIG_01_373 often means missing Invoice Number at UFF 77-98)."
+
   industry-insights:
     description: "Market analysis, competitive landscape, and technology trends"
     relevant_skills: [office-hours, content-watcher]
