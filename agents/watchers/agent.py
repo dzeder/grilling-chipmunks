@@ -11,6 +11,7 @@ Entry point: python -m agents.watchers.agent [--dry-run]
 import argparse
 import json
 import logging
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -183,21 +184,27 @@ def run_pipeline(dry_run: bool = False) -> PipelineResult:
         return result
 
     # --- Phase 2: Score ---
-    logger.info("=== Phase 2: Scoring %d items ===", len(all_items))
-    claude_client = anthropic.Anthropic()
     scored_items = []
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        logger.warning(
+            "::warning::ANTHROPIC_API_KEY not set — skipping scoring phase. "
+            "Watcher will still detect releases and persist state, but no items will be routed to issues."
+        )
+    else:
+        logger.info("=== Phase 2: Scoring %d items ===", len(all_items))
+        claude_client = anthropic.Anthropic()
 
-    for item in all_items:
-        repo = repo_lookup.get(item.repo)
-        if not repo:
-            continue
-        try:
-            scored = score_item(claude_client, item, repo)
-            scored_items.append(scored)
-        except Exception as e:
-            error_msg = f"Score error for {item.title[:60]}: {e}"
-            logger.error(error_msg)
-            result.errors.append(error_msg)
+        for item in all_items:
+            repo = repo_lookup.get(item.repo)
+            if not repo:
+                continue
+            try:
+                scored = score_item(claude_client, item, repo)
+                scored_items.append(scored)
+            except Exception as e:
+                error_msg = f"Score error for {item.title[:60]}: {e}"
+                logger.error(error_msg)
+                result.errors.append(error_msg)
 
     result.items_scored = len(scored_items)
 
@@ -291,8 +298,10 @@ def main() -> None:
     result = run_pipeline(dry_run=args.dry_run)
 
     if result.errors:
-        logger.warning("Completed with %d error(s)", len(result.errors))
-        sys.exit(1)
+        logger.warning(
+            "Completed with %d non-fatal error(s) — state was persisted, errors are in the log above.",
+            len(result.errors),
+        )
 
     sys.exit(0)
 
