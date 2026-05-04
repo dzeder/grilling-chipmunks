@@ -1,176 +1,176 @@
 {
   "anthropics/anthropic-cookbook": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
-    "last_commit_sha": null
+    "last_commit_sha": "33424c3eb476cd56379435be086ccc228af1050d"
   },
   "pydantic/pydantic-ai": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
-    "last_release_tag": "v1.87.0",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
+    "last_release_tag": "v1.88.0",
     "last_commit_sha": null
   },
   "langchain-ai/langgraph": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
-    "last_release_tag": "prebuilt==1.0.11",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
+    "last_release_tag": "checkpointpostgres==3.1.0a1",
     "last_commit_sha": null
   },
   "microsoft/autogen": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
     "last_commit_sha": null
   },
   "BerriAI/litellm": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
-    "last_release_tag": null,
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
+    "last_release_tag": "v1.83.10-stable",
     "last_commit_sha": null
   },
   "addyosmani/agent-skills": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
-    "last_commit_sha": "44b9e3734198f0d39efc6453a1721a1c936da8d0"
+    "last_commit_sha": "ba867fb33dcafee4bbd728289de32aad63213033"
   },
   "shanraisshan/claude-code-best-practice": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
-    "last_commit_sha": "10937f71cdef4dd25e33c197cfa75c5d9c58e4a5"
+    "last_commit_sha": "9876143d638160ee9fc153a28c4100df2399ab35"
   },
   "dxatscale/sfpowerscripts": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
     "last_commit_sha": null
   },
   "forcedotcom/salesforcedx-vscode": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
-    "last_release_tag": null,
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
+    "last_release_tag": "v66.9.0",
     "last_commit_sha": null
   },
   "forcedotcom/source-deploy-retrieve": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
-    "last_release_tag": "12.34.2",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
+    "last_release_tag": "12.34.5",
     "last_commit_sha": null
   },
   "trailheadapps/lwc-recipes": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
     "last_commit_sha": null
   },
   "Jaganpro/sf-skills": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
     "last_commit_sha": null
   },
   "n8n-io/n8n": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
-    "last_release_tag": "n8n@1.123.37",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
+    "last_release_tag": "n8n@2.19.0",
     "last_commit_sha": null
   },
   "temporalio/temporal": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
-    "last_release_tag": null,
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
+    "last_release_tag": "v1.31.0",
     "last_commit_sha": null
   },
   "zapier/zapier-platform": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
     "last_commit_sha": null
   },
   "prefecthq/prefect": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
-    "last_release_tag": "3.6.28",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
+    "last_release_tag": "3.6.29.dev3",
     "last_commit_sha": null
   },
   "aws/aws-cdk": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
-    "last_release_tag": "v2.251.0",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
+    "last_release_tag": "v2.252.0",
     "last_commit_sha": null
   },
   "aws-powertools/powertools-lambda-python": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
     "last_commit_sha": null
   },
   "localstack/localstack": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
     "last_commit_sha": null
   },
   "bridgecrewio/checkov": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
-    "last_release_tag": "3.2.525",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
+    "last_release_tag": "3.2.526",
     "last_commit_sha": null
   },
   "aws-samples/aws-cdk-examples": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
     "last_commit_sha": null
   },
   "shelfio/datadog-mcp": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
     "last_commit_sha": null
   },
   "DataDog/datadog-agent": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
-    "last_release_tag": null,
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
+    "last_release_tag": "7.78.2",
     "last_commit_sha": null
   },
   "DataDog/integrations-core": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
-    "last_release_tag": null,
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
+    "last_release_tag": "ddev-v16.1.1",
     "last_commit_sha": null
   },
   "DataDog/datadog-lambda-python": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
     "last_commit_sha": null
   },
   "squidfunk/mkdocs-material": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
     "last_commit_sha": null
   },
   "facebook/docusaurus": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
-    "last_release_tag": null,
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
+    "last_release_tag": "v3.10.1",
     "last_commit_sha": null
   },
   "python-openxml/python-docx": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
     "last_commit_sha": null
   },
   "semantic-release/semantic-release": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
     "last_commit_sha": null
   },
   "astral-sh/uv": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
-    "last_release_tag": null,
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
+    "last_release_tag": "0.11.8",
     "last_commit_sha": null
   },
   "nektos/act": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
-    "last_release_tag": null,
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
+    "last_release_tag": "v0.2.88",
     "last_commit_sha": null
   },
   "garrytan/gstack": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
     "last_commit_sha": null
   },
   "trufflesecurity/trufflehog": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
     "last_commit_sha": null
   },
   "gitleaks/gitleaks": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
     "last_commit_sha": null
   },
   "openai/evals": {
-    "last_checked_at": "2026-04-27T10:23:17.809300+00:00",
+    "last_checked_at": "2026-05-04T10:19:38.348208+00:00",
     "last_release_tag": null,
     "last_commit_sha": null
   }
