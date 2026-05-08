@@ -81,7 +81,7 @@ boto3>=1.43.6
 
 # Documents
 python-docx>=1.2.0
-markdown>=3.7
+markdown>=3.10.2
 
 # Content Watcher
 feedparser>=6.0.12
