@@ -46,25 +46,41 @@ Effort both-scales: when an option involves effort, label both human-team and CC
 
 Net line closes the tradeoff. Per-skill instructions may add stricter rules.
 
-12. **Non-ASCII characters — write directly, never \\u-escape.** When any
-    string field (question, option label, option description) contains
-    Chinese (繁體/簡體), Japanese, Korean, or other non-ASCII text, emit
-    the literal UTF-8 characters in the JSON string. **Never escape them
-    as \`\\uXXXX\`.** Claude Code's tool parameter pipe is UTF-8 native
-    and passes characters through unchanged. Manually escaping requires
-    recalling each codepoint from training, which is unreliable for long
-    CJK strings — the model regularly emits the wrong codepoint (e.g.
-    writes \`\\u3103\` thinking it is 管 U+7BA1, but \`\\u3103\` is
-    actually ㄃, so the user sees \`管理工具\` rendered as \`㄃3用箱\`).
-    The trigger is long, multi-line questions with hundreds of CJK
-    characters: that is exactly when reflexive escaping kicks in and
-    exactly when miscoding is most damaging. Long ≠ escape. Keep
-    characters literal.
+### Handling 5+ options — split, never drop
 
-    Wrong: \`"question": "請選擇\\uXXXX\\uXXXX\\uXXXX\\uXXXX"\`
-    Right: \`"question": "請選擇管理工具"\`
+AskUserQuestion caps every call at **4 options**. With 5+ real options, NEVER
+drop, merge, or silently defer one to fit. Pick a compliant shape:
 
-    Only JSON-mandatory escapes remain allowed: \`\\n\`, \`\\t\`, \`\\"\`, \`\\\\\`.
+- **Batch into ≤4-groups** — for coherent alternatives (e.g. version bumps,
+  layout variants). One call, 5th surfaced only if first 4 don't fit.
+- **Split per-option** — for independent scope items (e.g. "ship E1..E6?").
+  Fire N sequential calls, one per option. Default to this when unsure.
+
+Per-option call shape: \`D<N>.k\` header (e.g. D3.1..D3.5), ELI10 per option,
+Recommendation, kind-note (no completeness score — Include/Defer/Cut/Hold are
+decision actions), and 4 buckets:
+**A) Include**, **B) Defer**, **C) Cut**, **D) Hold** (stop chain, discuss).
+
+After the chain, fire \`D<N>.final\` to validate the assembled set (reprompt
+dependency conflicts) and confirm shipping it. Use \`D<N>.revise-<k>\` to
+revise one option without re-running the chain.
+
+For N>6, fire a \`D<N>.0\` meta-AskUserQuestion first (proceed / narrow / batch).
+
+question_ids for split chains: \`<skill>-split-<option-slug>\` (kebab-case ASCII,
+≤64 chars, \`-2\`/\`-3\` suffix on collision). The runtime checker
+(\`bin/gstack-question-preference\`) refuses \`never-ask\` on any \`*-split-*\` id,
+so split chains are never AUTO_DECIDE-eligible — the user's option set is sacred.
+
+**Full rule + worked examples + Hold/dependency semantics:** see
+\`docs/askuserquestion-split.md\` in the gstack repo. Read on demand when N>4.
+
+**Non-ASCII characters — write directly, never \\u-escape.** When any string
+field contains Chinese (繁體/簡體), Japanese, Korean, or other non-ASCII text,
+emit the literal UTF-8 characters; never escape them as \`\\uXXXX\` (the pipe is
+UTF-8 native, and manual escaping miscodes long CJK strings). Only \`\\n\`,
+\`\\t\`, \`\\"\`, \`\\\\\` remain allowed. Full rationale + worked example: see
+\`docs/askuserquestion-cjk.md\`. Read on demand when a question contains CJK.
 
 ### Self-check before emitting
 
@@ -79,5 +95,8 @@ Before calling AskUserQuestion, verify:
 - [ ] Net line closes the decision
 - [ ] You are calling the tool, not writing prose
 - [ ] Non-ASCII characters (CJK / accents) written directly, NOT \\u-escaped
+- [ ] If you had 5+ options, you split (or batched into ≤4-groups) — did NOT drop any
+- [ ] If you split, you checked dependencies between options before firing the chain
+- [ ] If a per-option Hold fires, you stopped the chain immediately (didn't queue)
 `;
 }
