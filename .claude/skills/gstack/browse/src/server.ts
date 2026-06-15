@@ -14,7 +14,7 @@
  */
 
 import { BrowserManager } from './browser-manager';
-import { handleReadCommand } from './read-commands';
+import { handleReadCommand, hasOutArg } from './read-commands';
 import { handleWriteCommand } from './write-commands';
 import { handleMetaCommand } from './meta-commands';
 import { handleCookiePickerRoute, hasActivePicker } from './cookie-picker-routes';
@@ -38,6 +38,7 @@ import {
 import { validateTempPath } from './path-security';
 import { resolveConfig, ensureStateDir, readVersionHash, resolveChromiumProfile, cleanSingletonLocks } from './config';
 import { emitActivity, subscribe, getActivityAfter, getActivityHistory, getSubscriberCount } from './activity';
+import { createSseEndpoint } from './sse-helpers';
 import { initAuditLog, writeAuditEntry } from './audit';
 import { inspectElement, modifyStyle, resetModifications, getModificationHistory, detachSession, type InspectorResult } from './cdp-inspector';
 // Bun.spawn used instead of child_process.spawn (compiled bun binaries
@@ -329,9 +330,15 @@ export const TUNNEL_COMMANDS = new Set<string>([
  * without standing up an HTTP listener. Behavior is identical to the inline
  * check; the function canonicalizes the command (so aliases hit the same set)
  * and returns false for null/undefined input.
+ *
+ * `args` is consulted so an `--out` invocation (e.g. `eval --out <file>`) is
+ * NEVER tunnel-dispatchable: `--out` turns an otherwise-readable command into a
+ * local-disk WRITE, and the tunnel surface never grants disk-write capability to
+ * remote paired agents. Omitting `args` preserves the old command-only behavior.
  */
-export function canDispatchOverTunnel(command: string | undefined | null): boolean {
+export function canDispatchOverTunnel(command: string | undefined | null, args?: string[]): boolean {
   if (typeof command !== 'string' || command.length === 0) return false;
+  if (Array.isArray(args) && hasOutArg(args)) return false;
   const cmd = canonicalizeCommand(command);
   return TUNNEL_COMMANDS.has(cmd);
 }
@@ -650,6 +657,8 @@ export const __testInternals__ = {
   idleCheckTick,
   setTunnelActive: (v: boolean) => { tunnelActive = v; },
   setLastActivity: (t: number) => { lastActivity = t; },
+  formatExplicitPortUnavailableError,
+  formatRandomPortUnavailableError,
   // Reset the module-level shutdown latch so tests that drive shutdown to
   // completion (process.exit-stubbed) can be followed by tests that also
   // need shutdown to fire. Without this, the second test's shutdown
@@ -713,6 +722,19 @@ if (BROWSE_PARENT_PID > 0 && !IS_HEADED_WATCHDOG) {
 import { READ_COMMANDS, WRITE_COMMANDS, META_COMMANDS } from './commands';
 export { READ_COMMANDS, WRITE_COMMANDS, META_COMMANDS };
 
+/**
+ * Whether an invocation should be treated as a WRITE for capability gating
+ * (scope, watch-mode block, tab ownership, tunnel). A command is a write if it
+ * mutates state (`WRITE_COMMANDS`) OR it carries an `--out` flag — `js`/`eval
+ * --out` writes the evaluate result to local disk, so the capability is
+ * per-invocation, not per-command-name. This deliberately does NOT change
+ * dispatch routing: `js`/`eval` still route to `handleReadCommand`; only the
+ * security gates consult this.
+ */
+function isWriteInvocation(command: string, args: string[]): boolean {
+  return WRITE_COMMANDS.has(command) || hasOutArg(args);
+}
+
 // ─── Inspector State (in-memory) ──────────────────────────────
 let inspectorData: InspectorResult | null = null;
 let inspectorTimestamp: number = 0;
@@ -720,6 +742,11 @@ let inspectorTimestamp: number = 0;
 // Inspector SSE subscribers
 type InspectorSubscriber = (event: any) => void;
 const inspectorSubscribers = new Set<InspectorSubscriber>();
+
+/** Diagnostic accessor used by the $B memory snapshot. */
+export function getInspectorSubscriberCount(): number {
+  return inspectorSubscribers.size;
+}
 
 function emitInspectorEvent(event: any): void {
   for (const notify of inspectorSubscribers) {
@@ -752,41 +779,124 @@ let activeBrowserManager: BrowserManager = browserManager;
 browserManager.onDisconnect = (code) => activeShutdown?.(code ?? 2);
 let isShuttingDown = false;
 
+type PortCheckResult =
+  | { available: true }
+  | { available: false; code?: string; message: string };
+
+type FailedPortAttempt = {
+  port: number;
+  result: Extract<PortCheckResult, { available: false }>;
+};
+
+const RANDOM_PORT_MIN = 10000;
+const RANDOM_PORT_MAX = 60000;
+const RANDOM_PORT_RETRIES = 5;
+
+function normalizePortError(err: unknown): Extract<PortCheckResult, { available: false }> {
+  const maybeNodeError = err as NodeJS.ErrnoException | undefined;
+  return {
+    available: false,
+    code: maybeNodeError?.code,
+    message: maybeNodeError?.message || String(err),
+  };
+}
+
+function isOccupiedPort(result: Extract<PortCheckResult, { available: false }>): boolean {
+  return result.code === 'EADDRINUSE';
+}
+
+function formatPortFailureDetail(attempt: FailedPortAttempt): string {
+  const { code, message } = attempt.result;
+  return code ? `${attempt.port} (${code}: ${message})` : `${attempt.port} (${message})`;
+}
+
+function formatExplicitPortUnavailableError(
+  port: number,
+  result: Extract<PortCheckResult, { available: false }>
+): Error {
+  if (isOccupiedPort(result)) {
+    return new Error(`[browse] Port ${port} (from BROWSE_PORT env) is in use`);
+  }
+
+  const detail = result.code ? `${result.code}: ${result.message}` : result.message;
+  return new Error(
+    `[browse] Cannot bind BROWSE_PORT=${port} on 127.0.0.1 (${detail}). ` +
+    `This usually means localhost port binding is blocked by the current sandbox or OS permissions, ` +
+    `not that the port is occupied. Allow localhost binding, or run browse from an unrestricted terminal.`
+  );
+}
+
+function formatRandomPortUnavailableError(attempts: FailedPortAttempt[]): Error {
+  const blockingAttempts = attempts.filter((attempt) => !isOccupiedPort(attempt.result));
+
+  if (blockingAttempts.length > 0) {
+    const last = blockingAttempts[blockingAttempts.length - 1];
+    return new Error(
+      `[browse] Cannot bind localhost ports after ${attempts.length} attempts in range ` +
+      `${RANDOM_PORT_MIN}-${RANDOM_PORT_MAX}. Last error: ${formatPortFailureDetail(last)}. ` +
+      `This usually means the current sandbox or OS permissions are blocking localhost port binding, ` +
+      `not that every sampled port is occupied. Allow localhost binding, set BROWSE_PORT to an approved ` +
+      `port, or run browse from an unrestricted terminal.`
+    );
+  }
+
+  return new Error(
+    `[browse] No available port after ${RANDOM_PORT_RETRIES} attempts in range ` +
+    `${RANDOM_PORT_MIN}-${RANDOM_PORT_MAX}; every sampled port was already in use`
+  );
+}
+
 // Test if a port is available by binding and immediately releasing.
 // Uses net.createServer instead of Bun.serve to avoid a race condition
 // in the Node.js polyfill where listen/close are async but the caller
 // expects synchronous bind semantics. See: #486
-function isPortAvailable(port: number, hostname: string = '127.0.0.1'): Promise<boolean> {
+function checkPortAvailable(port: number, hostname: string = '127.0.0.1'): Promise<PortCheckResult> {
   return new Promise((resolve) => {
     const srv = net.createServer();
-    srv.once('error', () => resolve(false));
-    srv.listen(port, hostname, () => {
-      srv.close(() => resolve(true));
-    });
+    let settled = false;
+    const finish = (result: PortCheckResult) => {
+      if (settled) return;
+      settled = true;
+      resolve(result);
+    };
+
+    srv.once('error', (err) => finish(normalizePortError(err)));
+    try {
+      srv.listen(port, hostname, () => {
+        srv.close(() => finish({ available: true }));
+      });
+    } catch (err) {
+      finish(normalizePortError(err));
+    }
   });
+}
+
+function isPortAvailable(port: number, hostname: string = '127.0.0.1'): Promise<boolean> {
+  return checkPortAvailable(port, hostname).then((result) => result.available);
 }
 
 // Find port: explicit BROWSE_PORT, or random in 10000-60000
 async function findPort(): Promise<number> {
   // Explicit port override (for debugging)
   if (BROWSE_PORT) {
-    if (await isPortAvailable(BROWSE_PORT)) {
+    const result = await checkPortAvailable(BROWSE_PORT);
+    if (result.available) {
       return BROWSE_PORT;
     }
-    throw new Error(`[browse] Port ${BROWSE_PORT} (from BROWSE_PORT env) is in use`);
+    throw formatExplicitPortUnavailableError(BROWSE_PORT, result);
   }
 
   // Random port with retry
-  const MIN_PORT = 10000;
-  const MAX_PORT = 60000;
-  const MAX_RETRIES = 5;
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    const port = MIN_PORT + Math.floor(Math.random() * (MAX_PORT - MIN_PORT));
-    if (await isPortAvailable(port)) {
+  const attempts: FailedPortAttempt[] = [];
+  for (let attempt = 0; attempt < RANDOM_PORT_RETRIES; attempt++) {
+    const port = RANDOM_PORT_MIN + Math.floor(Math.random() * (RANDOM_PORT_MAX - RANDOM_PORT_MIN));
+    const result = await checkPortAvailable(port);
+    if (result.available) {
       return port;
     }
+    attempts.push({ port, result });
   }
-  throw new Error(`[browse] No available port after ${MAX_RETRIES} attempts in range ${MIN_PORT}-${MAX_PORT}`);
+  throw formatRandomPortUnavailableError(attempts);
 }
 
 /**
@@ -866,6 +976,19 @@ async function handleCommandInternalImpl(
       };
     }
 
+    // `--out` writes the evaluate result to local disk, which is a WRITE
+    // capability distinct from the JS-exec (admin) capability js/eval need.
+    // Require write scope so an admin-but-not-write token can't write files.
+    if (hasOutArg(args) && !tokenInfo.scopes.includes('write')) {
+      return {
+        status: 403, json: true,
+        result: JSON.stringify({
+          error: `"--out" writes to disk and requires the "write" scope`,
+          hint: `Your scopes: ${tokenInfo.scopes.join(', ')}. Re-pair with write access to use --out.`,
+        }),
+      };
+    }
+
     // Domain check for navigation commands
     if ((command === 'goto' || command === 'newtab') && args[0]) {
       if (!checkDomain(tokenInfo, args[0])) {
@@ -920,7 +1043,7 @@ async function handleCommandInternalImpl(
   // Skip for `newtab` — it creates a tab rather than accessing one.
   if (command !== 'newtab' && tokenInfo && tokenInfo.clientId !== 'root' && tokenInfo.tabPolicy === 'own-only') {
     const targetTab = tabId ?? browserManager.getActiveTabId();
-    if (!browserManager.checkTabAccess(targetTab, tokenInfo.clientId, { isWrite: WRITE_COMMANDS.has(command), ownOnly: true })) {
+    if (!browserManager.checkTabAccess(targetTab, tokenInfo.clientId, { isWrite: isWriteInvocation(command, args), ownOnly: true })) {
       return {
         status: 403, json: true,
         result: JSON.stringify({
@@ -944,8 +1067,9 @@ async function handleCommandInternalImpl(
     };
   }
 
-  // Block mutation commands while watching (read-only observation mode)
-  if (browserManager.isWatching() && WRITE_COMMANDS.has(command)) {
+  // Block mutation commands while watching (read-only observation mode).
+  // `--out` invocations count as mutations (they write the result to disk).
+  if (browserManager.isWatching() && isWriteInvocation(command, args)) {
     return {
       status: 400, json: true,
       result: JSON.stringify({ error: 'Cannot run mutation commands while watching. Run `$B watch stop` first.' }),
@@ -2347,62 +2471,19 @@ export function buildFetchHandler(cfg: ServerConfig): ServerHandle {
           });
         }
         const afterId = parseInt(url.searchParams.get('after') || '0', 10);
-        const encoder = new TextEncoder();
-
-        const stream = new ReadableStream({
-          start(controller) {
-            // SSE egress invariant: every JSON.stringify here ships page-content-derived
-            // fields (URLs, command args, errors) to the sidebar. Lone surrogates must
-            // be sanitized DURING stringify (via sanitizeReplacer) so they're cleaned
-            // before escape-encoding — post-stringify regex is ineffective because
-            // JSON.stringify has already converted \uD800 → "\\ud800".
-            // 1. Gap detection + replay
+        // Cleanup contract (abort + enqueue-fail + heartbeat-fail, all
+        // idempotent) lives in createSseEndpoint; sanitizeReplacer is
+        // applied to every JSON.stringify inside the helper, so
+        // page-content-derived fields (URLs, command args, errors)
+        // stay surrogate-safe per CLAUDE.md egress invariant.
+        return createSseEndpoint(req, {
+          initialReplay: (send) => {
             const { entries, gap, gapFrom, availableFrom } = getActivityAfter(afterId);
-            if (gap) {
-              controller.enqueue(encoder.encode(`event: gap\ndata: ${JSON.stringify({ gapFrom, availableFrom }, sanitizeReplacer)}\n\n`));
-            }
-            for (const entry of entries) {
-              controller.enqueue(encoder.encode(`event: activity\ndata: ${JSON.stringify(entry, sanitizeReplacer)}\n\n`));
-            }
-
-            // 2. Subscribe for live events
-            const unsubscribe = subscribe((entry) => {
-              try {
-                controller.enqueue(encoder.encode(`event: activity\ndata: ${JSON.stringify(entry, sanitizeReplacer)}\n\n`));
-              } catch (err: any) {
-                console.debug('[browse] Activity SSE stream error, unsubscribing:', err.message);
-                unsubscribe();
-              }
-            });
-
-            // 3. Heartbeat every 15s
-            const heartbeat = setInterval(() => {
-              try {
-                controller.enqueue(encoder.encode(`: heartbeat\n\n`));
-              } catch (err: any) {
-                console.debug('[browse] Activity SSE heartbeat failed:', err.message);
-                clearInterval(heartbeat);
-                unsubscribe();
-              }
-            }, 15000);
-
-            // 4. Cleanup on disconnect
-            req.signal.addEventListener('abort', () => {
-              clearInterval(heartbeat);
-              unsubscribe();
-              try { controller.close(); } catch {
-                // Expected: stream already closed
-              }
-            });
+            if (gap) send('gap', { gapFrom, availableFrom });
+            for (const entry of entries) send('activity', entry);
           },
-        });
-
-        return new Response(stream, {
-          headers: {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-          },
+          subscribe,
+          liveEventName: 'activity',
         });
       }
 
@@ -2602,11 +2683,11 @@ export function buildFetchHandler(cfg: ServerConfig): ServerHandle {
         // Paired remote agents drive the browser but cannot configure the
         // daemon, launch new browsers, import cookies, or rotate tokens.
         if (surface === 'tunnel') {
-          if (!canDispatchOverTunnel(body?.command)) {
+          if (!canDispatchOverTunnel(body?.command, body?.args)) {
             logTunnelDenial(req, url, `disallowed_command:${body?.command}`);
             return new Response(JSON.stringify({
               error: `Command '${body?.command}' is not allowed over the tunnel surface`,
-              hint: `Tunnel commands: ${[...TUNNEL_COMMANDS].sort().join(', ')}`,
+              hint: `Tunnel commands: ${[...TUNNEL_COMMANDS].sort().join(', ')}. Note: --out (disk write) is never allowed over the tunnel.`,
             }), { status: 403, headers: { 'Content-Type': 'application/json' } });
           }
         }
@@ -2711,6 +2792,32 @@ export function buildFetchHandler(cfg: ServerConfig): ServerHandle {
         });
       }
 
+      // GET /memory — diagnostic snapshot (auth required, does NOT reset idle).
+      // Same auth model as /activity/stream and /inspector/events: Bearer header
+      // OR view-only SSE-session cookie. Does NOT extend /health (which already
+      // leaks AUTH_TOKEN to any localhost caller in headed mode — see TODOS.md
+      // "Audit /health token distribution"); a separate endpoint with the
+      // standard SSE auth keeps the future /health fix from cascading into the
+      // sidebar footer poll.
+      if (url.pathname === '/memory' && req.method === 'GET') {
+        const cookieToken = extractSseCookie(req);
+        if (!validateAuth(req) && !validateSseSessionToken(cookieToken)) {
+          return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+            status: 401, headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        const { buildMemorySnapshotJson } = await import('./memory-command');
+        const snapshot = await buildMemorySnapshotJson(cfgBrowserManager);
+        // sanitizeReplacer is required at every SSE/JSON egress that ships
+        // page-content-derived strings — tab.url and tab.title come from
+        // page content, so lone-surrogate bytes from broken emoji or
+        // mid-emoji splits could otherwise reach the sidebar / Claude API.
+        return new Response(JSON.stringify(snapshot, sanitizeReplacer), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
       // GET /inspector/events — SSE for inspector state changes (auth required)
       if (url.pathname === '/inspector/events' && req.method === 'GET') {
         // Same auth model as /activity/stream: Bearer OR view-only cookie.
@@ -2721,62 +2828,20 @@ export function buildFetchHandler(cfg: ServerConfig): ServerHandle {
             status: 401, headers: { 'Content-Type': 'application/json' },
           });
         }
-        const encoder = new TextEncoder();
-        const stream = new ReadableStream({
-          start(controller) {
-            // SSE egress invariant: inspectorData and CDP event payloads carry
-            // page-DOM strings (selectors, attribute values, console messages).
-            // sanitizeReplacer cleans lone surrogates DURING JSON.stringify so
-            // they're neutralized before escape-encoding (post-stringify regex
-            // is a no-op once \uD800 has become "\\ud800").
-            // Send current state immediately
-            if (inspectorData) {
-              controller.enqueue(encoder.encode(
-                `event: state\ndata: ${JSON.stringify({ data: inspectorData, timestamp: inspectorTimestamp }, sanitizeReplacer)}\n\n`
-              ));
-            }
-
-            // Subscribe for live events
-            const notify: InspectorSubscriber = (event) => {
-              try {
-                controller.enqueue(encoder.encode(
-                  `event: inspector\ndata: ${JSON.stringify(event, sanitizeReplacer)}\n\n`
-                ));
-              } catch (err: any) {
-                console.debug('[browse] Inspector SSE stream error:', err.message);
-                inspectorSubscribers.delete(notify);
-              }
-            };
+        // Cleanup contract (abort + enqueue-fail + heartbeat-fail,
+        // idempotent) lives in createSseEndpoint; sanitizeReplacer is
+        // applied to every JSON.stringify inside the helper. The
+        // inspector subscriber set stays here because it's also written
+        // to by emitInspectorEvent above.
+        return createSseEndpoint(req, {
+          initialReplay: inspectorData
+            ? (send) => send('state', { data: inspectorData, timestamp: inspectorTimestamp })
+            : undefined,
+          subscribe: (notify) => {
             inspectorSubscribers.add(notify);
-
-            // Heartbeat every 15s
-            const heartbeat = setInterval(() => {
-              try {
-                controller.enqueue(encoder.encode(`: heartbeat\n\n`));
-              } catch (err: any) {
-                console.debug('[browse] Inspector SSE heartbeat failed:', err.message);
-                clearInterval(heartbeat);
-                inspectorSubscribers.delete(notify);
-              }
-            }, 15000);
-
-            // Cleanup on disconnect
-            req.signal.addEventListener('abort', () => {
-              clearInterval(heartbeat);
-              inspectorSubscribers.delete(notify);
-              try { controller.close(); } catch (err: any) {
-                // Expected: stream already closed
-              }
-            });
+            return () => inspectorSubscribers.delete(notify);
           },
-        });
-
-        return new Response(stream, {
-          headers: {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-          },
+          liveEventName: 'inspector',
         });
       }
 
