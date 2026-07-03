@@ -63,7 +63,7 @@ pytest-xdist==3.8.0
     # via sf-skills (pyproject.toml)
 pytokens==0.4.1
     # via black
-typing-extensions==4.15.0
+typing-extensions==4.16.0
     # via mypy
 wheel==0.47.0
     # via pip-tools
