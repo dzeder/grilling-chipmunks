@@ -70,7 +70,7 @@ wheel==0.47.0
 
 # --- Additional dependencies from v2 framework ---
 # AI
-anthropic>=0.120.0
+anthropic>=0.120.2
 pydantic>=2.13.4
 
 # Salesforce
