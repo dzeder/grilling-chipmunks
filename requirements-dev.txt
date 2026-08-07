@@ -84,7 +84,7 @@ python-docx>=1.2.0
 markdown>=3.10.2
 
 # Content Watcher
-feedparser>=6.0.12
+feedparser>=6.0.14
 google-api-python-client>=2.198.0
 beautifulsoup4>=4.15.0
 requests>=2.34.2
