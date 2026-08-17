@@ -330,7 +330,7 @@ describe("gstack-memory-ingest --limit", () => {
  */
 function installFakeGbrain(
   home: string,
-  opts: { failingPaths?: string[] } = {},
+  opts: { failingPaths?: string[]; collectNothing?: boolean } = {},
 ): { binDir: string; logFile: string; argsFile: string; stagingListFile: string } {
   const binDir = join(home, "fake-bin");
   mkdirSync(binDir, { recursive: true });
@@ -390,6 +390,13 @@ EOF
     if [ -d "\$DIR" ]; then
       TOTAL=\$(find "\$DIR" -name "*.md" -type f | wc -l | tr -d ' ')
     else
+      TOTAL=0
+    fi
+    # collectNothing: simulate gbrain walking the staging dir and finding
+    # nothing — the real-world shape when .gitignore hides every staged file
+    # from collect_files. Crucially this writes NO sync-failures.jsonl entry,
+    # because there is no per-file failure: gbrain never saw the files.
+    if [ "${opts.collectNothing ? "1" : "0"}" = "1" ]; then
       TOTAL=0
     fi
     ERRORS=0
@@ -468,6 +475,51 @@ describe("gstack-memory-ingest writer (gbrain v0.20+ batch `import` interface)",
     // dir root. If writeStaged ever regresses to flat layout, this fails.
     const stagedList = readFileSync(stagingListFile, "utf-8");
     expect(stagedList).toMatch(/^\.\/transcripts\/claude-code\/.+\.md$/m);
+  });
+
+  // Silent-data-loss regression: gbrain accepts the import call, exits 0, and
+  // reports imported=0 because collect_files found nothing in the staging dir
+  // (real-world cause: gstack-artifacts-init writes `.gitignore = "*"` into
+  // $GSTACK_HOME, and `gbrain import` honours .gitignore, so every file staged
+  // under $GSTACK_HOME is invisible to it).
+  //
+  // No per-file failure is written to sync-failures.jsonl — gbrain never SAW
+  // the files — so readNewFailures returns empty. Before the reconciliation
+  // check, that made a total loss indistinguishable from success: every
+  // prepared file got state-recorded as ingested and the pass reported
+  // "N written". State then said "done", so no later run ever retried.
+  it("refuses to advance state when gbrain imports fewer pages than were staged", () => {
+    const home = makeTestHome();
+    const gstackHome = join(home, ".gstack");
+    mkdirSync(gstackHome, { recursive: true });
+    const { binDir, logFile } = installFakeGbrain(home, { collectNothing: true });
+
+    const session =
+      `{"type":"user","message":{"role":"user","content":"hi"},"timestamp":"2026-05-01T00:00:00Z","cwd":"/tmp/foo"}\n` +
+      `{"type":"assistant","message":{"role":"assistant","content":"hello"},"timestamp":"2026-05-01T00:00:01Z"}\n`;
+    writeClaudeCodeSession(home, "tmp-foo", "abc123", session);
+
+    const r = runScript(["--bulk", "--include-unattributed", "--quiet"], {
+      HOME: home,
+      GSTACK_HOME: gstackHome,
+      PATH: `${binDir}:${process.env.PATH || ""}`,
+    });
+
+    // gbrain WAS called — this is not a "gbrain missing" path.
+    expect(existsSync(logFile)).toBe(true);
+
+    // The pass must not claim success.
+    expect(r.stderr).toMatch(/\[memory-ingest\] ERR:.*accounted for 0 of 1 staged page/);
+    expect(r.stderr).toMatch(/Refusing to advance state/);
+    expect(r.stdout).not.toMatch(/written:\s+1/);
+
+    // The critical assertion: state must NOT mark the session ingested, or the
+    // next run skips it forever and the transcript is lost silently.
+    const statePath = join(gstackHome, ".transcript-ingest-state.json");
+    if (existsSync(statePath)) {
+      const state = JSON.parse(readFileSync(statePath, "utf-8"));
+      expect(Object.keys(state.sessions || {}).length).toBe(0);
+    }
   });
 
   // Originally landed in v1.32.0.0 (PR #1411) on the per-file `gbrain put`
@@ -764,5 +816,48 @@ exit 0
     expect(r.stderr + r.stdout).toMatch(/secret-scan match/);
 
     rmSync(home, { recursive: true, force: true });
+  });
+});
+
+// #2105: current Codex rollout records are
+// { type: 'response_item', payload: { type: 'message', role, content: [...] } }
+// — the legacy payload.message branch never fired on them, so every Codex
+// session imported as an empty shell (message_count: 0, 243/243 on the
+// reporting machine).
+describe("#2105 codex response_item rollout shape", () => {
+  it("extracts messages from response_item records", async () => {
+    const { parseTranscriptJsonl } = await import("../bin/gstack-memory-ingest");
+    const dir = mkdtempSync(join(tmpdir(), "ingest-2105-"));
+    const file = join(dir, "rollout-2026-06-01.jsonl");
+    writeFileSync(file, [
+      JSON.stringify({ type: "session_meta", payload: { id: "s1", cwd: "/tmp/x" }, timestamp: "2026-06-01T00:00:00Z" }),
+      JSON.stringify({ type: "response_item", payload: { type: "message", role: "user", content: [{ type: "input_text", text: "hello codex" }] } }),
+      JSON.stringify({ type: "response_item", payload: { type: "message", role: "assistant", content: [{ type: "output_text", text: "hello human" }] } }),
+      // Non-message response_items must not count as messages.
+      JSON.stringify({ type: "response_item", payload: { type: "reasoning", summary: [] } }),
+    ].join("\n") + "\n");
+
+    const parsed = parseTranscriptJsonl(file)!;
+    expect(parsed).not.toBeNull();
+    expect(parsed.agent).toBe("codex");
+    expect(parsed.message_count).toBe(2);
+    expect(parsed.body).toContain("## User\n\nhello codex");
+    expect(parsed.body).toContain("## Assistant\n\nhello human");
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it("legacy payload.message shape still parses", async () => {
+    const { parseTranscriptJsonl } = await import("../bin/gstack-memory-ingest");
+    const dir = mkdtempSync(join(tmpdir(), "ingest-2105-legacy-"));
+    const file = join(dir, "rollout-legacy.jsonl");
+    writeFileSync(file, [
+      JSON.stringify({ type: "session_meta", payload: { id: "s2", cwd: "/tmp/y" }, timestamp: "2026-06-01T00:00:00Z" }),
+      JSON.stringify({ payload: { message: { role: "user", content: "old shape" } } }),
+    ].join("\n") + "\n");
+
+    const parsed = parseTranscriptJsonl(file)!;
+    expect(parsed.message_count).toBe(1);
+    expect(parsed.body).toContain("## User\n\nold shape");
+    rmSync(dir, { recursive: true, force: true });
   });
 });
