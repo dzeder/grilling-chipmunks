@@ -65,7 +65,7 @@ pytokens==0.4.1
     # via black
 typing-extensions==4.16.0
     # via mypy
-wheel==0.47.0
+wheel==0.48.0
     # via pip-tools
 
 # --- Additional dependencies from v2 framework ---
