@@ -31,7 +31,9 @@ describe('content-binding template drift', () => {
   });
 
   test('land-and-deploy grades staleness content-first (wtree rule) and checks evidence', () => {
-    const land = rendered('land-and-deploy/SKILL.md');
+    // Carved (prompt-token-load-reduction): Step 3.5 moved out of the skeleton
+    // into the on-demand readiness-gate section — the grading rules live there.
+    const land = rendered('land-and-deploy/sections/readiness-gate.md');
     expect(land).toContain('wtree');
     expect(land).toContain('---WTREE---');
     expect(land).toMatch(/gstack-evidence check --label tests --expect-cmd '[^']+' --max-age 24/);
@@ -54,7 +56,9 @@ describe('content-binding template drift', () => {
     // structurally: the three row names in order inside the rule sentence.
     const rowList = /diff-scoped rows only:[\s\S]{0,80}?adversarial-review[\s\S]{0,80}?codex-review[\s\S]{0,80}?ship-stage entries/;
     expect(rendered('ship/SKILL.md')).toMatch(rowList);
-    expect(rendered('land-and-deploy/SKILL.md')).toMatch(rowList);
+    // land-and-deploy's copy of the row list lives in the carved readiness-gate
+    // section (Step 3.5a), not the skeleton.
+    expect(rendered('land-and-deploy/sections/readiness-gate.md')).toMatch(rowList);
   });
 
   test('release-body write side carries the banner tripwire (and it actually fires)', () => {
@@ -68,21 +72,47 @@ describe('content-binding template drift', () => {
 
     // Functional: execute the template's tripwire block against a 0-banner
     // original and a 1-banner outgoing body — the ABORT branch must fire.
+    //
+    // Pass the script as an ARGV element (spawnSync array form), never by
+    // interpolating JSON.stringify into a shell line: JSON escaping is not
+    // shell escaping. Inside shell double quotes a JSON "\n" stays a literal
+    // backslash-n, which collapsed this multi-line script onto one line where
+    // `then\n` became the command word `thenn` and `>&2\nelse\n` became the
+    // redirect `>&2nelsen` — silently littering a `2nelsen` file (containing
+    // "bash: thenn: command not found") in the repo root on every suite run,
+    // while the old not-contains assertion passed vacuously because ALL
+    // output had been redirected into that file.
     const block = body.match(/_ORIG_BANNERS=\$\(grep[\s\S]*?fi\n/);
     expect(block).not.toBeNull();
     const fs = require('fs');
     const os = require('os');
     const path = require('path');
-    const { execSync } = require('child_process');
+    const { spawnSync } = require('child_process');
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gstack-banner-'));
     try {
-      fs.writeFileSync(path.join(dir, 'orig.md'), 'clean body\n');
-      fs.writeFileSync(path.join(dir, 'new.md'), 'body with UNTRUSTED TRACKER CONTENT banner leak\n');
-      const script = block![0]
-        .replaceAll('/tmp/gstack-pr-body-orig-$$.md', path.join(dir, 'orig.md'))
-        .replaceAll('/tmp/gstack-pr-body-$$.md', path.join(dir, 'new.md'));
-      const out = execSync(`bash -c ${JSON.stringify(script + '; true')}`, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });
-      expect(out).not.toContain('banner tripwire clean');
+      const scriptFor = (origContent: string, newContent: string) => {
+        fs.writeFileSync(path.join(dir, 'orig.md'), origContent);
+        fs.writeFileSync(path.join(dir, 'new.md'), newContent);
+        return block![0]
+          .replaceAll('/tmp/gstack-pr-body-orig-$$.md', path.join(dir, 'orig.md'))
+          .replaceAll('/tmp/gstack-pr-body-$$.md', path.join(dir, 'new.md'));
+      };
+
+      // Banner leaked into the outgoing body → the ABORT branch fires, loudly.
+      const abort = spawnSync('bash', ['-c', scriptFor(
+        'clean body\n',
+        'body with UNTRUSTED TRACKER CONTENT banner leak\n',
+      )], { encoding: 'utf-8', timeout: 30_000 });
+      expect(abort.stderr).toContain('ABORT: envelope banner leaked');
+      expect(abort.stdout).not.toContain('banner tripwire clean');
+
+      // No banner delta → the clean branch fires.
+      const clean = spawnSync('bash', ['-c', scriptFor(
+        'clean body\n',
+        'also clean body\n',
+      )], { encoding: 'utf-8', timeout: 30_000 });
+      expect(clean.stdout).toContain('banner tripwire clean');
+      expect(clean.stderr).not.toContain('ABORT');
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
