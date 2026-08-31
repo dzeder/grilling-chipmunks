@@ -31,7 +31,9 @@ import {
   initRegistry, validateToken as validateScopedToken, checkScope, checkDomain,
   checkRate, createToken, createSetupKey, exchangeSetupKey, revokeToken,
   listTokens, recordCommand,
-  isRootToken, checkConnectRateLimit, type TokenInfo,
+  isRootToken, checkConnectRateLimit, type TokenInfo, type ScopeCategory,
+  DEFAULT_PAIR_SCOPES, InvalidScopeError, ReservedClientIdError, assertValidClientId,
+  assertValidTokenOptions, revokeSetupKeys, getClientSession, grantReducesAccess,
 } from './token-registry';
 import { validateTempPath } from './path-security';
 import { resolveConfig, ensureStateDir, readVersionHash, resolveChromiumProfile, cleanSingletonLocks, isPairAgentEnabled } from './config';
@@ -999,7 +1001,7 @@ async function handleCommandInternalImpl(
         status: 403, json: true,
         result: JSON.stringify({
           error: `Command "${command}" not allowed by your token scope`,
-          hint: `Your scopes: ${tokenInfo.scopes.join(', ')}. Ask the user to re-pair with --admin for eval/cookies/storage access.`,
+          hint: `Your scopes: ${tokenInfo.scopes.join(', ')}. Ask the user to re-pair without --restrict for full page access, or with --control for browser control commands.`,
         }),
       };
     }
@@ -1619,7 +1621,13 @@ export function buildFetchHandler(cfg: ServerConfig): ServerHandle {
   // validateAuth was deleted in v1.35.0.0.
   function validateAuth(req: Request): boolean {
     const header = req.headers.get('authorization');
-    return header === `Bearer ${authToken}`;
+    if (header === null) return false;
+    // Constant-time compare so a byte-by-byte early-exit can't leak the token
+    // prefix via response timing. timingSafeEqual requires equal-length inputs,
+    // so the length check gates it (the length itself is not secret).
+    const got = Buffer.from(header);
+    const want = Buffer.from(`Bearer ${authToken}`);
+    return got.length === want.length && crypto.timingSafeEqual(got, want);
   }
 
   // Factory-scoped shutdown. Closes the cfg-provided browserManager so
@@ -2310,7 +2318,14 @@ export function buildFetchHandler(cfg: ServerConfig): ServerHandle {
             scopes: session.scopes,
             agent: session.clientId,
           }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-        } catch {
+        } catch (err) {
+          // Name the caller's typo (bad scope, negative rateLimit, reserved
+          // clientId) instead of hiding it behind the generic body error.
+          if (err instanceof InvalidScopeError || err instanceof ReservedClientIdError) {
+            return new Response(JSON.stringify({ error: err.message }), {
+              status: 400, headers: { 'Content-Type': 'application/json' },
+            });
+          }
           return new Response(JSON.stringify({ error: 'Invalid request body' }), {
             status: 400, headers: { 'Content-Type': 'application/json' },
           });
@@ -2324,15 +2339,28 @@ export function buildFetchHandler(cfg: ServerConfig): ServerHandle {
             status: 403, headers: { 'Content-Type': 'application/json' },
           });
         }
-        const clientId = url.pathname.slice('/token/'.length);
+        // decodeURIComponent so CLI-encoded names (spaces, UTF-8) round-trip.
+        let clientId: string;
+        try {
+          clientId = decodeURIComponent(url.pathname.slice('/token/'.length));
+        } catch {
+          return new Response(JSON.stringify({ error: 'Malformed client ID encoding' }), {
+            status: 400, headers: { 'Content-Type': 'application/json' },
+          });
+        }
         const revoked = revokeToken(clientId);
-        if (!revoked) {
+        // Release tabs UNCONDITIONALLY: ownership outlives the token (it clears
+        // only on tab close), so a client whose token already expired can still
+        // own tabs. Gating release on a revoke hit would orphan that ownership
+        // and let a same-name re-pair inherit an authenticated tab.
+        const tabsReleased = browserManager.releaseClientTabs(clientId).length;
+        if (!revoked && tabsReleased === 0) {
           return new Response(JSON.stringify({ error: `Agent "${clientId}" not found` }), {
             status: 404, headers: { 'Content-Type': 'application/json' },
           });
         }
-        console.log(`[browse] Revoked token for: ${clientId}`);
-        return new Response(JSON.stringify({ revoked: clientId }), {
+        console.log(`[browse] Revoked ${revoked} token(s), released ${tabsReleased} tab(s) for: ${clientId}`);
+        return new Response(JSON.stringify({ revoked: clientId, tokens_deleted: revoked, tabs_released: tabsReleased }), {
           status: 200, headers: { 'Content-Type': 'application/json' },
         });
       }
@@ -2344,13 +2372,17 @@ export function buildFetchHandler(cfg: ServerConfig): ServerHandle {
             status: 403, headers: { 'Content-Type': 'application/json' },
           });
         }
-        const agents = listTokens().map(t => ({
+        // includeSetup: pending (unexchanged) setup keys are live grants the
+        // operator must be able to see — without them, revoking a paired-but-
+        // never-connected agent "works" while the list shows nothing.
+        const agents = listTokens({ includeSetup: true }).map(t => ({
           clientId: t.clientId,
           scopes: t.scopes,
           domains: t.domains,
           expiresAt: t.expiresAt,
           commandCount: t.commandCount,
           createdAt: t.createdAt,
+          pending: t.type === 'setup',
         }));
         return new Response(JSON.stringify({ agents }), {
           status: 200, headers: { 'Content-Type': 'application/json' },
@@ -2366,12 +2398,61 @@ export function buildFetchHandler(cfg: ServerConfig): ServerHandle {
         }
         try {
           const pairBody = await req.json() as any;
-          // Default: full access (read+write+admin+meta). The trust boundary is
-          // the pairing ceremony itself, not the scope. --control adds browser-wide
-          // destructive commands (stop, restart, disconnect). --restrict limits scope.
+          // Reject a reserved/invalid clientId up front (createSetupKey enforces
+          // it too, but this makes the 400 unambiguous and skips the teardown).
+          if (pairBody.clientId !== undefined) assertValidClientId(pairBody.clientId);
+          // Default: DEFAULT_PAIR_SCOPES (full page access). The trust boundary
+          // is the pairing ceremony itself, not the scope. --control adds
+          // browser-wide destructive commands (stop, restart, disconnect).
+          // --restrict limits scope — but can never grant control: that scope
+          // stays behind the explicit control flag.
+          if (!pairBody.control && !pairBody.admin
+              && Array.isArray(pairBody.scopes) && pairBody.scopes.includes('control')) {
+            return new Response(JSON.stringify({
+              error: 'The control scope requires the control flag (--control); it cannot be granted via a scopes list.',
+            }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+          }
           const scopes = pairBody.control || pairBody.admin
-            ? ['read', 'write', 'admin', 'meta', 'control'] as const
-            : (pairBody.scopes || ['read', 'write', 'admin', 'meta']) as const;
+            ? [...DEFAULT_PAIR_SCOPES, 'control' as const]
+            : ((pairBody.scopes || [...DEFAULT_PAIR_SCOPES]) as ScopeCategory[]);
+          // D1: a re-pair supersedes prior grants. ALWAYS drop stale setup keys
+          // so a superseded broad key can never be exchanged — this closes the
+          // shadow-key hole where a narrowing re-pair before the agent connects
+          // would otherwise leave the old broad key live. Revoke the live
+          // SESSION only when the new grant actually reduces access, so a
+          // broaden/refresh never strands a working agent mid-task. Compare
+          // against the resolved grant (not raw pairBody) so dropping 'control'
+          // or a default re-pair is classified correctly. Revoke runs BEFORE
+          // createSetupKey — revokeToken deletes all of a clientId's tokens, so
+          // minting first would nuke the fresh key.
+          const grant = {
+            scopes: [...scopes] as ScopeCategory[],
+            domains: pairBody.domains as string[] | undefined,
+            rateLimit: pairBody.rateLimit ?? 10,
+            tabPolicy: 'own-only' as const,
+          };
+          // Validate BEFORE any revoke (createSetupKey validates too, but that
+          // runs after the teardown below). A bad scope or negative rateLimit
+          // must 400 without knocking a live session offline — otherwise a
+          // reducing re-pair with a typo (--restrict red) destroys the session
+          // and mints no replacement.
+          assertValidTokenOptions(grant.scopes, grant.rateLimit);
+          const priorSession = pairBody.clientId ? getClientSession(pairBody.clientId) : null;
+          let superseded: { tokens_deleted: number; tabs_released: number } | undefined;
+          if (priorSession && grantReducesAccess(priorSession, grant)) {
+            const tokensDeleted = revokeToken(pairBody.clientId);
+            const tabsReleased = browserManager.releaseClientTabs(pairBody.clientId).length;
+            superseded = { tokens_deleted: tokensDeleted, tabs_released: tabsReleased };
+            console.log(`[browse] Superseded ${tokensDeleted} token(s), released ${tabsReleased} tab(s) for reducing re-pair: ${pairBody.clientId}`);
+          } else if (pairBody.clientId) {
+            revokeSetupKeys(pairBody.clientId);
+            // No live session, but tab ownership outlives token expiry: free any
+            // tabs orphaned by an expired session so this re-pair can't inherit
+            // an earlier incarnation's authenticated pages (mirrors DELETE
+            // /token's unconditional release). A live-session broaden keeps its
+            // tabs — the working agent still owns them.
+            if (!priorSession) browserManager.releaseClientTabs(pairBody.clientId);
+          }
           const setupKey = createSetupKey({
             clientId: pairBody.clientId,
             scopes: [...scopes],
@@ -2406,8 +2487,16 @@ export function buildFetchHandler(cfg: ServerConfig): ServerHandle {
             scopes: setupKey.scopes,
             tunnel_url: verifiedTunnelUrl,
             server_url: `http://127.0.0.1:${browsePort}`,
+            ...(superseded ? { superseded } : {}),
           }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-        } catch {
+        } catch (err) {
+          // Name the caller's typo (bad scope, negative rateLimit, reserved
+          // clientId) instead of hiding it behind the generic body error.
+          if (err instanceof InvalidScopeError || err instanceof ReservedClientIdError) {
+            return new Response(JSON.stringify({ error: err.message }), {
+              status: 400, headers: { 'Content-Type': 'application/json' },
+            });
+          }
           return new Response(JSON.stringify({ error: 'Invalid request body' }), {
             status: 400, headers: { 'Content-Type': 'application/json' },
           });
