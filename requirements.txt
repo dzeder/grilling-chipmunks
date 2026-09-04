@@ -1,4 +1,4 @@
-anthropic>=0.122.0
+anthropic>=1.2.0
 httpx>=0.28.1
 pydantic>=2.13.5
 pyyaml>=6.0.3
