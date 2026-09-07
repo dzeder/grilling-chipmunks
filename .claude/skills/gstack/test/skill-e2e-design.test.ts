@@ -1,12 +1,14 @@
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
-import { runSkillTest } from './helpers/session-runner';
+import { CAPTURE_MS, CAPTURE_LONG_MS } from './helpers/eval-budgets';
+import { runSkillTest, type SkillTestResult } from './helpers/session-runner';
 import { callJudge } from './helpers/llm-judge';
 import {
-  ROOT, browseBin, runId, evalsEnabled,
+  ROOT, runId, evalsEnabled, selectedTests,
   describeIfSelected, testConcurrentIfSelected,
-  copyDirSync, setupBrowseShims, logCost, recordE2E,
+  copyDirSync, logCost, recordE2E,
   createEvalCollector, finalizeEvalCollector,
 } from './helpers/e2e-helpers';
+import { asideAvailable } from './helpers/aside-available';
 import { spawnSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -76,11 +78,24 @@ A civic tech data platform for government employees to access, visualize, and sh
     run('git', ['add', '.']);
     run('git', ['commit', '-m', 'initial project setup']);
 
-    // Copy design-consultation skill
+    // Copy design-consultation skill — INCLUDING sections/. The skill has
+    // been carved since v1.57.0.0 (e722c5bf): Phases 3-6, where the DESIGN.md
+    // structure (the "AESTHETIC: [direction]" proposal template) is
+    // prescribed, live in sections/proposal-and-preview.md behind a STOP-read.
+    // Without the dir the agent improvises structure from the skeleton
+    // ("Visual thesis" vocabulary) and the section-synonym check becomes a
+    // coin flip (observed: CI run 33090283032 failed both attempts with
+    // "no sections dir" in the trace; the skeleton-only pass on 32899975845
+    // was lucky vocabulary).
     fs.mkdirSync(path.join(designDir, 'design-consultation'), { recursive: true });
     fs.copyFileSync(
       path.join(ROOT, 'design-consultation', 'SKILL.md'),
       path.join(designDir, 'design-consultation', 'SKILL.md'),
+    );
+    fs.cpSync(
+      path.join(ROOT, 'design-consultation', 'sections'),
+      path.join(designDir, 'design-consultation', 'sections'),
+      { recursive: true },
     );
   });
 
@@ -100,7 +115,7 @@ Skip research — work from your design knowledge. Skip the font preview page. S
 Write DESIGN.md and CLAUDE.md (or update it) in the working directory.`,
       workingDirectory: designDir,
       maxTurns: 20,
-      timeout: 360_000,
+      timeout: CAPTURE_LONG_MS,
       testName: 'design-consultation-core',
       runId,
       model: 'claude-opus-4-7',
@@ -121,7 +136,12 @@ Write DESIGN.md and CLAUDE.md (or update it) in the working directory.`,
     // Structural checks — fuzzy synonym matching to handle agent variation
     const sectionSynonyms: Record<string, string[]> = {
       'Product Context': ['product', 'context', 'overview', 'about'],
-      'Aesthetic': ['aesthetic', 'visual direction', 'design direction', 'visual identity'],
+      // Widened 2026-08-27: two CI runs produced judge-praised DESIGN.md files
+      // that articulated the direction as "design principles" / "design
+      // language" prose without any of the original four literals (run
+      // 33090283032, both attempts; inputs identical to the prior passing
+      // run 32899975845 — vocabulary variance, not a generation regression).
+      'Aesthetic': ['aesthetic', 'visual direction', 'design direction', 'visual identity', 'design language', 'visual language', 'design principle', 'look and feel', 'art direction'],
       'Typography': ['typography', 'type', 'font', 'typeface'],
       'Color': ['color', 'colour', 'palette', 'colors'],
       'Spacing': ['spacing', 'space', 'whitespace', 'gap'],
@@ -160,16 +180,32 @@ Write DESIGN.md and CLAUDE.md (or update it) in the working directory.`,
       const claude = fs.readFileSync(claudePath, 'utf-8');
       expect(claude.toLowerCase()).toContain('design.md');
     }
-  }, 420_000);
+  }, CAPTURE_LONG_MS);
 
   testConcurrentIfSelected('design-consultation-research', async () => {
-    // Test WebSearch integration — research phase only, no DESIGN.md generation
+    // Research phase only, no DESIGN.md generation. Web research runs in Aside
+    // first, WebSearch second ({{ASIDE_RESEARCH}}, rendered into
+    // design-consultation/SKILL.md). With Aside live the agent MUST search
+    // through `aside exec` — a straight-to-WebSearch run is the ordering bug
+    // this case pins. Without Aside (CI, or GSTACK_SKIP_ASIDE=1) it must use
+    // the WebSearch tool, or say the fallback sentence when that is missing
+    // too, and write the notes from in-distribution knowledge. Either way the
+    // notes file must exist.
     const researchDir = fs.mkdtempSync(path.join(os.tmpdir(), 'skill-e2e-research-'));
 
-    const result = await runSkillTest({
-      prompt: `You have access to WebSearch. Research civic tech data platform designs.
+    // Extract only the research contract (CLAUDE.md: extract, don't copy). The tree's
+    // SKILL.md unless GSTACK_E2E_DOCS_ROOT points at a `gen:skill-docs --out-dir` render.
+    const skill = fs.readFileSync(path.join(process.env.GSTACK_E2E_DOCS_ROOT || ROOT, 'design-consultation', 'SKILL.md'), 'utf-8');
+    const sectionStart = skill.indexOf('## Web research runs in Aside');
+    if (sectionStart < 0) throw new Error('design-consultation/SKILL.md has no "Web research runs in Aside" section — regenerate with: bun run gen:skill-docs');
+    const sectionEnd = skill.indexOf('\n## ', sectionStart + 1);
+    fs.writeFileSync(path.join(researchDir, 'research-contract.md'), skill.slice(sectionStart, sectionEnd > sectionStart ? sectionEnd : undefined));
+    const live = asideAvailable();
 
-Do exactly 2 WebSearch queries:
+    const result = await runSkillTest({
+      prompt: `Read ${researchDir}/research-contract.md first and follow it exactly: it says how web research runs in this project.
+
+Research civic tech data platform designs. Run exactly 2 research queries:
 1. 'civic tech government data platform design 2025'
 2. 'open data portal UX best practices'
 
@@ -177,14 +213,15 @@ Summarize the key design patterns you found to ${researchDir}/research-notes.md.
 Include: color trends, typography patterns, and layout conventions you observed.
 Do NOT generate a full DESIGN.md — just research notes.`,
       workingDirectory: researchDir,
-      maxTurns: 8,
+      maxTurns: 10,
+      allowedTools: ['Bash', 'Read', 'Write', 'WebSearch'],
       // 300s, not 90s: saturated-runner class (same as review-dashboard-via /
       // retro-base-branch). PR #2533 CI observed the sibling preview test at
       // 0 turns/$0.00 for 93s x3 attempts — session up, first completion
       // queued past the budget under concurrent API load. 90s budgets cannot
       // absorb one slow first completion; 300s is the repo's standard floor
       // for CI SDK tests. Outer timeout below rises to 360s for headroom.
-      timeout: 300_000,
+      timeout: CAPTURE_MS,
       testName: 'design-consultation-research',
       runId,
     });
@@ -195,26 +232,36 @@ Do NOT generate a full DESIGN.md — just research notes.`,
     const notesExist = fs.existsSync(notesPath);
     const notesContent = notesExist ? fs.readFileSync(notesPath, 'utf-8') : '';
 
-    // Check if WebSearch was used
+    // Aside live: research went through `aside exec` in a Bash tool call (WebSearch
+    // alone is the wrong order). Aside absent: WebSearch tool, or the fallback sentence.
+    const asideExecCalls = result.toolCalls.filter(tc => tc.tool === 'Bash' && /\baside exec\b/.test(String(tc.input?.command ?? '')));
     const webSearchCalls = result.toolCalls.filter(tc => tc.tool === 'WebSearch');
-    if (webSearchCalls.length > 0) {
-      console.log(`WebSearch used ${webSearchCalls.length} times`);
-    } else {
-      console.warn('WebSearch not used — may be unavailable in test env');
-    }
+    const searched = asideExecCalls.length > 0 || webSearchCalls.length > 0;
+    // Neither: the agent SAID the fallback. Assistant text blocks only — the
+    // contract file the agent Reads contains the same sentence, so tool_result
+    // content must not count.
+    const assistantText = result.transcript
+      .filter((e: any) => e?.type === 'assistant')
+      .flatMap((e: any) => (e.message?.content ?? []).filter((c: any) => c?.type === 'text').map((c: any) => String(c.text)))
+      .join('\n');
+    const saidFallback = assistantText.includes('Search unavailable');
+    const researchOk = live ? asideExecCalls.length > 0 : (searched || saidFallback);
+    console.log(`aside exec issued ${asideExecCalls.length} times; WebSearch called ${webSearchCalls.length} times; Aside live: ${live}; fallback said: ${saidFallback}`);
 
     recordE2E(evalCollector, '/design-consultation research', 'Design Consultation E2E', result, {
-      passed: notesExist && notesContent.length > 200 && ['success', 'error_max_turns'].includes(result.exitReason),
+      passed: researchOk && notesExist && notesContent.length > 200 && ['success', 'error_max_turns'].includes(result.exitReason),
     });
 
     expect(['success', 'error_max_turns']).toContain(result.exitReason);
+    if (live) expect(asideExecCalls.length).toBeGreaterThan(0);
+    else expect(searched || saidFallback).toBe(true);
     expect(notesExist).toBe(true);
     if (notesExist) {
       expect(notesContent.length).toBeGreaterThan(200);
     }
 
     try { fs.rmSync(researchDir, { recursive: true, force: true }); } catch {}
-  }, 360_000);
+  }, CAPTURE_LONG_MS);
 
   testConcurrentIfSelected('design-consultation-existing', async () => {
     // Pre-create a minimal DESIGN.md (independent of core test)
@@ -232,7 +279,7 @@ There is already a DESIGN.md in this repo. Update it with a complete design syst
 Skip research. Skip font preview. Skip any AskUserQuestion calls — this is non-interactive.`,
       workingDirectory: designDir,
       maxTurns: 20,
-      timeout: 360_000,
+      timeout: CAPTURE_LONG_MS,
       testName: 'design-consultation-existing',
       runId,
       model: 'claude-opus-4-7',
@@ -261,7 +308,7 @@ Skip research. Skip font preview. Skip any AskUserQuestion calls — this is non
       expect(hasColor).toBe(true);
       expect(hasSpacing).toBe(true);
     }
-  }, 420_000);
+  }, CAPTURE_LONG_MS);
 
   testConcurrentIfSelected('design-consultation-preview', async () => {
     // Test preview HTML generation only — no DESIGN.md (covered by core test)
@@ -284,7 +331,7 @@ Do NOT write DESIGN.md — only the preview HTML.`,
       maxTurns: 8,
       // 300s, not 90s: this is the test that failed 3x at 0 turns/$0.00/93s
       // on PR #2533 CI — see the research test's comment for the class.
-      timeout: 300_000,
+      timeout: CAPTURE_MS,
       testName: 'design-consultation-preview',
       runId,
     });
@@ -313,7 +360,7 @@ Do NOT write DESIGN.md — only the preview HTML.`,
     }
 
     try { fs.rmSync(previewDir, { recursive: true, force: true }); } catch {}
-  }, 360_000);
+  }, CAPTURE_LONG_MS);
 });
 
 // --- Plan Design Review E2E (plan-mode) ---
@@ -380,7 +427,7 @@ Skip the preamble bash block. Skip any AskUserQuestion calls — this is non-int
 IMPORTANT: Do NOT try to browse any URLs or use a browse binary. This is a plan review, not a live site audit. Just read the plan file, review it, and edit it to fix the gaps.`,
         workingDirectory: reviewDir,
         maxTurns: 15,
-        timeout: 300_000,
+        timeout: CAPTURE_MS,
         testName: 'plan-design-review-plan-mode',
         runId,
       });
@@ -419,7 +466,7 @@ IMPORTANT: Do NOT try to browse any URLs or use a browse binary. This is a plan 
     } finally {
       try { fs.rmSync(reviewDir, { recursive: true, force: true }); } catch {}
     }
-  }, 360_000);
+  }, CAPTURE_LONG_MS);
 
   testConcurrentIfSelected('plan-design-review-no-ui-scope', async () => {
     const reviewDir = setupReviewDir();
@@ -454,7 +501,7 @@ Skip the preamble bash block. Skip any AskUserQuestion calls — this is non-int
 IMPORTANT: Do NOT try to browse any URLs or use a browse binary. This is a plan review, not a live site audit.`,
         workingDirectory: reviewDir,
         maxTurns: 10,
-        timeout: 180_000,
+        timeout: CAPTURE_MS,
         testName: 'plan-design-review-no-ui-scope',
         runId,
       });
@@ -478,18 +525,41 @@ IMPORTANT: Do NOT try to browse any URLs or use a browse binary. This is a plan 
     } finally {
       try { fs.rmSync(reviewDir, { recursive: true, force: true }); } catch {}
     }
-  }, 240_000);
+  }, CAPTURE_MS);
 });
 
 // --- Design Review E2E (live-site audit + fix) ---
 
+/**
+ * Concatenated tool_result text from the stream-json transcript. runSkillTest
+ * leaves toolCalls[].output empty, and the agent's Bash INPUT also contains
+ * the sentinel string — only the tool_result proves the script printed it.
+ */
+function toolOutput(result: SkillTestResult): string {
+  const parts: string[] = [];
+  for (const e of result.transcript) {
+    if (e?.type !== 'user') continue;
+    for (const item of e.message?.content ?? []) {
+      if (item?.type !== 'tool_result') continue;
+      parts.push(typeof item.content === 'string' ? item.content : JSON.stringify(item.content ?? ''));
+    }
+  }
+  return parts.join('\n');
+}
+
+// /design-review drives the Aside browser; without it the skill's BROWSER SETUP stops at
+// NEEDS_ASIDE, so the block self-skips (CI runners have no Aside).
 describeIfSelected('Design Review E2E', ['design-review-fix'], () => {
+  // bun runs describe.skip callbacks too — probe only when this block is actually selected,
+  // so an unrelated eval run never pays the up-to-30s `aside repl` probe.
+  const selected = evalsEnabled && (selectedTests === null || selectedTests.includes('design-review-fix'));
+  if (selected && !asideAvailable()) { test.skip('needs Aside', () => {}); return; }
+
   let qaDesignDir: string;
   let qaDesignServer: ReturnType<typeof Bun.serve> | null = null;
 
   beforeAll(() => {
     qaDesignDir = fs.mkdtempSync(path.join(os.tmpdir(), 'skill-e2e-qa-design-'));
-    setupBrowseShims(qaDesignDir);
 
     const run = (cmd: string, args: string[]) =>
       spawnSync(cmd, args, { cwd: qaDesignDir, stdio: 'pipe', timeout: 5000 });
@@ -575,16 +645,12 @@ describeIfSelected('Design Review E2E', ['design-review-fix'], () => {
     const serverUrl = `http://localhost:${(qaDesignServer as any)?.port}`;
 
     const result = await runSkillTest({
-      prompt: `IMPORTANT: The browse binary is already assigned below as B. Do NOT search for it or run the SKILL.md setup block — just use $B directly.
-
-B="${browseBin}"
-
-Read design-review/SKILL.md for the design review + fix workflow.
+      prompt: `The Aside browser is installed and running. Read design-review/SKILL.md for the design review + fix workflow and follow its BROWSER SETUP section: drive the browser with \`aside repl\` scripts shaped exactly like its cookbook. Do not look for any other browser binary.
 
 Review the site at ${serverUrl}. Use --quick mode. Skip any AskUserQuestion calls — this is non-interactive. Fix up to 3 issues max. Write your report to ./design-audit.md.`,
       workingDirectory: qaDesignDir,
       maxTurns: 30,
-      timeout: 360_000,
+      timeout: CAPTURE_LONG_MS,
       testName: 'design-review-fix',
       runId,
     });
@@ -596,17 +662,29 @@ Review the site at ${serverUrl}. Use --quick mode. Skip any AskUserQuestion call
 
     // Check if any design fix commits were made
     const gitLog = spawnSync('git', ['log', '--oneline'], {
-      cwd: qaDesignDir, stdio: 'pipe',
+      cwd: qaDesignDir, stdio: 'pipe', timeout: 30_000,
     });
     const commits = gitLog.stdout.toString().trim().split('\n');
     const designFixCommits = commits.filter((c: string) => c.includes('style(design)'));
 
+    // The agent must actually drive Aside: an `aside repl` Bash call, a printed sentinel
+    // (from a tool_result, never the input), and no reach for the retired browse binary.
+    const bashCommands = result.toolCalls
+      .filter(t => t.tool === 'Bash')
+      .map(t => String(t.input?.command ?? ''));
+    const droveAside = bashCommands.some(c => /aside repl/.test(c));
+    const sentinelPrinted = /GSTACK_STEP_OK/.test(toolOutput(result));
+    const usedBrowseBin = bashCommands.some(c => /browse\/dist\/browse|\$B /.test(c));
+
     recordE2E(evalCollector, '/design-review fix', 'Design Review E2E', result, {
-      passed: ['success', 'error_max_turns'].includes(result.exitReason),
+      passed: ['success', 'error_max_turns'].includes(result.exitReason) && droveAside && sentinelPrinted && !usedBrowseBin,
     });
 
     // Accept error_max_turns — the fix loop is complex
     expect(['success', 'error_max_turns']).toContain(result.exitReason);
+    expect(droveAside).toBe(true);
+    expect(sentinelPrinted).toBe(true);
+    expect(usedBrowseBin).toBe(false);
 
     // Report and commits are best-effort — log what happened
     if (reportExists) {
@@ -616,7 +694,7 @@ Review the site at ${serverUrl}. Use --quick mode. Skip any AskUserQuestion call
       console.warn('No design-audit.md generated');
     }
     console.log(`Design fix commits: ${designFixCommits.length}`);
-  }, 420_000);
+  }, CAPTURE_LONG_MS);
 });
 
 // Module-level afterAll — finalize eval collector after all tests complete
