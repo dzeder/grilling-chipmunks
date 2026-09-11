@@ -77,7 +77,7 @@ pydantic>=2.13.5
 simple-salesforce>=1.12.10
 
 # AWS
-boto3>=1.43.85
+boto3>=1.43.89
 
 # Documents
 python-docx>=1.2.0
