@@ -48,7 +48,7 @@ import {
 import { atomicWriteSync } from "./fs-atomic";
 import { homedir } from "os";
 import { dirname, join } from "path";
-import { buildGbrainEnv, gbrainConfigDir, NEEDS_SHELL_ON_WINDOWS } from "./gbrain-exec";
+import { buildGbrainEnv, gbrainConfigDir, isExecTimeout, NEEDS_SHELL_ON_WINDOWS } from "./gbrain-exec";
 
 export type LocalEngineStatus =
   | "ok"
@@ -142,16 +142,33 @@ function gbrainConfigPath(env?: NodeJS.ProcessEnv): string {
  * broken-db / broken-config / engine-locked, silently suppressing brain
  * blocks for a fully-working remote brain.
  *
- * Evidence read: ~/.claude.json MCP registrations — user scope AND project
- * scope (project-scoped registrations are otherwise invisible, #2499).
+ * Evidence read: ~/.claude.json MCP registrations — user scope plus the
+ * cwd's NEAREST-ANCESTOR project scope only (#2499 made project scope
+ * visible; the per-project scoping fixes the machine-wide bleed where ONE
+ * project's remote registration reclassified broken local engines as
+ * thin-client for EVERY cwd). Ancestor matching mirrors the inline jq
+ * resolution in bin/gstack-skill-start (the single bash copy of the #2499
+ * resolution, moved there in token-reduction Phase 1): cwd == key or
+ * cwd startswith key + separator, longest matching key that actually
+ * carries a gbrain entry wins (a nested project WITHOUT gbrain doesn't
+ * shadow its parent's registration).
+ *
+ * Same-name conflicts resolve project-local over user scope — Claude
+ * Code's own precedence, verified empirically against claude 2.1.233 with
+ * a hermetic fake $HOME: `claude mcp get gbrain` reports "Scope: Local
+ * config" and the project-local URL when both scopes define the name.
+ *
  * File-read only: no subprocess, no network (a classifier network probe is
- * the #1964 pathology). Returns true only when a gbrain registration is
- * remote-HTTP AND no gbrain registration is local-stdio — a local-stdio
- * entry means the user runs a local engine (possibly alongside a remote one,
- * e.g. federation), and local-engine statuses like engine-locked must keep
- * their precise meaning there.
+ * the #1964 pathology). Returns true only when a visible gbrain
+ * registration is remote-HTTP AND no visible gbrain registration is
+ * local-stdio — a local-stdio entry means the user runs a local engine
+ * (possibly alongside a remote one, e.g. federation), and local-engine
+ * statuses like engine-locked must keep their precise meaning there.
  */
-export function hasRemoteOnlyGbrainMcp(env?: NodeJS.ProcessEnv): boolean {
+export function hasRemoteOnlyGbrainMcp(
+  env?: NodeJS.ProcessEnv,
+  cwd: string = process.cwd(),
+): boolean {
   interface McpEntry {
     type?: string;
     transport?: string;
@@ -174,30 +191,52 @@ export function hasRemoteOnlyGbrainMcp(env?: NodeJS.ProcessEnv): boolean {
     if (entry.command) return "local";
     return null;
   };
-  let sawRemote = false;
-  let sawLocal = false;
-  const scan = (servers: unknown): void => {
-    if (!servers || typeof servers !== "object") return;
+  /** Extract the gbrain-relevant entries from an mcpServers object. */
+  const gbrainEntries = (servers: unknown): Record<string, McpEntry> => {
+    const out: Record<string, McpEntry> = {};
+    if (!servers || typeof servers !== "object") return out;
     for (const [name, entry] of Object.entries(servers as Record<string, McpEntry>)) {
       if (!entry || typeof entry !== "object") continue;
       const isGbrainName = /^gbrain([-_][\w-]*)?$/.test(name);
       const cmdMentionsGbrain =
         typeof entry.command === "string" && /\bgbrain\b/.test(entry.command);
       if (!isGbrainName && !cmdMentionsGbrain) continue;
-      const c = classify(entry);
-      if (c === "remote") sawRemote = true;
-      if (c === "local") sawLocal = true;
+      out[name] = entry;
     }
+    return out;
   };
   const root = cj as {
     mcpServers?: unknown;
     projects?: Record<string, { mcpServers?: unknown }>;
   } | null;
-  scan(root?.mcpServers);
+  const userGbrain = gbrainEntries(root?.mcpServers);
+  // Nearest-ancestor project entry for cwd that carries a gbrain server.
+  // Path-boundary-aware (/a/repo never matches /a/repo2); both separators
+  // accepted so Windows project keys resolve.
+  let projectGbrain: Record<string, McpEntry> = {};
   if (root?.projects && typeof root.projects === "object") {
-    for (const proj of Object.values(root.projects)) {
-      if (proj && typeof proj === "object") scan(proj.mcpServers);
+    let bestKey: string | null = null;
+    for (const [key, proj] of Object.entries(root.projects)) {
+      if (!proj || typeof proj !== "object") continue;
+      const entries = gbrainEntries((proj as { mcpServers?: unknown }).mcpServers);
+      if (Object.keys(entries).length === 0) continue;
+      const isAncestor =
+        cwd === key || cwd.startsWith(`${key}/`) || cwd.startsWith(`${key}\\`);
+      if (!isAncestor) continue;
+      if (bestKey === null || key.length > bestKey.length) {
+        bestKey = key;
+        projectGbrain = entries;
+      }
     }
+  }
+  // Effective view for this cwd: project-local shadows user scope per name.
+  const effective: Record<string, McpEntry> = { ...userGbrain, ...projectGbrain };
+  let sawRemote = false;
+  let sawLocal = false;
+  for (const entry of Object.values(effective)) {
+    const c = classify(entry);
+    if (c === "remote") sawRemote = true;
+    if (c === "local") sawLocal = true;
   }
   return sawRemote && !sawLocal;
 }
@@ -220,30 +259,56 @@ function hashPath(p: string): string {
  * Memoized per-process keyed on PATH so detect's call and the classifier's
  * call share one fork-exec (~200ms saved per skill preamble).
  */
-const _gbrainBinCache = new Map<string, string | null>();
+// #2716: the probe must tell "gbrain isn't installed" apart from "gbrain is
+// installed but the --version round trip blew the budget" (bun-shim installs
+// on a loaded POSIX box take >2s). Both used to collapse into `null` → the
+// classifier said `no-cli`, which the `--is-ok` whitelist does NOT forgive —
+// so a slow box silently lost every brain-aware block. The cache stores the
+// discriminated result (per-process, same lifetime the old null had).
+export interface GbrainBinProbe {
+  bin: string | null;
+  timedOut: boolean;
+}
+// Caching a TIMEOUT for process lifetime is deliberate: the memo exists to
+// dedupe the ~3 probes a single skill preamble fires, and preamble processes
+// are short-lived — a retry next invocation gets a fresh probe anyway.
+const _gbrainBinCache = new Map<string, GbrainBinProbe>();
 // On Windows the shim is `gbrain.cmd` → `bun run cli.ts`; a cold spawn can
 // exceed 2s, and a false negative here poisons the 60s status cache with
 // "no-cli". Give the shim headroom; POSIX keeps the tight timeout.
+// `GSTACK_GBRAIN_VERSION_PROBE_TIMEOUT_MS` overrides for tests (same
+// precedent as GSTACK_GBRAIN_PROBE_TIMEOUT_MS on the sources probe).
 const VERSION_PROBE_TIMEOUT_MS = NEEDS_SHELL_ON_WINDOWS ? 10_000 : 2_000;
-export function resolveGbrainBin(env?: NodeJS.ProcessEnv): string | null {
+function versionProbeTimeoutMs(env?: NodeJS.ProcessEnv): number {
+  const raw = (env ?? process.env).GSTACK_GBRAIN_VERSION_PROBE_TIMEOUT_MS;
+  const n = raw ? Number(raw) : NaN;
+  return Number.isFinite(n) && n > 0 ? n : VERSION_PROBE_TIMEOUT_MS;
+}
+export function probeGbrainBin(env?: NodeJS.ProcessEnv): GbrainBinProbe {
   const e = env ?? process.env;
   const key = e.PATH || "";
   if (_gbrainBinCache.has(key)) return _gbrainBinCache.get(key)!;
-  let result: string | null = null;
+  let result: GbrainBinProbe = { bin: null, timedOut: false };
   try {
     execFileSync("gbrain", ["--version"], {
       encoding: "utf-8",
-      timeout: VERSION_PROBE_TIMEOUT_MS,
+      timeout: versionProbeTimeoutMs(e),
       stdio: ["ignore", "ignore", "ignore"],
       env: e,
       shell: NEEDS_SHELL_ON_WINDOWS, // #1731: gbrain is a .cmd shim on Windows
     });
-    result = "gbrain";
-  } catch {
-    result = null;
+    result = { bin: "gbrain", timedOut: false };
+  } catch (err) {
+    // Same discrimination the `sources list` probe below already uses: a
+    // killed/expired spawn is a TIMEOUT (binary present but slow), anything
+    // else (ENOENT, non-zero exit) is genuinely no CLI.
+    result = { bin: null, timedOut: isExecTimeout(err) };
   }
   _gbrainBinCache.set(key, result);
   return result;
+}
+export function resolveGbrainBin(env?: NodeJS.ProcessEnv): string | null {
+  return probeGbrainBin(env).bin;
 }
 
 /** Memoized per-process. */
@@ -256,7 +321,7 @@ export function readGbrainVersion(env?: NodeJS.ProcessEnv): string {
   try {
     const out = execFileSync("gbrain", ["--version"], {
       encoding: "utf-8",
-      timeout: VERSION_PROBE_TIMEOUT_MS,
+      timeout: versionProbeTimeoutMs(e),
       stdio: ["ignore", "pipe", "ignore"],
       env: e,
       shell: NEEDS_SHELL_ON_WINDOWS, // #1731: gbrain is a .cmd shim on Windows
@@ -346,9 +411,12 @@ function writeCache(status: LocalEngineStatus, key: CacheEntry["key"]): void {
  * error messages, classifier returns broken-config defensively (codex #8).
  */
 function freshClassify(env?: NodeJS.ProcessEnv): LocalEngineStatus {
-  // 1. CLI on PATH?
-  const gbrainBin = resolveGbrainBin(env);
-  if (!gbrainBin) return "no-cli";
+  // 1. CLI on PATH? A probe that TIMED OUT means the binary exists but the
+  // box is slow (#2716: bun-shim installs) — that's "timeout", which the
+  // `--is-ok` whitelist forgives, never "no-cli", which it doesn't.
+  const probe = probeGbrainBin(env);
+  if (!probe.bin) return probe.timedOut ? "timeout" : "no-cli";
+  const gbrainBin = probe.bin;
 
   // 2. Config file present? A bearer thin client (#2520) may never have run
   // a local init, so config.json can be absent while the remote-HTTP MCP
@@ -425,10 +493,21 @@ function freshClassify(env?: NodeJS.ProcessEnv): LocalEngineStatus {
         return configuredEngine(env) === "pglite" ? "engine-locked" : "broken-db";
       }
 
+      // gbrain >= 0.43 refuses the same held-lock case with exit 1 and its
+      // own message: "GBrain's local database is already open through `gbrain
+      // serve` (MCP, PID N). This brain uses PGLite, ...". That string matches
+      // none of the branches above, so without this check it falls through to
+      // the defensive broken-config default — whose remediation tells the user
+      // to move a perfectly healthy config.json aside and re-init the engine
+      // (#2194 follow-up).
+      if (stderr.includes("already open through")) {
+        return configuredEngine(env) === "pglite" ? "engine-locked" : "broken-db";
+      }
+
       // Probe killed by the timeout with no recognized error: the engine is
       // most likely healthy but slow (cold pooler connections measured at
       // 6.9-10.7s in #1964). Don't tell the user their config is malformed.
-      if (e.killed === true || e.signal === "SIGTERM" || e.code === "ETIMEDOUT") {
+      if (isExecTimeout(e)) {
         return "timeout";
       }
 
