@@ -63,6 +63,7 @@ export function isDisplayFree(displayNum: number): boolean {
   // the X socket/lock files, the same signal X servers themselves use.
   try {
     const result = Bun.spawnSync(['xdpyinfo', '-display', `:${displayNum}`], {
+    windowsHide: true,
       stdout: 'ignore', stderr: 'ignore', timeout: 2000,
     });
     return result.exitCode !== 0;
@@ -94,11 +95,20 @@ export function pickFreeDisplay(
  */
 export function readPidStartTime(pid: number): string {
   if (!isProcessAlive(pid)) return '';
-  const result = Bun.spawnSync(['ps', '-p', String(pid), '-o', 'lstart='], {
-    stdout: 'pipe', stderr: 'pipe', timeout: 2000,
-  });
-  if (result.exitCode !== 0) return '';
-  return result.stdout.toString().trim();
+  try {
+    const result = Bun.spawnSync(['ps', '-p', String(pid), '-o', 'lstart='], {
+      windowsHide: true,
+      stdout: 'pipe', stderr: 'pipe', timeout: 2000,
+    });
+    if (result.exitCode !== 0) return '';
+    return result.stdout.toString().trim();
+  } catch {
+    // Bun.spawnSync THROWS when the executable is missing (Windows shells
+    // without an MSYS `ps`). This function's contract is "empty string if
+    // ps fails" — a missing ps must not abort the caller (browser-manager
+    // now calls this on the universal launch path, #2709).
+    return '';
+  }
 }
 
 /**
@@ -109,7 +119,20 @@ export function readPidCmdline(pid: number): string {
   try {
     return fs.readFileSync(`/proc/${pid}/cmdline`, 'utf-8').replace(/\0/g, ' ').trim();
   } catch {
-    return '';
+    // No /proc on darwin — the platform #2709's reap actually targets. Fall
+    // back to ps (same pattern as readPidStartTime above); without this the
+    // reap's cmdline identity gate always saw '' on macOS and the reap was
+    // a structural no-op exactly where the spinning-GPU orphan lives.
+    try {
+      const result = Bun.spawnSync(['ps', '-p', String(pid), '-o', 'command='], {
+        windowsHide: true,
+        stdout: 'pipe', stderr: 'pipe', timeout: 2000,
+      });
+      if (result.exitCode !== 0) return '';
+      return result.stdout.toString().trim();
+    } catch {
+      return '';
+    }
   }
 }
 
@@ -159,6 +182,7 @@ export async function spawnXvfb(displayNum: number): Promise<XvfbHandle> {
   // Spawn detached: Xvfb's lifetime is tied to whether we've explicitly
   // killed it via the handle's close() method, not to the parent process.
   const proc = Bun.spawn(['Xvfb', display, '-screen', '0', '1920x1080x24', '-ac'], {
+    windowsHide: true,
     stdio: ['ignore', 'ignore', 'ignore'],
   });
   proc.unref();
