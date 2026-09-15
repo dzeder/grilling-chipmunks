@@ -92,7 +92,7 @@ When a user runs `pair-agent --client`, the daemon starts an ngrok tunnel so a r
 The fix is **two HTTP listeners**, not one:
 
 - **Local listener** (`127.0.0.1:LOCAL_PORT`) — always bound. Serves token bootstrap (`POST /extension-token`, released only to the pinned extension identity), `/health` (liveness/status only — never a token), `/cookie-picker`, `/inspector/*`, `/welcome`, `/refs`, the sidebar-agent API, and the full command surface. Never forwarded.
-- **Tunnel listener** (`127.0.0.1:TUNNEL_PORT`) — bound lazily on `/tunnel/start`, torn down on `/tunnel/stop`. Serves a locked allowlist: `/connect` (pairing ceremony, unauth + rate-limited), `/command` (scoped tokens only, further restricted to a browser-driving command allowlist), and `/sidebar-chat`. Everything else 404s.
+- **Tunnel listener** (`127.0.0.1:TUNNEL_PORT`) — bound lazily on `/tunnel/start`, torn down on `/tunnel/stop`. Serves a locked allowlist: `/connect` (pairing ceremony, unauth + rate-limited) and `/command` (scoped tokens only, further restricted to a browser-driving command allowlist). Everything else 404s.
 
 ngrok forwards only the tunnel port. The security property comes from **physical port separation**: a tunnel caller cannot reach `/health` or `/cookie-picker` because those paths don't exist on that TCP socket. Header inference (check `x-forwarded-for`, check origin) is unreliable (ngrok header behavior changes; local proxies can add these headers); socket separation isn't.
 
@@ -103,7 +103,6 @@ ngrok forwards only the tunnel port. The security property comes from **physical
 | `GET /connect` | public (`{alive:true}`) | public (`{alive:true}`) | Probe path for tunnel liveness |
 | `POST /connect` | public (rate-limited 300/min) | public (rate-limited) | Setup-key exchange for pair-agent |
 | `POST /command` | auth (Bearer root OR scoped) | auth (scoped only, allowlisted commands) | Root token on tunnel = 403 |
-| `POST /sidebar-chat` | auth | auth | Lets remote agent post into local sidebar |
 | `POST /pair` | root-only | 404 | Pairing mint — local operator action |
 | `POST /tunnel/{start,stop}` | root-only | 404 | Daemon configuration |
 | `POST /token`, `DELETE /token/:id` | root-only | 404 | Scoped token mint/revoke |
@@ -153,7 +152,7 @@ Every enumerated gstack-initiated off-machine sink writes a hash-chained, tamper
 
 Failure polarity is per-class and pinned by tests. Sensitive sinks are fail-closed: brain-sync pushes, memory-ingest, gbrain-sync, telemetry, ngrok tunnel starts, mcp-verify, and supabase-provision refuse to send if the receipt can't be written (each refusal prints problem + cause + fix). User-facing sinks fail open with a stderr warning — the design binary's OpenAI calls, update-check, the read-only dashboards, and git-class receipts proceed even when the receipt write failed, so a fail-open send can go unrecorded (warned, by design). The new-sink scanner in `test/egress-receipt-wiring.test.ts` fails CI when an off-machine sink ships unwired; its only exemptions are enumerated with reasons (user-directed page fetches, reachability probes, install-doc strings, skill prose).
 
-Inspect the ledger with `bin/gstack-egress`: `list` (what gstack attempted to send), `verify` (recompute the chain, exit 3 on tamper), `grants` (the standing consent settings and how to revoke each). Threat model: the ledger is forensic observability of ATTEMPTED egress — it records what gstack tried to send so accidents are auditable; it is not an exfiltration control.
+Inspect the ledger with `bin/gstack-egress`: `list` (what gstack attempted to send), `verify` (recompute the chain, exit 3 on tamper), `grants` (the standing consent settings and how to revoke each). `verify` detects in-place edits, reordering, and mid-chain deletion; it does NOT detect tail-truncation, whole-file re-fabrication, or deletion of the ledger itself — guarding against the same-machine, same-user actor who owns the file is out of scope for a forensic log. Threat model: the ledger is forensic observability of ATTEMPTED egress — it records what gstack tried to send so accidents are auditable; it is not an exfiltration control.
 
 ### Unicode sanitization at server egress (v1.38.0.0)
 
@@ -297,10 +296,10 @@ This is structurally sound — if a command exists in code, it appears in docs. 
 
 ### The preamble
 
-Every skill starts with a `{{PREAMBLE}}` block that runs before the skill's own logic. It handles five things in a single bash command:
+Every skill starts with a `{{PREAMBLE}}` block that runs before the skill's own logic. Since v1.71.0.0 the rendered block is a thin fence that invokes `bin/gstack-skill-start` (the consolidated preamble runtime — it replaced ~18KB of inline bash per tier-2+ skill) and reads back `KEY: value` STATUS lines that the skill prose branches on; `bin/gstack-skill-end` logs telemetry at skill end. One-time onboarding and consent text is emitted as session-bound `GSTACK_INSTRUCTION` blocks only when a runtime gate actually fires, instead of rendering in every skill. The startup still handles five things:
 
 1. **Update check** — calls `gstack-update-check`, reports if an upgrade is available.
-2. **Session tracking** — touches `~/.gstack/sessions/$PPID` and counts active sessions (files modified in the last 2 hours). When 3+ sessions are running, all skills enter "ELI16 mode" — every question re-grounds the user on context because they're juggling windows.
+2. **Session tracking** — touches `~/.gstack/sessions/<parent-pid>` and prunes entries older than 2 hours, so concurrent-session state is observable on disk.
 3. **Operational self-improvement** — at the end of every skill session, the agent reflects on failures (CLI errors, wrong approaches, project quirks) and logs operational learnings to the project's JSONL file for future sessions.
 4. **AskUserQuestion format** — universal format: context, question, `RECOMMENDATION: Choose X because ___`, lettered options. Consistent across all skills.
 5. **Search Before Building** — before building infrastructure or unfamiliar patterns, search first. Three layers of knowledge: tried-and-true (Layer 1), new-and-popular (Layer 2), first-principles (Layer 3). When first-principles reasoning reveals conventional wisdom is wrong, the agent names the "eureka moment" and logs it. See `ETHOS.md` for the full builder philosophy.
@@ -415,7 +414,7 @@ The `parseNDJSON()` function is pure — no I/O, no side effects — making it i
 
 **Machine-readable diagnostics:** Each test result includes `exit_reason` (success, timeout, error_max_turns, error_api, exit_code_N), `timeout_at_turn`, and `last_tool_call`. This enables `jq` queries like:
 ```bash
-jq '.tests[] | select(.exit_reason == "timeout") | .last_tool_call' ~/.gstack-dev/evals/_partial-e2e.json
+jq '.tests[] | select(.exit_reason == "timeout") | .last_tool_call' ~/.gstack/projects/<slug>/evals/_partial-e2e.json
 ```
 
 ### Eval persistence (`test/helpers/eval-store.ts`)
@@ -425,7 +424,7 @@ The `EvalCollector` accumulates test results and writes them in two ways:
 1. **Incremental:** `savePartial()` writes `_partial-e2e.json` after each test (atomic: write `.tmp`, `fs.renameSync`). Survives kills.
 2. **Final:** `finalize()` writes a timestamped eval file (e.g. `e2e-20260314-143022.json`). The partial file is never cleaned up — it persists alongside the final file for observability.
 
-`eval:compare` diffs two eval runs. `eval:summary` aggregates stats across all runs in `~/.gstack-dev/evals/`. Both are shard-aware (v1.63.0.0): the sharded paid runner (`scripts/test-paid-shards.ts`, run via `test:gate:sharded` / `test:periodic:sharded` — the `eval:bg:gate` / `eval:bg:periodic` scripts now point at these) gives each shard's collector its own directory at `<evalDir>/shards/<slug>/` through the `GSTACK_EVAL_DIR` env var (honored by the `EvalCollector` constructor), and `eval:list` / `eval:compare` / `eval:summary` scan one level of `shards/<slug>/` subdirectories. Baseline lookups exclude `_partial` accumulators (`isPartialEval` / `findLatestFinalizedRun` in `eval-store.ts`), so auto-comparison never uses the current run's own partial file as its baseline.
+`eval:compare` diffs two eval runs. `eval:summary` aggregates stats across all runs in `~/.gstack/projects/<slug>/evals/` (legacy fallback `~/.gstack-dev/evals/`). Both are shard-aware (v1.63.0.0): the sharded paid runner (`scripts/test-paid-shards.ts`, run via `test:gate:sharded` / `test:periodic:sharded` — the `eval:bg:gate` / `eval:bg:periodic` scripts now point at these) gives each shard's collector its own directory at `<evalDir>/shards/<slug>/` through the `GSTACK_EVAL_DIR` env var (honored by the `EvalCollector` constructor), and `eval:list` / `eval:compare` / `eval:summary` scan one level of `shards/<slug>/` subdirectories (`eval:flake-rank` reads the same tree recursively, plus the free-suite flake ledger). Baseline lookups exclude `_partial` accumulators (`isPartialEval` / `findLatestFinalizedRun` in `eval-store.ts`), so auto-comparison never uses the current run's own partial file as its baseline.
 
 ### Test tiers
 

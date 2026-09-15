@@ -3,6 +3,9 @@
 #
 # Usage:
 #   gstack-config get <key>          — read a config value (falls back to DEFAULTS)
+#   gstack-config has <key>          — exit 0 iff the key is literally present in the
+#                                      config file (get returns DEFAULTS for absent keys,
+#                                      so callers that need provenance use this instead)
 #   gstack-config set <key> <value>  — write a config value
 #   gstack-config list               — show all config (values + defaults)
 #   gstack-config defaults           — show just the defaults table
@@ -161,7 +164,27 @@ lookup_default() {
     brain_trust_policy*) echo "unset" ;;
     salience_allowlist) echo "" ;;
     user_slug_at_*) echo "" ;;
-    *) echo "" ;;
+    # Read by skill preambles but missing from this table, so they fell through
+    # to the catch-all and came back "" with exit 0. Values below are the ones
+    # the callers already assume in their own `|| echo "<default>"` fallback.
+    question_tuning) echo "false" ;;
+    team_mode) echo "false" ;;
+    transcript_ingest_mode) echo "off" ;;
+    # repo_mode: EMPTY is load-bearing — gstack-repo-mode treats any non-empty
+    # answer as a user override and skips its own classification entirely, so
+    # a synthesized "unknown" default turns the classifier into dead code.
+    # Empty + exit 0 = "no override set, go classify".
+    repo_mode) echo "" ;;
+    # Unknown key: exit non-zero instead of printing "". The fallback pattern
+    # the preambles use,
+    #   VAR=$(gstack-config get <key> 2>/dev/null || echo "<default>")
+    # only fires on a non-zero exit, so a catch-all echoing "" with exit 0 left
+    # VAR empty and the written default unreachable.
+    # Deliberately *only* the unknown-key path: the keys above whose default is
+    # intentionally empty (cross_project_learnings, salience_allowlist,
+    # user_slug_at_*, redact_repo_visibility) keep exit 0, because "" is their
+    # real answer and their callers rely on it.
+    *) return 1 ;;
   esac
 }
 
@@ -170,8 +193,16 @@ lookup_default() {
 # ──────────────────────────────────────────────────────────────────────
 
 # Compute sha8 of a string. Used for endpoint hashing.
+# shasum is macOS/perl; most Linux distros ship only coreutils sha256sum —
+# resolve whichever exists (same fallback chain as the codex-probe timeout
+# wrapper). Without this, any Linux user with a git email hit exit 127 in
+# resolve-user-slug's Layer-3 fallback.
 sha8_of() {
-  printf '%s' "$1" | shasum -a 256 | cut -c1-8
+  if command -v sha256sum >/dev/null 2>&1; then
+    printf '%s' "$1" | sha256sum | cut -c1-8
+  else
+    printf '%s' "$1" | shasum -a 256 | cut -c1-8
+  fi
 }
 
 # Detect the active brain endpoint hash. Reads ~/.claude.json for the gbrain
@@ -205,7 +236,11 @@ endpoint_hash_with_collision_check() {
   _claude_json="$HOME/.claude.json"
   if [ -n "$_matching" ] && [ -f "$_claude_json" ] && command -v jq >/dev/null 2>&1; then
     _url=$(jq -r '.mcpServers.gbrain.url // .mcpServers.gbrain.transport.url // empty' "$_claude_json" 2>/dev/null)
-    _sha16=$(printf '%s' "$_url" | shasum -a 256 | cut -c1-16)
+    if command -v sha256sum >/dev/null 2>&1; then
+      _sha16=$(printf '%s' "$_url" | sha256sum | cut -c1-16)
+    else
+      _sha16=$(printf '%s' "$_url" | shasum -a 256 | cut -c1-16)
+    fi
     # Look for any sha16-namespaced key that conflicts. If a stored sha16 exists
     # and differs from current sha16, that's the collision evidence; emit sha16.
     _stored16=$(grep -E "^(brain_trust_policy|user_slug_at)@${_sha16}" "$CONFIG_FILE" 2>/dev/null | head -1 || true)
@@ -297,9 +332,22 @@ case "${1:-}" in
     fi
     VALUE=$(read_config_value "$KEY" || true)
     if [ -z "$VALUE" ]; then
-      VALUE=$(lookup_default "$KEY")
+      # lookup_default exits non-zero for a key it does not know. Propagate
+      # that, so the caller's `|| echo "<default>"` can fire. A known key whose
+      # default is empty still exits 0 and prints "".
+      if ! VALUE=$(lookup_default "$KEY"); then
+        exit 1
+      fi
     fi
     printf '%s' "$VALUE"
+    ;;
+  has)
+    KEY="${2:?Usage: gstack-config has <key>}"
+    if ! printf '%s' "$KEY" | LC_ALL=C grep -qE '^[a-zA-Z0-9_]+(@[a-zA-Z0-9]+)?$'; then
+      echo "Error: key must contain only alphanumeric characters, underscores, and an optional @<endpoint-id> suffix" >&2
+      exit 1
+    fi
+    grep -qE "^${KEY}:" "$CONFIG_FILE" 2>/dev/null
     ;;
   set)
     KEY="${2:?Usage: gstack-config set <key> <value>}"
