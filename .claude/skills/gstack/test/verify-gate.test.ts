@@ -349,7 +349,19 @@ describe('opt-in contract (adapted from the fork: NOT registered by default)', (
   const gate = fs.readFileSync(GATE, 'utf-8');
 
   test('./setup does NOT register the gate — a Stop hook running the verify command after every turn is opt-in', () => {
-    expect(setup).not.toContain('verify-gate');
+    // The only permitted mentions are comments and the --no-team sweep
+    // EXCLUSION (protecting a user-registered gate from team-mode teardown).
+    // A registration (add-event) referencing the gate stays banned.
+    const mentions = setup.split('\n').filter((l) => l.includes('verify-gate'));
+    expect(mentions.length).toBeGreaterThan(0);   // the exclusion itself is pinned
+    for (const line of mentions) {
+      const t = line.trim();
+      // The exclusion list may name other user-registered opt-ins beside
+      // verify-gate (gstack-memorable); it must still start with verify-gate.
+      const allowed = t.startsWith('#') || /GSTACK_SWEEP_EXCLUDE_SOURCES="verify-gate(,[a-z-]+)*"/.test(t);
+      expect(allowed).toBe(true);
+      expect(t).not.toContain('add-event');
+    }
   });
 
   test('the bin documents its own registration and removal commands', () => {

@@ -132,6 +132,58 @@ if [ -d "$STATE_DIR/projects" ]; then
   done < <(find "$STATE_DIR/projects" -name browse.json -path '*/.gstack/*' 2>/dev/null || true)
 fi
 
+# ─── Remove gstack hooks from Claude Code settings ──────────
+# MUST run BEFORE any install-root deletion: SETTINGS_HOOK resolves inside the
+# install being removed — in a real global uninstall, running this after
+# `rm -rf ~/.claude/skills/gstack` silently no-ops and orphans every hook.
+SETTINGS_HOOK="$(dirname "$0")/gstack-settings-hook"
+SESSION_UPDATE="$(dirname "$0")/gstack-session-update"
+GSTACK_CONFIG="$(dirname "$0")/gstack-config"
+if [ -x "$SETTINGS_HOOK" ]; then
+  "$SETTINGS_HOOK" remove "$SESSION_UPDATE" && REMOVED+=("SessionStart hook") || true
+  # Cathedral T8 cleanup: also remove plan-tune PreToolUse + PostToolUse hooks.
+  if "$SETTINGS_HOOK" remove-source --source plan-tune-cathedral | grep -q "removed [1-9]"; then
+    REMOVED+=("plan-tune cathedral hooks")
+  fi
+  # AskUserQuestion error-fallback hook (registered by setup; previously never
+  # torn down).
+  if "$SETTINGS_HOOK" remove-source --source auq-error-fallback | grep -q "removed [1-9]"; then
+    REMOVED+=("AskUserQuestion error-fallback hook")
+  fi
+  # Timeline Stop hook (#2553).
+  if "$SETTINGS_HOOK" remove-source --source gstack-timeline-stop | grep -q "removed [1-9]"; then
+    REMOVED+=("timeline Stop hook")
+  fi
+  # Verification stop hook (opt-in via README; user-registered, ours to sweep).
+  if "$SETTINGS_HOOK" remove-source --source verify-gate | grep -q "removed [1-9]"; then
+    REMOVED+=("verification Stop hook")
+  fi
+  # Memorable recall bridge (opt-in via bin/gstack-memorable; user-registered,
+  # ours to sweep). gstack removes only its own hook entry: the vendor's
+  # consent, if the user granted it, is theirs (`memorable disable|forget`).
+  if "$SETTINGS_HOOK" remove-source --source gstack-memorable | grep -q "removed [1-9]"; then
+    REMOVED+=("Memorable UserPromptSubmit hook (Memorable's own consent is unchanged: memorable disable | memorable forget)")
+  fi
+  # Identity sweep for untagged strays (Claude Code strips _gstack_source
+  # tags; pre-v1.67 setups baked worktree paths). Removes every gstack-owned
+  # hook item, live or dead — the binaries they point at are being deleted.
+  if "$SETTINGS_HOOK" prune-stale --all | grep -q "removed [1-9]"; then
+    REMOVED+=("stray gstack hook entries")
+  fi
+fi
+# The Memorable consent key must never outlive the hook, kept state or not, and
+# not only when the hook manager is present: gstack-config resolves its root
+# through GSTACK_STATE_ROOT/GSTACK_HOME, which can be a different directory
+# from the STATE_DIR removed below. Only flipped when it is actually on, so no
+# config file is created just to say off; a failed flip is named, not hidden.
+if [ -x "$GSTACK_CONFIG" ] && [ "$("$GSTACK_CONFIG" get memorable_recall 2>/dev/null)" = "on" ]; then
+  if "$GSTACK_CONFIG" set memorable_recall off >/dev/null 2>&1; then
+    REMOVED+=("memorable_recall consent (set off)")
+  else
+    echo "WARNING: could not set memorable_recall off; run: $GSTACK_CONFIG set memorable_recall off" >&2
+  fi
+fi
+
 # ─── Remove global Claude skills ────────────────────────────
 CLAUDE_SKILLS="$HOME/.claude/skills"
 
@@ -331,21 +383,6 @@ if [ -n "$_GIT_ROOT" ]; then
   if [ -d "$_GIT_ROOT/.gstack-worktrees" ]; then
     rm -rf "$_GIT_ROOT/.gstack-worktrees"
     REMOVED+=("$_GIT_ROOT/.gstack-worktrees/")
-  fi
-fi
-
-# ─── Remove SessionStart hook from Claude Code settings ─────
-SETTINGS_HOOK="$(dirname "$0")/gstack-settings-hook"
-SESSION_UPDATE="$(dirname "$0")/gstack-session-update"
-if [ -x "$SETTINGS_HOOK" ]; then
-  "$SETTINGS_HOOK" remove "$SESSION_UPDATE" 2>/dev/null && REMOVED+=("SessionStart hook") || true
-  # Cathedral T8 cleanup: also remove plan-tune PreToolUse + PostToolUse hooks.
-  if "$SETTINGS_HOOK" remove-source --source plan-tune-cathedral 2>/dev/null | grep -q "removed [1-9]"; then
-    REMOVED+=("plan-tune cathedral hooks")
-  fi
-  # Timeline Stop hook (#2553).
-  if "$SETTINGS_HOOK" remove-source --source gstack-timeline-stop 2>/dev/null | grep -q "removed [1-9]"; then
-    REMOVED+=("timeline Stop hook")
   fi
 fi
 
