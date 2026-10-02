@@ -96,7 +96,7 @@ python-dotenv>=1.2.3
 tenacity>=9.1.4
 
 # Testing (additional)
-pytest-mock>=3.15.1
+pytest-mock>=3.16.0
 pytest-asyncio>=0.24.0
 openpyxl>=3.1.5
 
