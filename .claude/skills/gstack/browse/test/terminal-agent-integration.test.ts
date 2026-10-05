@@ -18,9 +18,13 @@ import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { GSTACK_EXTENSION_ID } from '../src/extension-id';
 
 const AGENT_SCRIPT = path.join(import.meta.dir, '../src/terminal-agent.ts');
 const BASH = '/bin/bash';
+const EXT_ORIGIN = `chrome-extension://${GSTACK_EXTENSION_ID}`;
+const ENV_EXTENSION_ID = 'a'.repeat(32);
+const FORK_EXTENSION_ID = 'b'.repeat(32);
 
 let stateDir: string;
 let agentProc: any;
@@ -73,6 +77,8 @@ beforeAll(() => {
       BROWSE_STATE_FILE: stateFile,
       BROWSE_SERVER_PORT: '0', // not used in this test
       BROWSE_TERMINAL_BINARY: terminalCli,
+      GSTACK_STATE_ROOT: stateDir,
+      BROWSE_EXTENSION_ID: ENV_EXTENSION_ID,
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
@@ -115,6 +121,50 @@ describe('terminal-agent: /internal/grant', () => {
   });
 });
 
+describe('terminal-agent: /internal/grant and /internal/revoke bearer auth', () => {
+  function post(route: 'grant' | 'revoke', token: string, authorization?: string): Promise<Response> {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (authorization !== undefined) headers.Authorization = authorization;
+    return fetch(`http://127.0.0.1:${agentPort}/internal/${route}`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ token }),
+    });
+  }
+
+  function wsStatus(token: string): Promise<number> {
+    return fetch(`http://127.0.0.1:${agentPort}/ws`, {
+      headers: { 'Origin': EXT_ORIGIN, 'Cookie': `gstack_pty=${token}` },
+    }).then((r) => r.status);
+  }
+
+  for (const route of ['grant', 'revoke'] as const) {
+    test(`${route}: no token → 403, wrong token → 403, valid internal token → 200`, async () => {
+      const target = `auth-matrix-${route}-token-long-enough`;
+      expect((await post(route, target)).status).toBe(403);
+      expect((await post(route, target, 'Bearer wrong-token')).status).toBe(403);
+      expect((await post(route, target, `Bearer ${internalToken}`)).status).toBe(200);
+    });
+  }
+
+  test('an unauthenticated revoke leaves the grant usable; an authenticated revoke removes it', async () => {
+    const token = 'revoke-auth-token-at-least-seventeen';
+    expect((await grantToken(token)).status).toBe(200);
+    expect(await wsStatus(token)).not.toBe(401);
+    expect((await post('revoke', token)).status).toBe(403);
+    expect((await post('revoke', token, 'Bearer wrong-token')).status).toBe(403);
+    expect(await wsStatus(token)).not.toBe(401);
+    expect((await post('revoke', token, `Bearer ${internalToken}`)).status).toBe(200);
+    expect(await wsStatus(token)).toBe(401);
+  });
+
+  test('an unauthenticated grant does not register the token', async () => {
+    const token = 'forged-grant-token-at-least-seventeen';
+    expect((await post('grant', token, 'Bearer wrong-token')).status).toBe(403);
+    expect(await wsStatus(token)).toBe(401);
+  });
+});
+
 describe('terminal-agent: /ws gates', () => {
   test('rejects upgrade attempts without an extension Origin', async () => {
     const resp = await fetch(`http://127.0.0.1:${agentPort}/ws`);
@@ -129,10 +179,34 @@ describe('terminal-agent: /ws gates', () => {
     expect(resp.status).toBe(403);
   });
 
+  function wsOriginStatus(origin: string): Promise<number> {
+    return fetch(`http://127.0.0.1:${agentPort}/ws`, {
+      headers: { Origin: origin, Cookie: 'gstack_pty=never-granted' },
+    }).then((r) => r.status);
+  }
+
+  test('rejects every extension Origin except the pinned one, even BROWSE_EXTENSION_ID from the environment (#1324)', async () => {
+    expect(await wsOriginStatus('chrome-extension://abc123')).toBe(403);
+    expect(await wsOriginStatus(`chrome-extension://${ENV_EXTENSION_ID}`)).toBe(403);
+    expect(await wsOriginStatus(EXT_ORIGIN)).toBe(401);
+  });
+
+  test('gstack-config browse_extension_id replaces the pinned ID for forks', async () => {
+    const config = path.join(stateDir, 'config.yaml');
+    fs.writeFileSync(config, `browse_extension_id: ${FORK_EXTENSION_ID}\n`);
+    try {
+      expect(await wsOriginStatus(`chrome-extension://${FORK_EXTENSION_ID}`)).toBe(401);
+      expect(await wsOriginStatus(EXT_ORIGIN)).toBe(403);
+    } finally {
+      fs.rmSync(config, { force: true });
+    }
+    expect(await wsOriginStatus(EXT_ORIGIN)).toBe(401);
+  });
+
   test('rejects extension-Origin upgrades without a granted cookie', async () => {
     const resp = await fetch(`http://127.0.0.1:${agentPort}/ws`, {
       headers: {
-        'Origin': 'chrome-extension://abc123',
+        'Origin': EXT_ORIGIN,
         'Cookie': 'gstack_pty=never-granted',
       },
     });
@@ -148,7 +222,7 @@ describe('terminal-agent: PTY round-trip via real WebSocket (Cookie auth)', () =
 
     const ws = new WebSocket(`ws://127.0.0.1:${agentPort}/ws`, {
       headers: {
-        'Origin': 'chrome-extension://test-extension-id',
+        'Origin': EXT_ORIGIN,
         'Cookie': `gstack_pty=${cookie}`,
       },
     } as any);
@@ -230,7 +304,7 @@ describe('terminal-agent: PTY round-trip via real WebSocket (Cookie auth)', () =
         'Sec-WebSocket-Version': '13',
         'Sec-WebSocket-Key': handshakeKey,
         'Sec-WebSocket-Protocol': `gstack-pty.${token}`,
-        'Origin': 'chrome-extension://test-extension-id',
+        'Origin': EXT_ORIGIN,
       },
     });
 
@@ -263,7 +337,7 @@ describe('terminal-agent: PTY round-trip via real WebSocket (Cookie auth)', () =
         'Sec-WebSocket-Version: 13\r\n' +
         'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n' +
         `Sec-WebSocket-Protocol: gstack-pty.${token}\r\n` +
-        'Origin: chrome-extension://test-extension-id\r\n' +
+        `Origin: ${EXT_ORIGIN}\r\n` +
         '\r\n';
       let buf = '';
       const socket = require('net').connect(agentPort, '127.0.0.1', () => socket.write(req));
@@ -289,7 +363,7 @@ describe('terminal-agent: PTY round-trip via real WebSocket (Cookie auth)', () =
         'Sec-WebSocket-Version': '13',
         'Sec-WebSocket-Key': 'dGhlIHNhbXBsZSBub25jZQ==',
         'Sec-WebSocket-Protocol': 'gstack-pty.never-granted-token',
-        'Origin': 'chrome-extension://test-extension-id',
+        'Origin': EXT_ORIGIN,
       },
     });
     expect(resp.status).toBe(401);
@@ -301,7 +375,7 @@ describe('terminal-agent: PTY round-trip via real WebSocket (Cookie auth)', () =
 
     const ws = new WebSocket(`ws://127.0.0.1:${agentPort}/ws`, {
       headers: {
-        'Origin': 'chrome-extension://test-extension-id',
+        'Origin': EXT_ORIGIN,
         'Cookie': `gstack_pty=${cookie}`,
       },
     } as any);
@@ -349,7 +423,7 @@ describe('terminal-agent: owned PTY completion and restart', () => {
     const granted = await internal('grant', { token, sessionId });
     expect(granted.status).toBe(200);
     const ws = new WebSocket(`ws://127.0.0.1:${agentPort}/ws`, {
-      headers: { Origin: 'chrome-extension://test-extension-id', Cookie: `gstack_pty=${token}` },
+      headers: { Origin: EXT_ORIGIN, Cookie: `gstack_pty=${token}` },
     } as any);
     const events: Array<{ type: string; [key: string]: any }> = [];
     let output = '';
@@ -428,7 +502,7 @@ describe('terminal-agent: owned PTY completion and restart', () => {
       expect(old.closed()).toBe(1000);
       expect(replacement.closed()).toBeNull();
       const revoked = await fetch(`http://127.0.0.1:${agentPort}/ws`, {
-        headers: { Origin: 'chrome-extension://test-extension-id', Cookie: `gstack_pty=${oldToken}` },
+        headers: { Origin: EXT_ORIGIN, Cookie: `gstack_pty=${oldToken}` },
       });
       expect(revoked.status).toBe(401);
 

@@ -1,93 +1,205 @@
 import { expect, test } from 'bun:test';
 import { readFileSync } from 'node:fs';
 import { ALL_HOST_CONFIGS } from '../hosts';
-import { generateAdversarialStep } from '../scripts/resolvers/review';
+import { generateAdversarialStep } from '../scripts/resolvers/outside-voice-steps';
+import { generateQAReview } from '../scripts/resolvers/qa';
 import { HOST_PATHS } from '../scripts/resolvers/types';
+import { between, compact, expectAbsent, expectMentions, expectOrdered, expectTokens } from './helpers/prompt-structure';
+import { readWorkflowExcerpt } from './helpers/workflow-excerpt';
 
-const read = (file: string) => readFileSync(new URL(`../ship/${file}`, import.meta.url), 'utf8');
+// Structural checks only (docs/test-value-bar.md): headings, step order and machine-read
+// tokens. Workflow wording is judged by the ship workflow-clarity judge in skill-llm-eval.
+const readShip = () => readWorkflowExcerpt('ship/SKILL.md', '# Ship:', '## Important Rules');
+const readTemplate = (name: string) => readFileSync(new URL(`../${name}`, import.meta.url), 'utf8');
+const reviewTemplate = readTemplate('ship/sections/review-army.md.tmpl');
+const coverageTemplate = readTemplate('ship/sections/test-coverage.md.tmpl');
+const entryTemplate = readTemplate('ship/SKILL.md.tmpl');
+const controlTemplate = between(entryTemplate, '### Ship control flow', '{{SECTION_INDEX:ship}}');
+const entry = compact(entryTemplate);
+const reviewFlow = compact(reviewTemplate);
+const finalGate = compact(controlTemplate + between(entryTemplate, '## Step 16:', '## Step 17:'));
+const pushFlow = compact(between(entryTemplate, '## Step 17:', '## Step 18:'));
+const docsTemplate = readTemplate('ship/sections/documentation.md.tmpl');
+const docs = compact(docsTemplate);
+const prTemplate = readTemplate('ship/sections/pr-body.md.tmpl');
 
-test('missing dispatched coverage is persisted and stopped before any zero-fix completion', () => {
-  const review = read('sections/review-army.md');
-  expect(review).toContain('partial findings are useful evidence, not completed coverage');
-  expect(review).toContain('Step 9.4 stops before Step 10 when a dispatched specialist failed');
-  const branches = review.slice(review.indexOf('take the first matching branch'), review.indexOf('5. Output summary'));
-  expect(branches.indexOf('If a dispatched specialist or Red Team failed')).toBeGreaterThanOrEqual(0);
-  expect(branches.indexOf('If fixes were applied')).toBeGreaterThan(branches.indexOf('STOP before Step 10'));
-  expect(branches).toContain('`status:"unavailable"`, `completed:false` and `converged:false`');
-  expect(review).toContain('Pre-Landing Review: INCOMPLETE');
-  expect(branches).toContain('new Step 9 pass');
-  expect(branches).toContain('Intentionally gated or host-unsupported reviewers were not dispatched');
-  expect(review).toContain('Continue to Step 10 only after a completed, converged review is persisted');
+test('ship QA starts its smoke guard before probes on every host', () => {
+  for (const host of ALL_HOST_CONFIGS) {
+    const body = generateQAReview({ host: host.name, skillName: 'ship', tmplPath: '', paths: HOST_PATHS[host.name] });
+    expectOrdered(body, [/smoke guard/i, '**3. Run smoke and plan checks.**'], `${host.name} ship QA`);
+  }
 });
 
-test('external-comment fixes refresh tests and mandatory review without repeating prior decisions', () => {
-  const section = read('sections/greptile.md');
-  const finish = section.slice(section.indexOf('**After all comments are resolved:**'));
-  expect(finish.indexOf('run Step 5')).toBeGreaterThan(-1);
-  expect(finish.indexOf('repeat Step 9')).toBeGreaterThan(finish.indexOf('run Step 5'));
-  expect(finish.indexOf('before continuing to Step 11')).toBeGreaterThan(finish.indexOf('repeat Step 9'));
-  expect(finish).toContain('do not repeat unchanged comment decisions');
-  expect(finish).toContain('If no fixes were applied, continue to Step 11');
+test('ship reports QA in the PR template headings, not a second combined report', () => {
+  const ship = compact(readShip());
+  expectTokens(ship, ['`## Exploratory QA`', '`## Verification Results`', '`templates/functional-report-template.md`'], 'ship QA reporting');
+  expectAbsent(ship, ['## Exploratory QA and Verification Results'], 'ship QA reporting');
 });
 
-test.each(ALL_HOST_CONFIGS.map(({ name }) => name))('%s: late adversarial fixes have a bounded return path and preserve approvals', host => {
+test('the invocation record keeps state tokens and scoped start markers', () => {
+  expectTokens(entry, ['**invocation record**', '`BUMP_LEVEL`', 'Steps 1–21', '11.5', '14.5'], 'ship entry');
+  const state = compact(between(entryTemplate, '### Keep state', '{{SECTION_INDEX:ship}}'));
+  expectTokens(state, ['`gstack-review-log --start`', '`REVIEW_START`', '`PASS_START`', '`DESIGN_START`', '`gstack-wtree`'], 'ship state');
+  expectMentions(entry, [['never', 'token']], 'ship entry');
+});
+
+test('plan obligations precede scope drift, learnings and review', () => {
+  const plan = readTemplate('ship/sections/plan-completion.md.tmpl');
+  expectOrdered(compact(between(plan, /^/, '**Dispatch this step')), ['1. Dispatch', '2. Collect', '3. Run Step 8.2', '4. Run Prior Learnings'], 'plan-completion route');
+  expectOrdered(plan, ['{{PLAN_COMPLETION_GATE_SHIP}}', '{{PLAN_VERIFICATION_EXEC}}', '{{SCOPE_DRIFT}}', '{{LEARNINGS_SEARCH:'], 'plan-completion placeholders');
+  expectOrdered(entryTemplate, ['{{SECTION:plan-completion}}', '{{SECTION:review-army}}'], 'ship entry sections');
+  const section = readTemplate('ship/sections/plan-completion.md');
+  expectOrdered(section, ['## Step 8.1:', '## Step 8.2:', '## Prior Learnings'], 'plan-completion section');
+  expectMentions(section, [['not done', 'block']], 'plan-completion section');
+});
+
+test('the parent owns one ordered review phase that persists each pass once', () => {
+  expectTokens(reviewFlow, ['CYCLES', '`converged:false`', '--finish REVIEW_START', '`CONVERGED`', '`status:"unavailable"`', '`completed:false`',
+    'Pre-Landing Review: INCOMPLETE', '`STATUS`: `unavailable`'], 'ship review phase');
+  expectOrdered(reviewTemplate, ['4. **', '5. Output summary:', '6. Persist the review result', '### Decide whether to repeat Step 9'], 'ship review phase');
+  expectTokens(compact(between(reviewTemplate, '4. **', '5. Output summary:')), ['CYCLES', 'REVIEW_START', '`converged:false`'], 'review finalize step');
+});
+
+test('named QA risks need explicit acceptance through AskUserQuestion', () => {
+  const gate = compact(between(reviewTemplate, '**Required-probe parent gate:**'));
+  expectTokens(gate, ['AskUserQuestion'], 'required-probe gate');
+  expectMentions(gate, [['accept', 'risk'], ['not', 'passing']], 'required-probe gate');
+});
+
+test('coverage generation has one bounded allowance and an audit-only child prompt', () => {
+  const allowance = compact(between(coverageTemplate, /^/, '````text'));
+  expectTokens(allowance, ['2 generation passes', '30-path/5-tests-per-pass/2-minute'], 'coverage allowance');
+  const prompt = coverageTemplate.split('````text\n')[1]?.split('\n````')[0] ?? '';
+  expectTokens(prompt, ['Generation: <allowed|audit-only>; passes used: <N> of 2.', '"coverage_pct":N,"gaps":N', '"tests_added":["path",...]'], 'coverage child prompt');
+  expectOrdered(prompt, [/audit-only/, '{{TEST_COVERAGE_AUDIT_SHIP}}'], 'coverage child prompt');
+  expectMentions(prompt, [['not', 'commit'], ['not', 'push']], 'coverage child prompt');
+});
+
+test('design-lite runs before the Design specialist and reports a fixed JSON shape', () => {
+  expectOrdered(reviewTemplate, ['{{DESIGN_REVIEW_LITE}}', '{{REVIEW_ARMY}}'], 'ship review army');
+  expectTokens(reviewTemplate, ['"dispatched":true,"findings":N,"critical":N,"informational":N'], 'ship review army');
+});
+
+test('late adversarial and comment fixes queue for the parent outside Step 9.4', () => {
+  const ship = readShip();
+  expectMentions(compact(between(ship, '## Step 11:', '## Step 12:')), [['queue', 'parent']], 'ship Step 11');
+  expectMentions(compact(between(ship, '## Step 10:', '## Step 11:')), [['queue', 'without editing']], 'ship Step 10');
+});
+
+test.each(ALL_HOST_CONFIGS.map(({ name }) => name))('%s: ship adversarial approvals queue and only ship carries the finish phase', host => {
   const ctx = { host, skillName: 'ship', tmplPath: '', paths: HOST_PATHS[host] };
-  const text = generateAdversarialStep(ctx);
-  const finish = text.slice(text.indexOf('### Step 11 completion and late-fix loop'));
-  expect(finish).toContain('Step 9.4 items 1–3');
-  expect(finish).toContain('Do not ask again for a Step 11 P1 fix already approved');
-  expect(finish).toMatch(/commit only the fixed files[\s\S]*Run Step 5[\s\S]*repeat Step 9 from a fresh start token[\s\S]*return directly to Step 11/);
-  expect(finish).toContain('third cycle still changes code');
-  expect(finish).toContain('record non-convergence and STOP');
-  expect(finish).toContain('A zero-fix cycle continues to Step 12');
-  expect(text).toContain('retain the acknowledged findings and failed gate');
-  expect(finish).toContain('unavailable or waived coverage is never reported as a clean completed pass');
+  expectMentions(compact(generateAdversarialStep(ctx)), [['queue', 'without editing'], ['outside coverage']], `${host} ship adversarial`);
   const standalone = generateAdversarialStep({ ...ctx, skillName: 'review' });
-  expect(standalone).not.toContain('Step 11 completion');
-  expect(standalone).toContain('If A: address the findings. Re-run the same shared structured invocation and diff scope to verify.');
+  expectAbsent(standalone, ['Before Step 12:', '### Finish the adversarial phase'], `${host} review adversarial`);
+  expectTokens(standalone, [/Step 5's Fix-First/], `${host} review adversarial`);
 });
 
-test('existing release levels have an explicit recovery rule, not implicit rebump approval', () => {
-  const root = read('SKILL.md');
-  const version = root.slice(root.indexOf('## Step 12:'), root.indexOf('## Step 14:'));
-  expect(version).toContain("this branch's earlier ship decision for `BUMP_LEVEL`");
-  expect(version).toContain('Do not follow the usable-candidate instructions above');
-  expect(version).toContain('first changed major/minor/patch/micro component supplies `BUMP_LEVEL`');
-  expect(version).toContain('a missing fourth component is zero');
-  expect(version).toContain('This recovers the level, not permission to bump again');
-  expect(version).toContain('Only approval changes the existing version');
+test('outside challenge availability keeps the review gates and fix limit', () => {
+  const adversarial = compact(readTemplate('ship/sections/adversarial.md'));
+  expectTokens(adversarial, ['P0/P1', "Step 9's three-cycle fix limit"], 'ship adversarial section');
+  const standaloneReview = readTemplate('review/sections/adversarial.md');
+  expectTokens(standaloneReview, ['Step 5 Fix-First'], 'review adversarial section');
+  expectAbsent(standaloneReview, ['Step 11'], 'review adversarial section');
 });
 
-test('distribution setup asks for unknown targets and cannot release before review', () => {
-  const root = read('SKILL.md');
-  const distribution = root.slice(root.indexOf('## Step 2:'), root.indexOf('## Step 3:'));
-  expect(distribution).toContain('git diff origin/<base> --diff-filter=A --name-only');
-  expect(distribution).toContain('a new `package.json` or `Cargo.toml` alone does not establish a publishable');
-  expect(distribution).toContain('Ask for the intended distribution target if it is unknown');
-  expect(distribution).toContain('do not invent a registry or credentials');
-  expect(distribution).toContain('Include the new workflow in the tests and review below');
-  expect(distribution).toContain('Do not publish a release during `/ship`');
+test('Step 11.5 reads review records and blocks on a mismatch', () => {
+  const receipt = compact(between(entryTemplate, '## Step 11.5:', '## Step 12:'));
+  expectTokens(receipt, ['~/.claude/skills/gstack/bin/gstack-review-read', '**Review records missing or mismatched**'], 'ship Step 11.5');
+  expectAbsent(receipt, ['phase:"core"', 'Step 9.5', 'source:"in-host"', 'status:"clean"'], 'ship Step 11.5');
 });
 
-test('ship plan audit resolves scope drift before learnings and stops on an unverified N', () => {
-  const section = read('sections/plan-completion.md');
-  expect(section.indexOf('## Step 8.1:')).toBeLessThan(section.indexOf('## Step 8.2:'));
-  expect(section.indexOf('## Step 8.2:')).toBeLessThan(section.indexOf('## Prior Learnings'));
-  expect(section).toContain('N) Not done — block ship and report the item as NOT DONE; do not offer a second deferral choice');
-  expect(section).toContain('Any N: STOP');
-  expect(section).not.toContain('re-enter the priority-1 gate');
+test('version recovery and digest generation keep their tokens', () => {
+  const version = compact(between(entryTemplate, '## Step 12:', '## Step 14:'));
+  expectTokens(version, ['`baseVersion`', '`currentVersion`', 'ALREADY_BUMPED', '`agents-digest/gstack-AGENTS.md`', '`agentsDigest`', '`bun scripts/gen-agents-digest.ts`'], 'ship version step');
+  expectAbsent(version, ['skip if ALREADY_BUMPED'], 'ship version step');
 });
 
-test('outside challenge and documentation reruns preserve their actual blocking owners', () => {
-  const adversarial = read('sections/adversarial.md');
-  expect(adversarial).toContain('An unavailable outside challenge does not block shipping by itself');
-  expect(adversarial).toContain('structured P1 and non-convergence gates still apply');
-  expect(adversarial).toContain('returning here does not reset Step 11');
-  const standaloneReview = readFileSync(new URL('../review/sections/adversarial.md', import.meta.url), 'utf8');
-  expect(standaloneReview).toContain('supported findings still enter Step 5 Fix-First');
-  expect(standaloneReview).not.toContain('supported findings still enter Step 11');
-  const docs = read('sections/pr-body.md');
-  expect(docs).toContain('the parent creates or updates the PR in Step 19');
-  expect(docs).toContain('On a rerun, Step 19 updates the existing PR');
-  expect(docs).not.toContain('no PR exists yet');
+test('distribution setup detects new targets and never invents credentials', () => {
+  const distribution = compact(between(entryTemplate, '## Step 2:', '## Step 3:'));
+  expectTokens(distribution, ['git diff origin/<base> --diff-filter=A --name-only'], 'ship Step 2');
+  expectMentions(distribution, [['never', 'credentials']], 'ship Step 2');
+});
+
+test('ambiguous Apple targets and merge conflicts stop for AskUserQuestion', () => {
+  const apple = compact(between(entryTemplate, '## Step 0.9:', '## Step 1:'));
+  expectTokens(apple, ['`Package.swift`', 'AskUserQuestion'], 'ship Step 0.9');
+  const merge = compact(between(entryTemplate, '## Step 3:', '{{SECTION:tests}}'));
+  expectTokens(merge, ['AskUserQuestion'], 'ship Step 3');
+  expectMentions(merge, [['conflict', 'stop']], 'ship Step 3');
+});
+
+test('missing test suites offer a named-gap decision and never report FRESH', () => {
+  const tests = compact(readTemplate('ship/sections/tests.md.tmpl'));
+  expectTokens(tests, ['A) Add tests', 'B) Ship', 'C) Stop'], 'ship tests section');
+  expectTokens(finalGate, ['FRESH'], 'ship Step 16');
+  expectMentions(finalGate, [['untested', 'approval']], 'ship Step 16');
+});
+
+test('Step 16 stages run in order and freeze inputs through push', () => {
+  expectOrdered(finalGate, ['### 1. Finish writers and prepare outputs', '### 2. Choose the change route',
+    '### 3. Resolve documentation freshness', '### 4. Verify the frozen candidate', '**Reuse a check when its inputs match.**'], 'ship Step 16');
+  const route = compact(between(entryTemplate, '### 2. Choose the change route', '### 3. Resolve documentation freshness'));
+  expectOrdered(route, ['**Behavior, tests or build inputs changed:**', '**Only authored docs or release metadata changed:**',
+    '**No changes, or the docs-only checks still support the plan:**'], 'ship change route');
+  expectTokens(finalGate, ['**Build failed or prerequisite missing**', "**Check each test lane's receipt as well.**"], 'ship Step 16');
+  expectMentions(finalGate, [['freeze', 'push']], 'ship Step 16');
+});
+
+test('evidence exemptions cover only release metadata and receipts name their command', () => {
+  expectTokens(finalGate, ['--allow-paths CHANGELOG.md,VERSION,package.json,agents-digest/gstack-AGENTS.md', '| FRESH (exit 0) |',
+    "--label <lane> --expect-cmd '<exact Step 5 command>'", '~/.claude/skills/gstack/bin/gstack-wtree', 'git diff <reviewed-tree> <current-tree>'], 'ship evidence gate');
+});
+
+test('docs attempts are collected by the parent with typed result fields', () => {
+  expectTokens(docs, ['`files_updated`', '`documentation_section`', '`blocked`'], 'ship documentation section');
+  expectOrdered(docsTemplate, ['**Subagent prompt:**', '**Parent processing:**'], 'ship documentation section');
+  const freshness = compact(between(entryTemplate, '### 3. Resolve documentation freshness', '### 4. Verify the frozen candidate'));
+  expectTokens(freshness, ['Step 14.5'], 'ship docs freshness');
+  const retry = between(freshness, '**An attempt remains, with changed inputs or an available repair:**', '**Otherwise:**');
+  expectAbsent(retry, ['Continue to stage 4'], 'ship docs retry');
+  expectTokens(retry, [/Step 16 stage 1/i], 'ship docs retry');
+  expectOrdered(entryTemplate, ['## Step 14.5:', '## Step 17:'], 'ship entry');
+});
+
+test('late verified outputs are committed before push, without tags', () => {
+  expectOrdered(compact(between(entryTemplate, '### 5. Report, then push', '## Step 17:')), [/commit/i, 'continue to Step 17'], 'ship Step 16.5');
+  expectMentions(entry, [['not', 'git tag']], 'ship entry');
+  expectOrdered(pushFlow, ['**Non-fast-forward push:**', '**Authentication, hook or network failure:**'], 'ship Step 17');
+  expectTokens(pushFlow, ['`ALREADY_PUSHED`'], 'ship Step 17');
+});
+
+test('Step 18 resolves open PR state before preparing the exact title Step 19 scans', () => {
+  const title = compact(between(entryTemplate, '## Step 18:', '{{SECTION:pr-body}}'));
+  expectOrdered(title, ['gh pr list --head <branch-name> --state open --json number,title,url', 'Prepare the title'], 'ship Step 18');
+  expectTokens(title, ['glab mr list --source-branch <branch-name> --output json', '`NEW_TITLE`', '`v<NEW_VERSION> <type>: <summary>`', '`v$NEW_VERSION `'], 'ship Step 18');
+  expectTokens(prTemplate, [': "${NEW_TITLE:?Restore the saved Step 18 title before scanning}"', 'exit 3'], 'ship pr-body');
+  expectAbsent(prTemplate, ['NEW_TITLE="<final vNEW_VERSION type: summary>"'], 'ship pr-body');
+  const generated = readTemplate('ship/sections/pr-body.md');
+  expectTokens(generated, ['**Existing open PR/MR:**'], 'ship pr-body section');
+});
+
+test('linked spec discovery reads frontmatter fields and claims closure only for completed scope', () => {
+  const instructions = compact(between(prTemplate, /^/, 'The PR/MR body should contain'));
+  expectTokens(instructions, ['`spec_branch`', '`spec_filed_at`', '`spec_issue_number`', '`## Linked Spec`', '`Closes #N`', '`Linked to #N`'], 'ship linked spec');
+  expectMentions(instructions, [['frontmatter', 'never', 'source']], 'ship linked spec');
+  const body = between(prTemplate, 'The PR/MR body should contain', '#### Redaction scan');
+  expectAbsent(body, ['CURRENT_BRANCH=', 'SPEC_ARCHIVES=', 'SPEC_FILE=$(grep'], 'ship pr body');
+  expectAbsent(prTemplate, ['[ -z "$SPEC_FILE" ] && exit'], 'ship pr-body');
+});
+
+test('comment triage reports one of three statuses with fixed result strings', () => {
+  const section = compact(readTemplate('ship/sections/greptile.md.tmpl'));
+  expectTokens(section, ['"status":"complete|no_pr|unavailable"', '`complete`', '`no_pr`', '`unavailable`',
+    '"Greptile: no PR exists"', '"Greptile: fetched, zero comments"', '`Greptile triage: UNAVAILABLE (dispatch failed)`'], 'ship greptile section');
+  expectAbsent(section, ['If no PR exists, `gh` fails, the API errors, or there are zero comments'], 'ship greptile section');
+});
+
+test('ship resolves branch and installed-asset references without competing instructions', () => {
+  expectAbsent(entryTemplate, ['Test coverage gaps within target threshold', '`.claude/skills/review/TODOS-format.md`'], 'ship entry');
+  expectOrdered(entryTemplate, ['`<branch-name>`', 'refs/heads/<branch-name>'], 'ship entry');
+  expectTokens(entryTemplate, ['~/.claude/skills/gstack/review/TODOS-format.md'], 'ship entry');
+  expectTokens(entry, ['## Step 16: Verification Gate'], 'ship entry');
+  const row = readTemplate('ship/SKILL.md').split('\n').find(line => line.startsWith('| exploratory QA before Fix-First'));
+  expect(row, 'ship section index lost its exploratory QA row').toBeDefined();
+  expectTokens(row!, ['`sections/review-army.md`'], 'ship section index');
 });

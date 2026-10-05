@@ -2,16 +2,9 @@ import {expect,test} from 'bun:test';
 import {planFloorDXPane,planFloorDXReplyInput,matchesNativePlanQuestion,type PlanFloorDXReply} from './helpers/claude-pty-runner';
 import captured from './fixtures/plan-floor-dx-custom-491.json';
 import editorHints from './fixtures/plan-floor-dx-editor-hint.json';
-import {E2E_TOUCHFILES,selectTests} from './helpers/touchfiles';
 const call=captured.call;
 const state=(stage:PlanFloorDXReply['stage']='focus'):PlanFloorDXReply=>({call:structuredClone(call),
   pane:planFloorDXPane(captured.questionViewport,call)!,reply:captured.reply,stage});
-
-test('editor-hint capture changes select the live DX finding-floor probe',()=>{
- expect(selectTests(['test/fixtures/plan-floor-dx-editor-hint.json'],E2E_TOUCHFILES,[]).selected)
-   .toContain('plan-devex-finding-floor');
-});
-
 test('generic matcher authenticates the crop while DX custom replies still require the complete pane',()=>{
   expect(matchesNativePlanQuestion(captured.originalViewport,call)).toBe(true);
   expect(planFloorDXPane(captured.originalViewport,call)).toBeNull();
@@ -152,4 +145,15 @@ test.each(['Vim','Nano','Visual Studio Code'])('custom input with %s hint still 
  expect(planFloorDXReplyInput(hint(captured.focusedViewport),call,state('submit'))).toBeNull();
  expect(planFloorDXReplyInput(hint(captured.filledViewport).replace('Confirmed review context:','Unapproved context:'),call,state('submit'))).toBeNull();
  expect(planFloorDXReplyInput(hint(captured.filledViewport),{...call,answered:true},state('submit'))).toBeNull();
+});
+
+test('editor-hint normalization cannot rewrite question content that resembles a footer',()=>{
+ const footer='Enter to select · ↑/↓ to navigate · Esc to cancel';
+ const short=structuredClone(call);short.questions[0]!.question='Review the documented controls:\n'+footer;
+ const pane='☐ Empathy\n'+short.questions[0]!.question+'\n'+captured.questionViewport.slice(captured.questionViewport.indexOf('❯ 1.'));
+ const reply:PlanFloorDXReply={call:short,pane,reply:captured.reply,stage:'focus'};
+ expect(planFloorDXReplyInput(pane,short,reply)).toEqual({input:'4',stage:'paste'});
+ const focused=pane.replace('❯ 1.','  1.').replace('  4. Type something.','❯ 4. Type something.');
+ const changed=focused.replaceAll(footer,footer.replace(' · Esc to cancel',' · ctrl+g to edit in Vim · Esc to cancel'));
+ expect(planFloorDXReplyInput(changed,short,{...reply,stage:'paste'})).toBeNull();
 });

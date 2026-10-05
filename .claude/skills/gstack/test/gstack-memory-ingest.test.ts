@@ -15,7 +15,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "bun:test";
-import { mkdtempSync, writeFileSync, readFileSync, existsSync, rmSync, mkdirSync, statSync, chmodSync, readdirSync, symlinkSync, utimesSync, copyFileSync } from "fs";
+import { mkdtempSync, writeFileSync, readFileSync, existsSync, rmSync, mkdirSync, statSync, chmodSync, readdirSync, symlinkSync, utimesSync, copyFileSync, realpathSync } from "fs";
 import { tmpdir } from "os";
 import { basename, dirname, join } from "path";
 import { spawnSync } from "child_process";
@@ -30,7 +30,7 @@ describe("requested secret scanning at the import boundary", () => {
   const realScanner = process.env.GSTACK_TEST_GITLEAKS;
 
   beforeEach(() => {
-    home = mkdtempSync(join(tmpdir(), "gstack-scan-"));
+    home = realpathSync(mkdtempSync(join(tmpdir(), "gstack-scan-")));
     bin = join(home, "bin");
     mkdirSync(bin);
     mkdirSync(join(home, "tmp"));
@@ -61,7 +61,14 @@ else if (args[0] === 'import') {
     }
   }
   walk(args[1]);
-  writeFileSync(join(process.env.HOME, 'imported.json'), JSON.stringify(files));
+  // One import per gbrain source (A4): pages of one ingest run accumulate;
+  // a new run (different parent pid) starts a fresh list.
+  const log = join(process.env.HOME, 'imported.json');
+  const owner = join(process.env.HOME, 'imported.ppid');
+  let prior = [];
+  try { if (readFileSync(owner, 'utf8') === String(process.ppid)) prior = JSON.parse(readFileSync(log, 'utf8')); } catch {}
+  writeFileSync(owner, String(process.ppid));
+  writeFileSync(log, JSON.stringify([...prior, ...files]));
   if (process.env.SNAPSHOT_STAGE) {
     if (!process.env.SNAPSHOT_STAGE.startsWith(process.env.GSTACK_HOME + '/.staging-ingest-')) process.exit(2);
     cpSync(args[1], process.env.SNAPSHOT_STAGE, { recursive: true });
@@ -112,7 +119,11 @@ const rel = relative(process.env.HOME, report);
 if (report !== '/dev/stdout' && (isAbsolute(rel) || rel.startsWith('..'))) process.exit(2);
 appendFileSync(join(process.env.HOME, 'scans'), JSON.stringify({ input, report, body: readFileSync(input, 'utf8'), inputMode: statSync(input).mode & 511, dirMode: statSync(dirname(report)).mode & 511, reportMode: statSync(report).mode & 511 }) + '\\n');
 if (mode === 'error') process.exit(2);
-if (mode === 'timeout') Bun.sleepSync(63000);
+if (mode === 'timeout') {
+  writeFileSync(join(process.env.HOME, 'scanner.pid'), String(process.pid));
+  Bun.sleepSync(2000);
+  writeFileSync(join(process.env.HOME, 'scanner-late'), 'late scanner work');
+}
 if (process.env.APPEND_DURING_SCAN) {
   const path = realpathSync(process.env.APPEND_DURING_SCAN);
   if (!path.startsWith(process.env.HOME + '/')) process.exit(2);
@@ -139,8 +150,8 @@ if (process.env.LIMIT_STAGE_WRITES === '1') {
 `, { mode: 0o700 });
   }
 
-  function run(args: string[] = [], timeout = 30000) {
-    const argv = [SCRIPT, "--include-unattributed", "--sources", "transcript", ...args];
+  function run(args: string[] = [], timeout = 30000, preload?: string) {
+    const argv = [...(preload ? ["--preload", preload] : []), SCRIPT, "--include-unattributed", "--sources", "transcript", ...args];
     const limited = env.LIMIT_STAGE_WRITES === "1";
     const r = spawnSync(limited ? "/bin/bash" : process.execPath,
       limited ? ["-c", 'trap "" XFSZ; exec "$@"', "f3-limit", process.execPath, ...argv] : argv, {
@@ -186,6 +197,20 @@ if (process.env.LIMIT_STAGE_WRITES === '1') {
     delete env.REJECT_IMPORT;
     env.GSTACK_INGEST_RESUME_DIR = dir;
     return dir;
+  }
+
+  // A4: unattributed transcripts never enter the publishable remote-http
+  // staging, so remote-http cases use a transcript from a repository.
+  function attributed(path: string): string {
+    const repo = join(home, "remote-repo");
+    if (!existsSync(repo)) {
+      expect(spawnSync("git", ["init", "-q", repo], { env, cwd: home, timeout: 10000 }).status).toBe(0);
+      expect(spawnSync("git", ["-C", repo, "remote", "add", "origin", "https://example.com/remote.git"], { env, cwd: home, timeout: 10000 }).status).toBe(0);
+    }
+    const records = readFileSync(path, "utf8").trim().split("\n").map((line) => JSON.parse(line));
+    records[0].payload.cwd = repo;
+    writeFileSync(path, records.map((entry) => JSON.stringify(entry)).join("\n") + "\n");
+    return path;
   }
 
   function appendRecord(): string {
@@ -287,6 +312,9 @@ if (process.env.LIMIT_STAGE_WRITES === '1') {
           writeFileSync(allowed, records.map((entry) => JSON.stringify(entry)).join("\n") + "\n");
           const dir = interruptedStage();
           expect(imported()).toHaveLength(2);
+          // A4: the two pages import into two sources, so the interrupted run
+          // made one (failed) import per source.
+          const importsBefore = readFileSync(join(home, "imports"), "utf8");
           const policy = spawnSync(join(import.meta.dir, "..", "bin", "gstack-gbrain-repo-policy"), ["set", "_unattributed", tier], {
             env, cwd: home, encoding: "utf8", timeout: 10000,
           });
@@ -297,7 +325,7 @@ if (process.env.LIMIT_STAGE_WRITES === '1') {
           expect(result.stderr).toContain("[repo policy] staged page is not a current permitted source");
           expect(result.stderr).toContain("resumed import refused");
           expect(imported()).toEqual([]);
-          expect(readFileSync(join(home, "imports"), "utf8")).toBe("import\n");
+          expect(readFileSync(join(home, "imports"), "utf8")).toBe(importsBefore);
           expect(sessions()).toEqual({});
           expect(existsSync(dir)).toBe(true);
           delete env.GSTACK_INGEST_RESUME_DIR;
@@ -395,22 +423,40 @@ if (process.env.LIMIT_STAGE_WRITES === '1') {
       });
     }
 
-    for (const mode of ["no-write", "remote-http"]) {
-      it(`does not stamp an append during the ${mode} scan`, () => {
-        scanner("clean");
-        const path = source();
-        if (mode === "remote-http") writeFileSync(join(home, ".claude.json"), JSON.stringify({ mcpServers: { gbrain: { type: "http", url: "http://fixture.invalid/mcp" } } }));
-        env.APPEND_DURING_SCAN = path;
-        env.APPEND_RECORD = appendRecord();
-        const args = mode === "no-write" ? ["--scan-secrets", "--no-write"] : ["--scan-secrets"];
-        expect(run(args).status).toBe(0);
-        expect(sessions()[path]).toBeUndefined();
-        expect(imported()).toEqual([]);
-        delete env.APPEND_DURING_SCAN;
-        expect(run(args).status).toBe(0);
-        expect(sessions()[path]).toBeDefined();
-      });
-    }
+    it("does not stamp an append during the remote-http scan", () => {
+      scanner("clean");
+      const path = attributed(source());
+      writeFileSync(join(home, ".claude.json"), JSON.stringify({ mcpServers: { gbrain: { type: "http", url: "http://fixture.invalid/mcp" } } }));
+      env.APPEND_DURING_SCAN = path;
+      env.APPEND_RECORD = appendRecord();
+      expect(run(["--scan-secrets"]).status).toBe(0);
+      expect(sessions()[path]).toBeUndefined();
+      expect(imported()).toEqual([]);
+      delete env.APPEND_DURING_SCAN;
+      expect(run(["--scan-secrets"]).status).toBe(0);
+      expect(sessions()[path]).toBeDefined();
+    });
+
+    it("--no-write leaves state untouched, so the next real run imports every eligible page (A9)", () => {
+      scanner("clean");
+      const first = source("first conversation");
+      const second = source("second conversation");
+      const statePath = join(env.GSTACK_HOME, ".transcript-ingest-state.json");
+      const dry = run(["--no-write"]);
+      expect(dry.status).toBe(0);
+      expect(existsSync(statePath)).toBe(false);
+      expect(dry.stderr).toContain("--no-write: 2 page(s) would be imported");
+      expect(imported()).toEqual([]);
+      expect(run(["--no-write", "--scan-secrets"]).status).toBe(0);
+      expect(existsSync(statePath)).toBe(false);
+      expect(run([]).status).toBe(0);
+      expect(imported()).toHaveLength(2);
+      expect(Object.keys(sessions()).sort()).toEqual([first, second].sort());
+      const before = readFileSync(statePath, "utf8");
+      source("third conversation");
+      expect(run(["--no-write"]).status).toBe(0);
+      expect(readFileSync(statePath, "utf8")).toBe(before);
+    });
 
     for (const remote of [false, true]) {
       it(`never stamps a page that failed to stage (remote-http: ${remote})`, () => {
@@ -430,7 +476,8 @@ if (process.env.LIMIT_STAGE_WRITES === '1') {
       (process.platform === "linux" ? it : it.skip)(`keeps OS-limited partial writes out of outgoing pages (remote-http: ${remote})`, () => {
         scanner("clean");
         if (remote) writeFileSync(join(home, ".claude.json"), JSON.stringify({ mcpServers: { gbrain: { type: "http", url: "http://fixture.invalid/mcp" } } }));
-        const path = source("ordinary conversation ".repeat(300));
+        const created = source("ordinary conversation ".repeat(300));
+        const path = remote ? attributed(created) : created;
         env.LIMIT_STAGE_WRITES = "1";
         const result = run(["--scan-secrets"]);
         expect(result.stderr).toContain("EFBIG");
@@ -460,11 +507,18 @@ if (process.env.LIMIT_STAGE_WRITES === '1') {
       expect(readFileSync(join(home, "imports"), "utf8").trim().split("\n")).toHaveLength(2);
     });
 
-    it("keeps the no-scan import stamping contract unchanged", () => {
+    // A1 changes the old no-scan contract on purpose: without --scan-secrets
+    // the stamp used to describe the file as it was AFTER the import (its
+    // newer self), so the appended record was never imported.
+    it("does not stamp an append during an unscanned import, and the next run imports it (A1)", () => {
       const path = source();
       env.APPEND_DURING_IMPORT = path;
       env.APPEND_RECORD = appendRecord();
       expect(run().status).toBe(0);
+      expect(sessions()[path]).toBeUndefined();
+      delete env.APPEND_DURING_IMPORT;
+      expect(run().status).toBe(0);
+      expect(imported()[0].body).toContain("late ordinary update");
       expect(sessions()[path]).toMatchObject({ sha256: createHash("sha256").update(readFileSync(path)).digest("hex") });
     });
   });
@@ -516,28 +570,95 @@ if (process.env.LIMIT_STAGE_WRITES === '1') {
     });
   }
 
-  it("ends a detect invocation at its 60-second deadline and retries after repair", () => {
+  it("enforces the production 60-second detect contract with a short real timeout and retries after repair", async () => {
     scanner("timeout");
     const path = source();
-    const r = run(["--scan-secrets"], 75000);
+    const original = readFileSync(path);
+    const preload = join(home, "scanner-timeout.cjs");
+    const observed = join(home, "scanner-timeout.jsonl");
+    writeFileSync(preload, String.raw`
+const cp = require('child_process');
+const { appendFileSync, realpathSync } = require('fs');
+const { sep } = require('path');
+const actual = cp.execFileSync;
+const ownedHome = realpathSync(${JSON.stringify(home)});
+const ownedTmp = realpathSync(${JSON.stringify(join(home, "tmp"))}) + sep;
+const ownedScanner = realpathSync(${JSON.stringify(join(bin, "gitleaks"))});
+cp.execFileSync = function(file, args, options) {
+  if (file !== 'gitleaks' || args?.[0] !== 'detect') return actual(file, args, options);
+  if (!ownedScanner.startsWith(ownedHome + sep)
+    || realpathSync(Bun.which(file, { PATH: options.env.PATH })) !== ownedScanner
+    || realpathSync(options.env.HOME) !== ownedHome
+    || args.length !== 10 || args[1] !== '--no-git' || args[2] !== '--source'
+    || args[4] !== '--report-format' || args[5] !== 'json' || args[6] !== '--report-path'
+    || args[8] !== '--exit-code' || args[9] !== '0'
+    || !realpathSync(args[3]).startsWith(ownedTmp) || !realpathSync(args[7]).startsWith(ownedTmp)
+    || options.stdio !== 'ignore' || options.timeout !== 60000 || options.killSignal !== 'SIGKILL') {
+    throw Error('Unexpected scanner or production detect contract');
+  }
+  appendFileSync(${JSON.stringify(observed)}, JSON.stringify({ phase: 'invoke', timeout: options.timeout,
+    effectiveTimeout: 500, killSignal: options.killSignal }) + '\n');
+  try { return actual(file, args, { ...options, timeout: 500 }); }
+  catch (error) {
+    appendFileSync(${JSON.stringify(observed)}, JSON.stringify({ phase: 'error', code: error.code,
+      signal: error.signal, status: error.status, pid: error.pid }) + '\n');
+    throw error;
+  }
+};
+require('module').syncBuiltinESMExports();
+`);
+    const passthrough = spawnSync(process.execPath, ["--preload", preload, "-e", String.raw`
+const { execFileSync } = require('child_process');
+process.stdout.write(execFileSync('gitleaks', ['version'], { timeout: 60000, killSignal: 'SIGKILL' }));
+process.stdout.write(execFileSync(process.execPath, ['-e', 'process.stdout.write("passthrough")'], { timeout: 60000, killSignal: 'SIGKILL' }));
+`], { env, cwd: home, encoding: "utf8", timeout: 5000 });
+    expect(passthrough.error).toBeUndefined();
+    expect(passthrough.status, passthrough.stderr).toBe(0);
+    expect(passthrough.stdout).toBe("8.30.1\npassthrough");
+    expect(existsSync(observed)).toBe(false);
+    const r = run(["--scan-secrets"], 5000, preload);
+    const pid = Number(readFileSync(join(home, "scanner.pid"), "utf8"));
+    expect(Number.isSafeInteger(pid) && pid > 0).toBe(true);
+    expect(readFileSync(observed, "utf8").trim().split("\n").map((line) => JSON.parse(line))).toEqual([
+      { phase: "invoke", timeout: 60000, effectiveTimeout: 500, killSignal: "SIGKILL" },
+      { phase: "error", code: "ETIMEDOUT", signal: "SIGKILL", status: null, pid },
+    ]);
+    const reapedBy = performance.now() + 500;
+    let reaped = false;
+    while (performance.now() < reapedBy) {
+      try { process.kill(pid, 0); }
+      catch (error) {
+        expect((error as NodeJS.ErrnoException).code).toBe("ESRCH");
+        reaped = true;
+        break;
+      }
+      await Bun.sleep(10);
+    }
+    expect(reaped).toBe(true);
+    expect(existsSync(join(home, "scanner-late"))).toBe(false);
     expect(r.stderr).toContain("secret-scan error");
     expect(imported()).toEqual([]);
     expect(sessions()[path]).toBeUndefined();
+    expect(readFileSync(path)).toEqual(original);
     expect(readdirSync(join(home, "tmp"))).toEqual([]);
     scanner("clean");
     expect(run(["--scan-secrets"]).status).toBe(0);
+    expect(imported()).toHaveLength(1);
     expect(sessions()[path]).toBeDefined();
-  }, 80000);
+    expect(readdirSync(join(home, "tmp"))).toEqual([]);
+    expect(existsSync(join(home, "scanner-late"))).toBe(false);
+  });
 
-  it("does not stamp --no-write pages that could not pass the requested scan", () => {
+  it("does not stamp or import pages that could not pass the requested scan", () => {
     scanner("error");
     const path = source();
-    run(["--scan-secrets", "--no-write"]);
+    run(["--scan-secrets"]);
     expect(sessions()[path]).toBeUndefined();
-    scanner("clean");
-    expect(run(["--scan-secrets", "--no-write"]).status).toBe(0);
-    expect(sessions()[path]).toBeDefined();
     expect(imported()).toEqual([]);
+    scanner("clean");
+    expect(run(["--scan-secrets"]).status).toBe(0);
+    expect(sessions()[path]).toBeDefined();
+    expect(imported()).toHaveLength(1);
   });
 
   it("accepts a complete clean report exactly at the 16 MiB ceiling", () => {
@@ -548,11 +669,27 @@ if (process.env.LIMIT_STAGE_WRITES === '1') {
     expect(sessions()[path]).toBeDefined();
   });
 
+  it("never stages unattributed transcripts for a remote-http brain (A4)", () => {
+    scanner("clean");
+    writeFileSync(join(home, ".claude.json"), JSON.stringify({ mcpServers: { gbrain: { type: "http", url: "http://fixture.invalid/mcp" } } }));
+    const local = source("unattributed ordinary text");
+    const shared = attributed(source("attributed ordinary text"));
+    const result = run([]);
+    expect(result.status).toBe(0);
+    expect(result.stderr).toContain("kept 1 unattributed transcript(s) on this machine: the brain is remote");
+    expect(sessions()[local]).toBeUndefined();
+    expect(sessions()[shared]).toMatchObject({ status: "staged" });
+    const outgoing = join(env.GSTACK_HOME, "transcripts");
+    const staged = readdirSync(outgoing, { recursive: true }).map(String).filter((f) => f.endsWith(".md"));
+    expect(staged).toHaveLength(1);
+    expect(staged[0]).not.toContain("_unattributed");
+  });
+
   it("scans remote-http pages before persistent staging", () => {
     scanner("clean");
     writeFileSync(join(home, ".claude.json"), JSON.stringify({ mcpServers: { gbrain: { type: "http", url: "http://fixture.invalid/mcp" } } }));
-    const bad = source('UNSAFE="synthetic"');
-    const clean = source();
+    const bad = attributed(source('UNSAFE="synthetic"'));
+    const clean = attributed(source());
     expect(run(["--scan-secrets"]).status).toBe(0);
     expect(imported()).toEqual([]);
     expect(sessions()[bad]).toBeUndefined();
@@ -721,7 +858,22 @@ function isolateGitRemote(repo: string, url: string): void {
   expect(git("remote", "get-url", "origin")).toBe(url);
 }
 
+/**
+ * These cases exercise transcript ingest after the user consented, so the
+ * isolated state root gets `transcript_ingest_mode: recent` unless the case
+ * set the key itself. The no-consent paths live in
+ * gstack-gbrain-sync-transcript-mode.test.ts.
+ */
+function seedTranscriptConsent(gstackHome: string | undefined): void {
+  if (!gstackHome) return;
+  mkdirSync(gstackHome, { recursive: true });
+  const config = join(gstackHome, "config.yaml");
+  const current = existsSync(config) ? readFileSync(config, "utf-8") : "";
+  if (!/^transcript_ingest_mode:/m.test(current)) writeFileSync(config, `${current}transcript_ingest_mode: recent\n`);
+}
+
 function runScript(args: string[], env: Record<string, string> = {}): { stdout: string; stderr: string; exitCode: number } {
+  seedTranscriptConsent(env.GSTACK_HOME);
   const result = spawnSync("bun", [SCRIPT, ...args], {
     encoding: "utf-8",
     timeout: 30000,
@@ -854,7 +1006,7 @@ describe("gstack-memory-ingest CLI", () => {
 // ── State file behavior ────────────────────────────────────────────────────
 
 describe("gstack-memory-ingest state file", () => {
-  it("--incremental on empty home creates state file with schema_version: 1", () => {
+  it("--incremental on empty home creates state file with schema_version: 2", () => {
     const home = makeTestHome();
     const gstackHome = join(home, ".gstack");
     mkdirSync(gstackHome, { recursive: true });
@@ -863,7 +1015,7 @@ describe("gstack-memory-ingest state file", () => {
     const statePath = join(gstackHome, ".transcript-ingest-state.json");
     expect(existsSync(statePath)).toBe(true);
     const state = JSON.parse(readFileSync(statePath, "utf-8"));
-    expect(state.schema_version).toBe(1);
+    expect(state.schema_version).toBe(2);
     expect(state.last_writer).toBe("gstack-memory-ingest");
     rmSync(home, { recursive: true, force: true });
   });
@@ -880,7 +1032,7 @@ describe("gstack-memory-ingest state file", () => {
     expect(existsSync(statePath + ".bak")).toBe(true);
 
     const fresh = JSON.parse(readFileSync(statePath, "utf-8"));
-    expect(fresh.schema_version).toBe(1);
+    expect(fresh.schema_version).toBe(2);
     rmSync(home, { recursive: true, force: true });
   });
 
@@ -1109,6 +1261,14 @@ EOF
     fi
     exit 0
     ;;
+  sources)
+    # A4: transcript sources are registered before their first import.
+    case "\${2:-}" in
+      list) echo '{"sources":[]}' ;;
+      add) echo "Source added: \${3:-}" ;;
+    esac
+    exit 0
+    ;;
   put|put_page|put-page)
     # If new ingest code ever regresses to per-file puts, fail loudly so the
     # test signals a real architectural regression.
@@ -1201,7 +1361,7 @@ describe("gstack-memory-ingest writer (gbrain v0.20+ batch `import` interface)",
     // Verify gbrain was called exactly ONCE with import, not per-file put.
     const calls = readFileSync(logFile, "utf-8").trim().split("\n").filter(Boolean);
     expect(calls.length).toBe(1);
-    expect(calls[0]).toMatch(/^import\s+\/.+\/\.staging-ingest-\d+-\d+$/);
+    expect(calls[0]).toMatch(/^import\s+\/.+\/\.staging-ingest-\d+-\d+(-src-[a-z0-9-]+)?$/);
 
     // Verify args: --no-embed and --json both present.
     const argDump = readFileSync(argsFile, "utf-8");
@@ -1325,6 +1485,7 @@ case "\${1:-}" in
       echo '{"status":"success","duration_s":0.1,"imported":1,"skipped":0,"errors":0,"chunks":1,"total_files":1}'
     fi
     exit 0 ;;
+  sources) [ "\${2:-}" = list ] && echo '{"sources":[]}'; exit 0 ;;
   *) echo "unknown"; exit 2 ;;
 esac
 `;
@@ -1393,6 +1554,7 @@ case "\${1:-}" in
       echo '{"status":"success","duration_s":0.1,"imported":1,"skipped":0,"errors":0,"chunks":1,"total_files":1}'
     fi
     exit 0 ;;
+  sources) [ "\${2:-}" = list ] && echo '{"sources":[]}'; exit 0 ;;
   *) echo "unknown"; exit 2 ;;
 esac
 `;
@@ -1478,6 +1640,7 @@ case "\${1:-}" in
       echo '{"status":"success","duration_s":0.1,"imported":1,"skipped":0,"errors":1,"chunks":1,"total_files":2}'
     fi
     exit 0 ;;
+  sources) [ "\${2:-}" = list ] && echo '{"sources":[]}'; exit 0 ;;
   *) echo "unknown"; exit 2 ;;
 esac
 `;
