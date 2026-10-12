@@ -952,6 +952,42 @@ A running daemon with config A meeting a new invocation with config B exits
 1 with a `browse disconnect` hint instead of silently restarting and dropping
 tab state, cookies, or sessions.
 
+### Proxy from environment
+
+Without `--proxy`, `$B` picks the proxy up from the environment (#915). The
+first one set wins:
+
+1. `--proxy <url>`
+2. `BROWSE_PROXY_URL` (`BROWSE_PROXY_URL=direct` turns off steps 3-5)
+3. `HTTPS_PROXY`, then `https_proxy`
+4. `HTTP_PROXY`, then `http_proxy`
+5. `ALL_PROXY`, then `all_proxy`
+6. no proxy (a direct connection)
+
+Values from the environment follow the same credential policy as `--proxy`.
+`socks5h://` is treated as `socks5://`, because Chromium's SOCKS5 already
+resolves names through the proxy. `NO_PROXY` (or `no_proxy`) is translated to
+Chromium's bypass list: `example.com` and `.example.com` cover the domain and
+its subdomains, and CIDR blocks and `host:port` entries pass through.
+Loopback (`localhost`, `127.0.0.1`, `[::1]`) is always bypassed, for every
+proxy source. When a server starts, `$B` prints one line naming the proxy and
+where it came from, with credentials redacted.
+
+- **`warning: HTTPS_PROXY is not a proxy URL browse can use (...)`.** The
+  variable doesn't parse as `scheme://host:port`: a curl-style `host:port`, an
+  unsupported scheme, or a bad port. `$B` connects directly instead of failing
+  every command. Fix: `export HTTPS_PROXY=http://host:port` (or `socks5://`),
+  or set `BROWSE_PROXY_URL=direct` to silence the warning. A bad `--proxy` or
+  `BROWSE_PROXY_URL` is still an error, because those are explicit browse
+  settings and a silent direct connection could expose your real IP address.
+- **`the running browse daemon was started with different proxy settings (<VAR> differs), so it was not reused.`**
+  The proxy and the normalized `NO_PROXY` rules are part of the daemon config,
+  so a session whose environment differs (even by `NO_PROXY` alone) does not
+  silently reuse a daemon that routes differently. The refusal prints the
+  daemon's settings and this session's. Fix: run `browse stop` to restart the
+  daemon with this session's settings (stop works whatever the proxy settings
+  are), or set `BROWSE_PROXY_URL=direct` when the running daemon has no proxy.
+
 **Stealth scope (Layer C, always on).** Every context — headless `launch`,
 `--headed`/`--proxy`, `handoff`, and the `useragent`/`viewport --scale`
 rebuild (`recreateContext`) — gets the full Layer C mask, no opt-in flag.
@@ -1606,7 +1642,7 @@ the global `~/.gstack/browser-skills/foo/` only inside project-a.
 | `BROWSE_TUNNEL` | 0 | Activate the dual-listener tunnel architecture (requires `NGROK_AUTHTOKEN`) |
 | `BROWSE_TUNNEL_LOCAL_ONLY` | 0 | Test-only — bind both listeners locally without ngrok |
 | `CHROMIUM_PROFILE` | unset | Explicit headed Chromium profile directory (used by gbrowser's gbd per-workspace); honored by headed launch and profile-lock cleanup, not used by headless sessions |
-| `GSTACK_DISABLE_GPU` | unset | Set to `off` to skip the macOS headless GPU-taming flag set (applied by default on Darwin to stop runaway GPU-process spin) |
+| `GSTACK_DISABLE_GPU` | unset | On macOS, headless Chromium starts with a GPU-taming flag set (it stops runaway GPU-process spin) that also disables WebGL: `getContext('webgl')`/`'webgl2'` return `null`, so WebGL pages (three.js, Mapbox GL, sigma.js) show their fallback. Set `GSTACK_DISABLE_GPU=off` to enable WebGL (`off` is the only recognized value). |
 | `GSTACK_BROWSE_MAX_HTML_BYTES` | 52428800 (50MB) | `load-html` size cap |
 | `GSTACK_SECURITY_OFF` | unset | Emergency kill switch — disable ML classifier |
 | `GSTACK_STEALTH` | unset | Set to `extended` (also accepts `1`/`true`) to layer six aggressive patches (WebGL spoof, faked plugins, mediaDevices) on top of Layer C. Actively lies; can break sites. |

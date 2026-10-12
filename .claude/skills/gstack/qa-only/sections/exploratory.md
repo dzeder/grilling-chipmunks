@@ -56,9 +56,6 @@ Never reset DEADLINE_FILE/bypass DEADLINE_TOOL. Expiry or an invalid/missing DEA
 
 Each probe is one native command/interaction plus checks, excluding bookkeeping.
 Never batch probes.
-How one probe works: (1) if bounded, check the clock and choose the next command;
-(2) publish a checkpoint naming it (functional: `capture --after` publishes it);
-(3) run exactly that command via DEADLINE_TOOL or EVIDENCE_TOOL, read its result, repeat.
 
 1. First demonstrate success: output AND durable effects. Guard if bounded; await completion.
 2. **Decide whether another probe is needed.** If bounded, run `bun DEADLINE_TOOL status DEADLINE_FILE`.
@@ -103,7 +100,7 @@ with their failing contract and expected assertion; never create tests or freeze
 ## 4. Final report
 
 Use the surface report template; link each checkpoint. Separate browser scores, functional outcomes and proposed/executed tests.
-Write PROBE_DIR/annotations.json {evidence: [{capture, command, contract, expected, classification}], limits} (browser-only: evidence [], checkpoints in limits); before Markdown `bun EVIDENCE_TOOL materialize PROBE_DIR annotations.json` (fills observed/metadata; prints reportLinks; runs once per PROBE_DIR); you classify. Annotate every safe capture, including failures/replays: an omitted capture is withheld and keeps the verdict inconclusive. Classify a capture taken before an input change `superseded`; it closes when the same command reran on current inputs. Disclose withheld/incomplete evidence.
+Write PROBE_DIR/annotations.json {evidence: [{capture, command, contract, expected, classification}], limits: ["checkpoint 001"]} (limits: non-empty string array, not an object; browser-only: evidence []); before Markdown `bun EVIDENCE_TOOL materialize PROBE_DIR annotations.json` (fills observed/metadata; prints reportLinks; runs once per PROBE_DIR); you classify. Annotate every safe capture, including failures/replays: an omitted capture is withheld and keeps the verdict inconclusive. Classify a capture taken before an input change `superseded`; it closes when the same command reran on current inputs. Disclose withheld/incomplete evidence.
 Evidence is invocation-local.
 Missing prerequisites/expectations/observations, timeouts and refusal never pass.
 Pass requires all required current-input contracts to pass with no required remainder.

@@ -37,10 +37,10 @@ path authorizes no other; implementation edits require explicit authority.
 
 | Artifact | Destination | If writing is forbidden |
 |---|---|---|
-| Working plan, ledger and complete review report | Selected report file | Ask for a permitted destination if the user can supply one; wait without completion telemetry. If none is permitted, follow **Read-only review** below, then use **Blocked outcome**. |
+| Working plan, ledger and complete review report | Selected report file | Ask for a permitted destination if the user can supply one; wait without completion telemetry. If none is permitted, use **Read-only review** below, then **Report-back outcome**. |
 | QA Test Plan and task JSONL | Discovery paths below | Present each completely as **not persisted** and continue. |
 | TODOS.md | The project's TODO file | Present accepted TODO content as **not persisted** and continue. |
-| Required Review Log | The helper's state location | Present its fields as **not persisted**; at Review Log, use **Blocked outcome** instead of publishing a saved review. The final gate cannot pass without this log. |
+| Required Review Log | The helper's state location | Present its fields as **not persisted**; at Review Log, use **Report-back outcome** instead of publishing a saved review. The final gate cannot pass without this log. |
 | Best-effort metadata/learning logs | Helper-defined locations | Skip forbidden writes; otherwise keep their best-effort behavior. |
 
 QA Test Plan/task JSONL keep discovery paths `$GSTACK_STATE_ROOT/projects/{slug}/`:
@@ -404,12 +404,9 @@ changes or write findings into the plan yet.
   Count each once, label estimates, and seek fewer moving parts. Use these counts in B.
 - **Search check:** For each new architectural pattern, infrastructure component
    or concurrency approach, research built-ins, current practice and pitfalls
-   through Aside (entrypoint readiness), one read-only request per pattern:
-
-   ```bash
-   _EG="$HOME/.claude/skills/gstack/bin/gstack-egress-lib.sh"; [ -r "$_EG" ] && . "$_EG"; _aside_exec() { if command -v _gstack_egress_run >/dev/null 2>&1; then _gstack_egress_run open aside-agent aside.com aside-exec "user invoked this skill" --no-payload aside exec "$@"; else aside exec "$@"; fi; }
-   _aside_exec "Search the web for {framework} {pattern} built-in, {pattern} best practice {current year}, and {framework} {pattern} pitfalls. Read-only: do not sign in, submit, or change anything. Reply with up to 8 bullets, each with its source URL, then stop."
-   ```
+   through Aside (entrypoint readiness), one read-only request per pattern.
+   Prompt file text (create, write and send it with the Web research runs in Aside blocks in SKILL.md):
+   `{framework} {pattern} built-in, {pattern} best practice {current year}, and {framework} {pattern} pitfalls. Reply with up to 8 bullets, each with its source URL.`
 
    If Aside is unavailable, use host WebSearch for these queries. With neither,
    skip and note: "Search unavailable — proceeding with in-distribution knowledge only."
@@ -425,6 +422,13 @@ changes or write findings into the plan yet.
 
 - **Distribution check:** For new artifacts, verify build/publish CI/CD, target
    OS/architectures and download/install channels. Put deferrals in "NOT in scope".
+
+**Reality rows (required):** run `~/.claude/skills/gstack/bin/gstack-plan-reality rows --phase eng` and work each
+row it prints (tier 1 always: premise-table, already-done, surface-check, binding-decisions, numbers, deferred-asks, pr-count; tier 2 by detected scope, `--scope <csv>`).
+Every row cites a file:line receipt; the premise table counts `unverified=<n>`. End with
+one line per row, `REALITY: <row> pass|finding|n/a <summary> <file:line>`, then run
+`~/.claude/skills/gstack/bin/gstack-plan-reality check --phase eng <review-file|->` (it prints the `PLAN_REALITY:` line): a missing row is `incomplete`
+unattended; interactive runs repair twice, then warn at the gate.
 
 ### B. Resolve complexity selectors
 
@@ -477,6 +481,34 @@ including when B was skipped. A smaller arrangement that preserves scope is not
 a scope reduction. This result supplies MODE; it approves no pending remedy.
 Keep it current if later approved choices change scope.
 Continue to Section 1 only when no answer is pending.
+
+### Reality rows (why each exists)
+
+Each row is tied to the incident that earned it; its check is what
+`~/.claude/skills/gstack/bin/gstack-plan-reality rows --phase <p> --deep` prints. Tier 1 rows are required in every review; a
+tier 2 row is required when the detected scope names its scope (`--scope`)
+and may be omitted or marked `n/a` otherwise.
+
+| Row | Tier | Scope | Incident that earned it |
+|---|---|---|---|
+| `premise-table` | 1 | always | A wave rested on "13 of 28 threads ran nothing" with no per-thread evidence; the first table found 1 FALSE and 3 UNVERIFIED claims in 27. |
+| `already-done` | 1 | always | A fix was re-planned and rebuilt the day after main merged it; nobody read the base log. |
+| `surface-check` | 1 | always | The installer relied on `bun upgrade --version`; `bun upgrade --help` on the target listed only `--canary`. |
+| `binding-decisions` | 1 | always | An owner decision taken mid-review was undone two phases later by the project default it had replaced. |
+| `numbers` | 1 | always | An effort table with no basis was credited until a reviewer re-counted it; quoted parity ratios were off by two decimals. |
+| `deferred-asks` | 1 | always | An issue asked for six things; the plan shipped four and the owner found the other two after merge. |
+| `pr-count` | 1 | always | A five-PR wave became seven in the Eng phase; the cost of each extra gate had never been stated. |
+| `prior-art` | 2 | dependency | A patched vendored hunk was dropped on upgrade because nobody had recorded why the fork diverged. |
+| `transaction-semantics` | 2 | db | A pool change ended transactions on idle connections; the crash robot was not rerun. |
+| `contract-assumptions` | 2 | dependency | A sibling repo's default changed between planning and build; the plan still assumed the old flag. |
+| `falsification-box` | 2 | incident | An outage plan chased its first hypothesis for a day with nothing stated that would have killed it. |
+| `stop-reasons` | 2 | incident | A hold code shipped with no test that could produce it; it first fired in production. |
+| `reporter-environment` | 2 | incident | A bug was "ruled out" on a different runtime than the reporter's; the reporter still had it. |
+| `units` | 2 | perf | A timing input moved from ms to s; three downstream thresholds kept their numbers. |
+| `perf-table` | 2 | perf | A speedup came from one warm-cache run with no base comparison; main was as fast. |
+| `recall` | 2 | search | A query-plan change sped up the hot path and dropped recall on the smallest bucket. |
+| `dependency-fallback` | 2 | dependency | A stacked PR waited on a predecessor that never merged; nothing said what it could ship alone. |
+| `obligation-tiers` | 2 | dependency | A PR outgrew review because every accepted finding was treated as must-ship. |
 
 ## Review Sections (after scope is agreed)
 
@@ -643,9 +675,9 @@ Quality scoring rubric:
 
 A test that breaks under a behavior-preserving refactor asserts implementation: rewrite it at the owning boundary, unless exact output is the declared contract (goldens, prompt bytes, wire formats).
 
-Value card: `Value: protects=<...>; fails_when=<...>; why_new=<...>; seam=none` (seam: `none` or its name); each field at most 160 UTF-8 bytes here (clamp to 157 plus `...`; JSON keeps full values). One card per Critical Path and Edge Case in the Test Plan Artifact. A missing upstream card never blocks: derive it; ignore unknown fields.
+Value card: `Value: protects=<...>; fails_when=<...>; why_new=<...>; seam=none; no_claim=<...>` (seam: `none` or its name; `no_claim`: one sentence on what green does not prove and which fixtures or mocks stand in for what, e.g. `no_claim=provider acceptance (mocked provider; unit only)` or `no_claim=none beyond protects`; it never waives a required live check); each field at most 160 UTF-8 bytes here (clamp to 157 plus `...`; written JSON keeps full values). One card per Critical Path and Edge Case in the Test Plan Artifact. A missing upstream card never blocks: derive it; ignore unknown fields.
 
-Example: Value: protects=refundPayment rejects an empty reason; fails_when=the reason guard is removed or inverted; why_new=billing.test.ts covers processPayment only; seam=none
+Example: Value: protects=refundPayment rejects an empty reason; fails_when=the reason guard is removed or inverted; why_new=billing.test.ts covers processPayment only; seam=none; no_claim=provider acceptance (mocked provider; unit only)
 Rejected (covered_elsewhere): "checkout renders"; checkout.e2e.ts:15 covers it, so extend that test.
 
 Weak tests (★ smoke/existence/trivial, gate-failing or unrated) never count as coverage. X = paths with a ★★/★★★ test / total paths (value-weighted; the gate uses X); Y = paths with any test / total paths. /ship computes them; here every proposed test needs a card.
@@ -763,7 +795,7 @@ Repo: {owner/repo}
 
 ## Critical Paths
 - {end-to-end flow that must work}
-  Value: protects={...}; fails_when={...}; why_new={...}; seam=none
+  Value: protects={...}; fails_when={...}; why_new={...}; seam=none; no_claim={...}
 
 ## Tests to Retire
 - {existing test made obsolete by this plan and why, or none}
@@ -802,47 +834,26 @@ review. The user turns this off only by asking explicitly
 
 ```bash
 
-# Codex preflight: one block (functions sourced here don't persist to later blocks).
-_TEL=$(~/.claude/skills/gstack/bin/gstack-config get telemetry 2>/dev/null || echo off)
-_CODEX_CFG=$(~/.claude/skills/gstack/bin/gstack-config get codex_reviews 2>/dev/null || echo enabled)
-source ~/.claude/skills/gstack/bin/gstack-codex-probe 2>/dev/null || true
-if [ "$_CODEX_CFG" = "disabled" ]; then
-  _CODEX_MODE="disabled"
-elif { [ -n "${CODEX_THREAD_ID:-}" ] || [ -n "${CODEX_SANDBOX:-}" ] || [ "${GSTACK_ACTIVE_HOST:-}" = codex ]; }; then
-  _CODEX_MODE="under_codex"
-elif ! command -v codex >/dev/null 2>&1; then
-  _CODEX_MODE="not_installed"; _gstack_codex_log_event "codex_cli_missing" 2>/dev/null || true
-elif ! _gstack_codex_auth_probe >/dev/null 2>&1; then
-  _CODEX_MODE="not_authed"; _gstack_codex_log_event "codex_auth_failed" 2>/dev/null || true
-else
-  # The free sandbox check runs before the paid model probe. Probe code 2 means
-  # the CLI cannot execute at all, a different fix from an unusable model.
-  _CODEX_MP=0; _gstack_codex_sandbox_preflight || _CODEX_MP=3
-  [ "$_CODEX_MP" -ne 0 ] || { _gstack_codex_model_probe; _CODEX_MP=$?; }
-  if [ "$_CODEX_MP" -eq 3 ]; then
-    _CODEX_MODE="sandbox_unavailable"
-  elif [ "$_CODEX_MP" -eq 2 ]; then
-    _CODEX_MODE="broken_install"
-  elif [ "$_CODEX_MP" -ne 0 ]; then
-    _CODEX_MODE="model_unusable"
-  elif [ "${_GSTACK_CODEX_PROBE_STATE:-}" = inconclusive ]; then
-    _CODEX_MODE="unverified"
+if ! _OUTSIDE_CFG=$("$HOME/.claude/skills/gstack/bin/gstack-config" get --stored codex_reviews) || [ "$_OUTSIDE_CFG" = disabled ]; then
+  echo 'CODEX_MODE: disabled'
+elif ( # GSTACK_ACTIVE_HOST names the harness, never the model.
+if { [ -n "${CODEX_THREAD_ID:-}" ] || [ -n "${CODEX_SANDBOX:-}" ] || [ "${GSTACK_ACTIVE_HOST:-}" = codex ]; }; then
+  echo 'Codex outside review unavailable: harness mismatch; no outside process started. Missing coverage.' >&2
+  if { [ -n "${CLAUDECODE:-}" ] || [ "${GSTACK_ACTIVE_HOST:-}" = claude ]; } && { [ -n "${CODEX_THREAD_ID:-}" ] || [ -n "${CODEX_SANDBOX:-}" ] || [ "${GSTACK_ACTIVE_HOST:-}" = codex ]; }; then
+    echo 'Inherited harness markers conflict. Run setup --host <actual-harness> (claude or codex); do not guess a replacement provider.' >&2
   else
-    _CODEX_MODE="ready"; _gstack_codex_version_check 2>/dev/null || true
+    echo 'Repair installed skills: run setup --host codex from your gstack checkout.' >&2
   fi
+  exit 78
 fi
-echo "CODEX_MODE: $_CODEX_MODE"
+); then
+  if command -v codex >/dev/null 2>&1; then echo 'CODEX_MODE: ready'; else echo 'CODEX_MODE: not_installed'; fi
+else
+  echo 'CODEX_MODE: under_current_harness'
+fi
 ```
 
-Branch on the echoed `CODEX_MODE`:
-- **`disabled`** — the user turned Codex reviews off (`codex_reviews=disabled`). Skip the reviewer invocation; record disabled coverage as directed below; do NOT fall back to a Claude subagent — disabled means no extra review step. Print: "Codex review skipped (codex_reviews disabled). Re-enable: `gstack-config set codex_reviews enabled`."
-- **`not_installed`** — Codex CLI absent. Print: "Codex not installed; outside coverage unavailable. Install: `npm install -g @openai/codex`." Fall back to the Claude subagent path.
-- **`under_codex`** — stale artifact selected its own harness. Print: "Codex outside review unavailable: harness mismatch; no outside process started. Missing coverage. Repair: setup --host codex." Skip the outside invocation and construct the prompt below, then follow **Native fallback**. Conflicting inherited harness markers are not grounds to guess another provider.
-- **`not_authed`** — installed but no credentials. Print: "Codex not authenticated; outside coverage unavailable. Run `codex login` or set `$CODEX_API_KEY`." Fall back to the Claude subagent path.
-- **`broken_install`** — the CLI is on PATH but cannot execute (spawn ENOENT, non-executable binary, missing vendor payload). Print: "Codex is installed but its binary cannot run — Codex passes skipped. Reinstall: `npm install -g @openai/codex`." Relay the probe's HINT lines. Fall back to the Claude subagent path.
-- **`model_unusable`** — the selected model (see `CODEX_MODEL:`) is invalid or unavailable to the account (HTTP 400 on every call). Relay the probe's HINT lines and the fix (`GSTACK_CODEX_MODEL=<supported-model>` or config.toml `model`); never substitute a model. Fall back to the Claude subagent path. The ~10s round trip is cached for 1h.
-- **`sandbox_unavailable`** — Codex's sandbox cannot start here (containers without user namespaces); the probe printed the reason and fix. No paid call ran; outside coverage is unavailable. Fall back to the Claude subagent path.
-- **`ready`** or **`unverified`** — run the Codex pass below. `unverified` means the model check timed out; say so, and let the pass's own verdict decide.
+The historical `CODEX_MODE` variable describes **Codex** availability here. The invocation checks auth and the [policy](https://github.com/garrytan/gstack/blob/main/docs/model-policy.md) plan-review model. Missing/broken CLI: install or repair Codex; authentication failure: run `codex login`. Disabled ends this entire extra review step (so does a send's `consent_missing` line), including the native fallback; record outside_status: disabled and continue after the section. Disabled is not an unavailable provider and never triggers a replacement reviewer. Provider failure is missing outside coverage; follow the caller’s existing fallback only when reviews are enabled. Never substitute another external provider.
 
 **Outcome routing:** Pick exactly one row from this table, finish that row's
 steps, then leave Outside Voice. Missing reviewer coverage is non-blocking;
@@ -913,12 +924,12 @@ THE PLAN:
 
 **If `CODEX_MODE: ready` (or `unverified`) — run Codex:**
 
-Run this block only for `ready`, in the one foreground Bash call described below.
+Run this block for `ready` or `unverified`, in the one foreground Bash call described below.
 Its opening harness guard rechecks the fresh shell: exit 78 uses the same Native
 fallback below, never a replacement provider. Finish termination before fallback and consume only
 completed output. Use private temporary paths, with no background jobs.
 
-Create a private prompt file: run `umask 077; mktemp "${TMPDIR:-/tmp}/gstack-plan-prompt.XXXXXXXX"` in Bash and keep the returned path. Use Write to put the **complete prompt and context**, including actual plan/spec/source, in that file. Substitute its shell-quoted path for `<prepared-prompt-file>`; never interpolate user text into shell source. Request a final Recommendation: <action> because <specific reason> line, including an explicit no-findings rationale.
+Create a private prompt file: run `umask 077; mktemp "${TMPDIR:-/tmp}/gstack-plan-prompt.XXXXXXXX"` in Bash and keep the returned path. Use Write to put the **complete prompt and context**, including actual plan/spec/source, in that file. Substitute its shell-quoted path for `<prepared-prompt-file>`; never interpolate user text into shell source. Request a severity (Critical, High, Medium or Low) per finding and a final Recommendation: <action> because <specific reason> line, including an explicit no-findings rationale.
 
 ```bash
 # GSTACK_ACTIVE_HOST names the harness, never the model.
@@ -938,11 +949,13 @@ trap 'rm -rf "$_OUTSIDE_TMP"' EXIT
 _OUTSIDE_INPUT="$_OUTSIDE_TMP/prompt"
 cat -- '<prepared-prompt-file>' >"$_OUTSIDE_INPUT" || exit 1
 
-source "$HOME/.claude/skills/gstack/bin/gstack-codex-probe" && _gstack_codex_select_model exec || exit 1
-_gstack_codex_sandbox_preflight >/dev/null || exit 1
-_gstack_codex_first_use_notice
+_CODEX_PROBE="$HOME/.claude/skills/gstack/bin/gstack-codex-probe"
+export _CODEX_DEADLINE=$(($(date +%s)+300)); _CODEX_OUT=$("$_CODEX_PROBE" role-ready exec) || exit $?
+_CODEX_SEL=$(echo "$_CODEX_OUT" | sed -n 's/^CODEX_SEL: //p')
+_CODEX_SANDBOX_MODE=$(echo "$_CODEX_OUT" | sed -n 's/^CODEX_SANDBOX: //p')
+"$_CODEX_PROBE" show-first-use-notice
 _OUTSIDE_EXIT=0
-_gstack_codex_timeout_wrapper 300 codex exec - -C "$_REPO_ROOT" -s "${_GSTACK_CODEX_SANDBOX:?}" -c "model=\"${_GSTACK_CODEX_SEL:?}\"" -c skills.include_instructions=false -c 'model_reasoning_effort="high"' -c 'web_search="cached"' --json -o "$_OUTSIDE_TMP/text" <"$_OUTSIDE_INPUT" >"$_OUTSIDE_TMP/events" 2>"$_OUTSIDE_TMP/stderr" || _OUTSIDE_EXIT=$?
+"$_CODEX_PROBE" run-with-timeout --effort high 300 codex exec - -C "$_REPO_ROOT" -s "${_CODEX_SANDBOX_MODE:?}" -c "model=\"${_CODEX_SEL:?}\"" -c skills.include_instructions=false -c 'web_search="cached"' --json -o "$_OUTSIDE_TMP/text" <"$_OUTSIDE_INPUT" >"$_OUTSIDE_TMP/events" 2>"$_OUTSIDE_TMP/stderr" || _OUTSIDE_EXIT=$?
 cat "$_OUTSIDE_TMP/text" 2>/dev/null || tail -n 20 "$_OUTSIDE_TMP/events"
 
 cat "$_OUTSIDE_TMP/stderr" >&2 || { [ "$_OUTSIDE_EXIT" -ne 0 ] || _OUTSIDE_EXIT=1; }
@@ -1094,10 +1107,11 @@ must pass steps 1–4 again.
    if later approved decisions changed its requirements. Do not recreate unchanged output.
 2. **Save and Read back.** Use Plan File Review Report to save the complete body
    and terminal `## GSTACK REVIEW REPORT`; pass its Read-back gate. Forbidden
-   persistence or an unrecovered save requires **Blocked outcome**, not logging.
+   persistence uses **Report-back outcome**; an unrecovered save requires
+   **Blocked outcome**, not logging.
 3. **Log the saved review.** Run Review Log with saved Completion summary values.
-   If the required log is forbidden, show fields as not persisted and take **Blocked outcome**;
-   failures use the write policy's recovery. Neither supplies completion or saved-dashboard credit.
+   If the required log is forbidden, show fields as not persisted and take **Report-back outcome**;
+   failures use the write policy's recovery.
 4. **Publish.** Display the Review Readiness Dashboard, then present the saved
    Completion summary to the user.
 5. **Choose navigation.** Use Next Steps — Review Chaining; wait for its answer.
@@ -1181,13 +1195,13 @@ backslashes serialize cleanly — never use hand-rolled `echo` / `printf`.
 
 ```bash
 GSTACK_STATE_ROOT=$(~/.claude/skills/gstack/bin/gstack-paths --get GSTACK_STATE_ROOT); : "${GSTACK_STATE_ROOT:?gstack-paths failed; reinstall with ./setup or /gstack-upgrade}"
-BRANCH=$(~/.claude/skills/gstack/bin/gstack-slug --get BRANCH 2>/dev/null)
 SLUG=$(~/.claude/skills/gstack/bin/gstack-slug --get SLUG 2>/dev/null)
 TASKS_DIR="$GSTACK_STATE_ROOT/projects/${SLUG:-unknown}"
 mkdir -p "$TASKS_DIR"
 TASKS_FILE="$TASKS_DIR/tasks-eng-review-$(date +%Y%m%d-%H%M%S).jsonl"
 COMMIT=$(git rev-parse HEAD 2>/dev/null || echo unknown)
-BRANCH=$(git branch --show-current 2>/dev/null || echo unknown)
+# The task record keeps the raw git branch; artifact filenames keep gstack-slug's sanitized BRANCH.
+GIT_BRANCH=$(git branch --show-current 2>/dev/null || echo unknown)
 RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$$"
 
 # Repeat ONE jq invocation per task identified during this review.
@@ -1198,7 +1212,7 @@ RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$$"
 jq -nc \
   --arg phase 'eng-review' \
   --arg run_id "$RUN_ID" \
-  --arg branch "$BRANCH" \
+  --arg branch "$GIT_BRANCH" \
   --arg commit "$COMMIT" \
   --arg id "$TASK_ID" \
   --arg priority "$PRIORITY" \
@@ -1228,6 +1242,7 @@ prior reviews; the terminal report adds those separately.
 ### Completion summary
 From final decisions/outputs; publish after report Read-back and Review Log:
 - Step 0: Scope Challenge — ___ (scope accepted as-is / scope reduced per recommendation)
+- Reality rows: ___/___ applicable rows emitted (`PLAN_REALITY` line), ___ unverified premises
 - Architecture Review: ___ issues found
 - Code Quality Review: ___ issues found
 - Test Review: diagram produced, ___ gaps identified
@@ -1314,7 +1329,7 @@ DROP the current skill's row; emit the sentinel only when both are zero.
 
 ### Write to the report file
 
-If the report destination is absent or writing is forbidden, assemble the same complete working plan, review output and terminal report in chat, labeled not persisted. Do not run the file-writing steps below or claim their Read-back gate passed. Then follow **Blocked outcome** in the entrypoint. Otherwise save only accepted changes, keeping unresolved choices pending:
+If the report destination is absent or writing is forbidden, assemble the same complete working plan, review output and terminal report in chat, labeled not persisted. Do not run the file-writing steps below or claim their Read-back gate passed. Then use **Report-back outcome**. Otherwise save only accepted changes, keeping unresolved choices pending:
 
 The report must always be the LAST section of the report file — never mid-file.
 Use a single delete-then-append flow:
@@ -1386,9 +1401,8 @@ Historical source "claude" is a native subagent; "claude-code" is the external C
 Do not infer old providers or unknown models from today's harness. A native result
 does not fill missing, disabled or skipped outside coverage.
 
-**Source attribution:** Append a recorded `via` to the suffix, for example
-"CLEAR (PLAN via /autoplan)" or "CLEAR (DIFF via /ship)". Without `via`, keep
-"CLEAR (PLAN)" or "CLEAR (DIFF)". Below the dashboard, group `autoplan-voices`
+**Source attribution:** Append a recorded `via` to the suffix ("CLEAR (PLAN via
+/autoplan)"); without one, keep "CLEAR (PLAN)" or "CLEAR (DIFF)". Below the dashboard, group `autoplan-voices`
 and `design-outside-voices` by workflow run and phase. Show each phase's provider
 and outside_status; retain partial coverage. These details do not clear Eng Review.
 
@@ -1397,8 +1411,7 @@ and outside_status; retain partial coverage. These details do not clear Eng Revi
 - **Content-first rule:** For `review`, `adversarial-review`, `codex-review`,
   ship-stage reviews and `design-review-lite`, use `review_freshness.status`
   and show its `reason`. CURRENT means a completed clean review whose start and
-  end content fingerprints equal the current `---WTREE---` fingerprint. This
-  fingerprint covers working-tree content, not just the commit.
+  end content fingerprints equal the current `---WTREE---` fingerprint.
   STALE or UNVERIFIED cannot clear Eng Review. Missing `review_freshness`,
   including legacy log-only records, means UNVERIFIED. Never fall back to HEAD
   equality or commit distance for diff evidence, even at zero commits.
@@ -1407,12 +1420,11 @@ and outside_status; retain partial coverage. These details do not clear Eng Revi
 - **Plan records** (plan-ceo-review, plan-eng-review, plan-design-review and
   codex-plan-review) use the 7-day window, not the working-tree fingerprint.
   If `plan_sha256` is present, you may compare the plan file and report a mismatch.
-  For plan records only, compare the recorded commit with `---HEAD---`.
-  If different, run `git rev-list --count STORED_COMMIT..HEAD` and report
+  Compare the recorded commit with `---HEAD---`; if different, run
+  `git rev-list --count STORED_COMMIT..HEAD` and report
   "Note: {skill} review from {date} may be stale — {N} commits since review".
-  A failed command means UNKNOWN, treated as stale. Without commit tracking,
-  retain the note to consider re-running. Omit staleness notes when all reviews
-  are current.
+  A failed command means UNKNOWN, treated as stale; without commit tracking,
+  suggest a re-run. Omit notes when all reviews are current.
 
 **3. Choose the historical verdict.** CLEARED requires the selected Eng Review
 to be `clean`, within 7 days and fresh under step 2. Otherwise report NOT CLEARED
@@ -1467,6 +1479,8 @@ copy the working plan's task prerequisites, dependencies and execution order
 without adding or strengthening them in the question or descriptions. A test
 required before editing one function does not make every independent lane wait.
 A next-step answer approves no implementation change.
+
+When the user chooses C: **Implementation model:** relay model/source from `"$HOME/.claude/skills/gstack/bin/gstack-models" resolve --role implementation --provider anthropic`. gstack cannot change this session. Recommend only; no spawn or config edits unless asked. On error, relay its repair, not a model. [Policy setup](https://github.com/garrytan/gstack/blob/main/docs/model-policy.md).
 
 ## Learning hooks
 
