@@ -183,6 +183,41 @@ function launchedProcess(browser: Browser | null | undefined): ChildProcess | nu
 }
 
 /**
+ * #2709: PID of the Chromium browser process gstack launched, read over CDP
+ * (`SystemInfo.getProcessInfo`, type "browser") because Playwright 1.62's
+ * Browser has no `process()`. Call it only for a launch gstack owns; a
+ * connected browser belongs to someone else and must never be reaped. Bounded:
+ * a hung or failed CDP call logs once and returns null, which means no reap.
+ */
+export async function launchedChromiumPid(browser: Browser, timeoutMs = 2_000): Promise<number | null> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const query = async (): Promise<number | null> => {
+    const session = await browser.newBrowserCDPSession();
+    try {
+      const { processInfo } = await session.send('SystemInfo.getProcessInfo');
+      const pid = processInfo.find((p) => p.type === 'browser')?.id;
+      return Number.isInteger(pid) && pid! > 0 ? pid! : null;
+    } finally {
+      await session.detach().catch(() => {});
+    }
+  };
+  try {
+    return await Promise.race([
+      query(),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`timed out after ${timeoutMs}ms`)), timeoutMs);
+      }),
+    ]);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn(`[browse] Could not record the Chromium PID (CDP SystemInfo.getProcessInfo: ${msg}); browse stop cannot reap a surviving Chromium.`);
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
  * Resolve why the underlying Chromium ChildProcess is going away.
  *
  * The 'disconnected' Playwright event fires before the child process emits
@@ -286,7 +321,7 @@ export class BrowserManager {
   // at startup based on BROWSE_PROXY_URL. For SOCKS5 with auth, server.ts
   // points this at the local bridge (socks5://127.0.0.1:<bridgePort>); for
   // HTTP/HTTPS or unauth SOCKS5, it's the upstream URL directly.
-  private proxyConfig: { server: string; username?: string; password?: string } | null = null;
+  private proxyConfig: { server: string; bypass?: string; username?: string; password?: string } | null = null;
   private pages: Map<number, Page> = new Map();
   private tabSessions: Map<number, TabSession> = new Map();
   private activeTabId: number = 0;
@@ -527,7 +562,7 @@ export class BrowserManager {
    * launchHeaded(). Called by server.ts at startup once the (optional) SOCKS5
    * bridge is up.
    */
-  setProxyConfig(cfg: { server: string; username?: string; password?: string } | null): void {
+  setProxyConfig(cfg: { server: string; bypass?: string; username?: string; password?: string } | null): void {
     this.proxyConfig = cfg;
   }
 
@@ -669,12 +704,10 @@ export class BrowserManager {
     });
 
     // #2709: record the child's identity so the CLI can reap a survivor after
-    // daemon shutdown. `.process()` exists here — we launched this browser.
+    // daemon shutdown. We launched this browser, so its PID is ours to record.
     {
-      const proc = launchedProcess(this.browser);
-      this.chromiumProcInfo = proc?.pid
-        ? { pid: proc.pid, startTime: readPidStartTime(proc.pid) }
-        : null;
+      const pid = await launchedChromiumPid(this.browser);
+      this.chromiumProcInfo = pid ? { pid, startTime: readPidStartTime(pid) } : null;
     }
 
     this.context = await this.browser.newContext(contextOptions);
@@ -1554,6 +1587,41 @@ export class BrowserManager {
   async setViewport(width: number, height: number) {
     this.currentViewport = { width, height };
     await this.getPage().setViewportSize({ width, height });
+  }
+
+  /**
+   * Undo a `viewport WxH` pin. Headless contexts restore the 1280x720 launch
+   * default. Headed contexts launch with `viewport: null`, but Playwright has no
+   * way to drop a page's emulated size, so the active tab gets a fresh page in
+   * the same context (cookies and storage persist, refs reset as on navigation).
+   */
+  async resetViewport(): Promise<'window' | 'default'> {
+    this.currentViewport = { width: 1280, height: 720 };
+    if (this.connectionMode !== 'headed') {
+      await this.getPage().setViewportSize(this.currentViewport);
+      return 'default';
+    }
+    if (!this.context) throw new Error('Browser not launched');
+
+    const tabId = this.activeTabId;
+    const pinned = this.getPage();
+    const loaded = this.getActiveSession().getLoadedHtml();
+    const url = pinned.url();
+    const page = await this.context.newPage();
+    const session = new TabSession(page);
+    this.wirePageEvents(page);
+    try {
+      if (loaded) await session.setTabContent(loaded.html, { waitUntil: loaded.waitUntil });
+      else if (url !== 'about:blank') await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    } catch (err) {
+      await page.close().catch(() => {});
+      throw err;
+    }
+    this.pages.set(tabId, page);
+    this.tabSessions.set(tabId, session);
+    await pinned.close().catch(() => {});
+    await page.bringToFront().catch(() => {});
+    return 'window';
   }
 
   // ─── Extra Headers ─────────────────────────────────────────

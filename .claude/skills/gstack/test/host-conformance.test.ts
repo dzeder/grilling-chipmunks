@@ -29,9 +29,10 @@ const DISCOVERY: Record<string, string> = {
   opencode: '.config/opencode/skills',
   cursor: '.cursor/skills',
   copilot: '.copilot/skills',
+  agy: '.gemini/antigravity-cli/skills',
 };
-/** Every directory any host (or a shared agents layout) reads. */
-const ALL_DISCOVERY_DIRS = [...Object.values(DISCOVERY), '.agents/skills', '.copilot/skills', '.hermes/skills'];
+/** Every directory any host (or a shared agents layout) reads; .gemini/skills is Gemini CLI's. */
+const ALL_DISCOVERY_DIRS = [...Object.values(DISCOVERY), '.agents/skills', '.copilot/skills', '.hermes/skills', '.gemini/skills'];
 
 const installable = ALL_HOST_CONFIGS.filter(c => c.tier !== 'instruction-only').map(c => c.name);
 const instructionOnly = ALL_HOST_CONFIGS.filter(c => c.tier === 'instruction-only').map(c => c.name);
@@ -203,7 +204,9 @@ describe.skipIf(process.platform === 'win32')('host conformance kit', () => {
     const qa = join(src, '.agents/skills/gstack-qa/sections');
     rmSync(join(qa, readdirSync(qa).find(n => n.endsWith('.md'))!));
     const status = runSetup(f, join(src, 'setup'), ['--status']);
-    expect(status.status).toBe(0);
+    // A1: broken section links make --status exit 1 instead of always 0.
+    expect(status.status).toBe(1);
+    expect(status.stderr).toContain('broken section links');
     expect(status.stdout).toMatch(/codex global: router is a symlink, which Codex skips\. Fix: cd \S+ && \.\/setup --host codex; section links: [1-9]\d* of \d+ broken \(first: [^)]*\)\. Fix: cd /);
   }, 60_000);
 

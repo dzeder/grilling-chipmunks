@@ -15,6 +15,7 @@ import {
 import { basename, dirname, join, isAbsolute, delimiter, resolve } from 'node:path';
 import { redactFindingSpans } from '../redact-engine';
 import { CsoError, MAX_OUTPUT } from './contracts';
+import { windowsDockerUnavailable } from './windows-docker';
 
 const SOURCE_RUNTIME = /^bun(?:\.exe)?$/i.test(basename(process.execPath));
 const WINDOWS_GIT =
@@ -45,6 +46,7 @@ export function executable(name: string): string {
       );
     }
   }
+  if (process.platform === 'win32' && name.toLowerCase() === 'docker') windowsDockerUnavailable();
   for (const directory of TRUSTED_DIRECTORIES) {
     const candidates =
       process.platform === 'win32'
@@ -60,6 +62,9 @@ export function executable(name: string): string {
   }
   throw new CsoError('TOOL_UNAVAILABLE', `${name} is not installed in a trusted system executable directory`);
 }
+// Git for Windows 2.56 rejects GIT_CONFIG_GLOBAL=NUL ("unable to access 'NUL'"); its MSYS
+// path layer maps /dev/null, so one spelling empties the global config on every platform.
+export const EMPTY_GLOBAL_GIT_CONFIG = '/dev/null';
 export function childEnvironment(home: string): Record<string, string> {
   return {
     PATH: TRUSTED_PATH,
@@ -68,7 +73,7 @@ export function childEnvironment(home: string): Record<string, string> {
     LC_ALL: 'C.UTF-8',
     TZ: 'UTC',
     GIT_CONFIG_NOSYSTEM: '1',
-    GIT_CONFIG_GLOBAL: process.platform === 'win32' ? 'NUL' : '/dev/null',
+    GIT_CONFIG_GLOBAL: EMPTY_GLOBAL_GIT_CONFIG,
     GIT_TERMINAL_PROMPT: '0',
     GIT_OPTIONAL_LOCKS: '0',
     GIT_ATTR_NOSYSTEM: '1',
@@ -225,10 +230,13 @@ function safeMetadata(value: string, key: string): boolean {
     return true;
   return false;
 }
+// Run ids are public CI metadata to the shared redactor; here only the validated
+// workflow slot may carry one.
+const RUN_ID_SEGMENT = /(\/actions\/runs\/)[0-9]+/g;
 function sanitizeJson(value: unknown, key: string, seen: WeakSet<object>, trustedMetadata: boolean): unknown {
   if (typeof value === 'string') {
     if (trustedMetadata && safeMetadata(value, key)) return value;
-    return redact(value);
+    return redact(value).replace(RUN_ID_SEGMENT, '$1<REDACTED-ci-run-id>');
   }
   if (value === null || typeof value !== 'object') return value;
   if (seen.has(value as object)) throw new CsoError('INVALID_SCHEMA', 'Cyclic JSON cannot be persisted');
@@ -496,6 +504,28 @@ function hardenGit(file: string, args: string[]): { args: string[]; configs?: Gi
     ],
   };
 }
+/** Ceiling for one supervised child command. */
+export const COMMAND_TIMEOUT_MS = 300_000;
+/**
+ * Ceiling for one dependency fetch or install command inside a preparation
+ * container. Rails lockfiles that pin only the `ruby` platform compile native
+ * gems offline, which takes about 385 s at the app role's CPU share. Every
+ * other command keeps COMMAND_TIMEOUT_MS, and both stay inside the caller's
+ * aggregate deadline.
+ */
+export const PREPARATION_COMMAND_TIMEOUT_MS = 900_000;
+export function commandTimeoutMs(
+  deadline: number,
+  phase: 'command' | 'preparation',
+  now = Date.now(),
+): number {
+  return Math.max(
+    1,
+    Math.min(phase === 'preparation' ? PREPARATION_COMMAND_TIMEOUT_MS : COMMAND_TIMEOUT_MS, deadline - now),
+  );
+}
+/** Raw output is never printed or persisted, so a caller may opt in to more than MAX_OUTPUT (snapshot path listings). */
+const RAW_OUTPUT_LIMIT = 16 * 1024 * 1024;
 export async function runProcess(
   file: string,
   args: string[],
@@ -508,6 +538,8 @@ export async function runProcess(
     raw?: boolean; // Only for inert Git framing or private helper/Docker control JSON that is validated before use. Never print or persist raw results.
     /** `splice` replaces each located sensitive span with a marker instead of withholding both channels. */
     redaction?: 'withhold' | 'splice';
+    /** Allows PREPARATION_COMMAND_TIMEOUT_MS; only preparation dependency commands set it. */
+    preparationCommand?: true;
   },
 ): Promise<ProcessResult> {
   if (!isAbsolute(file) || !isAbsolute(opts.cwd) || !existsSync(opts.cwd))
@@ -519,7 +551,7 @@ export async function runProcess(
     throw new CsoError('INVALID_ARGUMENT', 'Invalid child argument');
   const hardened = hardenGit(file, args);
   args = hardened.args;
-  const cap = Math.min(opts.maxBytes ?? MAX_OUTPUT, MAX_OUTPUT);
+  const cap = Math.min(opts.maxBytes ?? MAX_OUTPUT, opts.raw ? RAW_OUTPUT_LIMIT : MAX_OUTPUT);
   return new Promise((resolve, reject) => {
     const child = spawn(file, args, {
       cwd: opts.cwd,
@@ -545,7 +577,13 @@ export async function runProcess(
         timedOut = true;
         kill();
       },
-      Math.max(1, Math.min(opts.timeoutMs ?? 30_000, 300_000)),
+      Math.max(
+        1,
+        Math.min(
+          opts.timeoutMs ?? 30_000,
+          opts.preparationCommand ? PREPARATION_COMMAND_TIMEOUT_MS : COMMAND_TIMEOUT_MS,
+        ),
+      ),
     );
     const capture = (target: Buffer[]) => (chunk: Buffer) => {
       bytes += chunk.length;
@@ -607,12 +645,13 @@ export async function runProcess(
     child.stdin.end(opts.input);
   });
 }
-export async function git(repo: string, args: string[], home: string): Promise<string> {
+export async function git(repo: string, args: string[], home: string, maxBytes?: number): Promise<string> {
   const result = await runProcess(executable('git'), ['--no-optional-locks', '-C', repo, ...args], {
     cwd: home,
     env: childEnvironment(home),
     raw: true,
     timeoutMs: 15_000,
+    maxBytes,
   });
   if (result.code || result.timedOut || result.truncated) {
     // Git stderr and argv can contain repository paths, refs, and configured

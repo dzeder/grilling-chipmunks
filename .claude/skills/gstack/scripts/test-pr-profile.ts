@@ -11,7 +11,7 @@ import { derivedDependencies, type DerivedDependencies } from './pr-dependencies
 export const PR_PROFILE_CASE_IDS = [
   'hermetic-canary', 'hermetic-sentinel',
   'browse-basic', 'browse-snapshot', 'skillmd-setup-discovery',
-  'qa-bootstrap', 'review-sql-injection', 'review-coverage-audit',
+  'qa-bootstrap', 'review-sql-injection', 'review-gate-integrity', 'review-coverage-audit',
   'qa-functional-cli-report', 'qa-functional-webhook-report',
   'qa-functional-cli-fix', 'qa-functional-webhook-fix',
   'review-exploratory-small-cli', 'ship-exploratory-small-cli', 'ship-exploratory-unavailable',
@@ -46,6 +46,7 @@ export const PR_PROFILE_FILES: Record<string, readonly string[]> = {
   'test/skill-e2e-qa-functional-fix.test.ts': ['qa-functional-cli-fix', 'qa-functional-webhook-fix'],
   'test/skill-e2e-qa-callers.test.ts': ['review-exploratory-small-cli', 'ship-exploratory-small-cli', 'ship-exploratory-unavailable', 'ship-exploratory-plan-checks', 'ship-exploratory-late-input'],
   'test/skill-e2e-review.test.ts': ['review-sql-injection'],
+  'test/skill-e2e-gate-integrity.test.ts': ['review-gate-integrity'],
   'test/skill-e2e-coverage-audit.test.ts': ['review-coverage-audit', 'plan-eng-coverage-audit'],
   'test/skill-e2e-test-value.test.ts': ['ship-coverage-value', 'review-test-value', 'test-audit-report-only'],
   'test/skill-e2e-plan.test.ts': ['plan-review-report'],
@@ -211,7 +212,11 @@ export const FREE_ONLY_PR_FILES = [
   'scripts/ubicloud/**',
   'tsconfig.test.json', // Read only by `tsc -p tsconfig.test.json` (typecheck:test); Bun's runtime reads tsconfig.json.
   '.gitignore', // Changes which untracked files git reports, never tracked content a case reads.
+  '.gstack/generated.json', // gstack's own regen registry: gstack-regen/gstack-pregate read it from origin/<base> of the repo they run in; paid cases run in fixture repos.
+  '.gstack/pregate.json', // gstack's own pre-gate policy: same trust boundary, same reason.
+  '.gstack/ship-policy.json', // gstack's own ship policy: gstack-ship-policy/gstack-restamp read it from origin/<base> of the repo they run in; same reason.
   'scripts/retired-command.ts', // One-release stubs for retired package scripts; no paid case imports it.
+  'careful/bin/check-careful.sh', // /careful PreToolUse hook: covered by test/hook-scripts.test.ts; no paid fixture copies or runs it.
   // Reporting and launch tools: they read CI history or start a lane, never run inside a paid case.
   'scripts/test-health-report.ts',
   'scripts/bump-harness-version.ts',
@@ -226,6 +231,8 @@ export const FREE_ONLY_PR_FILES = [
   '.github/workflows/dependency-review.yml',
   '.github/workflows/free-tests.yml',
   '.github/workflows/make-pdf-gate.yml',
+  '.github/workflows/model-policy-freshness.yml',
+  '.github/workflows/measure-journal-read.yml',
   '.github/workflows/native-qualification.yml',
   '.github/workflows/osv-scanner.yml',
   '.github/workflows/platform-qualification.yml',
@@ -234,6 +241,9 @@ export const FREE_ONLY_PR_FILES = [
   '.github/workflows/scorecard.yml',
   '.github/workflows/skill-docs.yml',
   '.github/workflows/test-health.yml',
+  '.github/workflows/eval-sweep.yml', // The weekly off-ship sweep on main; no PR-gate case reads it, and it never gates a PR.
+  '.github/actionlint.yaml', // Runner labels for actionlint only.
+  'scripts/ship-measure-sweep.ts', // The weekly sweep CLI; it launches paid cases, never runs inside one.
   '.github/workflows/version-gate.yml',
   '.github/workflows/windows-free-tests.yml',
   '.github/workflows/windows-setup-e2e.yml',

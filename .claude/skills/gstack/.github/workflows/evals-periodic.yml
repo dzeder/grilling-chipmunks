@@ -20,6 +20,9 @@ run-name: ${{ inputs.nonce && format('Periodic Evals [eval-bg {0}]', inputs.nonc
 on:
   schedule:
     - cron: '0 6 * * 1'  # Monday 6 AM UTC; build-image below builds or reuses the CI image
+    # Daily, for autoplan-schema-canary alone (latest Claude Code vs the /autoplan
+    # guard's payload assumptions); every census job below skips this schedule.
+    - cron: '30 7 * * *'
   workflow_dispatch:
     inputs:
       redispatch_of:
@@ -38,13 +41,17 @@ on:
         description: 'eval-bg: dispatch nonce carried in the run name'
         type: string
         default: ''
+      schema_canary_only:
+        description: 'Run only autoplan-schema-canary (the daily latest-Claude-Code canary), not the census'
+        type: boolean
+        default: false
 
 # One group per ref AND event: a branch dispatch never cancels main's census,
 # and a manual main dispatch never cancels the scheduled one. A re-dispatch
 # runs in its own group so it never cancels the run that dispatched it; both
 # runs are reported.
 concurrency:
-  group: evals-periodic-${{ github.ref }}-${{ github.event_name }}${{ inputs.redispatch_of && format('-redispatch-{0}', inputs.redispatch_of) || '' }}
+  group: evals-periodic-${{ github.ref }}-${{ github.event_name }}${{ inputs.redispatch_of && format('-redispatch-{0}', inputs.redispatch_of) || '' }}${{ (github.event.schedule == '30 7 * * *' || inputs.schema_canary_only) && '-schema-canary' || '' }}
   cancel-in-progress: true
 
 env:
@@ -92,10 +99,10 @@ jobs:
       # Registry cache export needs a docker-container builder — the default
       # `docker` driver hard-errors on cache-to.
       - if: steps.check.outputs.exists == 'false'
-        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
       - if: steps.check.outputs.exists == 'false'
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .github/docker
           file: .github/docker/Dockerfile.ci
@@ -110,6 +117,9 @@ jobs:
   plan-slices:
     runs-on: ubicloud-standard-8
     timeout-minutes: 10
+    # The daily schedule and a canary-only dispatch run schema-canary alone;
+    # every census job needs this one, so they all skip with it.
+    if: ${{ github.event.schedule != '30 7 * * *' && !inputs.schema_canary_only }}
     permissions:
       contents: read
     outputs:
@@ -135,7 +145,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
-          bun-version: 1.4.0
+          bun-version: 1.4.2
 
       - name: Emit run manifest (ALL periodic tests minus reasoned excludes)
         env:
@@ -175,6 +185,54 @@ jobs:
           name: gate-census-plan
           path: /tmp/gate-census-plan/manifest.json
           retention-days: 30
+
+  # autoplan-schema-canary: installs the latest published Claude Code with
+  # install scripts off, audits registry signatures, and checks the Agent and
+  # Read hook payloads against the journal with the /autoplan guard's own
+  # comparison. Daily, so a schema strip reds within a day of a release; the
+  # weekly census also runs it. Read-only token; the key's spend is capped by
+  # the case (one haiku session, about $0.02).
+  schema-canary:
+    runs-on: ubicloud-standard-2
+    needs: build-image
+    if: ${{ github.event.schedule == '30 7 * * *' || inputs.schema_canary_only }}
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ${{ needs.build-image.outputs.image-tag }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      options: --user runner
+    env:
+      EVALS_RUN_ID: ci-${{ github.run_id }}-${{ github.run_attempt }}-schema-canary
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Fix bun temp
+        uses: ./.github/actions/fix-bun-temp
+
+      - name: Restore deps
+        uses: ./.github/actions/restore-deps
+
+      - name: Run autoplan-schema-canary on the latest Claude Code
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GSTACK_EVAL_DIR: /tmp/schema-canary-results
+        run: EVALS_TIER=periodic bun run scripts/test-paid-shards.ts --tier periodic --case autoplan-schema-canary --trials 1
+
+      - name: Upload canary results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: schema-canary-a${{ github.run_attempt }}
+          path: /tmp/schema-canary-results
+          if-no-files-found: ignore
+          retention-days: 90
 
   eval-slices:
     runs-on: ubicloud-standard-8
@@ -587,7 +645,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
-          bun-version: 1.4.0
+          bun-version: 1.4.2
 
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
@@ -675,7 +733,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set +e
-          bun run eval:pass-rates --gate --runs 10 > /tmp/pass-rates.txt 2>&1
+          bun run eval:pass-rates --gate --runs 10 --branch "$GITHUB_REF_NAME" > /tmp/pass-rates.txt 2>&1
           echo "exit=$?" >> "$GITHUB_OUTPUT"
           cat /tmp/pass-rates.txt
 
@@ -700,28 +758,42 @@ jobs:
             echo "redispatch=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # A red weekly lane nobody must action is waste — upsert ONE tracking
-      # issue (never a new issue per week) with the headline and failure block
-      # of both lanes, and close it on the next green run.
-      - name: Upsert tracking issue on failure
-        if: always() && github.ref == 'refs/heads/main' && (steps.reconcile.outputs.exit != '0' || steps.gate-reconcile.outputs.exit != '0' || steps.pass-rates.outputs.exit != '0' || needs.eval-slices.result != 'success' || !contains(fromJSON('["success","skipped"]'), needs.eval-codex-slices.result) || needs.gate-census.result != 'success')
+      # A red census writes one report on every ref: the step summary and the
+      # census-report artifact. Only main (scheduled weekly, or dispatched on
+      # main) upserts ONE tracking issue (never a new issue per week) and
+      # closes it on the next green run; a branch-dispatched census never
+      # comments on or closes main's issue. Every report-derived line goes
+      # through the one published-text sanitizer (scripts/lib/published-text.ts).
+      - name: Write the census report
+        if: always() && (steps.reconcile.outputs.exit != '0' || steps.gate-reconcile.outputs.exit != '0' || steps.pass-rates.outputs.exit != '0' || needs.eval-slices.result != 'success' || !contains(fromJSON('["success","skipped"]'), needs.eval-codex-slices.result) || needs.gate-census.result != 'success')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REDISPATCH: ${{ steps.verdict.outputs.redispatch }}
           REDISPATCH_OF: ${{ inputs.redispatch_of }}
         run: |
           set -euo pipefail
-          TITLE="Weekly periodic evals: red lane needs triage"
-          BODY_FILE=/tmp/issue-body.md
+          published() { # $1 fence|line: stdin lines through the published-text sanitizer
+            bun --no-install -e 'import { publishedFence, sanitizePublishedText } from "./scripts/lib/published-text";
+              const lines = (await Bun.stdin.text()).split("\n").filter(Boolean);
+              console.log(process.argv[1] === "line" ? sanitizePublishedText(lines.join(" ")) : publishedFence(lines.length ? lines : ["(none)"]).join("\n"));' "$1"
+          }
           RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          GUIDE_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/${GITHUB_SHA}/docs/evals/census-red.md"
+          bun run eval:pass-rates --reds --runs 10 --branch "$GITHUB_REF_NAME" > /tmp/pass-rates-reds.txt 2>&1 \
+            || echo "history unavailable: eval:pass-rates --reds exited $?" >> /tmp/pass-rates-reds.txt
+          bun run eval:pass-rates --headroom --runs 10 --branch "$GITHUB_REF_NAME" > /tmp/pass-rates-headroom.txt 2>&1 \
+            || echo "history unavailable: eval:pass-rates --headroom exited $?" >> /tmp/pass-rates-headroom.txt
           {
-            echo "Automated weekly report — run: ${RUN_URL}"
+            echo "Periodic census report: branch ${GITHUB_REF_NAME} @ ${GITHUB_SHA}, event ${GITHUB_EVENT_NAME}, run ${RUN_URL}"
+            echo
+            echo "A census went red: triage with ${GUIDE_URL}"
             if [ -n "$REDISPATCH_OF" ]; then echo; echo "This run is the one INFRA/INCOMPLETE re-dispatch of run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${REDISPATCH_OF}; both runs are reported."; fi
             if [ "$REDISPATCH" = "true" ]; then echo; echo "Every red verdict is machine-classified INFRA/INCOMPLETE: re-dispatching once as a new run (EVAL_POLICY.infraRedispatch). This run stays red and reported."; fi
             echo
             echo "- periodic reconciliation exit: ${{ steps.reconcile.outputs.exit }} (slices job: ${{ needs.eval-slices.result }}, Codex slices job: ${{ needs.eval-codex-slices.result }})"
             echo "- gate census reconciliation exit: ${{ steps.gate-reconcile.outputs.exit }} (census job: ${{ needs.gate-census.result }})"
             echo "- pass-rate history gate exit: ${{ steps.pass-rates.outputs.exit }}"
+            echo "- $({ grep -E '^all-green probability' /tmp/pass-rates-reds.txt || echo 'all-green probability: unavailable (see the red ledger)'; } | published line)"
             echo
             echo "### Periodic lane"
             cat /tmp/paid-report/report-summary.md 2>/dev/null || echo "(no periodic report summary)"
@@ -730,23 +802,44 @@ jobs:
             cat /tmp/gate-census-report/report-summary.md 2>/dev/null || echo "(no gate census report summary)"
             echo
             echo "### Pass-rate history (ACTION REQUIRED)"
-            echo '```'
-            { grep -E 'ACTION REQUIRED|history unavailable' /tmp/pass-rates.txt || echo "(no pass-rate alarms)"; } | sed 's/@/@\xe2\x80\x8b/g' | head -c 6000
-            echo '```'
+            { awk '/^ACTION REQUIRED/ { on = 1; print; next } on && /^  \[/ { print; next } { on = 0 } /history unavailable/ { print }' /tmp/pass-rates.txt 2>/dev/null \
+              | grep . || echo "(no pass-rate alarms)"; } | head -c 6000 | published fence
+            echo
+            echo "### Red ledger: bun run eval:pass-rates --reds --runs 10 --branch ${GITHUB_REF_NAME}"
+            { head -n 1 /tmp/pass-rates-reds.txt; tail -n +2 /tmp/pass-rates-reds.txt | tail -n 60; } | cut -c1-400 | published fence
+            echo
+            echo "### Session headroom: bun run eval:pass-rates --headroom --runs 10 --branch ${GITHUB_REF_NAME}"
+            head -n 40 /tmp/pass-rates-headroom.txt | cut -c1-400 | published fence
             echo
             echo "<details><summary>Full reconciliation output</summary>"
             echo
-            echo '```'
-            tail -c 6000 /tmp/report.txt 2>/dev/null | sed 's/@/@\xe2\x80\x8b/g' || echo "(no reconciliation output)"
-            echo '```'
+            { tail -c 6000 /tmp/report.txt 2>/dev/null || echo "(no reconciliation output)"; } | published fence
             echo
-            echo '```'
-            tail -c 6000 /tmp/gate-report.txt 2>/dev/null | sed 's/@/@\xe2\x80\x8b/g' || echo "(no gate census reconciliation output)"
-            echo '```'
+            { tail -c 6000 /tmp/gate-report.txt 2>/dev/null || echo "(no gate census reconciliation output)"; } | published fence
             echo "</details>"
             echo
             echo "Policy: EVAL_POLICY and CASE_QUARANTINE in test/helpers/periodic-exclude-data.ts; history: \`bun run eval:pass-rates\`."
-          } > "$BODY_FILE"
+          } > /tmp/census-report.md
+          cat /tmp/census-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the census report
+        if: always() && (steps.reconcile.outputs.exit != '0' || steps.gate-reconcile.outputs.exit != '0' || steps.pass-rates.outputs.exit != '0' || needs.eval-slices.result != 'success' || !contains(fromJSON('["success","skipped"]'), needs.eval-codex-slices.result) || needs.gate-census.result != 'success')
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: census-report-a${{ github.run_attempt }}
+          path: /tmp/census-report.md
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - name: Upsert tracking issue on failure
+        if: always() && github.ref == 'refs/heads/main' && (steps.reconcile.outputs.exit != '0' || steps.gate-reconcile.outputs.exit != '0' || steps.pass-rates.outputs.exit != '0' || needs.eval-slices.result != 'success' || !contains(fromJSON('["success","skipped"]'), needs.eval-codex-slices.result) || needs.gate-census.result != 'success')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TITLE="Weekly periodic evals: red lane needs triage"
+          BODY_FILE=/tmp/census-report.md
+          [ -s "$BODY_FILE" ] || echo "Periodic census report missing; run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" > "$BODY_FILE"
           EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "in:title \"$TITLE\"" --json number --jq '.[0].number // empty')
           if [ -n "$EXISTING" ]; then
             gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file "$BODY_FILE"

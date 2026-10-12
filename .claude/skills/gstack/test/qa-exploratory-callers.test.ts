@@ -4,7 +4,7 @@ import * as path from 'node:path';
 import * as os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import {
-  callerExcerpt, callerReviewRecordTemplate, callerSnapshot, callerTools, createQaCallerFixture, qaCallerInstructions,
+  callerExcerpt, callerProbeReadErrors, callerReviewRecordTemplate, callerSnapshot, callerTools, createQaCallerFixture, qaCallerInstructions,
   QA_CALLER_CASES, QA_CALLER_TEST_MS,
   qaCallerSessionOptions, qaCallerCommandAllowed, readCallerReceipt, retainQaCallerEvidence, runQaCaller, unloadedHelperCommand, validateCallerEvidence,
   type CallerProbe, type CallerReceipt, type QaCallerFixture,
@@ -87,6 +87,27 @@ function rebuildCheckpoints(observed: ReturnType<typeof evidence>) {
 }
 
 describe('caller native-event observer controls', () => {
+  test('captured instruction Read and probe in one provider response is not consumed instruction evidence', () => {
+    const captured = JSON.parse(fs.readFileSync(path.join(import.meta.dir, 'fixtures/qa-caller-read-probe-mtb1007a.json'), 'utf8'));
+    const tools = callerTools(captured.events);
+    const probe = tools.find(tool => tool.name === 'Bash')!;
+    const resources = ['exploratory', 'system-functional'].map(id => [id, tools.find(tool => String(tool.input.file_path).endsWith(`/qa/sections/${id}.md`))] as const);
+    expect(resources[0][1]!.resultIndex).toBeLessThan(probe.index);
+    expect(resources[0][1]!.messageId).toBe(probe.messageId);
+    expect(callerProbeReadErrors(probe, resources)).toEqual([
+      'probe preceded resource read: exploratory', 'probe preceded resource read: system-functional',
+    ]);
+    expect(callerProbeReadErrors({ ...probe, messageId: 'separate-response-control' }, resources))
+      .toEqual(['probe preceded resource read: system-functional']);
+    const ordered = structuredClone(captured.events);
+    const command = ordered.splice(2, 2);
+    command[0].message.id = 'separate-response-control';
+    ordered.push(...command);
+    const ready = callerTools(ordered);
+    expect(callerProbeReadErrors(ready.find(tool => tool.name === 'Bash')!,
+      ['exploratory', 'system-functional'].map(id => [id, ready.find(tool => String(tool.input.file_path).endsWith(`/qa/sections/${id}.md`))] as const))).toEqual([]);
+  });
+
   test.each(['pending-result', 'same-event', 'same-message-id'])('method Read %s cannot authorize a dependent probe', ordering => {
     const observed = evidence();
     const events = observed.result.transcript as any[];
@@ -707,6 +728,21 @@ describe('generated actual parent paths', () => {
     expect(callerExcerpt('before\nSTART\nbody\nEND\nafter', 'START', 'END')).toBe('START\nbody\n');
     expect(() => callerExcerpt('START without end', 'START', 'END')).toThrow('boundary');
     expect(() => callerExcerpt('START START END', 'START', 'END')).toThrow('boundary');
+  });
+
+  test('the ship fixture admits the plan-completion acceptance block with the discovered plan path substituted', () => {
+    const fixture = createQaCallerFixture('ship-exploratory-plan-checks', { installRuntime: false });
+    try {
+      const block = fixture.workflowCommands.find(command => command.startsWith('PLAN_FILE="PLAN.md"\n_REL=$(git ls-files --full-name --error-unmatch'));
+      expect(block).toBeDefined();
+      expect(block).not.toContain('<plan-path>');
+      expect(block).not.toContain('<base>');
+      expect(qaCallerCommandAllowed(block!, fixture.workflowCommands)).toBe(true);
+      expect(qaCallerCommandAllowed(block!.replace('PLAN.md', 'OTHER.md'), fixture.workflowCommands)).toBe(false);
+      expect(qaCallerSessionOptions(fixture, 'free-control').prompt).toContain('PLAN.md for <plan-path>');
+    } finally {
+      fs.rmSync(fixture.root, { recursive: true, force: true });
+    }
   });
 
   test('the review fixture admits only the actual native read-only diff fragments', () => {
