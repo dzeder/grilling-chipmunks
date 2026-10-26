@@ -42,6 +42,12 @@ MIGRATIONS=false
 API=false
 AUTH=false
 
+# Test-file paths, the same rule the test-bootstrap resolver counts as
+# TESTFILES (scripts/resolvers/testing.ts; test/diff-scope.test.ts keeps the two
+# identical). Nested test dirs and Python's test_*.py / tests.py were missed by
+# the root-anchored globs alone (#3335).
+TEST_PATH_RE='(^|/)(tests?|spec|__tests__)/|(^|/)tests?\.py$|(^|/)test_[^/]+\.py$|_test\.(go|py|rb|ts|js|exs|dart)$|\.(test|spec)\.[jt]sx?$|_spec\.rb$|Test\.(java|kt)$'
+
 _print_flags() {
   echo "SCOPE_FRONTEND=$FRONTEND"
   echo "SCOPE_BACKEND=$BACKEND"
@@ -104,6 +110,11 @@ for f in ${FILES_LIST[@]+"${FILES_LIST[@]}"}; do
     *.tsx|*.jsx|*.vue|*.svelte|*.astro) m_frontend=true ;;
     *.erb|*.haml|*.slim|*.hbs|*.ejs) m_frontend=true ;;
     *.html) m_frontend=true ;;
+    # Dart: the extension cannot tell a Flutter widget from a repository or a
+    # pure-Dart server, so it is BOTH frontend and backend (BACKEND set below).
+    # A skipped reviewer is invisible; an extra one (design-lite included) is a
+    # visible pass that costs a review.
+    *.dart) m_frontend=true ;;
     tailwind.config.*|postcss.config.*) m_frontend=true ;;
     app/views/*|*/components/*|styles/*|css/*|app/assets/stylesheets/*) m_frontend=true ;;
   esac
@@ -121,7 +132,9 @@ for f in ${FILES_LIST[@]+"${FILES_LIST[@]}"}; do
   case "$f" in
     *.test.*|*.spec.*|*_test.*|*_spec.*) m_tests=true ;;
     test/*|tests/*|spec/*|__tests__/*|cypress/*|e2e/*) m_tests=true ;;
+    conftest.py|*/conftest.py) m_tests=true ;;
   esac
+  if [[ "$f" =~ $TEST_PATH_RE ]]; then m_tests=true; fi
 
   # Docs
   case "$f" in
@@ -135,6 +148,7 @@ for f in ${FILES_LIST[@]+"${FILES_LIST[@]}"}; do
     *.yml|*.yaml) m_config=true ;;
     .github/*) m_config=true ;;
     requirements.txt|pyproject.toml|go.mod|Cargo.toml|composer.json) m_config=true ;;
+    pubspec.lock|*/pubspec.lock) m_config=true ;;
   esac
 
   # Migrations: database migration files. Bare migrations/* covers a
@@ -169,6 +183,9 @@ for f in ${FILES_LIST[@]+"${FILES_LIST[@]}"}; do
       *.ts|*.js|*.mjs|*.cjs|*.mts|*.cts) m_backend=true ;;
     esac
   fi
+  case "$f" in
+    *.dart) m_backend=true ;;
+  esac
 
   [ "$m_frontend" = true ] && FRONTEND=true
   [ "$m_prompts" = true ] && PROMPTS=true

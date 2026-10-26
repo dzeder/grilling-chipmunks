@@ -25,6 +25,7 @@ import { TabSession, type RefEntry } from './tab-session';
 import { resolveChromiumProfile, cleanSingletonLocks, resolveConfig } from './config';
 import { ensureProjectProfile } from './chromium-profiles';
 import { launchWithXProtectHeal } from './xprotect-heal';
+import { DIRECT_PROXY_ARG, forcesDirect } from './proxy-config';
 import { readPidStartTime, shouldSpawnXvfb, spawnFreeXvfb, xvfbInstallHint, type XvfbHandle } from './xvfb';
 import { withCdpSession } from './cdp-bridge';
 import { resultLine } from '../../lib/result-codes';
@@ -290,6 +291,44 @@ export async function handleChromiumDisconnect(browser: Browser | null): Promise
   process.exit(1);
 }
 
+/**
+ * How long a tab-independent read waits on one tab's renderer (#3247). A page
+ * stuck in a long script never answers page.evaluate() or page.title(); before
+ * this bound, one such tab made /health call the whole daemon unhealthy and
+ * hung `tabs`. Kept well under the CLI's /health request timeout
+ * (HEALTH_REQUEST_TIMEOUT_MS in cli.ts) so the CLI reads the answer instead of
+ * timing out on it.
+ */
+export const TAB_PROBE_TIMEOUT_MS = 1_000;
+
+/**
+ * Budget for saveState()'s per-tab storage read. Longer than the probe: a tab
+ * that misses it falls back to the last storage it answered with, which may
+ * be stale, so only a tab that is really stuck takes that path.
+ */
+const TAB_STORAGE_READ_TIMEOUT_MS = 5_000;
+
+type TabStorage = { localStorage: Record<string, string>; sessionStorage: Record<string, string> };
+type TabReadKind = 'probe' | 'title' | 'storage';
+
+function urlOrigin(url: string): string {
+  return URL.canParse(url) ? new URL(url).origin : '';
+}
+
+/**
+ * Resolve with `work`'s value, or with undefined once `ms` passes. The losing
+ * read settles on its own when the renderer frees up, so callers pass a promise
+ * that cannot reject.
+ */
+function withinTabBudget<T>(work: Promise<T>, ms: number): Promise<T | undefined> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<undefined>((resolve) => {
+    timer = setTimeout(() => resolve(undefined), ms);
+    (timer as { unref?: () => void }).unref?.();
+  });
+  return Promise.race([work, deadline]).finally(() => clearTimeout(timer));
+}
+
 export type { RefEntry };
 
 // Re-export TabSession for consumers
@@ -300,7 +339,7 @@ export interface BrowserState {
   pages: Array<{
     url: string;
     isActive: boolean;
-    storage: { localStorage: Record<string, string>; sessionStorage: Record<string, string> } | null;
+    storage: TabStorage | null;
     /**
      * HTML content loaded via load-html (setContent), replayed after context recreation.
      * In-memory only — never persisted to disk (HTML may contain secrets or customer data).
@@ -360,6 +399,13 @@ export class BrowserManager {
   private extensionContext = false;
   /** Pending and recorded navigation-guard verdicts per page (D2). */
   private navigationGuards = new WeakMap<Page, { pending: Set<Promise<void>>; blocked: string | null }>();
+  /** One pending read per page and kind (#3247). A read that outlives its
+   * budget stays queued in the renderer until the page frees up, so a stuck
+   * tab reuses it instead of collecting a new one on every /health poll,
+   * `tabs` call or persist tick. */
+  private pendingTabReads = new WeakMap<Page, Map<TabReadKind, Promise<unknown>>>();
+  /** The last storage each page answered with, and the origin it came from. */
+  private lastTabStorage = new WeakMap<Page, { origin: string; storage: TabStorage }>();
   // Our own 'disconnected' listeners per browser. Detach only these: removing
   // every 'disconnected' listener also strips Playwright's internal one that
   // resolves browser.close(), so each close waited the full race timeout (and
@@ -570,6 +616,18 @@ export class BrowserManager {
   }
 
   /**
+   * Playwright passes a configured proxy explicitly as --proxy-server, so only
+   * a session browse resolved to direct was exposed: `BROWSE_PROXY_URL=direct`
+   * on a machine with HTTPS_PROXY set still routed every `goto` through that
+   * proxy (#3440 item 8). Direct now means DIRECT_PROXY_ARG on every launch
+   * path (headless, the extension context, headed, handoff) wherever Chromium
+   * would otherwise pick a proxy browse did not resolve (forcesDirect).
+   */
+  private proxyLaunchArgs(): string[] {
+    return !this.proxyConfig && forcesDirect(process.env) ? [DIRECT_PROXY_ARG] : [];
+  }
+
+  /**
    * Get the ref map for external consumers (e.g., /refs endpoint).
    */
   getRefMap(): Array<{ ref: string; role: string; name: string }> {
@@ -590,7 +648,7 @@ export class BrowserManager {
     // macOS still showed (#2281, #432).
     const extensionsDir = process.env.BROWSE_EXTENSIONS_DIR;
     const { STEALTH_LAUNCH_ARGS, buildGStackLaunchArgs, STEALTH_IGNORE_DEFAULT_ARGS } = await import('./stealth');
-    const launchArgs: string[] = [...STEALTH_LAUNCH_ARGS, ...buildGStackLaunchArgs()];
+    const launchArgs: string[] = [...STEALTH_LAUNCH_ARGS, ...buildGStackLaunchArgs(), ...this.proxyLaunchArgs()];
     // #2771/#1968: honor GSTACK_CHROMIUM_PATH headless too (NixOS, macOS 13).
     // That bundle belongs to the user, so the XProtect heal never touches it,
     // and a launch failure names it.
@@ -764,6 +822,7 @@ export class BrowserManager {
       // empty-fallback returns native), so this is safe on stock Playwright
       // Chromium too.
       ...buildGStackLaunchArgs(),
+      ...this.proxyLaunchArgs(),
     ];
     if (extensionPath) {
       // Skip --load-extension when running against a custom Chromium build
@@ -1090,20 +1149,43 @@ export class BrowserManager {
     this.closeOwnedDisplay();
   }
 
-  /** Health check — verifies Chromium is connected AND responsive */
-  async isHealthy(): Promise<boolean> {
-    if (!this.browser || !this.browser.isConnected()) return false;
-    try {
-      const page = this.pages.get(this.activeTabId);
-      if (!page) return true; // connected but no pages — still healthy
-      await Promise.race([
-        page.evaluate('1'),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000)),
-      ]);
-      return true;
-    } catch {
-      return false;
+  /**
+   * Daemon liveness for /health: Chromium is connected. The active tab is NOT
+   * part of it (#3247): a page stuck in a long script is one busy tab, not a
+   * dead daemon, and the CLI gates every command on this answer — including
+   * the tabs, tab, closetab and stop commands that get out of that state.
+   * probeActiveTab() reports the tab on its own.
+   */
+  isHealthy(): boolean {
+    return Boolean(this.browser?.isConnected());
+  }
+
+  /**
+   * Does the active tab's main thread answer within `timeoutMs`? Null when
+   * there is no active page. A rejected evaluate (crashed or closing target)
+   * also counts as not responsive.
+   */
+  async probeActiveTab(timeoutMs = TAB_PROBE_TIMEOUT_MS): Promise<{ id: number; responsive: boolean } | null> {
+    const id = this.activeTabId;
+    const page = this.pages.get(id);
+    if (!page) return null;
+    const probe = this.sharedTabRead(page, 'probe', () => page.evaluate('1').then(() => true, () => false));
+    return { id, responsive: (await withinTabBudget(probe, timeoutMs)) === true };
+  }
+
+  /** Join the page's pending read of this kind, or start one. `read` must not
+   * reject. */
+  private sharedTabRead<T>(page: Page, kind: TabReadKind, read: () => Promise<T>): Promise<T> {
+    let reads = this.pendingTabReads.get(page);
+    if (!reads) {
+      reads = new Map();
+      this.pendingTabReads.set(page, reads);
     }
+    const pending = reads.get(kind);
+    if (pending) return pending as Promise<T>;
+    const started = read().finally(() => reads.delete(kind));
+    reads.set(kind, started);
+    return started;
   }
 
   // ─── Tab Management ────────────────────────────────────────
@@ -1301,17 +1383,23 @@ export class BrowserManager {
     return released;
   }
 
-  async getTabListWithTitles(): Promise<Array<{ id: number; url: string; title: string; active: boolean }>> {
-    const tabs: Array<{ id: number; url: string; title: string; active: boolean }> = [];
-    for (const [id, page] of this.pages) {
-      tabs.push({
+  /**
+   * Every tab with its title. Titles are read in parallel, each bounded by
+   * TAB_PROBE_TIMEOUT_MS: a tab whose renderer is stuck comes back with
+   * `busy: true` and an empty title instead of hanging the list (#3247).
+   */
+  async getTabListWithTitles(): Promise<Array<{ id: number; url: string; title: string; active: boolean; busy: boolean }>> {
+    return Promise.all([...this.pages].map(async ([id, page]) => {
+      const title = await withinTabBudget(
+        this.sharedTabRead(page, 'title', () => page.title().catch(() => '')), TAB_PROBE_TIMEOUT_MS);
+      return {
         id,
         url: page.url(),
-        title: await page.title().catch(() => ''),
+        title: title ?? '',
         active: id === this.activeTabId,
-      });
-    }
-    return tabs;
+        busy: title === undefined,
+      };
+    }));
   }
 
   // ─── Session Access ────────────────────────────────────────
@@ -1715,7 +1803,9 @@ export class BrowserManager {
   // ─── State Save/Restore (shared by recreateContext + handoff) ─
   /**
    * Capture browser state: cookies, localStorage, sessionStorage, URLs, active tab.
-   * Skips pages that fail storage reads (e.g., already closed).
+   * Skips the storage of pages that fail the read (e.g., already closed).
+   * A page whose renderer is stuck past TAB_STORAGE_READ_TIMEOUT_MS does not
+   * hold up `state save` (#3247); see readTabStorage() for what it gets.
    */
   async saveState(): Promise<BrowserState> {
     if (!this.context) throw new Error('Browser not launched');
@@ -1725,13 +1815,7 @@ export class BrowserManager {
 
     for (const [id, page] of this.pages) {
       const url = page.url();
-      let storage = null;
-      try {
-        storage = await page.evaluate(() => ({
-          localStorage: { ...localStorage },
-          sessionStorage: { ...sessionStorage },
-        }));
-      } catch {}
+      const storage = await this.readTabStorage(page, url);
 
       // Capture load-html content so a later context recreation (viewport --scale)
       // can replay it via setTabContent. Never persisted to disk.
@@ -1751,6 +1835,28 @@ export class BrowserManager {
     }
 
     return { cookies, pages };
+  }
+
+  /**
+   * One tab's localStorage/sessionStorage for saveState(). A failed read
+   * (closed page, opaque origin) is null. A read that times out returns the
+   * last storage this page gave for the same origin: a periodic
+   * BROWSE_PERSIST_STATE snapshot must not replace good storage on disk with
+   * null just because the page is busy.
+   */
+  private async readTabStorage(page: Page, url: string): Promise<TabStorage | null> {
+    const origin = urlOrigin(url);
+    const read = await withinTabBudget(this.sharedTabRead(page, 'storage', () => page.evaluate(() => ({
+      localStorage: { ...localStorage },
+      sessionStorage: { ...sessionStorage },
+    })).catch(() => null)), TAB_STORAGE_READ_TIMEOUT_MS);
+    if (read === undefined) {
+      const last = this.lastTabStorage.get(page);
+      return last?.origin === origin ? last.storage : null;
+    }
+    if (read) this.lastTabStorage.set(page, { origin, storage: read });
+    else this.lastTabStorage.delete(page);
+    return read;
   }
 
   /**
@@ -2025,7 +2131,7 @@ export class BrowserManager {
       // Same blink-level stealth flags as launch()/launchHeaded(). Without
       // STEALTH_LAUNCH_ARGS the handed-off browser kept the AutomationControlled
       // tell that the other two paths strip.
-      const launchArgs: string[] = ['--hide-crash-restore-bubble', ...STEALTH_LAUNCH_ARGS, ...buildGStackLaunchArgs()];
+      const launchArgs: string[] = ['--hide-crash-restore-bubble', ...STEALTH_LAUNCH_ARGS, ...buildGStackLaunchArgs(), ...this.proxyLaunchArgs()];
       if (extensionPath) {
         launchArgs.push(`--disable-extensions-except=${extensionPath}`);
         launchArgs.push(`--load-extension=${extensionPath}`);

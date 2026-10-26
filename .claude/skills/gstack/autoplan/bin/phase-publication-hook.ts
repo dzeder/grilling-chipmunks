@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env -S bun --no-env-file --config=/dev/null
 /** A native parent publication barrier at Autoplan's exact Read boundaries. */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -627,12 +627,21 @@ function phaseDecision(input: PublicationHookInput, root: string, before: Event[
  * A worktree session gets the repository root as CLAUDE_PROJECT_DIR while its
  * journal is rooted in the linked worktree. Only git's own two-way link makes
  * a directory that worktree: <root>/.git/worktrees/<name>/gitdir names
- * <worktree>/.git, and that file names the same admin entry back.
+ * <worktree>/.git, and that file names the same admin entry back. A project
+ * directory below the root (#3296) uses the first .git found walking up; a
+ * .git file there means a linked worktree or submodule, which has no registry.
  */
 export function linkedWorktrees(projectDir: string): string[] {
-  let entries: fs.Dirent[];
-  const admin = path.join(projectDir, '.git', 'worktrees');
-  try { entries = fs.readdirSync(admin, { withFileTypes: true }); } catch { return []; }
+  let entries: fs.Dirent[], admin: string | undefined;
+  try {
+    for (let dir = path.resolve(projectDir); ; dir = path.dirname(dir)) {
+      const dotGit = fs.statSync(path.join(dir, '.git'), { throwIfNoEntry: false });
+      if (dotGit) { if (dotGit.isDirectory()) admin = path.join(dir, '.git', 'worktrees'); break; }
+      if (path.dirname(dir) === dir) break;
+    }
+    if (!admin) return [];
+    entries = fs.readdirSync(admin, { withFileTypes: true });
+  } catch { return []; }
   return entries.filter(entry => entry.isDirectory()).slice(0, 256).flatMap(entry => {
     try {
       const link = path.join(admin, entry.name);
@@ -697,8 +706,11 @@ export function ownedRead(journal: string, owners: string[], input: PublicationH
  * A ready journal holding the current call takes the journal path; one that
  * lacks it takes the payload path at once (Claude Code may write the record only
  * with its result). The 2-second window remains for a journal that does not exist
- * yet, a journal lagging more than one message, and the unrecognized-shape double
- * read. Claude Code's appends never fail a read; a changed prefix is `rewritten`.
+ * yet, a journal lagging more than one message, a journal with no public event or
+ * none after its latest human turn (Claude Code 2.1.292 can flush the turn's
+ * earlier calls after this one's hook; at expiry an empty journal is journal lag
+ * and a human-turn tail takes the payload path), and the unrecognized-shape
+ * double read. Claude Code's appends never fail a read; a changed prefix is `rewritten`.
  */
 export async function runPublicationHook(value: unknown, root: string): Promise<object> {
   return approveOwnedRead(value, await guardOutput(value, root), root);
@@ -731,7 +743,9 @@ async function guardOutput(value: unknown, root: string): Promise<object> {
       if (read.transcript.status === 'ready') {
         if (read.events.some(e => e.kind === 'use' && e.toolUseId === input.tool_use_id))
           return decided(journalDecision(input, root, read.events, version), 'journal', version);
-        if (!journalLagged(read.events)) return decided(payloadDecision(input, root, read.events), 'payload', version);
+        const tail = read.events.at(-1)?.kind;
+        if (tail && !journalLagged(read.events) && (tail !== 'user_turn' || expired))
+          return decided(payloadDecision(input, root, read.events), 'payload', version);
         if (expired) return unverifiedOutput('journal_lag', {}, version, 'payload');
       } else if (code === 'too_large') {
         return unverifiedOutput('too_large', { size: measure.recordBytes ? mib(measure.recordBytes) : undefined, limit: mib(ownedRecordLimit()) },

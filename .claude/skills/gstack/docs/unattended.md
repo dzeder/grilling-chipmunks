@@ -16,8 +16,10 @@ it, so `headless` keeps its BLOCK semantics.
 
 ## What the session kind changes
 
-`gstack-skill-start` prints `SESSION_KIND: unattended` and
-`UNATTENDED_SESSION: true`, then applies these rules for the whole skill:
+`gstack-skill-start` prints `SESSION_KIND: unattended`,
+`UNATTENDED_SESSION: true` and the `unattended-session` instruction block
+(`GSTACK_INSTRUCTION_BEGIN: unattended-session <session-id>` through
+`GSTACK_INSTRUCTION_END`), then applies these rules for the whole skill:
 
 - **No prompts.** The update check, upgrade offer, telemetry and sync consent,
   onboarding tips and routing blocks are suppressed exactly as they are for
@@ -57,17 +59,75 @@ An unknown `GSTACK_SESSION_KIND` value coerces to `interactive` and says so:
 
 ## The terminal line
 
-Every workflow skill ends an unattended run with one line the parent greps:
+A run that writes a record ends with one line the parent greps:
 
 ```
 GSTACK_RESULT: skill=<name> status=<status> run=<dir>
 ```
 
 `status` is one of `complete`, `gate_pending`, `incomplete`, `interrupted` or
-`refused`; `run` is the directory that holds the artifacts below. `/autoplan`
+`refused`; `run` is where the run's record is. `/autoplan`
 always ends `gate_pending` when it reaches the final gate, because the gate is
 written and never approved. Pure queries (`gstack-artifact schema`,
 `gstack-gate render`) print no result line.
+
+Not every workflow writes this line or a run directory today:
+
+- **`/autoplan`** writes the full run directory below through `gstack-autoplan`,
+  and `gstack-artifact validate` checks it. It is the only skill with steps
+  and helpers that write `run.json`, `decisions.jsonl` and `gate.json`.
+- **Workflow commands** `gstack-pregate`, `gstack-regen`, `gstack-restamp` and
+  `gstack-ship-queue` print their own line, with `run=` naming their own record
+  (the pregate receipt, the regen worktree, the restamp journal, the queue
+  record), not a run directory.
+- **A refused launch.** Any skill whose install check refuses it at startup
+  prints `GSTACK_RESULT: skill=<name> status=refused run=-` and stops.
+- **`/ship`** ends with `gstack-ship-receipt result --pr <n>` (or `--body
+  .gstack/tmp/ship-receipt.md` after the handoff section). It binds the
+  receipt to the branch head, writes `<state root>/ship/runs/<utc>-<head12>/`
+  (`ship-run.json` with `head`, `pr`, `base`, `version`, `queue_mode`,
+  `session_kind`, `receipt` as the path of the copied `ship-receipt.md`, and
+  `receipt_source`; it is a /ship record, not the `run` v1 manifest below, so
+  read it directly: `gstack-artifact validate` does not apply) and prints
+  `GSTACK_RESULT: skill=ship status=complete run=<dir>`. When gh cannot read
+  the PR it prints `GSTACK_RESULT: skill=ship status=incomplete run=-` (exit 1). A receipt that is missing or names another head prints
+  `GSTACK_RESULT: skill=ship status=refused run=-` with `QUEUE_RECEIPT_MISSING`
+  or `QUEUE_RECEIPT_STALE` on stderr (exit 3); a run that stops before
+  publication prints the same refused line itself. A parent's merge check is
+  then mechanical: take `run=` from the last result line, read
+  `ship-run.json`, and compare its `head` to the PR head. `gstack-ship-queue ready`,
+  `train build` and `verify --train` make the same comparison from the PR body
+  ([ship-policy.md](ship-policy.md#ship-before-ready)), which is why an
+  unattended /ship may update the body of a PR that already exists: when an
+  open PR for the branch exists and HEAD is its pushed head, Step 18 takes the
+  pr-body section's existing-PR path and posts the body (receipt first) and
+  title through `gstack-post`. That is the one publication the unattended
+  rules allow; it never runs `pr-create`, never pushes a commit, never runs
+  `gh pr ready` (the existing-PR path's draft-state items concern an early PR
+  an unattended run never opens), and a branch with no open PR, or whose PR
+  head is not HEAD, takes the handoff section. `result --pr <n>` also refuses
+  `QUEUE_RECEIPT_STALE` when HEAD is not the PR's pushed head.
+  When the run committed anything (a CHANGELOG entry, generated tests), the
+  parent pushes those commits itself, then reruns the receipt write, the body
+  post and `result` at the pushed head: a receipt for an unpushed head is
+  `QUEUE_RECEIPT_STALE` to the queue.
+- **Every other workflow skill** (`/review`, `/qa`, `/design-review`,
+  `/spec`, `/land-and-deploy` and the rest) gets the session rules above (no
+  prompts, approvals stay pending, nothing published), but has no step that
+  writes a run directory or prints the line, so a parent should not wait for
+  either. `/eval-plan` asks for a `gate_pending` line at its spend gate, but no
+  helper writes its `gate.json` yet (`gstack-gate` renders and parses a gate
+  list; it does not create one). `/cso` skips the shared startup, so these
+  session rules do not reach it at all. Read each skill's own record instead:
+  the review-log rows (`gstack-review-read`) for `/review` and the
+  `qa-report-*.md` file for `/qa`. For a `/ship` run from before the result
+  line, read the receipt instead: when the run did not push (an unattended run
+  must not), read the receipt file in the child's checkout with
+  `gstack-ship-receipt read --body .gstack/tmp/ship-receipt.md --json`;
+  use `gstack-ship-receipt read --pr <n> --json` only once a PR exists. In both
+  cases compare the receipt's `head` to the branch SHA (`git rev-parse HEAD` in
+  the child's checkout): `read` does not check that the receipt is current, so
+  an older PR's receipt reads as valid; `result` does.
 
 Every workflow command shares one exit table: `0` ok, `1` fail, `2` usage,
 `3` refused or needs a flag. Error lines end with a result code in parentheses,
@@ -76,6 +136,8 @@ in [troubleshooting.md](troubleshooting.md#unattended-runs-and-artifacts) with
 a `fix:` clause. Grep the code, not the prose.
 
 ## The run directory
+
+`/autoplan` writes these files; the next section shows how a parent reads them.
 
 | File | Schema | Contents |
 |------|--------|----------|
@@ -95,8 +157,10 @@ JSON Schema for any of `findings`, `decisions`, `tasks`, `timing`, `run`,
 
 ## How a parent consumes a run
 
-1. **Decide whether the run finished.** `gstack-artifact validate <dir>/run.json`
-   is the deterministic completion check. It exits `0` and prints
+1. **Decide whether the run finished.** For an `/autoplan` run directory,
+   `gstack-artifact validate <dir>/run.json`
+   is the deterministic completion check (a `/ship` `run=` directory holds
+   `ship-run.json`, read directly as described above). It exits `0` and prints
    `ARTIFACT_VALID: run=<id> status=<status>` only when the manifest parses and
    matches its schema, every required phase and each reviewer voice has a
    terminal outcome, every listed artifact exists inside the run directory with

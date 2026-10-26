@@ -64,6 +64,12 @@ ask once about its `(promote: fix #N)` references (each `fix #<n>` reply adds `-
 `--supersedes <n>`/`--credit <n>` for a `Related:` PR only when the owner confirms; rerun after any change.
 The completion message lists unpromoted candidates, `Related:` lines and any `ISSUE_LOOKUP_FAILED`.
 
+### Capy
+
+Run `[ "${GSTACK_CAPY:-}" = 1 ] && echo 'CAPY_PR: on' || echo 'CAPY_PR: off'`. On `CAPY_PR: on`, read
+`~/.claude/skills/gstack/ship/sections/capy-pr.md` now: the body opens with its `## What changed`,
+`## Why` and `## Approvals` before the sections below. On `CAPY_PR: off`, skip it.
+
 The PR/MR body should contain these sections (never reuse a prior run's body):
 
 ```
@@ -200,7 +206,10 @@ per-lane counts (`{"<lane>":{"pass":N,"fail":N,"skip":N}}`) to
 
 Add `--receipt .gstack/tmp/tree-receipt.json` only when Step 16 wrote it (gate-ahead).
 New PR/MR: omit `--pr`, then rerun with the number after creation and repost the body.
-Its `SHIP_RECEIPT:` line opens the completion message. `RECEIPT_INVALID` names the bad
+Its `SHIP_RECEIPT:` line opens the completion message. The posted receipt is what
+`gstack-ship-queue ready`, `train build` and `verify --train` require (`QUEUE_RECEIPT_MISSING`,
+`QUEUE_RECEIPT_STALE`, no flag around them), so /ship runs before every READY and after any
+push. `RECEIPT_INVALID` names the bad
 field: fix that input file and rerun; nothing was written. `ISSUE_LINKS_MISSING`: add
 the named line under `## Issues` and rerun. `PREGATE_STALE` means rerun
 `gstack-pregate` on the stamped tree; `PREGATE_REMOTE_UNCLEARED` needs

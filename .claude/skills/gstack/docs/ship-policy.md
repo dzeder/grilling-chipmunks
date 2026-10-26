@@ -168,9 +168,51 @@ gate: command="<gate_command>" full_e2e=no gate-ahead=none
 SHIP_RECEIPT: pr=42 head=<head12> …
 ```
 
+CI's Version Gate (`scripts/compare-pr-version.ts`) accepts that head as
+unstamped when `VERSION` and `package.json`'s version match its merge base, the
+CHANGELOG change is confined to `[Unreleased]`, and any changed release output
+is byte for byte what `release_tool` generates at the head's merge base
+`VERSION` (the head's own, so a later stamp on main changes nothing), so a
+generator change ships with its regenerated output and the slot's restamp
+regenerates it again. A release output that differs from that (a hand edit, one generated at a
+bumped version, or one the tool never writes), a `VERSION` bump or a
+`package.json` version change classifies the head as stamped, and it must then
+carry base + bump. The tool runs as head code in a throwaway worktree with a
+bare environment and no tokens; one that fails at the head is an error, never
+a pass.
+
+**A PR that conflicts with the base on CHANGELOG.md alone.** GitHub shows every
+READY PR as conflicting each time main stamps; the train merges the CHANGELOG
+by section, so the lane never merges main for it. The conflict does mean GitHub
+has no merge ref for the PR, so no `pull_request` CI runs on the head and
+`ready` prints `ci: none at <head12>` with a `ci-hint:` line. The lane then
+dispatches the free workflows on the branch (`gh workflow run free-tests.yml
+--ref <branch> && gh workflow run windows-free-tests.yml --ref <branch>`),
+clears the requires-remote pregate lanes with those runs
+(`gstack-pregate clear --remote <lane> --run-url <run>`) and reruns `ready`,
+which passes because the dispatched check runs attach to the commit; the
+`ci-hint:` line then says those non-pull_request runs count. The `ci-hint:` line is
+advisory text for the lane; nothing parses it, and a PR whose head is on a fork
+gets a hint that leaves the dispatch to the coordinator. `ready --screen` on such a
+PR refuses, because there is no merge ref to screen (`QUEUE_SCREEN_STALE_REF`,
+`<remote> has no refs/pull/<n>/merge`); that refusal's "merge <base> into the
+branch" advice does not apply to a CHANGELOG-only conflict, so the lane READYs
+with `--no-screen` after the skill's own paid cases ran focused.
+
+`ci:` counts the latest run per check (one app's check name), as GitHub's
+rollup does: a check that was re-run or superseded on the same commit (a
+cancelled run beside a later pass of the same name from a second workflow run)
+is judged by its newest run (latest `completed_at`, then id; a run still in
+progress is newest); two apps reporting the same name stay separate; a run with
+no name or no readable `completed_at` counts on its own; commit-status contexts
+are counted one each.
+
 It refuses (`QUEUE_NOT_READY`) when the working tree has tracked edits, HEAD
 is not the PR's pushed head, CI at that exact head is not green, or the pregate
-result is not a current pass. Send the block as printed.
+result is not a current pass, and (`QUEUE_RECEIPT_MISSING`,
+`QUEUE_RECEIPT_STALE`) when the PR body carries no /ship receipt for that
+head: /ship runs before every READY ([details](#ship-before-ready)). Send the
+block as printed.
 
 **2. Lane behind another PR: gate ahead.** Gate the tree the queue will have
 once the predecessor lands, while it is still open:
@@ -281,10 +323,11 @@ warning on stderr). A block for gstack itself would read:
 "min_gstack_version": "<the version that introduced train>"
 ```
 
-gstack's own policy does not carry it yet: trains go live for gstack only
-after the workflow side (the train-nonce record, the `cases` and
-`prefix_shas` inputs, the dispatched screen) has merged and one dry-run train
-of two already-merged heads has passed. `gate_workflow` is dispatched with
+gstack's own policy carries this block. It went live after the workflow side
+(the train-nonce record, the `cases` and `prefix_shas` inputs, the dispatched
+screen) merged and one dry-run train passed: two unstamped scratch docs PRs on
+a scratch base whose `route` step read the policy from that base instead of
+the default branch. `gate_workflow` is dispatched with
 `evals_all`, `expected_sha` and `nonce` (bisects add `cases` and
 `prefix_shas`, screens add `screen_pr`, `screen_merge_sha` and
 `screen_policy`). That run publishes `full_gate_check` as a check run on the
@@ -303,13 +346,53 @@ are mirrored to origin as git notes on `refs/notes/gstack-trains` before any
 remote effect, so a lost machine loses nothing: `train status` on a clean
 state root rebuilds them. `GSTACK_SHIP_QUEUE_NOW` pins the clock for tests.
 
+<a id="ship-before-ready"></a>
+**0. Lane: /ship before READY.** Every READY follows a /ship run on the branch
+at the head being READY'd, including a re-READY after a push (Garry,
+2026-10-25: "we should really be using the gstack ship skill before merging
+PRs"). /ship runs the tests, both reviews, the gate-integrity list and the docs
+audit, and ends by writing its receipt into the PR body
+(`gstack-ship-receipt write --pr <n> … --body <file>`, posted with
+`gstack-post pr-body`). Under `queue_mode: stamp-at-merge` it bumps no version
+and never merges or merges main into the branch; the train still stamps at the
+slot. The queue enforces this at every step from the PR body alone:
+
+- `ready` refuses with `QUEUE_RECEIPT_MISSING` when the body has no valid
+  receipt and with `QUEUE_RECEIPT_STALE` when the receipt's `head` is not the
+  head being READY'd (or its `pr` is another PR); the informational
+  `SHIP_RECEIPT:` line still prints. There is no flag around it.
+- `train build` refuses a pin whose PR has no current receipt with the same
+  codes, naming the PR, before anything is written, pushed or dispatched,
+  `--dry-run` included.
+- `verify --train` refuses the slot with the same codes before printing
+  `MERGE_CONDITION`.
+
+**The stamp keeps the pin's receipt.** The slot's stamp commit changes only
+stamp files (and, from slot 2 on, merges main into the pin), so no /ship runs
+on it: the receipt written for the pinned head stays the binding one. `verify
+--train` accepts a receipt whose `head` is either the slot's pinned head or
+the current head, and the re-READY after the stamp push (`ready` at the stamp
+commit) accepts the receipt for the pin when HEAD is the pin plus stamp files,
+or (from slot 2 on) the pin merged with main plus stamp files on top of the
+merge; any other head is `QUEUE_RECEIPT_STALE`, including a merge of main with
+no stamp above it (a lane's own push under rule 14) and a merge whose pin side
+carries an edit made after /ship.
+
+This is a process gate, not an authenticity check: the receipt is a block in
+the PR body, which the PR author writes, so the codes prove that /ship was run
+and recorded for this head, not that nobody typed the block by hand. Fork heads
+are already refused (`QUEUE_TRAIN_UNTRUSTED`). The `ship-run.json` that
+`gstack-ship-receipt result` writes under the lane's state root is a
+normalized copy of that same block bound to the head it was run at, not an
+authenticity proof either.
+
 **1. Lane: READY with a screen choice.** Under a train policy READY needs an
 explicit choice:
 
 ```bash
 gstack-ship-queue ready --pr 42                    # prints SCREEN: lines and the recommendation, refuses
 gstack-ship-queue ready --pr 42 --no-screen        # READY receipt; the PR rides unscreened
-gstack-ship-queue ready --pr 42 --screen [--broad] # dispatches one paid screen on the PR's merge SHA
+gstack-ship-queue ready --pr 42 --screen [--broad] # dispatches one paid screen on the PR's merge SHA (QUEUE_SCREEN_STALE_REF when GitHub's merge ref lags the head)
 ```
 
 Without a choice it prints the `SCREEN:` selection (with
@@ -325,7 +408,17 @@ dispatches `gate_workflow` with `screen_pr`, `screen_merge_sha` (the
 the policy, so a repeat follows the same run and a broad screen never adopts
 a narrow one. The READY block gains `screen: …`, and the receipt is written
 locally and to the notes ref. `--dry-run` prints the dispatch without sending
-it.
+it. Before dispatching, `ready` fetches the merge ref and requires its second
+parent to be the PR head: a missing or lagging merge ref (GitHub stops
+recomputing it while the PR conflicts with the base, CHANGELOG-only conflicts
+included) is `QUEUE_SCREEN_STALE_REF`, because a screen dispatched there plans
+no cases and reports success. A finished screen that planned no cases (no
+`paid-plan` artifact, which a superseded run never uploads, or a plan manifest
+with nothing planned) is never followed as a screen: `ready --screen`
+dispatches a fresh one and `train build` prints `SCREEN: #<n> run <id> planned
+no cases …; counted as not-run` and seats the slot unscreened. A plan the
+queue cannot read keeps the slot screened, with `SCREEN: #<n> <reason>;
+counted as screened, unverified`.
 
 **2. Coordinator: build.** Name the pins exactly as READY reported them:
 
@@ -336,7 +429,9 @@ gstack-ship-queue train build --prs 41@<sha>,42@<sha>,43@<sha>
 
 It prints `ORDER:` (the slot order to announce: screened PRs first in READY
 order, then unscreened; when `max_size` or more unscreened PRs wait they form
-their own train and `HELD:` lists them), one `PREFIX: T<i> <commit>
+their own train and `HELD:` lists them; `--order <pr>,<pr>,...` naming every
+pinned PR once replaces that rule, for a PR that must merge before another,
+and the train's later `NEXT:` rebuilds keep it), one `PREFIX: T<i> <commit>
 tree=<tree>` per prefix and one `SLOT:` per PR. `--dry-run` adds the
 `ESTIMATE:` line and writes, pushes and dispatches nothing. Otherwise it
 writes `train.json`, pushes `train/<nonce>`, dispatches `free_workflow` there
@@ -347,14 +442,20 @@ has waited `fill_hours` (`QUEUE_TRAIN_WAITING`); `--urgent` dispatches a
 one-PR train at once. The same pins on the same base return the live train
 instead of a second one; `train build --train <nonce>` resumes a train from
 its record. Refusals, all before any spend: `QUEUE_TRAIN_UNTRUSTED` (a fork
-head), `QUEUE_TRAIN_MOVED` (a head moved from its pin), `QUEUE_NOT_READY` (no
-READY receipt at that head), `QUEUE_TRAIN_CONFLICT` (the printed
+head), `QUEUE_TRAIN_MOVED` (a head moved from its pin),
+`QUEUE_RECEIPT_MISSING` and `QUEUE_RECEIPT_STALE` (the PR body has no /ship
+receipt for the pin; see [/ship before READY](#ship-before-ready)),
+`QUEUE_NOT_READY` (no READY receipt at that head), `QUEUE_TRAIN_CONFLICT` (the printed
 `QUEUE_TRAIN_CONFLICT: train <id> stopped at #<pr> (conflicts: <files>) after
 merging #<a>,#<b>; nothing dispatched, no branch pushed; fix: …` line names
 the build without that PR) and `QUEUE_TRAIN_FREE_RED` (free tests red,
 missing, cancelled or on another SHA). In a merge, version files take the
 prefix's side and the CHANGELOG merges by section, since the stamp at merge
-rewrites both.
+rewrites both; a PR whose CHANGELOG drops or renames a released heading (or
+carries a released entry's text in a section of its own) is a CHANGELOG
+conflict, never merged with the damage. READY receipts and train records are
+keyed on origin's GitHub owner/repo, so lanes whose origin uses another URL
+form (git.capy.ai, ssh, a token URL) share the coordinator's queue.
 
 **3. Coordinator: status and verdict.**
 
@@ -400,6 +501,19 @@ EVAL_POLICY.infraRedispatch allows: `train rebuild --train <nonce> --infra`.
 The rebuild-once rule lives in the train module beside that constant until
 EVAL_POLICY records it. Bisect results never turn a train green.
 
+**Stamping a slot.** When the slot is called, the lane stamps it at main plus PATCH. Slot 1's pin applies cleanly to main. From slot 2 on, main already carries the earlier slots' stamps, so the pin conflicts on CHANGELOG.md and GitHub can't merge it. The lane merges main into the pin first, then stamps:
+
+```bash
+git fetch origin main
+git merge --no-ff --no-commit origin/main        # expect a CHANGELOG.md conflict only
+bun --no-env-file --config=/dev/null -e "import { mergeChangelogs } from './lib/changelog-check'; import { spawnSync } from 'node:child_process'; import { writeFileSync } from 'node:fs'; const s = (n) => spawnSync('git', ['show', ':' + n + ':CHANGELOG.md'], { encoding: 'utf8', maxBuffer: 1 << 26, timeout: 30000 }).stdout; const m = mergeChangelogs(s(2), s(3), s(1)); if (!m) { console.error('CHANGELOG needs a hand merge'); process.exit(1); } writeFileSync('CHANGELOG.md', m);"
+git add CHANGELOG.md && git commit --no-edit
+gstack-restamp --next --base main --pr 42 --expect-base <main sha> --expect-order <order> --allow-repo-commands
+git add CHANGELOG.md VERSION package.json <release outputs> && git commit -m "v<X> stamp" && git push
+```
+
+A conflict in any file other than CHANGELOG.md means the merge isn't the train's prefix. Stop and report it. When the helper says the CHANGELOG needs a hand merge, take main's CHANGELOG unchanged and put your own entry above it. `verify` accepts the resulting head because it contains main and its tree equals T<i> modulo stamps, with its CHANGELOG judged as main's plus lines your pin added, however the conflict was resolved; the `head:` line says "T<i> with main merged in".
+
 **5. Coordinator: verify, merge, verify again.** For each slot in order:
 
 ```bash
@@ -409,7 +523,9 @@ gstack-ship-queue verify --pr 41 --train <nonce>   # VERIFY_TRAIN: #41 merged; m
 ```
 
 Before a merge, main's tree must equal the prefix before the PR modulo stamps
-and the PR must still be at its pin (stamps aside); after it, main's tree
+and the PR must be at its pin (stamps aside) or contain main and be T<i>
+modulo stamps (its pin with main merged in; its CHANGELOG must be main's with
+only lines from the pin's own CHANGELOG diff above it); after it, main's tree
 must equal the prefix after it. Anything else is `QUEUE_TRAIN_TREE_MISMATCH`
 (or `QUEUE_TRAIN_MOVED`). When nothing of the train has merged, that is a plain
 refusal: build a new train on current main. When earlier slots already
@@ -446,7 +562,7 @@ which carry the workflow consequences the skill prose would otherwise spell out:
 | Line | Effect |
 |---|---|
 | `ship: history merge-only: …` | never rebase, squash or force-push; `check-history --plan <merge\|squash\|rebase>` refuses a rewrite plan (`HISTORY_POLICY_VIOLATION`, exit 3) |
-| `ship: queue_mode stamp-at-merge: …` | Step 12 items 1–4 are replaced by `gstack-restamp --next --base <base> --pr <n> --expect-base <sha>` when the PR is next, `--after <predecessor-pr>` when it is not; the restamp's own `next:` line says what follows (NEW_VERSION, CHANGELOG entry text only, the merge's expected head) |
+| `ship: queue_mode stamp-at-merge: …` | Step 12 items 1–4 are replaced by `gstack-restamp --next --base <base> --pr <n> --expect-base <sha>` when the PR is next, `--after <predecessor-pr>` when it is not; the restamp's own `next:` line says what follows: under `stamp-at-merge`, `commit and push only the stamp diff above (FILES), with no edit of your own` and the merge's expected head (the stamp commit holds restamp's output alone); under the per-PR queue, NEW_VERSION and the CHANGELOG entry text |
 | `ship: shared merge queue: …` | in a coordinator-run queue, `gstack-ship-queue ready`, `gate-ahead` and `stamp` replace the restamp calls; see [Run a shared merge queue](#run-a-shared-merge-queue) |
 | `ship: gate-ahead: …` | with `.gstack/tmp/gate-ahead.json` present, Step 16 reuses only the lanes `gstack-tree-receipt … --json > .gstack/tmp/tree-receipt.json` marks reusable; stamp-sensitive and not-eligible lanes run live; `--force-gate <reason>` is the coordinator's call |
 | `ship: bump patch: …` | Step 12 never asks for MINOR or MAJOR; PATCH or MICRO by size |
@@ -455,6 +571,20 @@ which carry the workflow consequences the skill prose would otherwise spell out:
 
 The PR body's first section is the ship receipt (`gstack-ship-receipt write … --body`),
 written by the pr-body section of `/ship` after the body is composed.
+
+## What `/land-and-deploy` reads from it
+
+Step 3.4 runs `show-effective --base <base>` before the merge and prints one
+`VERSION_CHECK:` verdict for the PR head:
+
+| Policy | Stops when | Passes |
+|---|---|---|
+| `queue_mode: stamp-at-merge` | the head's VERSION is not the base's version plus one bump, or the changelog's top two headings at the head are not that version and then the base's top entry (`STOP stamp stale`: run `gstack-restamp --next` on the branch, push the stamp, rerun) | an exact stamp; other open PRs' tentative stamps are ignored |
+| `queue_mode: claim-at-open` (and no policy file) | another open PR holds the same VERSION, or the base is already at or above it (`VERSION drift detected`: rerun `/ship`) | any unique VERSION above the base, including a MICRO bump or one below a sibling's claim |
+
+An invalid policy, an unreadable claim list or a missing VERSION is `unavailable`:
+the skill reports it and CI's version gate is the backstop. A base at or above the
+branch VERSION still stops.
 
 <a id="stamp-at-merge"></a>
 ## `queue_mode: stamp-at-merge`
@@ -481,7 +611,7 @@ Stages, each journaled in `.gstack/tmp/restamp-journal.json`:
 0. **restamp_command** (only when the policy sets it): the repo's own restamp, see [restamp_command](#restamp-command).
 1. **version**: `gstack-version-bump write --version <X>` in the staging worktree (VERSION, the manifest, npm lockfiles); skipped when `restamp_command` owns the version.
 2. **release_tool**: the policy command, under the contract below.
-3. **changelog**: the PR's `[Unreleased]` or old-version section moves to the top under `<X>`, above its predecessor's entry. Duplicate headings (`CHANGELOG_DUPLICATE_HEADING`) and a top entry that is not `<X>` (`CHANGELOG_TOP_MISMATCH`) are errors.
+3. **changelog**: the PR's `[Unreleased]` or old-version section moves to the top under `<X>`, above its predecessor's entry. A duplicate heading the PR introduces (`CHANGELOG_DUPLICATE_HEADING`: the headings are counted against the base's CHANGELOG at `origin/<base>` and at the fork point, so a version the base already heads twice passes as long as the PR adds no further copy) and a top entry that is not `<X>` (`CHANGELOG_TOP_MISMATCH`) are errors; the section being re-headed itself may exist only once.
 4. **stamp_paths**: exact `(was X)`, `since: X` and `vX` rewrites, plus every `stamp_patterns` template, within `stamp_paths` and `stamp_files`. `X` is the branch's own tentative stamp (its VERSION when it moved past base), else `--was <X>`, else the version an unstamped branch would have taken next (`base + bump`); mentions of a version the base never released (not a CHANGELOG heading at base, not a tag) are rewritten too, so a queue reorder that moves the base under a branch still finds its `since:` fields. Only the repo's own version width counts, so a 3-digit dependency pin in a 4-digit repo is never a candidate.
 5. **mirror**: tier 2; declared and validated, reported as not run.
 6. **apply**: every changed file is written to the branch only after all stages validated, each against the fingerprinted preimage; a file edited meanwhile is `RESTAMP_CONFLICT` and the applied writes roll back (rollback refuses to overwrite a file whose bytes differ from the recorded postimage).
@@ -579,183 +709,3 @@ recorded predecessor head is no longer the predecessor PR's head (checked
 through `--predecessor-ref` or `gh pr view --predecessor-pr`) the receipt
 prints `PREDECESSOR MOVED <old> -> <new> — fix: gstack-restamp --after <pr>
 again (RESTAMP_PREDECESSOR_MOVED)` and refuses `eligible`.
-
-`/ship` Step 16 consults the receipt; when it says `eligible`, a repeated full
-gate needs `--force-gate <reason>`, and the coordinator makes the call.
-
-### The evidence bundle
-
-`gstack-evidence` is machine-local by design, so the portable form is a bundle:
-
-```bash
-gstack-evidence bundle --out evidence-bundle.json --label tests --label e2e --require tests,e2e \
-  --selection tests='bun run test' --run-url tests=https://github.com/.../actions/runs/1
-```
-
-A bundle binds to a committed head (`repo.commit`, `repo.tree`) and carries the
-comparison material (version source, CHANGELOG path, `stamp_paths`,
-`release_outputs`), the execution identity above, the required-lane manifest,
-and per lane the command, `cmd_sha256`, exit, timestamp, executed selection,
-run URL, log hash and whether it is `verified` (produced by the ledger on a
-clean committed tree at this head) or not (dirty tree, other commit, or an
-`--import`ed assertion). A fresh coordinator machine reads it with
-`gstack-tree-receipt --bundle` after the gate VM is gone; the receipt refuses
-reuse when the bundle was produced on another tree or lacks the identity
-(`EVIDENCE_IDENTITY_UNKNOWN`).
-
-<a id="ship-receipt"></a>
-## The ship receipt
-
-The handoff record is a fenced block, identifiers first, validated against
-`gstack-artifact schema ship-receipt`:
-
-````
-```gstack-ship-receipt
-{ "schema_version": 1, "pr": 42, "head": "<sha>", "version": "1.2.7.0", "base": "main",
-  "gated_tree": "<tree>", "predecessor": "<sha>", "tree": "same-modulo-stamps",
-  "gate_reuse": "eligible (reusable: tests; rerun: digest)", "gate": { "tests": { "pass": 10, "fail": 0, "skip": 1 } },
-  "ci": { "checks": 3, "failed": 0 }, "spend_usd": 0.42, "session_kind": "unattended",
-  "artifacts_consumed": "1/1", "run": "<run id>", "thread": "<thread id>", "policy": "base origin/main@<sha>" }
-```
-````
-
-`gstack-ship-receipt write --pr <n> --receipt <tree-receipt.json> --gate '<json>' --ci '<json>' --body <pr-body.md>`
-makes it the first section of the PR body (`/ship` Step 18) and prints
-`SHIP_RECEIPT: pr=… head=… version=…` for the first line of the completion
-message. `/land-and-deploy` reads it with `gstack-ship-receipt read --pr <n>
---json` (`RECEIPT_MISSING`, `RECEIPT_INVALID`).
-
-### The adoption census (P7)
-
-```bash
-gstack-ship-receipt census --repo garrytan/gstack --since v1.91.70.0 --cohort threads.txt
-```
-
-reads merged PRs since the tag through `gh`, parses each receipt, deduplicates
-by `run` and `thread`, and prints `CENSUS: … unattended=<n> consumed=<n>
-adoption=<consumed threads>/<cohort> durable=yes`. The cohort file lists one
-thread id per line (threads that never invoke gstack count in the
-denominator); without it the denominator is the threads the receipts name.
-
-## History policy and preregistration (C7)
-
-Under `history: merge-only`, `/ship` refuses a squash or rebase plan and merges
-the base branch instead: `gstack-ship-policy check-history --plan squash`
-prints `HISTORY: refused (…) (HISTORY_POLICY_VIOLATION)` with exit 3, and
-without `--plan` it prints `HISTORY: ok` or `HISTORY: rewritten …
-(HISTORY_POLICY_VIOLATION)` (exit 1) when the pushed branch is no longer an
-ancestor of HEAD. `gstack-evidence ancestor
---from-policy --base main` prints one `ANCESTOR: ok|missing <sha>` line per
-`preregistration_shas` entry (`PREREGISTRATION_NOT_ANCESTOR`, exit 1), and the
-ship receipt records the result in `preregistration`.
-
-## Contributor mode
-
-`/review` runs `gstack-contributor-mode detect` at Step 1 (decision D10). The PR
-author is outside the maintainer set when `maintainers` in `.gstack/ship-policy.json`
-on the base branch is non-empty and does not list the login (`source=policy`);
-with an empty list, when `gh api repos/<owner>/<repo>/collaborators/<login>/permission`
-reports less than push permission (`source=collaborators`, an egress receipt
-`contributor-mode` precedes the call); when neither is available the mode is off
-and `CONTRIBUTOR_SOURCE_UNAVAILABLE` names what was missing. `--contributor`
-forces it on (`source=flag`). `CODEOWNERS` is file ownership, not maintenance
-authority, and is never read. The printed line is
-`CONTRIBUTOR_MODE: on|off author=<login> source=flag|policy|collaborators|off`,
-followed when on by the evidence-first instructions: a table per change
-(evidence value, risk surfaces, `accept` / `supersede` / `decline`), where
-`accept` keeps a direct path for a correct outside implementation judged by the
-same bar as a maintainer change, `supersede` rewrites from our own plan only after
-a plain-language approval, and the credit lines (`Contributed by @handle`,
-`Co-Authored-By:`, `Supersedes #N`) appear only when a diagnosis or a test carried
-over. `gstack-contributor-mode instructions` prints the same text without detecting.
-
-## Banned terms
-
-`.gstack/banned-terms.json` lists terms the repository forbids outside named
-locations: `terms` (a string, or `{ "term", "allowed_paths", "reason" }`) and a
-top-level `allowed_paths` that every term inherits. Globs follow the same
-containment rules as the ship policy (repo-relative, no `..`, under 256
-characters). `gstack-banned-terms check --base <ref>` scans the lines the branch
-adds since its merge base (or whole files with `--files <csv>`), reading the term
-list from the committed copy on the base by default (`--policy-from head` reads
-the working tree). Each finding is one line,
-`BANNED_TERM: "<term>" <file>:<line> allowed: <locations> — <text>`, and the
-last line is `BANNED_TERMS: ok | found=<n> | none` (`none`: the repository keeps
-no list). Exit 0 for ok or none, 1 when found, 3 when the file is invalid
-(`BANNED_TERMS_INVALID`, also from `validate`). `/review` turns each finding into
-a Step 4 finding and `/document-release` into a documentation finding;
-`gstack-banned-terms init` writes a commented example.
-
-<a id="approval-classes"></a>
-## Approval classes
-
-`.gstack/approval-classes.json` names the changes that need the owner's
-approval before they ship: upgrade-time data rewrites, trust or visibility
-changes, existing-user default changes, data repairs, anything the owner wants
-cited. Each entry in `classes` has a `name` (lowercase, dashes) and at least
-one matcher: `paths` (globs of changed files), `patterns` (literal text in an
-added line, case-sensitive) or `migrations: true` (the files the ship policy's
-`migrations` key describes). `allowed_paths` exempts files, such as tests;
-`description` is for people. Globs follow the ship policy's containment rules.
-
-Classes come only from the copy committed on `origin/<base>`, so a branch can
-neither declare nor drop its own; `gstack-approval-classes validate` checks the
-working-tree copy before you commit it, and `init` writes an example.
-`gstack-approval-classes check --base <ref>` scans the branch's changes since
-the merge base and prints one `APPROVAL_CLASS: <class> <file>:<line>` line per
-hit, one `APPROVAL_SCOPE: <class>@<digest12>` line per declared class with hits,
-and `APPROVAL_CLASSES: ok | found=<n> | none` last (exit 0, 1 when found, 3 when
-the base file is invalid or `origin/<base>` does not resolve). Built-in
-detectors only report: the ship policy's migration files, when no class sets
-`migrations: true`, print as `(built-in, report-only)` and need no citation.
-
-The digest covers the class's effects: each matched file with its blob at the
-scanned head, and each matched added line. The scan reads git's native diff
-(`--no-ext-diff --no-textconv`), so a configured external diff driver or text
-conversion cannot hide a line; when the content diff cannot be read, or its
-added lines disagree with git's own count, `check` and the receipt refuse with
-`APPROVAL_SOURCE_UNAVAILABLE` instead of passing. Adding, removing or editing an
-effect changes the token, so an approval given earlier no longer binds.
-
-**Enforcement.** `gstack-ship-receipt write` refuses with
-`APPROVAL_CITATION_MISSING`, writing nothing, unless each declared class with
-hits has a line in the `--body` file (or an `--approval` value) of the form
-
-```
-Approved by <owner> <YYYY-MM-DD> via <ref> [for <class>@<digest12>[,<class>@<digest12>]]
-```
-
-that resolves and binds:
-
-- A plan sha (7 to 64 hex characters) must match the plan of an autoplan run
-  passed with `--approval-run <run dir>` whose gate is APPROVED, and the plan
-  must name the scope token, or the class and every effect path.
-- A GitHub comment or review URL must be written by a `maintainers` login from
-  the base's ship policy that equals the cited owner. A review must be in
-  state `APPROVED`; a comment-only, dismissed or changes-requested review is
-  not an approval. The evidence is the body's first non-blank line only. It
-  must start at column 0 with `Approved` or `Approve` (any case, optionally
-  in `**` bold; no list marker, quote or indent) and name the token, or the
-  class and every effect path. Nothing later in the body counts, so a
-  rejection that quotes or nests an example approval approves nothing. For
-  example, a comment whose first line is
-  `Approved data-repair@0123456789ab: preview-first, never at upgrade.`
-  verifies; one that opens with any other line does not.
-- A token is authoritative. Evidence that names the class with a different
-  digest approved earlier effects: it does not bind, and it never falls back
-  to matching the class and paths.
-- Anything else (a thread code, a chat message, a URL gstack cannot read) is
-  recorded `citation: unverified` for the coordinator, and only when the line
-  attests which scope it covers with `for <class>@<digest12>` matching the
-  current token.
-
-The receipt's `approval` object records the source, `status` (`checked`, or
-`unavailable` when `origin/<base>` does not resolve), one record per class
-(scope token, effects, `citation: verified | unverified`, owner, date, ref,
-`binding: token | paths | attested`, evidence) and any report-only hits; the
-`SHIP_RECEIPT:` line ends with `approval=verified`, `approval=unverified:<classes>`,
-`approval=none` or `approval=unchecked`. A repository without the file gets no
-`approval` object unless a built-in detector reported.
-
-A data repair is a class to declare, and /review checks its shape: explicit,
-preview-first, and never reachable from an upgrade or migration path.

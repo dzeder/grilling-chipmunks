@@ -277,6 +277,9 @@ gstack_result_anchor() {
     QUEUE_TRAIN_REBUILD_REFUSED) printf '%s' 'queue-train-rebuild-refused' ;;
     QUEUE_TRAIN_TREE_MISMATCH) printf '%s' 'queue-train-tree-mismatch' ;;
     QUEUE_TRAIN_FROZEN) printf '%s' 'queue-train-frozen' ;;
+    QUEUE_RECEIPT_MISSING) printf '%s' 'queue-receipt-missing' ;;
+    QUEUE_RECEIPT_STALE) printf '%s' 'queue-receipt-stale' ;;
+    QUEUE_SCREEN_STALE_REF) printf '%s' 'queue-screen-stale-ref' ;;
     READY_SCREEN_CHOICE_REQUIRED) printf '%s' 'ready-screen-choice-required' ;;
     PREGATE_TIMING_ASSERTION) printf '%s' 'pregate-timing-assertion' ;;
     APPROVAL_CLASSES_INVALID) printf '%s' 'approval-classes-invalid' ;;
@@ -286,6 +289,18 @@ gstack_result_anchor() {
     STATE_MATRIX_INCOMPLETE) printf '%s' 'state-matrix-incomplete' ;;
     WTREE_UNAVAILABLE) printf '%s' 'wtree-unavailable' ;;
     REGEN_DEPS_MISSING) printf '%s' 'regen-deps-missing' ;;
+    APPROVAL_RECORD_INVALID) printf '%s' 'approval-record-invalid' ;;
+    APPROVAL_RECORD_SECRET) printf '%s' 'approval-record-secret' ;;
+    APPROVAL_RECORD_NO_BRANCH) printf '%s' 'approval-record-no-branch' ;;
+    APPROVAL_RECORD_UNAVAILABLE) printf '%s' 'approval-record-unavailable' ;;
+    APPROVAL_RECORD_WRITE_FAILED) printf '%s' 'approval-record-write-failed' ;;
+    APPROVAL_IMPORT_UNANSWERED) printf '%s' 'approval-import-unanswered' ;;
+    CAPTAIN_BRIEF_INCOMPLETE) printf '%s' 'captain-brief-incomplete' ;;
+    PR_SHOTS_INPUT_NOT_FOUND) printf '%s' 'pr-shots-input-not-found' ;;
+    PR_SHOTS_INPUT_REFUSED) printf '%s' 'pr-shots-input-refused' ;;
+    PR_SHOTS_IDENTICAL) printf '%s' 'pr-shots-identical' ;;
+    PR_SHOTS_RENDER_FAILED) printf '%s' 'pr-shots-render-failed' ;;
+    LAUNCH_FILE_UNWRITABLE) printf '%s' 'capy-install-launch-file-unwritable' ;;
     *) return 1 ;;
   esac
 }
