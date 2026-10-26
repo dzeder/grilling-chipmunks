@@ -1,8 +1,8 @@
-#!/usr/bin/env bun
+#!/usr/bin/env -S bun --no-env-file --config=/dev/null
 /**
  * gstack-pregate — cheap checks before anything paid or remote (plan C8).
  *
- *   gstack-pregate [run] [--stage preflight|tests|all] [--only <check,..>] [--base <ref>]
+ *   gstack-pregate [run] [--stage preflight|tests|all] [--only <check,..>] [--base <branch>]
  *                  [--allow-repo-commands] [--policy-from base|head] [--out <pregate.json>]
  *                  [--timeout <s>] [--stall-timeout <s>] [--remote --spend-cap <usd>] [--run <id>] [--explain] [--json]
  *   gstack-pregate verify [--out <pregate.json>] [--json]      publication check: current tree, no fail/incomplete, obligations cleared
@@ -27,8 +27,9 @@ import { spawnSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { EXIT, exitTableHelp, formatResult, type PregateFile } from '../lib/headless-artifacts';
-import { PREGATE_CONFIG_PATH, exampleConfigJson, explainConfig, loadConfigFromHead } from '../lib/pregate/config';
-import { buildContext, describeRefusal } from '../lib/pregate/context';
+import { PREGATE_CONFIG_PATH, explainConfig, loadConfigFromHead } from '../lib/pregate/config';
+import { describeDraft, draftConfig } from '../lib/pregate/init-draft';
+import { buildContext, defaultUserConfigPath, describeRefusal, loadedDotenvFiles } from '../lib/pregate/context';
 import { CHECKS, CHECK_IDS, PREGATE_OUT_REL, PREGATE_TIER2, clearDecision, clearObligation, readPregateFile, renderTable, runPregate, verifyPregate, writePregateFile } from '../lib/pregate/index';
 import { describeLane, discoverLanes } from '../lib/pregate/workflows';
 import { REMOTE_GATE_LANE } from '../lib/pregate/checks/lanes';
@@ -60,7 +61,7 @@ const HELP = `gstack-pregate — cheap checks before anything paid or remote (do
 
   --stage preflight|tests|all   default all
   --only <check,...>            restrict to these checks (${CHECK_IDS.join(', ')}; tier 2 later: ${PREGATE_TIER2.join(', ')})
-  --base <ref>                  base branch (default: origin/HEAD, else main)
+  --base <branch>               a branch on origin, not a commit (default: origin/HEAD's branch, else main)
   --allow-repo-commands         run pin-file commands and the test runner (what /ship passes); without it those checks are incomplete
   --policy-from base|head       base (default, reviewed) or head (unreviewed; needs --allow-repo-commands)
   --out <file>                  pregate.json path (default ${PREGATE_OUT_REL})
@@ -139,13 +140,14 @@ async function cmdRun(root: string, rest: string[], json: boolean): Promise<numb
   if (stallTimeoutMs !== undefined && (!Number.isFinite(stallTimeoutMs) || stallTimeoutMs < 0)) { process.stderr.write('gstack-pregate: --stall-timeout needs a number of seconds (0 disables)\n'); return EXIT.usage; }
   let remote: { spendCapUsd: number } | null = null;
   if (rest.includes('--remote')) {
-    if (!allow || policyFrom === 'head') { process.stderr.write('gstack-pregate: --remote runs the base branch\'s remote_gate and needs --allow-repo-commands with --policy-from base\n'); return EXIT.refused; }
+    if (!allow || policyFrom === 'head') { process.stderr.write('gstack-pregate: --remote runs the active policy\'s remote_gate (the base branch\'s copy, or the user-owned file when the base carries none) and needs --allow-repo-commands with --policy-from base\n'); return EXIT.refused; }
     const cap = Number(flag(rest, '--spend-cap') ?? process.env.GSTACK_SPEND_CAP_USD ?? NaN);
     if (!Number.isFinite(cap) || cap <= 0) { process.stderr.write('gstack-pregate: --remote spends money; pass --spend-cap <usd> (or set GSTACK_SPEND_CAP_USD)\n'); return EXIT.usage; }
     remote = { spendCapUsd: cap };
   } else if (flag(rest, '--spend-cap') !== undefined) { process.stderr.write('gstack-pregate: --spend-cap applies only with --remote\n'); return EXIT.usage; }
   const base = resolveBaseBranch(root, flag(rest, '--base'));
-  const loaded = buildContext({ repoRoot: root, base, policyFrom, allowRepoCommands: allow, timeoutMs, stallTimeoutMs, remote, knownChecks: [...CHECK_IDS, ...PREGATE_TIER2] });
+  const userConfigPath = defaultUserConfigPath(root);
+  const loaded = buildContext({ repoRoot: root, base, policyFrom, allowRepoCommands: allow, timeoutMs, stallTimeoutMs, remote, knownChecks: [...CHECK_IDS, ...PREGATE_TIER2], userConfigPath });
   if ('refused' in loaded) {
     const refusal = describeRefusal(loaded.refused, base);
     process.stderr.write(refusal.line + '\n');
@@ -280,6 +282,8 @@ async function main(argv: string[]): Promise<number> {
   if (bad) { process.stderr.write(`gstack-pregate: ${bad}; see gstack-pregate --help\n`); return EXIT.usage; }
   const root = repoRoot();
   if (!root) { process.stderr.write('gstack-pregate: not inside a git repository\n'); return EXIT.usage; }
+  const dotenv = loadedDotenvFiles(process.cwd(), process.execArgv);
+  if (dotenv.length) { process.stderr.write(resultLine('gstack-pregate', 'POLICY_SOURCE_UNAVAILABLE', `bun loaded ${dotenv.join(', ')} from the working directory, and a checkout's .env must not choose the state root or slug behind the policy; run gstack-pregate directly (its shebang passes --no-env-file) or as bun --no-env-file`) + '\n'); return EXIT.refused; }
   if (cmd === 'run') return await cmdRun(root, rest, json);
   if (cmd === 'verify') return cmdVerify(root, rest, json);
   if (cmd === 'clear') return cmdClear(root, rest);
@@ -303,9 +307,11 @@ async function main(argv: string[]): Promise<number> {
     if (rest.includes('--explain')) { process.stdout.write(explainConfig()); if (rest.length === 1) return EXIT.ok; }
     const file = path.join(root, PREGATE_CONFIG_PATH);
     if (fs.existsSync(file) && !rest.includes('--force')) { process.stderr.write(resultLine('gstack-pregate init', 'POLICY_EXISTS', file) + '\n'); return EXIT.refused; }
+    const draft = draftConfig(root);
     fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.writeFileSync(file, exampleConfigJson());
-    process.stdout.write(`PREGATE_CONFIG_WRITTEN: ${PREGATE_CONFIG_PATH} (edit it, then gstack-pregate validate; commit it on the base branch before /ship reads it)\n`);
+    fs.writeFileSync(file, draft.json);
+    process.stdout.write(`PREGATE_CONFIG_WRITTEN: ${PREGATE_CONFIG_PATH} (a draft from this repo: review it, then gstack-pregate validate; commit it on the base branch before /ship reads it)\n`);
+    for (const line of describeDraft(draft)) process.stdout.write(`${line}\n`);
     return EXIT.ok;
   }
   process.stderr.write(`gstack-pregate: unknown command ${cmd}\n${HELP}\n`);

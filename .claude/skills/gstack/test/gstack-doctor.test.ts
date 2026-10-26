@@ -27,7 +27,7 @@ const COPIED = [
   'autoplan/SKILL.md', // its frontmatter registers the autoplan hook the hooks-row test breaks
   'bin/gstack-launch-probe.sh',
   'bin/gstack-doctor-check.sh', 'bin/gstack-doctor-components.sh', 'bin/gstack-runtime-pins.ts', 'lib/runtime-pins.ts',
-  'bin/gstack-windows-bash.ts', 'lib/script-invocation.ts', 'lib/result-codes.ts', 'lib/result-codes-release.ts', // the windows bash row
+  'bin/gstack-windows-bash.ts', 'lib/script-invocation.ts', 'lib/bun-isolation.ts', 'lib/result-codes.ts', 'lib/result-codes-release.ts', 'lib/result-codes-capy.ts', // the windows bash row
 ];
 const bases: string[] = [];
 afterEach(() => { for (const b of bases.splice(0)) fs.rmSync(b, { recursive: true, force: true }); });
@@ -630,7 +630,7 @@ describe('gstack-doctor --check', () => {
     const wrapper = '/drive/skills/gstack/scripts/install.sh';
     const capy = row(f, ['--project', project], { STUB_BUN_VERSION: '1.3.14', GSTACK_CAPY_WRAPPER_PATH: wrapper });
     expect(capy.rows.pins.status).toBe('FAIL');
-    expect(capy.rows.pins.rest).toContain(`fix: bash ${wrapper} (installs the project's pinned Bun when it is a verified version: 1.4.2 1.4.3; otherwise it names the conflict), or change the pin in ${project}`);
+    expect(capy.rows.pins.rest).toContain(`fix: bash ${wrapper} (installs the project's pinned Bun when it is a verified version: 1.4.2 1.4.3 1.4.4; otherwise it names the conflict), or change the pin in ${project}`);
     expect(capy.rows.pins.rest).toContain('(PROJECT_PIN_MISMATCH; ');
     const forSkill = row(f, ['--project', project, '--for', 'review'], { STUB_BUN_VERSION: '1.3.14', GSTACK_CAPY_WRAPPER_PATH: wrapper });
     expect(forSkill.rows.pins.rest).toContain(`fix: bash ${wrapper} --for review (installs`);
