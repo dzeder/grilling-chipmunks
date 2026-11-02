@@ -10,7 +10,7 @@ import * as path from 'node:path';
 import type { Exec, RunSummary } from '../scripts/eval-bg';
 import type { QueueContext } from './ship-queue';
 
-export interface PrInfo { headRefOid: string; isCrossRepository: boolean; state: string; headRefName: string; body: string }
+export interface PrInfo { headRefOid: string; isCrossRepository: boolean; state: string; headRefName: string; body: string; baseRefName?: string }
 export interface RunInfo { databaseId: number; status: string; conclusion: string | null; url: string; headSha: string; event: string; displayTitle: string }
 export interface CheckInfo { status: string; conclusion: string | null }
 
@@ -34,10 +34,10 @@ export function repoSlug(ctx: QueueContext): string | null {
 }
 
 export function prInfo(ctx: QueueContext, pr: string): PrInfo | { error: string } {
-  const r = ctx.gh(['pr', 'view', pr, '--json', 'headRefOid,isCrossRepository,state,headRefName,body']);
+  const r = ctx.gh(['pr', 'view', pr, '--json', 'headRefOid,isCrossRepository,state,headRefName,body,baseRefName']);
   const p = json<Partial<PrInfo>>(r);
   if (!p?.headRefOid) return { error: `cannot read PR #${pr} through gh (${(r.err ?? r.out).trim().slice(0, 120) || 'no headRefOid'})` };
-  return { headRefOid: p.headRefOid, isCrossRepository: p.isCrossRepository !== false, state: p.state ?? 'OPEN', headRefName: p.headRefName ?? '', body: p.body ?? '' };
+  return { headRefOid: p.headRefOid, isCrossRepository: p.isCrossRepository !== false, state: p.state ?? 'OPEN', headRefName: p.headRefName ?? '', body: p.body ?? '', ...(p.baseRefName ? { baseRefName: p.baseRefName } : {}) };
 }
 
 const RUN_FIELDS = 'databaseId,status,conclusion,url,headSha,event,displayTitle';
@@ -57,14 +57,21 @@ export function asRun(summary: RunSummary): { id: number; url: string } {
   return { id: summary.databaseId, url: summary.url };
 }
 
-/** One JSON artifact of a run (the named file, else the first .json file it holds); null when it is missing or unreadable. */
+/**
+ * One JSON artifact of a run: the named file wherever the artifact keeps it
+ * (a multi-path upload keeps its directories, so report-verdict-a1 holds
+ * paid-report/collector-outcomes.json), else the first .json file at its
+ * root; null when it is missing or unreadable.
+ */
 export function downloadJson(ctx: QueueContext, slug: string, run: number, name: string, scratch: string, file?: string): unknown {
   const dir = path.join(scratch, `${run}-${name}`);
   fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(dir, { recursive: true });
   try {
     if (!ctx.gh(['run', 'download', String(run), '--repo', slug, '-n', name, '-D', dir]).ok) return null;
-    const pick = file ?? fs.readdirSync(dir).find(f => f.endsWith('.json'));
+    const pick = file
+      ? (fs.readdirSync(dir, { recursive: true }) as string[]).filter(f => path.basename(f) === file).sort((a, b) => a.length - b.length)[0]
+      : fs.readdirSync(dir).find(f => f.endsWith('.json'));
     return pick && fs.existsSync(path.join(dir, pick)) ? JSON.parse(fs.readFileSync(path.join(dir, pick), 'utf8')) : null;
   } catch { return null; } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 }

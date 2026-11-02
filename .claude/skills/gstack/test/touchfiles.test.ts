@@ -21,6 +21,7 @@ import {
 import { paidTestClosure, isCovered } from './helpers/touchfile-closure';
 import { ASK_QUESTIONS_HEADING, readWorkflowExcerpt } from './helpers/workflow-excerpt';
 import { sharedLibsPlanExcerpt } from './helpers/shared-libs-plan-excerpt';
+import { readSkillEffective } from './helpers/skill-startup';
 
 const ROOT = path.resolve(import.meta.dir, '..');
 const SHIP_GUARD_ONLY = ['ship-managed-hook-refresh', 'ship-unmanaged-hook-consent', 'ship-local-hook-preservation'];
@@ -141,7 +142,7 @@ describe('selectTests', () => {
       ['plan-eng-review/sections/review-sections.md', 'TEST_COVERAGE_AUDIT_PLAN'],
       ['ship/sections/tests.md', 'TEST_BOOTSTRAP'],
       ['ship/sections/test-coverage.md', 'TEST_COVERAGE_AUDIT_SHIP'],
-      ['design-review/SKILL.md', 'TEST_BOOTSTRAP'],
+      ['design-review/sections/test-bootstrap.md', 'TEST_BOOTSTRAP'],
     ];
     for (const [output, token] of consumers) {
       expect(fs.readFileSync(path.join(ROOT, `${output}.tmpl`), 'utf8')).toContain(`{{${token}}}`);
@@ -182,7 +183,7 @@ describe('selectTests', () => {
   });
 
   test('bounded shared-code planning selects its consumed resolvers, excluding other Eng sections', () => {
-    const entrypoint = fs.readFileSync(path.join(ROOT, 'plan-eng-review/SKILL.md'), 'utf8');
+    const entrypoint = readSkillEffective(path.join(ROOT, 'plan-eng-review/SKILL.md'));
     const review = fs.readFileSync(path.join(ROOT, 'plan-eng-review/sections/review-sections.md'), 'utf8');
     const excerpt = sharedLibsPlanExcerpt(entrypoint, review);
     for (const [start, end] of [
@@ -309,8 +310,10 @@ describe('selectTests', () => {
     // The formerly keyless periodic AUQ probes drive the CEO skill too.
     expect(result.selected).toContain('auq-consistency');
     expect(result.selected).toContain('auq-verbose-vs-carved-ab');
-    expect(result.selected.length).toBe(21);
-    expect(result.skipped.length).toBe(Object.keys(E2E_TOUCHFILES).length - 21);
+    // /autoplan --ceo-only runs plan-ceo-review's Phase 1 and its 0E mode rule.
+    expect(result.selected).toContain('autoplan-ceo-only');
+    expect(result.selected.length).toBe(22);
+    expect(result.skipped.length).toBe(Object.keys(E2E_TOUCHFILES).length - 22);
   });
 
   test('global touchfile triggers ALL tests', () => {

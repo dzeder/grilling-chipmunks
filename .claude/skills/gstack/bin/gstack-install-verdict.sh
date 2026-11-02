@@ -8,7 +8,9 @@
 # one checkout and one project (the caller's git toplevel, or none):
 #   <state root>/install-verdicts/<sha256(checkout realpath)>/<sha256(project realpath | "none")>.json
 # written atomically by bin/gstack-capy-install (install and --check) with
-#   schema_version 2, checkout, head, for, required[], pins_planning_only, ok,
+#   schema_version 2, checkout, head, for (comma-separated: an ok run at the same
+#   HEAD and Bun keeps the workflows an earlier ok install certified, #3561),
+#   required[] (their union), pins_planning_only, ok,
 #   trailer, min_revision, launch_path, time, project, pin (the exact Bun pin),
 #   bun_path (realpath), bun_version, bun_rule (gstack_bun_resolve), bun_install,
 #   node_path (realpath), node_version, node_rule (gstack_node_resolve; empty
@@ -159,7 +161,7 @@ gstack_install_admission() {
         done
         if [ -n "$detail" ] && gstack_doctor_install_profile "$(gstack_install_verdict_field "$file" for)"; then
           detail="$detail ($(gstack_install_verdict_field "$file" for) certifies only the read-only helpers)"
-          fix="run GSTACK_CAPY_ROOT=$src bash $src/capy/skill/gstack/scripts/install.sh --for $skill (the full install: ./setup and host profiles), then launch with the GSTACK_LAUNCH line it prints"
+          fix="run GSTACK_CAPY_ROOT=$src bash $src/capy/skill/gstack/scripts/install.sh --for $skill (upgrades this checkout in place: ./setup and host profiles, no second clone), then launch with the GSTACK_LAUNCH line it prints"
         fi
       fi
       v_bun=$(gstack_install_verdict_field "$file" bun_path)
