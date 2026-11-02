@@ -224,6 +224,57 @@ describe('prefix trees modulo stamps', () => {
     expect(stampFreeTree(git, 'f'.repeat(40), repo.work, policy)).toHaveProperty('error');
   });
 
+  // Value: protects=a gated-to-current diff git cannot produce refuses with its cause instead of reading as 'no changes'
+  //   (GST-448); fails_when=buildReceipt treats a failed diff as an empty one or drops why it failed; seam=a missing blob; no_claim=none
+  test('a diff git cannot produce refuses the receipt with EVIDENCE_IDENTITY_UNKNOWN and git\'s reason', () => {
+    const policy = loadPolicyFromHead(repo.work).policy;
+    repo.git('checkout', '-q', '-B', 'lost-blob', sha.t1!);
+    fs.writeFileSync(path.join(repo.work, 'lost.txt'), 'a blob this test deletes from the object store\n');
+    repo.git('add', '-A'); repo.git('commit', '-q', '-m', 'add a blob');
+    const head = repo.git('rev-parse', 'HEAD');
+    const blobId = repo.git('rev-parse', `${head}:lost.txt`);
+    const gitDir = repo.git('rev-parse', '--absolute-git-dir');
+    fs.rmSync(path.join(gitDir, 'objects', blobId.slice(0, 2), blobId.slice(2)));
+    const r = buildReceipt({ repoRoot: repo.work, gated: sha.t1!, current: head, policy, policyLabel: 'fixture' }) as { error?: string; code?: string };
+    expect(r.code).toBe('EVIDENCE_IDENTITY_UNKNOWN');
+    expect(r.error).toMatch(/^git diff [0-9a-f]{12} [0-9a-f]{12} failed \(.+\), so the changed files cannot be classified/);
+    repo.git('checkout', '-q', '-f', 'squash');
+  });
+
+  // #3512: a stamp path carrying a tentative `*_KEY_VERSION = '<next minor>'` (gstack's own convention since #3511) digests the
+  // same before and after the slot stamp moves it, so train-backstop finds the record that covers main; a base-version mention
+  // on a line the base already carried digests the same at the prefix (where it equals VERSION) and on the stamped main.
+  test('stampFreeTree collapses every stamp-form mention, not only the commit\'s version: a moved tentative key and a kept released one both digest equal', () => {
+    const git = gitIn(repo.work);
+    const policy = { ...loadPolicyFromHead(repo.work).policy, stamp_paths: ['docs/**/*.md', 'lib/policy.ts'], stamp_patterns: ["_KEY_VERSION = '{version}'"] };
+    const policyFile = (text: string) => { fs.mkdirSync(path.join(repo.work, 'lib'), { recursive: true }); fs.writeFileSync(path.join(repo.work, 'lib', 'policy.ts'), text); };
+    // The unstamped prefix: VERSION 1.2.3.0, a new key written as the tentative 1.3.0.0, a released key at 1.2.3.0 (the base's version).
+    repo.git('checkout', '-q', '-B', 'key-prefix', sha.main!);
+    policyFile("export const DOCS_KEY_VERSION = '1.3.0.0';\nexport const REVIEW_KEY_VERSION = '1.2.3.0';\nexport const OLD_KEY_VERSION = '1.2.2.0';\n");
+    repo.git('add', '-A'); repo.git('commit', '-q', '-m', 'prefix with a tentative key');
+    const prefix = repo.git('rev-parse', 'HEAD');
+    // Main after the slot stamp: VERSION 1.2.4.0, the tentative moved to the released version, the released key as written.
+    fs.writeFileSync(path.join(repo.work, 'VERSION'), '1.2.4.0\n');
+    policyFile("export const DOCS_KEY_VERSION = '1.2.4.0';\nexport const REVIEW_KEY_VERSION = '1.2.3.0';\nexport const OLD_KEY_VERSION = '1.2.2.0';\n");
+    repo.git('commit', '-qam', 'stamp 1.2.4.0');
+    const stamped = repo.git('rev-parse', 'HEAD');
+    expect(stampFreeTree(git, stamped, repo.work, policy)).toBe(stampFreeTree(git, prefix, repo.work, policy));
+    // A byte beyond a stamp-form mention still changes the digest.
+    policyFile("export const DOCS_KEY_VERSION = '1.2.4.0';\nexport const REVIEW_KEY_VERSION = '1.2.3.0';\nexport const OLD_KEY_VERSION = '1.2.2.0';\nexport const EXTRA = 1;\n");
+    repo.git('commit', '-qam', 'a code byte');
+    expect(stampFreeTree(git, repo.git('rev-parse', 'HEAD'), repo.work, policy)).not.toBe(stampFreeTree(git, prefix, repo.work, policy));
+    // The receipt agrees with the digest on the stamp, and refuses a released key moved by hand (older than the gated version;
+    // a mention equal to it is the base's own version, which the stamp_paths stage moves on a branch-added line).
+    const tree = (current: string) => (buildReceipt({ repoRoot: repo.work, gated: prefix, current, policy, policyLabel: 'fixture' }) as { tree: string; residual: string[] }).tree;
+    expect(tree(stamped)).toBe('same-modulo-stamps');
+    repo.git('checkout', '-q', '-B', 'hand-move', prefix);
+    fs.writeFileSync(path.join(repo.work, 'VERSION'), '1.2.4.0\n');
+    policyFile("export const DOCS_KEY_VERSION = '1.2.4.0';\nexport const REVIEW_KEY_VERSION = '1.2.3.0';\nexport const OLD_KEY_VERSION = '1.2.4.0';\n");
+    repo.git('commit', '-qam', 'stamp plus a released key moved by hand');
+    expect(tree(repo.git('rev-parse', 'HEAD'))).toBe('changed');
+    repo.git('checkout', '-q', 'squash');
+  });
+
   test('T1..Tk come from the train head by first parents; a head that is not a train is refused', () => {
     const git = gitIn(repo.work);
     const policy = loadPolicyFromHead(repo.work).policy;

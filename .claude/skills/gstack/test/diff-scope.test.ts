@@ -9,6 +9,7 @@ import { mkdtempSync, writeFileSync, mkdirSync, rmSync, readFileSync } from 'fs'
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
+import { resolveBase } from '../lib/gate-diff/git';
 
 const SCRIPT = join(import.meta.dir, '..', 'bin', 'gstack-diff-scope');
 
@@ -330,6 +331,70 @@ describe('exit-code contract (#2526)', () => {
   });
 });
 
+describe('a bare base name reads origin/<base> when it exists (#3650)', () => {
+  function behindBase(base: string) {
+    const dir = createRepo(['README2.md']);
+    const git = (...args: string[]) => spawnSync('git', args, { cwd: dir, stdio: 'pipe', timeout: 5000 }).stdout.toString().trim();
+    const seed = git('rev-parse', 'main');
+    git('checkout', '-q', '-B', base, 'main');
+    writeFileSync(join(dir, 'service.py'), 'print(1)\n');
+    git('add', '.');
+    git('commit', '-qm', 'upstream backend change');
+    git('update-ref', `refs/remotes/origin/${base}`, 'HEAD');
+    git('checkout', '-q', 'feature/test');
+    git('rebase', '-q', `origin/${base}`);
+    git('branch', '-f', base, seed);
+    expect(git('diff', '--name-only', `${base}...HEAD`).split('\n').sort()).toEqual(['README2.md', 'service.py']);
+    return { dir, git };
+  }
+  const scopeAt = (dir: string, base: string) => Object.fromEntries(spawnSync('bash', [SCRIPT, base], { cwd: dir, stdio: 'pipe', timeout: 5000 }).stdout.toString().trim().split('\n').map(l => l.split('=')));
+
+  test('a local main behind origin/main does not widen the scope to upstream commits', () => {
+    const { dir } = behindBase('main');
+    const scope = runScope(dir);
+    expect([scope.SCOPE_BACKEND, scope.SCOPE_DOCS]).toEqual(['false', 'true']);
+  });
+
+  test('a slash-named base reads its remote-tracking twin too, and HEAD or a sha stays as given', () => {
+    const { dir, git } = behindBase('release/x');
+    expect(scopeAt(dir, 'release/x').SCOPE_BACKEND).toBe('false');
+    git('update-ref', 'refs/remotes/origin/HEAD', git('rev-parse', 'release/x'));
+    expect(scopeAt(dir, 'HEAD').SCOPE_DOCS).toBe('false');
+    git('update-ref', `refs/remotes/origin/${git('rev-parse', 'release/x')}`, 'HEAD');
+    expect(scopeAt(dir, git('rev-parse', 'release/x')).SCOPE_BACKEND).toBe('true');
+  });
+
+  test('a colliding tag, a fork branch over an explicit remote base, or an unrelated twin never replaces the base (#3650 review)', () => {
+    const { dir, git } = behindBase('main');
+    const upstreamCommit = git('rev-parse', 'origin/main');
+    git('tag', 'origin/main', 'HEAD');
+    expect([scopeAt(dir, 'main').SCOPE_BACKEND, scopeAt(dir, 'main').SCOPE_DOCS]).toEqual(['false', 'true']);
+    git('remote', 'add', 'upstream', 'file:///nonexistent-upstream');
+    git('update-ref', 'refs/remotes/upstream/main', git('rev-parse', 'main'));
+    git('update-ref', 'refs/remotes/origin/upstream/main', 'HEAD');
+    expect(scopeAt(dir, 'upstream/main').SCOPE_BACKEND).toBe('true');
+    git('tag', '-d', 'origin/main');
+    git('checkout', '-q', '--orphan', 'island');
+    git('commit', '-q', '--allow-empty', '-m', 'unrelated');
+    git('update-ref', 'refs/remotes/origin/main', 'HEAD');
+    git('checkout', '-q', 'feature/test');
+    expect(scopeAt(dir, 'main').SCOPE_BACKEND).toBe('true');
+    expect(upstreamCommit).not.toBe('');
+  });
+
+  test('with origin/main unrelated, a related local main comes before a related other remote, the base resolveBase picks', () => {
+    const { dir, git } = behindBase('main');
+    git('remote', 'add', 'upstream', 'file:///nonexistent-upstream');
+    git('update-ref', 'refs/remotes/upstream/main', git('rev-parse', 'origin/main'));
+    git('checkout', '-q', '--orphan', 'island');
+    git('commit', '-q', '--allow-empty', '-m', 'unrelated');
+    git('update-ref', 'refs/remotes/origin/main', 'HEAD');
+    git('checkout', '-q', 'feature/test');
+    expect(resolveBase('main', dir, 'HEAD')?.sha).toBe(git('rev-parse', 'main'));
+    expect(scopeAt(dir, 'main').SCOPE_BACKEND).toBe('true');
+  });
+});
+
 describe('uncommitted work is visible (#2299)', () => {
   test('uncommitted change on a branch with no commits sets the scope', () => {
     const dir = mkdtempSync(join(tmpdir(), 'diff-scope-dirty-'));
@@ -365,6 +430,27 @@ describe('uncommitted work is visible (#2299)', () => {
     expect(status).toBe(0);
     expect(vars.SCOPE_MIGRATIONS).toBe('true');
     expect(vars.SCOPE_BACKEND).toBe('true');
+  });
+
+  // Value: protects=--head scopes one committed range from any checkout, the input the receipt writer and the merge queue
+  // share; fails_when=--head still reads the working tree or untracked files, or an unknown head reads as all-false; seam=none
+  test('--head <sha> scopes only the committed range: working-tree and untracked files are ignored, an unknown head is an error', () => {
+    const dir = createRepo(['lib/auth.ts']);
+    const head = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: dir, stdio: 'pipe' }).stdout.toString().trim();
+    mkdirSync(join(dir, 'db', 'migrate'), { recursive: true });
+    writeFileSync(join(dir, 'db', 'migrate', '001.rb'), '# untracked\n');
+    writeFileSync(join(dir, 'styles.css'), 'a{}\n');
+    const scope = (args: string[]) => spawnSync('bash', [SCRIPT, 'main', ...args], { cwd: dir, stdio: 'pipe', timeout: 5000 });
+    const ranged = scope(['--head', head]);
+    expect(ranged.status).toBe(0);
+    const out = ranged.stdout.toString();
+    expect(out).toContain('SCOPE_AUTH=true');
+    expect(out).toContain('SCOPE_MIGRATIONS=false');
+    expect(out).toContain('SCOPE_FRONTEND=false');
+    expect(runScopeFull(dir).vars.SCOPE_MIGRATIONS).toBe('true');
+    const unknown = scope(['--head', 'f'.repeat(40)]);
+    expect(unknown.status).toBe(2);
+    expect(unknown.stdout.toString()).toContain('SCOPE_ERROR=no_head');
   });
 
   test('non-ASCII path still matches extension globs (NUL-safe file listing, #2526)', () => {

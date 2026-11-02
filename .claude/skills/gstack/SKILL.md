@@ -205,15 +205,19 @@ quality gates that produce better results than answering inline.
 - User asks to review code, check the diff, pre-landing review, "look at my changes" → invoke `/review`
 - User asks to find code worth sharing, shared-code extractions, or duplication worth consolidating → invoke `/deslop-shared-libs`
 - User asks to audit, prune or find low-value tests in the existing suite → invoke `/test-audit`
+- User asks to write a skill, improve or slim a skill, or add a lesson to a named skill → invoke `/write-skill`
 - User asks about visual polish, design audit of a live site, "this looks off" → invoke `/design-review`
 - User asks to audit the live developer experience, time-to-hello-world → invoke `/devex-review`
+- User asks to run the checks, make the tests pass, "verify my change", "check my work" while building → invoke `/verify`
 - User asks to ship, deploy, push, create a PR, "let's land this", "send it" → invoke `/ship`
 - User asks to merge + deploy + verify as one flow → invoke `/land-and-deploy`
+- User asks to rebase or revive an old PR, "modernize this PR", whether a stale PR is still worth landing → invoke `/modernize`
 - User asks to configure deployment for the project → invoke `/setup-deploy`
 - User asks to monitor prod after shipping, post-deploy checks → invoke `/canary`
 - User asks to update docs after shipping → invoke `/document-release`
 - User asks to write docs from scratch, generate documentation, "document this feature/module" → invoke `/document-generate`
 - User asks for a weekly retro, what did we ship, "how'd we do" → invoke `/retro`
+- User asks to run a crew of agents, coordinate lanes, build a merge train, call a slot, validate a READY block, write the crew digest, "set up a captain", "run the crew" → invoke `/captain`
 Generic “second opinion”, “outside review”, or “cross-model review” requests use `/codex` (namespaced: `/gstack-codex`). This selection follows the **claude harness**, independently of model configuration. Explicit provider requests take precedence: Codex means `/codex`; Claude Code means `/claude-code`. Never silently substitute another provider. If that provider is the current harness, report that no outside invocation ran and suggest the other wrapper only as a separate user choice. Wrapper availability: Claude Code installs only /codex; Codex installs only /claude-code; other harnesses install both. Repair stale installations with `setup --host claude`. There is no /claude compatibility alias.
 - User asks for safety mode, careful mode → invoke `/careful` or `/guard`
 - User asks to restrict edits to a directory → invoke `/freeze` or `/unfreeze`
@@ -229,6 +233,7 @@ Generic “second opinion”, “outside review”, or “cross-model review” 
 - User asks to codify or save the last `/scrape` as a reusable skill → invoke `/skillify` (fallback browser)
 - User asks about page speed, web performance regression → invoke `/benchmark`; model or skill benchmarks → invoke `/benchmark-models`
 - User asks to plan, preregister, price or pilot a paid eval → invoke `/eval-plan`
+- User asks to run a suite, build or eval on Ubicloud → invoke `/ubicloud`
 - User asks what gstack has learned, "show learnings" → invoke `/learn`
 - User asks to tune question sensitivity, "stop asking me that" → invoke `/plan-tune`
 - User asks for code quality dashboard, "health check" → invoke `/health`
