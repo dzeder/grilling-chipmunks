@@ -318,6 +318,17 @@ console.log("ASIDE_DIR=" + pwd); await closeTab(pg); console.log("GSTACK_STEP_OK
 '
 ```
 
+**Touch (verified in Aside 1.26; add the Responsive override for phone size):**
+
+```bash
+aside repl '
+const pg = await openTab("<url>"), t = (m, p) => pg._sendToTarget(m, p);
+await t("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 5 });
+for (const [type, touchPoints] of [["touchStart", [{ x: <tap-x>, y: <tap-y> }]], ["touchEnd", []]]) await t("Input.dispatchTouchEvent", { type, touchPoints });
+await closeTab(pg); console.log("GSTACK_STEP_OK");
+'
+```
+
 **Links and their status (same-origin; on a LOCAL target each link is HEAD-checked, on a real site the user's cookies would ride every request so links are listed as `LINK ?` unfetched — consent to LOOK is not consent to hit every URL):**
 
 ```bash
@@ -452,8 +463,7 @@ HTML into a PNG or PDF is the render engine's job: use /make-pdf, /diagram, or
 /design-html for that.
 
 On the fallback path, `/setup-browser-cookies` asks the user to choose the source
-browser and account/profile; Dia is macOS-only. Navigate to the matching target
-before a direct `--domain` import. Cookies copied is **not checked**, not proof
+browser and account/profile. Navigate to the matching target before a direct `--domain` import. Cookies copied is **not checked**, not proof
 of login. `--verify-auth` requires a daemon-configured exact visible identity
 assertion; HTTP 200 and cookie counts are not enough. Storage stays intact unless
 the user explicitly approves `--clear-storage` for the captured origin on a Chromium target. Other engines reject reset, not ordinary import or auth checks. Do not

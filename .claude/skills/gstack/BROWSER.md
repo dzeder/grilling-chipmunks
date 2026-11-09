@@ -99,7 +99,7 @@ through CDP before `goto`, as the cookbook does), and no `file://` navigation.
 | `/scrape` | Prototype the extraction with `aside repl`, hand back the table, list, or prices as structured data. Read-only. |
 | `/devex-review` | Walk the real onboarding flow and time it, carrying the cookbook inline. |
 | `/ship`, `/spec`, `/land-and-deploy`, `/setup-deploy`, `/office-hours` | Third-party web actions (vendor dashboards, API keys, webhooks) offered as an Aside drive across your real sessions, with the one-question consent gate for anything mutating. |
-| `/plan-ceo-review`, `/plan-eng-review`, `/plan-devex-review`, `/design-consultation`, `/review`, `/investigate`, `/cso`, `/office-hours` | Web research runs through `aside exec` in your real browser (`{{ASIDE_RESEARCH}}`), one read-only request per question, answers treated as untrusted content. No Aside → the same queries go to the host's WebSearch tool; no WebSearch either → "Search unavailable" once and the skill proceeds on in-distribution knowledge. |
+| `/plan-ceo-review`, `/plan-devex-review`, `/design-consultation`, `/review`, `/cso`, `/office-hours` | Web research runs through `aside exec` in your real browser (`{{ASIDE_RESEARCH}}`), one read-only request per question, answers treated as untrusted content. No Aside → the same queries go to the host's WebSearch tool; no WebSearch either → "Search unavailable" once and the skill proceeds on in-distribution knowledge. |
 
 ### Local-HTML rendering
 
@@ -218,7 +218,7 @@ What changes when the fallback is active:
 
 | On Aside | On the fallback engine |
 |---|---|
-| Your sessions are already there | `/setup-browser-cookies` copies selected cookies from Chrome, Chromium, Brave, Edge, Windows-only Opera and Opera GX, or macOS-only Comet, Arc, and Dia; verify sign-in separately, or log in once in headed mode |
+| Your sessions are already there | `/setup-browser-cookies` copies selected cookies from Chrome, Chromium, Brave, Edge, Windows-only Opera and Opera GX, or macOS-only Comet and Arc; verify sign-in separately, or log in once in headed mode |
 | You watch the tabs the agent opens in Aside | `/open-gstack-browser` (or `$B connect`) shows the headed GStack Browser with the side panel |
 | Sign-in wall: sign in inside Aside, say "done" | `$B handoff` opens a visible Chrome at the same page; `$B resume` continues |
 | One `aside repl` script per flow, fresh session each time | Persistent daemon: cookies, tabs, and localStorage carry over between `$B` calls |
@@ -350,7 +350,7 @@ Three escalating modes:
   every command tick through in real time.
 - **Pair-agent over a tunnel**. Daemon binds a second listener that ngrok
   forwards. A remote agent (Codex, OpenClaw, Hermes, anything that can speak
-  HTTP) drives your local browser through a 26-command allowlist with a
+  HTTP) drives your local browser through a 25-command allowlist with a
   scoped, single-use token.
 
 ---
@@ -568,7 +568,7 @@ from `snapshot`, or `@c` refs from `snapshot -C`. Full table:
 
 #### Choosing a source and checking sign-in
 
-Select the source browser and account/profile explicitly. The picker recognizes Chrome, Chromium, Brave, Edge, Windows-only Opera and Opera GX, and macOS-only Comet, Arc, and Dia. It shows current profile names from `Local State`, falling back to Preferences and then the directory name, with directory labels to distinguish duplicate names. `--profile` takes that directory (`Default`, `Profile 2`), not its display name. Without it, only a sole relevant profile is selected; ambiguity or unreadable profiles require a choice. The omitted-browser default remains `comet` for CLI compatibility, not as a recommendation. The picker opening link is one-use and expires after five minutes.
+Select the source browser and account/profile explicitly. The picker recognizes Chrome, Chromium, Brave, Edge, Windows-only Opera and Opera GX, and macOS-only Comet and Arc. It shows current profile names from `Local State`, falling back to Preferences and then the directory name, with directory labels to distinguish duplicate names. `--profile` takes that directory (`Default`, `Profile 2`), not its display name. Without it, only a sole relevant profile is selected; ambiguity or unreadable profiles require a choice. The omitted-browser default remains `comet` for CLI compatibility, not as a recommendation. The picker opening link is one-use and expires after five minutes.
 
 For direct import, first navigate to a page matching `--domain`. Example after choosing Chrome's `Profile 2`:
 
@@ -619,7 +619,7 @@ Storage stays intact by default. With explicit approval on a Chromium target, `-
 
 | Command | Description |
 |---------|-------------|
-| `tabs` | List open tabs |
+| `tabs` | List open tabs, with each owned tab's owner (a pair-agent client or `session:<name>`) |
 | `tab <id>` | Switch to tab |
 | `newtab [url] [--json]` | Open new tab; `--json` returns `{tabId, url}` for programmatic use |
 | `closetab [id]` | Close tab |
@@ -633,6 +633,27 @@ in a long script, `status`, `tabs`, `tab <id>`, `newtab`, `closetab`,
 `state save` and `stop` keep working, and `status` and `tabs` mark the tab as
 not responding. A command that needs the stuck tab times out after 30s and
 names it, so you can switch away or close it without `--force-restart`.
+
+**Sessions keep parallel agents on their own tabs (#1961).** A call from a
+known agent harness (Claude Code, Codex and others) gets a session named after
+that agent process; its first command opens the session's own tab and later
+commands stay there without moving the shared active tab. Name one with
+`--session <name>` or `BROWSE_SESSION=<name>`; `BROWSE_SESSION=` turns it off.
+`--tab-id` and `BROWSE_TAB` win over a session and no longer move the active
+tab either. Sessions isolate tabs, not cookies or storage, and only the local
+root token can name one.
+
+### Phone emulation + touch
+
+This is Chromium emulating a phone on one tab, not Safari; a real device still goes through `/ios-qa`.
+
+| Command | Description |
+|---------|-------------|
+| `device [<name> [--landscape] \| off \| --list]` | Emulate a phone on the current tab only (size, pixel ratio, touch, `pointer: coarse`, user agent) from Playwright's devices table; other tabs stay desktop. `off` restores; `viewport` and `responsive` refuse while a device is active |
+| `tap <@ref\|sel\|x y> [--hold <ms>]` | Touch and release at an element's center or at x y. Needs `device` first |
+| `swipe <@ref\|sel\|x y> <up\|down\|left\|right> [--distance <px>] [--ms <n>]` | One-finger swipe (default 300px over 300ms). Needs `device` first |
+| `pinch <@ref\|sel\|x y> <scale>` | Two-finger pinch; scale above 1 zooms in, below 1 zooms out. Needs `device` first |
+| `touch [down\|move <finger 0-9> <x> <y> \| up <finger> \| cancel]` | Hold, move and lift numbered fingers for multi-finger flows; no action lists held fingers. Needs `device` first |
 
 ### Extraction
 
@@ -1174,7 +1195,7 @@ resets once — a one-time in-product notice explains this.
 
 Remote AI agents (Codex, OpenClaw, Hermes, anything that speaks HTTP) can
 drive your local browser through an ngrok tunnel. The whole flow is gated
-by a 26-command allowlist, scoped tokens, and a denial log.
+by a 25-command allowlist, scoped tokens, and a denial log.
 
 ### How it works
 
@@ -1194,22 +1215,30 @@ When `pair-agent` activates, the daemon binds **two HTTP listeners**:
   forwarded by ngrok. Used by your Claude Code, the Side Panel, anything
   on your machine.
 - **Tunnel listener** (`127.0.0.1:TUNNEL_PORT`). Locked allowlist —
-  `/connect`, `/command` (scoped tokens + 26-command browser-driving
+  `/connect`, `/command` (scoped tokens + 25-command browser-driving
   allowlist), `/sidebar-chat`. ngrok forwards only this port.
 
 Root tokens sent over the tunnel return 403. SSE endpoints use a 30-minute
 HttpOnly `gstack_sse` cookie (never valid against `/command`).
 
-### The 26-command tunnel allowlist
+### The 25-command tunnel allowlist
 
-Defined in `browse/src/server.ts` as `TUNNEL_COMMANDS`. Pure gate function
-`canDispatchOverTunnel(command)` is exported for unit testing. Set:
+Defined in `browse/src/routes/commands.ts` as `TUNNEL_COMMANDS`. Pure gate
+function `canDispatchOverTunnel(command, args)` is exported for unit testing. Set:
 
 ```
 goto, click, text, screenshot, html, links, forms, accessibility,
-attrs, media, data, scroll, press, type, select, wait, eval,
+attrs, media, data, scroll, press, type, select, wait,
 newtab, tabs, back, forward, reload, snapshot, fill, url, closetab
 ```
+
+The gate also reads the args, so over the tunnel a paired agent can't read
+local files, can't choose a path on the daemon's disk, and can't make the
+daemon save screenshot or snapshot images: `goto`/`newtab` take http(s) URLs only, `screenshot` needs
+`--base64` (it returns the image) and cannot name an output path, `snapshot`
+refuses `-a`/`--annotate`, `-H`/`--heatmap` and `-o`, and `--out` is
+refused everywhere. `eval` is absent because it runs a file from the
+daemon's disk.
 
 Notably absent: `pair`, `unpair`, `cookies`, `setup`, `launch`, `restart`,
 `stop`, `tunnel-start`, `token-mint`, `state`, `connect`, `disconnect`. A
@@ -1354,17 +1383,17 @@ Playwright's `--disable-component-update`, so it never receives the CRLSet
 revocation updates Chrome pushes to running browsers. Aside uses your own
 browser's trust store and updates.
 
-**Known gap: the compromised eMudhra intermediates
+**The compromised eMudhra intermediates
 ([#3338](https://github.com/garrytan/gstack/issues/3338)).** Chrome blocked
 eight eMudhra intermediate CAs by CRLSet on 2026-10-17, the day their key
-compromise was reported, and scheduled the removal of their root, emSign ECC
-Root CA - G3, from the Chrome Root Store for 2026-10-27. The root store built
-into gstack's pinned Playwright 1.62.1 (Chromium 151) still trusts that root, so
-the headless browser accepts certificates those intermediates issued. That lasts
-until gstack moves to the first Playwright release whose Chromium is
-158.0.8115.0 or later, the first Chrome for Testing build measured to refuse
-them. Until then, don't do signed-in work in this engine on a network you do not
-trust, and prefer Aside for signed-in work where you have it.
+compromise was reported, and removed their root, emSign ECC Root CA - G3, from
+the Chrome Root Store. Playwright 1.64.1 (Chromium 156) still trusted that root,
+so gstack's headless browser accepted certificates those intermediates issued.
+gstack now pins Playwright 1.65.0, whose Chromium 158.0.8127.18 no longer
+carries the root, so the headless shell and the full Chromium both refuse those
+certificates. `./setup` downloads that Chromium on an upgraded install. A
+`GSTACK_CHROMIUM_PATH` build older than 158.0.8115.0, the first Chrome for
+Testing build measured to refuse them, still trusts the root.
 
 To check a build, run it on a network that does not inspect TLS, because a
 captive portal or an intercepting proxy can fail some or all sites with the
@@ -1514,6 +1543,19 @@ capacity each), flushed to disk asynchronously via `Bun.write()`:
 - Console: `.gstack/browse-console.log`
 - Network: `.gstack/browse-network.log`
 - Dialog: `.gstack/browse-dialog.log`
+
+The console, network, dialog and startup-error logs start empty at each daemon
+start and can grow while one daemon runs; `browse-daemon.log` and the
+`browse-audit.jsonl` command audit build up across restarts, and codex scratch
+files collect in `.gstack/tmp/`.
+Run `gstack-clean` in the repository to see what it would reclaim, then
+`gstack-clean --apply` to do it: it cuts these logs to their last 256 KB
+once they pass 1 MB, removes `tmp/codex-*` files older than 7 days, and
+trims the audit log only when you pass `--audit-days N`. It never touches
+`browse.json`, `session-state.json`, `chromium-profile/`, `browser-skills/`
+or `browse-states/`, and it skips the browse files while the daemon runs.
+Deleting the whole `.gstack/` folder instead also deletes your cookies and
+browser skills.
 
 The `console`, `network`, and `dialog` commands read from the in-memory
 buffers (not disk) so capture is real-time even when disk is slow.
@@ -1732,6 +1774,9 @@ the global `~/.gstack/browser-skills/foo/` only inside project-a.
 | `BROWSE_HEADLESS_SKIP` | 0 | Skip Chromium launch entirely (test harness only) |
 | `BROWSE_TUNNEL` | 0 | Activate the dual-listener tunnel architecture (requires `NGROK_AUTHTOKEN`) |
 | `BROWSE_TUNNEL_LOCAL_ONLY` | 0 | Test-only — bind both listeners locally without ngrok |
+| `BROWSE_SESSION` | unset (agent harness calls get `agent-<pid>`) | CLI side: this caller's session name; empty or `off` turns sessions off |
+| `BROWSE_SESSION_IDLE_MINUTES` | 120 | Daemon side: close (headless) or release (headed) a session's tabs after this many idle minutes; 0 keeps them |
+| `BROWSE_MAX_SESSIONS` | 16 | Daemon side: most sessions at once; the least recently used idle one is closed to make room |
 | `CHROMIUM_PROFILE` | unset | Explicit headed Chromium profile directory (used by gbrowser's gbd per-workspace); honored by headed launch and profile-lock cleanup, not used by headless sessions |
 | `GSTACK_DISABLE_GPU` | unset | On macOS, headless Chromium starts with a GPU-taming flag set (it stops runaway GPU-process spin) that also disables WebGL: `getContext('webgl')`/`'webgl2'` return `null`, so WebGL pages (three.js, Mapbox GL, sigma.js) show their fallback. Set `GSTACK_DISABLE_GPU=off` to enable WebGL (`off` is the only recognized value). |
 | `GSTACK_BROWSE_MAX_HTML_BYTES` | 52428800 (50MB) | `load-html` size cap |
@@ -1776,7 +1821,11 @@ browse/
 │   ├── cdp-inspector.ts         # $B inspect — persistent CDP session per page
 │   ├── activity.ts              # ActivityEntry, CircularBuffer, SSE subscribers, privacy filtering
 │   ├── buffers.ts               # Console/network/dialog circular buffers (O(1) ring)
-│   ├── tab-session.ts           # Per-tab session state (load-html replay, ref map scope)
+│   ├── tab-session.ts           # Per-tab session state (load-html replay, ref map scope, device profile, held fingers)
+│   ├── session-name.ts          # CLI: which session a call belongs to (--session, BROWSE_SESSION, agent harness pid)
+│   ├── session-tabs.ts          # Daemon: per-session and per-tab-id request scopes, idle sweep, session cap
+│   ├── device-emulation.ts      # $B device: per-tab phone emulation over the tab's own CDP session
+│   ├── touch-commands.ts        # $B tap/swipe/pinch/touch via Input.dispatchTouchEvent
 │   ├── token-registry.ts        # Mint/validate/revoke for root + setup keys + scoped tokens
 │   ├── sse-session-cookie.ts    # 30-min HttpOnly cookie for /activity/stream + /inspector/events
 │   ├── pty-session-cookie.ts    # Separate scope: live Claude PTY auth

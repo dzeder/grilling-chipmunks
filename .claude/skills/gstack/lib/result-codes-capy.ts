@@ -41,7 +41,7 @@ export const CAPY_RESULT_CODES = {
   },
   CAPTAIN_BRIEF_INCOMPLETE: {
     anchor: 'captain-brief-incomplete',
-    summary: 'the plan lacks one or more of the sections the Captain brief needs (Before → after, Why it matters, What caused this work, Big decisions), so the brief is not ready for approval',
+    summary: 'the plan lacks one or more of the sections the Captain brief needs (ELI5 on a run whose gate carries it, Before → after, Why it matters, What caused this work, Big decisions), so the brief is not ready for approval',
     fix: 'add the named sections to the plan, revise the run if the plan is under review, and render again; --allow-incomplete prints a preview that still says it is not ready',
   },
   PR_SHOTS_INPUT_NOT_FOUND: {
@@ -68,5 +68,55 @@ export const CAPY_RESULT_CODES = {
     anchor: 'capy-install-launch-file-unwritable',
     summary: 'the install passed but its launch file (the sourceable GSTACK_LAUNCH_FILE beside the verdict) could not be written, so the run is a fail: no caller is handed only the launch line to re-type',
     fix: 'make the verdict directory under the state root writable, or set GSTACK_STATE_ROOT to a writable directory, then re-run bin/gstack-capy-install',
+  },
+  PROJECT_FLOOR_UNMET: {
+    anchor: 'project-floor-unmet',
+    summary: 'the installed gstack is below the floor the project declares (min_gstack_version in its .gstack/ship-policy.json); the row is a WARN and the trailer stays ok, because a floor is a project rule, not a security minimum',
+    fix: 'run the install command the row names (the Capy skill installer fast-forwards a clean checkout to origin in one step; gstack-upgrade elsewhere) before the first workflow, or lower the floor in the project',
+  },
+  PROJECT_NODE_PIN_UNMET: {
+    anchor: 'project-node-pin-unmet',
+    summary: "the Node on PATH does not satisfy the project's Node pin while every Bun pin is met; the pins row is a WARN and the trailer stays ok, because gstack runs on Bun and the project's own tests may select their Node (nvm, CI)",
+    fix: "put a Node that satisfies the pin first on PATH (the Capy skill installer installs an exact pin into gstack's runtime store and launches it through the GSTACK_LAUNCH PATH), or change the pin in the project",
+  },
+  PIN_UNREASONED: {
+    anchor: 'pin-unreasoned',
+    summary: 'a Capy session start found the checkout more than 24 hours behind origin\'s default branch and pinned (GSTACK_CAPY_SELF_UPGRADE=off, GSTACK_CAPY_AUTO_UPGRADE=0, a detached HEAD or another branch) with no recorded reason, so it overrode the pin and fast-forwarded (R75)',
+    fix: 'nothing when the pin was not deliberate; to keep a pin, record why: GSTACK_PIN_REASON=<why> for the session, or git -C <checkout> config gstack.pinReason "<why>"',
+  },
+  UPGRADE_SKIPPED: {
+    anchor: 'upgrade-skipped',
+    summary: 'the install-mode session was behind origin and its session-start fast-forward was skipped (dirty, diverged or pinned checkout, a live lease, or gstack-upgrade missing); the row is a WARN with the reason and the trailer stays ok with a behind= note, because a gap above the supported minimum is never a hard fail',
+    fix: 'run the fix the row names (bin/gstack-upgrade after clearing its refusal, or the Capy skill installer) before the next workflow, since any behind= of 1 or more calls for it; below the supported minimum the bootstrapper fails revision instead',
+  },
+  PLAN_RECORD_MISSING: {
+    anchor: 'plan-record-missing',
+    summary: 'the PR body has no Plan: line, so the PR reads as Plan: required and nothing shows its plan step (GST-1751)',
+    fix: "copy the brief's Plan line into the PR body with gstack-approvals render --plan \"<line>\": Plan: approved: <run id or row id>, or Plan: exempt: <reason>; then rerun",
+  },
+  PLAN_UNRESOLVED: {
+    anchor: 'plan-unresolved',
+    summary: 'Plan: approved: <token> (or a public repo\'s approved (record r-<id>)) names no approval row this machine can read, or a row that is a ruling or grant rather than a plan approval',
+    fix: 'gstack-approvals import --autoplan <run dir> --by "<owner>" after the owner answered (or gstack-approvals add with their words for a plan approved outside /autoplan), then cite the run id or row id and rerun',
+  },
+  PLAN_NOT_APPROVED: {
+    anchor: 'plan-not-approved',
+    summary: 'the Plan line says required, or the cited plan row is pending or rejected, or its gate was answered in an agent\'s own words instead of the owner\'s',
+    fix: 'finish the plan step: relay the gate to the owner through the Captain, answer it with their exact words (--owner-reply), import it, and cite the run; nothing was written',
+  },
+  PLAN_EXEMPT_UNKNOWN: {
+    anchor: 'plan-exempt-unknown',
+    summary: 'Plan: exempt: names a reason crew/docs/captain.md does not list (bug fix, s1, flaky, stamp, changelog-resolve, cap-repin, audited-list, read-only, or crew:<rule>)',
+    fix: "use the exemption the brief names, spelled as listed; a change none of them covers is a feature: Plan: required",
+  },
+  PLAN_STORE_UNAVAILABLE: {
+    anchor: 'plan-store-unavailable',
+    summary: 'Plan: approved: needs the approval store, and this machine has neither the state root\'s approvals nor a Drive mirror, so missing cannot be told apart from unreadable',
+    fix: 'run ready on the lane machine that imported the approval, or gstack-approvals sync there so the Drive mirror holds it; land checks the READY note and does not need the store',
+  },
+  QUEUE_PLAN_MISMATCH: {
+    anchor: 'queue-plan-mismatch',
+    summary: 'land found a READY note with no plan record, or a note whose Plan line differs from the PR body\'s, under plan_record: require',
+    fix: 'the lane fixes the PR body\'s Plan line if needed and reruns gstack-ship-queue ready --pr <n> at the pin, which resolves the line and writes the record into the note',
   },
 } satisfies Record<string, ResultCode>;

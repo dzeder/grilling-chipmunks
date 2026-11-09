@@ -61,6 +61,8 @@ export interface SkillTestResult {
   tokenUsage?: CodexTokenUsage;
   /** Codex host: false when the session completed no turn or its model has no price row. */
   costKnown?: boolean;
+  /** runSkillTest's testName: the registered case id the session ledger names, which recordE2E binds the record's cost to. */
+  testName?: string;
 }
 
 /** Local default startup grace: 90s covers observed API queue latency
@@ -88,6 +90,15 @@ export function scanBrowseErrors(text: string): string[] {
     const match = text.match(pattern);
     return match ? [match[0].slice(0, 200)] : [];
   });
+}
+
+/** True when a Bash `goto` printed browse's success line for exactly this URL with a 2xx status. */
+export function browseNavigatedTo(toolCalls: Array<{ tool: string; input: any; output: string }>, url: string): boolean {
+  return toolCalls.some(call => call.tool === 'Bash' && /\bgoto\b/.test(String(call.input?.command ?? ''))
+    && String(call.output ?? '').split('\n').some(line => {
+      const match = line.trim().match(/^Navigated to (\S+) \((\d+)\)$/);
+      return match?.[1] === url && match[2]!.startsWith('2');
+    }));
 }
 
 // --- Testable NDJSON parser ---
@@ -741,5 +752,5 @@ Before source Reads, use Bash to run exactly \`date -u +%Y-%m-%dT%H:%M:%SZ\`. Af
     turnsUsed,
   };
 
-  return { toolCalls, browseErrors, exitReason, duration, output: resultLine?.result || '', costEstimate, transcript, model, firstResponseMs, maxInterTurnMs };
+  return { toolCalls, browseErrors, exitReason, duration, output: resultLine?.result || '', costEstimate, transcript, model, firstResponseMs, maxInterTurnMs, ...(testName ? { testName } : {}) };
 }

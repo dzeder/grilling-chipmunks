@@ -91,8 +91,8 @@ gstack-brain-sync --status
 ```
 
 Shows: the status (`ok`, `idle`, `held`, `collision`, `blocked`,
-`push_failed`, `error`), files held back by the secret scan with their
-fixes, files held because their path differs only by letter case from
+`push_failed`, `error`), files held back by the secret scan or because
+they are not valid JSON, with their fixes, files held because their path differs only by letter case from
 another path (`case_held`, `case_names`; see
 [troubleshooting](troubleshooting.md#artifact-case-collision)), the
 `drainable` count, the last sync and push times, pending queue depth, and
@@ -156,7 +156,7 @@ to it); everything else syncs. The held file stays queued and is re-scanned
 at every sync, and skill start prints:
 
 ```
-ARTIFACTS_SYNC: attention: status=held held=1. The secret scan is holding back 1 file(s); everything else still syncs. See which files and how to fix them: <bin> --status
+ARTIFACTS_SYNC: attention: status=held held=1. Sync is holding back 1 file(s) that the secret scan flagged or that are not valid JSON; everything else still syncs. See which files and how to fix them: <bin> --status
 ```
 
 To remediate:
@@ -190,6 +190,36 @@ append commits. Git's default would conflict at the file tail, but the
 
 You shouldn't see conflict prompts. If you do (a real semantic conflict,
 like two machines editing the same plan), git will stop and prompt.
+
+When a push is rejected, brain-sync fetches and merges the other machine's
+commits itself. Local edits to files that merge would change are set aside
+and put back afterward, and a failed merge is aborted, so `~/.gstack` never
+holds conflict markers. If a local edit conflicts with the other machine's
+change, the other machine's version stays in the working tree and your edit
+is kept in a git stash; `gstack-brain-sync --status` names the stash and the
+`git -C ~/.gstack --literal-pathspecs restore --source=<stash> -- <path>`
+command that brings it back.
+
+JSON files such as `developer-profile.json` have no merge driver, so a
+merge can leave conflict markers in them. The sync parses every staged
+`.json` file and holds back one that does not parse (status `held`, rule
+`invalid-json`) until you repair it, and `gstack-doctor` warns when a synced profile or
+decision snapshot holds conflict markers.
+
+A project's decision snapshot, `decisions.active.json`, is never merged: it
+is rebuilt from that project's `decisions.jsonl`, which merges like any other
+`.jsonl` file. When two machines each log a decision between pushes, their
+snapshots conflict; if every conflict in brain-sync's merge is such a snapshot,
+brain-sync rebuilds each one from the merged log, commits the merge and pushes,
+whether or not your `.gitattributes` predates this. The one exception is a log
+that lost lines on either side since the machines last agreed, as
+`gstack-decision-log --compact` does to redacted decisions: the merged log is
+the union of both sides, so a rebuild would bring the redacted decision back,
+and brain-sync aborts that merge as before. Repositories set up by
+`gstack-artifacts-init` also mark the snapshot `merge=binary`, so a merge you
+run by hand keeps your side without conflict markers; finish it with
+`gstack-decision-log --rebuild-snapshot <project-slug>` and `git add -f` the
+snapshot before committing.
 
 ## Cross-machine pull cadence
 

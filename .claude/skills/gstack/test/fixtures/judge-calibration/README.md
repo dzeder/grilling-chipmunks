@@ -15,12 +15,22 @@ labels) before any schema was written (for `cookie-workflow`, before any request
 schema was sent). `second_review` records that verdict, and each
 disagreement carries `author_expected` and the third reviewer's `adjudication`.
 
-`scripts/judge-calibration.ts` runs the comparison and `scripts/judge-calibration-configs.ts`
+`scripts/judge-calibration.ts` runs the comparison and `crew/scripts/judge-calibration-configs.ts`
 defines each configuration. Run outputs land in `<config>/runs/`:
 `comparison-1.samples.jsonl` holds every sample with its value or error kind, latency
 and priced usage, and `comparison-1.result.json` holds the flip rates, agreement,
 false passes, error rates, p95 latency, landing decision and the UC3 prose-step
 trigger. `manifest.json` prices every planned call before dispatch.
+
+The `qa-workflow`, `qa-health-rubric`, `workflow-default` and `cookie-workflow`
+configurations were removed with the skill-text clarity judges (GST-1371,
+2026-11-04). Their corpus directories no longer serve any configuration and are
+deleted in a follow-up (the deletion alone is larger than the /ship review
+ceiling). The `qa-anti-refusal`, `cross-skill` and `voice` configurations and their
+corpus directories were removed with the last three standalone judges (GST-1403,
+2026-11-04); `test/review-bot-history-facts.test.ts` checks the cross-skill facts for
+free. All of these rows below, and their entries in `manifest.json`, are the
+historical record of the comparison.
 
 ## Comparison (1) results (2026-10-03, `claude-fable-5-1`, unless the row says otherwise)
 
@@ -51,7 +61,11 @@ reservation; its 14 cases now send `WORKFLOW_JUDGE_RESPONSE_SCHEMA` without the
 compact-reasoning validator (still only on `ship`). The frontier (`review`) configuration has no corpus and stays on today's request. A $0.12 two-call pilot sized
 output tokens before the manifest was priced. Total W2 spend: $90.47 of $115.
 
-`cookie-workflow` (GSTA-91, separately funded) is held and stays on today's request. Its one
+`cookie-workflow` (GSTA-91, separately funded) was held, and the hold was released on
+GStack Minder's ruling of 2026-10-29: "GStack Minder, 2026-10-29: release the GSTA-91 hold; a07 is
+matched by old-b; free-text parse errors cost train 42" (`cookie-workflow/release.json`). The
+cookie workflow judge now sends `WORKFLOW_JUDGE_RESPONSE_SCHEMA`, with its thresholds, model and
+samples unchanged; the comparison below stays recorded as held. Its one
 new false pass, a07, scored 4/4/4 on all three new samples and on all three `old-b` samples;
 `old-a`'s a07 panel is incomplete because one old sample returned invalid JSON (the defect the
 schema transport removes), so the comparison counts it against the new request only. Both

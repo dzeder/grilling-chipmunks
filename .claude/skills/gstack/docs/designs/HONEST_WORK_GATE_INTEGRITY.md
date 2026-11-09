@@ -158,7 +158,7 @@ v1 (see Review record).
 
 | id | what it tags | signal |
 |---|---|---|
-| RH-1 | test removed or disabled | removed `test(`/`it(`/`def test_`/`func Test`/`@Test`; added `.skip`, `.only`, `xit`, `xdescribe`, `@pytest.mark.skip`, `#[ignore]`, `t.Skip(`, `@Disabled`, `@Ignore`, `XCTSkip`, `@tag :skip` |
+| RH-1 | test removed or disabled | removed `test(`/`it(`/`def test_`/`func Test`/`@Test`; added `.skip`, `.only`, `xit`, `xdescribe`, `@pytest.mark.skip`, `#[ignore]`, `t.Skip(`, `@Disabled`, `@Ignore`, `XCTSkip`, `@tag :skip`; not in data, logs or run output (`.json`, `.jsonl`, `.ndjson`, `.csv`, `.tsv`, `.log`, `.out`) unless renamed from another file, so English there that quotes "fit (" carries no RH-1 |
 | RH-3 | snapshot changed without its owning test | `__snapshots__/<name>.snap` or `<name>.snap` whose conventional owner (`<name>` test file) has no hunk in the candidate. `*.golden`, `testdata/` and project `Snapshot paths:` are tagged `RH-3?` (owner unresolved: listed and read, never inferred). No general source-ownership inference in v1 |
 | RH-4 | placeholder committed | added `todo!()`, `unimplemented!()`, `raise NotImplementedError`, `throw new Error("not implemented")`, `pass  # TODO` in non-test code |
 | RH-12 | environment sniffing in product code | added `process.env.CI`, `NODE_ENV === 'test'`, `RAILS_ENV == 'test'`, `PYTEST_CURRENT_TEST`, `GITHUB_ACTIONS` outside test paths |
@@ -180,9 +180,12 @@ only history need is calibration, which `--commit <sha>` covers by scanning
 one commit's first-parent delta without the working tree.) Positional
 base defaults the way `gstack-diff-scope` does (the remote's `HEAD` target,
 origin first, then the other remotes → `main` → `master`); an
-already-qualified ref is used as given, and a branch name with no local
-branch resolves through its remote-tracking twin (`origin/main` for `main`:
-the merge-base is the same commit), noted once on stderr. stdout: one
+already-qualified ref is used as given, and a branch name resolves through
+its remote-tracking twin (`origin/main` for `main`), so a stale local `main`
+never adds commits the branch only inherited (GST-883). Only when no remote
+has the branch does the local ref stand, noted once on stderr (a repository
+with no remote at all uses it quietly). Branches are read by full ref name,
+so a tag named `main` or `origin/main` cannot stand in for them. stdout: one
 `GATE_SUMMARY: listed=N read=N tagged={RH-1:2,RH-15:1} unmatched=N
 coverage=<patterns> languages_unlisted=<…> candidate=<sha+wtree>` line, then
 the read-level listing (bounded; the full listing goes to `--out`).

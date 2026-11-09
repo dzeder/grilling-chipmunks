@@ -1,5 +1,5 @@
 /**
- * Fixtures for merge trains (lib/ship-queue-train*.ts): a hermetic repo from
+ * Fixtures for merge trains (crew/lib/ship-queue-train*.ts): a hermetic repo from
  * restamp-fixture (bare origin plus working clone under os.tmpdir(), its own
  * git identity) whose base policy declares a `train` block, and a stateful
  * `gh` on PATH that answers every GitHub call the train surface makes from a
@@ -31,13 +31,24 @@ export interface Rule {
   plan?: { planned: number } | { manifest: unknown } | null;
   /** Marks every artifact of runs dispatched under this rule expired in the artifacts listing. */
   expired?: boolean;
+  /** A screen run's gate binding (gate-binding-a1/gate-binding.json, crew/scripts/gate-reuse.ts) and its report's collector-outcomes.json (report-verdict-a1). */
+  binding?: { verdict: 'GREEN' | 'RED'; reconcile_exit?: number; flaky?: string[] };
+  outcomes?: { red?: string[]; flakyLines?: string[] };
+  /** The run confirmed a verdict reuse (R2a/R2): paid-plan carries a valid gate-reuse.json naming this run and no binding is uploaded. */
+  reuse?: { run: number; flaky?: string[] };
   check?: string | null;
+  /** The check-run name a run dispatched under this rule attaches to its head (a push or workflow_dispatch run's job), with the run's status and conclusion. */
+  ci?: string;
   bisect?: { prefixes: string[]; patterns: Record<string, string>; costUsd?: number };
 }
 export interface ShimData {
   repo: string; origin: string; nextId: number; prs: Record<string, unknown>; runs: Array<Record<string, unknown>>;
   artifacts: Record<string, Record<string, unknown>>; checks: Record<string, Array<{ name: string; status: string; conclusion: string | null }>>;
-  ci: Record<string, unknown[]>; rules: Record<string, Rule>; artifact: string; log: Array<Record<string, unknown>>;
+  ci: Record<string, unknown[]>; ciFail?: string[]; rules: Record<string, Rule>; artifact: string; log: Array<Record<string, unknown>>;
+  /** Commit statuses (the legacy status API) at a sha, beside the check runs in `ci`. */
+  statuses?: Record<string, Array<{ state: string; context: string }>>;
+  /** Per PR, how many more `gh pr view` calls answer before the PR reads as not found (a GitHub answer that changes between two reads). */
+  vanish?: Record<string, number>;
 }
 
 export interface TrainFixture { repo: FixtureRepo; state: string; dataFile: string; env: Record<string, string>; read: () => ShimData; write: (fn: (d: ShimData) => void) => void }
@@ -52,13 +63,13 @@ export function trainFixture(policy: Record<string, unknown> = TRAIN_POLICY, pre
   fs.writeFileSync(path.join(dir, 'shim.js'), shimSource());
   fs.writeFileSync(path.join(dir, 'gh'), `#!/bin/sh\nexec node "${path.join(dir, 'shim.js')}" "${dataFile}" "$@"\n`, { mode: 0o755 });
   const state = path.join(repo.root, 'state');
-  const env = { PATH: `${dir}:${process.env.PATH ?? ''}`, GSTACK_STATE_ROOT: state, GSTACK_SHIP_QUEUE_POLL_MS: '20', GSTACK_EVAL_BG_POLL_MS: '20', GSTACK_SHIP_QUEUE_NOW: '2026-10-18T12:00:00Z' };
+  const env = { PATH: `${dir}:${process.env.PATH ?? ''}`, GSTACK_STATE_ROOT: state, GSTACK_SHIP_QUEUE_POLL_MS: '20', GSTACK_GH_POLL_FLOOR_MS: '0', GSTACK_EVAL_BG_POLL_MS: '20', GSTACK_SHIP_QUEUE_NOW: '2026-10-18T12:00:00Z' };
   const read = () => JSON.parse(fs.readFileSync(dataFile, 'utf8')) as ShimData;
   const write = (fn: (d: ShimData) => void) => { const d = read(); fn(d); fs.writeFileSync(dataFile, JSON.stringify(d)); };
   return { repo, state, dataFile, env, read, write };
 }
 
-/** The repo key lib/ship-queue-train-record.ts derives from origin's URL. */
+/** The repo key crew/lib/ship-queue-train-record.ts derives from origin's URL. */
 export function repoKey(fx: TrainFixture): string {
   const norm = fx.repo.origin.replace(/\.git$/, '').replace(/\/+$/, '');
   return createHash('sha256').update(norm).digest('hex').slice(0, 16);
@@ -95,7 +106,7 @@ export function openPr(fx: TrainFixture, pr: string, opts: { file?: string; text
   repo.git('commit', '-q', '-m', `feat #${pr}`);
   const head = repo.git('rev-parse', 'HEAD');
   repo.git('push', '-q', '-f', 'origin', `HEAD:refs/pull/${pr}/head`, `${mergeRefCommit(fx, head)}:refs/pull/${pr}/merge`);
-  fx.write(d => { d.prs[pr] = { headRefOid: head, isCrossRepository: !!opts.cross, state: 'OPEN', headRefName: `pr-${pr}`, url: `https://github.com/fixture/repo/pull/${pr}`, body: opts.shipped === false ? '' : shippedBody(pr, head) }; });
+  fx.write(d => { d.prs[pr] = { headRefOid: head, isCrossRepository: !!opts.cross, state: 'OPEN', headRefName: `pr-${pr}`, title: `Change from #${pr}`, url: `https://github.com/fixture/repo/pull/${pr}`, body: opts.shipped === false ? '' : shippedBody(pr, head) }; });
   return head;
 }
 
@@ -136,6 +147,41 @@ export function trainJson(fx: TrainFixture, nonce: string, state = fx.state): an
 }
 export const dispatches = (fx: TrainFixture, workflow?: string) => fx.read().log.filter(l => l.cmd === 'workflow run' && (!workflow || l.workflow === workflow));
 
+/** For train land and land: pr view reads the head from origin's branch; pr edit and pr merge act on origin; any commit without recorded CI reads green. */
+export function wrapLand(fx: TrainFixture): void {
+  const dir = path.join(fx.repo.root, 'gh-land-wrap');
+  fs.mkdirSync(dir, { recursive: true });
+  const shim = path.join(fx.repo.root, 'gh-train-shim', 'shim.js');
+  fs.writeFileSync(path.join(dir, 'gh'), [
+    '#!/usr/bin/env node',
+    "const fs=require('fs');const cp=require('child_process');const D=process.env.LAND_WRAP_DATA;const a=process.argv.slice(2);",
+    "const d=JSON.parse(fs.readFileSync(D,'utf8'));const save=()=>fs.writeFileSync(D,JSON.stringify(d));",
+    "const g=(...x)=>cp.execFileSync('git',['--git-dir',d.origin,...x],{encoding:'utf8',timeout:30000}).trim();",
+    "const rev=r=>{try{return g('rev-parse','--verify','--quiet',r)}catch{return ''}};",
+    "if(a[0]==='pr'&&a[1]==='view'&&d.prs[a[2]]){const p=d.prs[a[2]];const h=rev('refs/heads/'+p.headRefName);if(h)p.headRefOid=h;save();console.log(JSON.stringify(p));process.exit(0)}",
+    "if(a[0]==='pr'&&a[1]==='edit'){(d.labels=d.labels||{})[a[2]]=a[a.indexOf('--add-label')+1];save();process.exit(0)}",
+    "if(a[0]==='pr'&&a[1]==='merge'){const p=d.prs[a[2]];const want=a[a.indexOf('--match-head-commit')+1];if(rev('refs/heads/'+p.headRefName)!==want){console.error('Head branch was modified');process.exit(1)}(d.mergeArgs=d.mergeArgs||{})[a[2]]=a.slice(3);",
+    "  const before=rev('main');let tree=rev(want+'^{tree}');",
+    "  if(d.outsideOnMerge){const blob=cp.execFileSync('git',['--git-dir',d.origin,'hash-object','-w','--stdin'],{input:'outside\\n',encoding:'utf8',timeout:30000}).trim();",
+    "    const ls=g('ls-tree',before+'^{tree}')+'\\n100644 blob '+blob+'\\toutside.txt';const ot=cp.execFileSync('git',['--git-dir',d.origin,'mktree'],{input:ls+'\\n',encoding:'utf8',timeout:30000}).trim();",
+    "    g('update-ref','refs/heads/main',g('commit-tree',ot,'-p',before,'-m','outside'));tree=g('merge-tree','--write-tree','--merge-base='+before,rev('main'),want).split('\\n')[0];d.outsideOnMerge=false}",
+    "  g('update-ref','refs/heads/main',g('commit-tree',tree,'-p',rev('main'),'-m','squash #'+a[2]));p.state='MERGED';save();process.exit(0)}",
+    "const paged=/commits\\/([0-9a-f]+)\\/(check-runs|status)\\?.*page=(\\d+)/.exec(a[1]||'');",
+    "if(a[0]==='api'&&paged&&!(d.ci||{})[paged[1]]&&!((d.statuses||{})[paged[1]])){const list=paged[2]==='check-runs'?[{name:'free-tests',status:'completed',conclusion:'success',id:1,completed_at:'2026-10-26T00:00:00Z'}]:[];const key=paged[2]==='check-runs'?'check_runs':'statuses';console.log(JSON.stringify(paged[3]==='1'?{total_count:list.length,state:'success',[key]:list}:{total_count:list.length,[key]:[]}));process.exit(0)}",
+    `const r=cp.spawnSync('node',[${JSON.stringify(shim)},D,...a],{stdio:'inherit',timeout:120000});process.exit(r.status??1);`,
+    '',
+  ].join('\n'), { mode: 0o755 });
+  fx.env.PATH = `${dir}:${fx.env.PATH}`;
+  (fx.env as Record<string, string>).LAND_WRAP_DATA = fx.dataFile;
+}
+
+/** A changelog_fragments PR: a fragment under changelog.d/, pushed as pr-<n>, with a READY receipt. */
+export function fragmentPr(fx: TrainFixture, pr: string, fragment = `- #${pr} change\n`): string {
+  const head = openPr(fx, pr, { file: `changelog.d/pr-${pr}.md`, text: fragment, changelog: false });
+  fx.repo.git('push', '-q', 'origin', `${head}:refs/heads/pr-${pr}`);
+  readyReceipt(fx, pr, head);
+  return head;
+}
 function shimSource(): string {
   return [
     "const fs = require('fs'); const path = require('path'); const cp = require('child_process');",
@@ -147,7 +193,7 @@ function shimSource(): string {
     "const rev = r => { const x = cp.spawnSync('git', ['--git-dir', d.origin, 'rev-parse', '--verify', '--quiet', r], { encoding: 'utf8', timeout: 30000 }); return x.status === 0 ? x.stdout.trim() : ''; };",
     "d.log.push({ cmd: a.slice(0, 2).join(' '), args: a });",
     "if (a[0] === 'repo' && a[1] === 'view') out({ nameWithOwner: d.repo });",
-    "if (a[0] === 'pr' && a[1] === 'view') { const p = d.prs[a[2]]; if (!p) fail('no pull request found'); out(p); }",
+    "if (a[0] === 'pr' && a[1] === 'view') { const p = d.prs[a[2]]; const left = d.vanish && d.vanish[a[2]]; if (left !== undefined) { if (left <= 0) fail('no pull request found'); d.vanish[a[2]] = left - 1; } if (!p) fail('no pull request found'); out(p); }",
     "if (a[0] === 'workflow' && a[1] === 'run') {",
     "  const w = a[2]; const ref = opt('--ref'); const inputs = {};",
     "  a.forEach((x, i) => { if (x === '-f') { const kv = a[i + 1]; const k = kv.slice(0, kv.indexOf('=')); inputs[k] = kv.slice(kv.indexOf('=') + 1); } });",
@@ -163,6 +209,13 @@ function shimSource(): string {
     "  if (rule.record && !inputs.prefix_shas) d.artifacts[id][d.artifact] = { schema: 1, kind: 'train-gate', nonce: rule.record.nonce || inputs.nonce, head_sha: head, tree: rev(head + '^{tree}'),",
     "    verdict: rule.record.verdict || 'GREEN', census: rule.record.census, panels: rule.record.panels };",
     "  if (rule.check && !inputs.prefix_shas) (d.checks[head] = d.checks[head] || []).push({ name: 'gstack/full-gate', status: 'completed', conclusion: rule.check });",
+    "  if (rule.ci) (d.ci[head] = d.ci[head] || []).push({ name: rule.ci, status: run.status, conclusion: run.conclusion, id: id, completed_at: '2026-10-26T00:00:00Z' });",
+    "  if (rule.binding) d.artifacts[id]['gate-binding-a1'] = { schema: 1, repository: d.repo, pr: Number(inputs.screen_pr) || 0, run_id: id, run_attempt: 1, head_sha: rev(head + '^2') || head, base_sha: rev(head + '^1') || head,",
+    "    profile: 'pr', reconcile_exit: rule.binding.reconcile_exit === undefined ? (rule.binding.verdict === 'GREEN' ? 0 : 1) : rule.binding.reconcile_exit, verdict: rule.binding.verdict, manual_accepted: 0, selection_sha256: 'a'.repeat(64),",
+    "    flaky_cases: rule.binding.flaky || [], purpose: 'screen', tested_sha: head, screen_policy: inputs.screen_policy || 'narrow' };",
+    "  if (rule.reuse && d.artifacts[id]['paid-plan']) d.artifacts[id]['paid-plan'].__reuse = { schema: 1, kind: 'main-moved', pr: Number(inputs.screen_pr) || 0, reused_run_id: rule.reuse.run, reused_run_attempt: 1, gated_head: 'b'.repeat(40), current_head: 'c'.repeat(40),",
+    "    gated_base: 'd'.repeat(40), base_sha: 'e'.repeat(40), selection_sha256: 'a'.repeat(64), why: 'same own diff on a moved main', gated_merge_base: 'f'.repeat(40), merge_base: '1'.repeat(40), own_diff_sha256: 'b'.repeat(64), reused_screen_policy: 'narrow', reused_flaky: rule.reuse.flaky || [] };",
+    "  if (rule.outcomes) d.artifacts[id]['report-verdict-a1'] = { version: 2, panels: (rule.outcomes.red || []).map(c => ({ case: c, kind: 'judge', status: 'FAIL', failsLane: true, redClass: 'VERDICT' })), flakyLines: rule.outcomes.flakyLines || [] };",
     "  if (rule.bisect && inputs.prefix_shas) for (const sha of inputs.prefix_shas.split(',')) {",
     "    const at = rule.bisect.prefixes.indexOf(sha);",
     "    d.artifacts[id][d.artifact + '-bisect-' + sha.slice(0, 12)] = { schema: 1, kind: 'train-bisect-prefix', nonce: inputs.nonce, prefix_sha: sha, checked_out_sha: sha,",
@@ -178,8 +231,9 @@ function shimSource(): string {
     "if (a[0] === 'run' && a[1] === 'view') { const r = d.runs.find(x => String(x.databaseId) === a[2]); if (!r) fail('run not found'); out(r); }",
     "if (a[0] === 'run' && a[1] === 'download') {",
     "  const art = (d.artifacts[a[2]] || {})[opt('-n')]; if (!art) fail('no artifact matches');",
-    "  fs.mkdirSync(opt('-D'), { recursive: true }); fs.writeFileSync(path.join(opt('-D'), opt('-n') === 'paid-plan' ? 'manifest.json' : 'record.json'), JSON.stringify(art));",
-    "  if (opt('-n') === 'paid-plan') fs.writeFileSync(path.join(opt('-D'), 'gate-reuse.json'), '{\"reuse\":\"confirmed\"}'); save(); process.exit(0);",
+    "  const fileFor = n => n === 'paid-plan' ? 'manifest.json' : n.startsWith('gate-binding-') ? 'gate-binding.json' : n.startsWith('report-verdict-') ? 'paid-report/collector-outcomes.json' : 'record.json';",
+    "  fs.mkdirSync(path.dirname(path.join(opt('-D'), fileFor(opt('-n')))), { recursive: true }); fs.writeFileSync(path.join(opt('-D'), fileFor(opt('-n'))), JSON.stringify(art));",
+    "  if (opt('-n') === 'paid-plan') fs.writeFileSync(path.join(opt('-D'), 'gate-reuse.json'), art.__reuse ? JSON.stringify(art.__reuse) : '{\"reuse\":\"confirmed\"}'); save(); process.exit(0);",
     "}",
     "if (a[0] === 'api') {",
     "  const arts = /actions\\/runs\\/(\\d+)\\/artifacts(?:\\?name=([^&]+))?/.exec(a[1] || '');",
@@ -187,9 +241,13 @@ function shimSource(): string {
     "  const named = /commits\\/([0-9a-f]+)\\/check-runs\\?check_name=([^&]+)/.exec(a[1] || '');",
     "  if (named) { const list = (d.checks[named[1]] || []).filter(c => c.name === decodeURIComponent(named[2])); out({ total_count: list.length, check_runs: list }); }",
     "  const paged = /commits\\/([0-9a-f]+)\\/(check-runs|status)\\?.*page=(\\d+)/.exec(a[1] || '');",
-    "  if (paged) { const list = paged[2] === 'check-runs' ? (d.ci[paged[1]] || []) : []; const key = paged[2] === 'check-runs' ? 'check_runs' : 'statuses';",
+    "  if (paged && (d.ciFail || []).includes(paged[1])) fail('HTTP 502: gateway timeout');",
+    "  if (paged) { const list = paged[2] === 'check-runs' ? (d.ci[paged[1]] || []) : ((d.statuses || {})[paged[1]] || []); const key = paged[2] === 'check-runs' ? 'check_runs' : 'statuses';",
     "    out(paged[3] === '1' ? { total_count: list.length, state: 'success', [key]: list } : { total_count: list.length, [key]: [] }); }",
     "}",
+    "if (a[0] === 'pr' && a[1] === 'comment') { const p = d.prs[a[2]]; if (!p) fail('no pull request found'); p.comments = [...(p.comments || []), { body: opt('--body') }]; out({}); }",
+    "if (a[0] === 'pr' && a[1] === 'close') { const p = d.prs[a[2]]; if (!p) fail('no pull request found'); p.state = 'CLOSED'; out({}); }",
+    "if (a[0] === 'pr' && a[1] === 'list') { const head = opt('--head'); const st = opt('--state'); out(Object.entries(d.prs).filter(([, p]) => (!head || p.headRefName === head) && (st !== 'open' || p.state === 'OPEN')).map(([n, p]) => ({ number: Number(n), state: p.state, headRefOid: p.headRefOid, baseRefName: p.baseRefName || 'main', mergeCommit: p.mergeCommit || null }))); }",
     "fail('gh shim: unsupported ' + a.join(' '));",
   ].join('\n') + '\n';
 }
