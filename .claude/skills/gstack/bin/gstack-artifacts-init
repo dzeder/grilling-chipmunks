@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # gstack-artifacts-init — set up ~/.gstack/ as a git repo synced to a private
 # git host (GitHub or GitLab) so a remote gbrain can ingest your artifacts
-# (CEO plans, designs, /investigate reports) as a federated source.
+# (CEO plans, designs, retros) as a federated source.
 #
 # Replaces gstack-brain-init in v1.27.0.0 (per D4 hard-delete; no compat
 # shim). Existing users are migrated by gstack-upgrade/migrations/v1.27.0.0.sh.
@@ -403,6 +403,9 @@ projects/*/designs/**/*.md merge=union
 projects/*/ceo-plans/**/*.md merge=union
 projects/*/*-design-*.md merge=union
 projects/*/*-test-plan-*.md merge=union
+# Derived from decisions.jsonl, so never merged as text: gstack-brain-sync
+# rebuilds a conflicted snapshot from the merged log (#4174).
+projects/*/decisions.active.json merge=binary
 EOF
 
 # ---- register merge drivers in local git config ----
