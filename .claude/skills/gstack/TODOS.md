@@ -46,7 +46,7 @@
 
 ### P2/P3: pregate head-policy follow-ups (filed 2026-10-31, from the GST-419/GST-420 /ship review)
 - **`finish` fallback drops head-policy lanes (P2)** — `lib/ship-release.ts` reruns pregate on the stamped tree under the base policy, so after a version bump a lane the branch added under `--policy-from head` is gone and `finish` reports `PREGATE: fail (rerun on the stamped tree)`. GSTA-194 owns that file and has the note. **Effort:** S. **Priority:** P2.
-- **The 3600 s preflight and `finish` wrapper deadline (P3)** — it caps the whole pregate run, so several runners that each fit `timeout_s` can still be cut off together. Derive the wrapper deadline from `timeout_s` and the lane count, or document the cap. **Effort:** S. **Priority:** P3.
+- **The 3600 s `finish` wrapper deadline (P3)** — it caps the whole pregate rerun, so several runners that each fit `timeout_s` can still be cut off together. Derive the wrapper deadline from `timeout_s` and the lane count, or document the cap. Preflight's half is done: `gstack-ship-preflight --step-timeout <s>` sets that budget and a stop prints `PREGATE: time limit hit` (#4429). **Effort:** S. **Priority:** P3.
 - **A bootstrap head policy can still certify itself without `--remote` (P3)** — with no trusted policy, the head file may set `remote_gate: null`, or produce an obligation that `gstack-pregate clear --receipt` accepts from the branch's own gate. Decide what a bootstrap `pregate.json` may certify, then enforce it in `verify` from the recorded policy label instead of per entry point. The `--remote` refusal also prints the generic `PREGATE_HEAD_POLICY_LOOSENS` fix line, which does not apply when there is no trusted policy. **Effort:** S. **Priority:** P3.
 
 ### P3: `/codex --effort` follow-ups (filed 2026-10-11, from the #3146 autoplan review)
@@ -185,12 +185,12 @@ Left open by the iPad and route-drop release, each with its reason.
 
 Left open by v1.91.42.0, which lifted the snapshot file-count ceiling.
 
-- **Tracked symlinks refuse the whole /cso run** — `capture()` fails closed on
+- **Tracked symlinks refuse the whole /cso run** — `capture()` failed closed on
   any tracked symlink ("Symlink or special source file"). 5 of 8 mid-size OSS
-  repos measured for v1.91.42.0 stop there (django, rails, terraform, grafana,
-  vscode; 1-10 symlinks each, mostly test fixtures). Recording them as unread
-  exclusions in the manifest, like dependency trees, is a security design call
-  for Garry. **Effort:** M. **Priority:** P1.
+  repos measured for v1.91.42.0 stopped there (django, rails, terraform, grafana,
+  vscode; 1-10 symlinks each, mostly test fixtures). Decided on 2026-11-20 by
+  GStack Minder in #4567: /cso records each link by its target string, or notes that the target was withheld when it matches a secret pattern and never
+  dereferences it. **Effort:** M. **Priority:** P1.
 - **64 MiB aggregate source cap (#2993)** — files over 1 MiB are withheld from
   the audit but still read and counted. Stream-hash them without counting
   toward the cap, report them as unread coverage, and add an admission estimate
@@ -5509,9 +5509,10 @@ Garry for each; revisit 2026-10-29 unless a date says otherwise.
   (`['paste', 'enter', 'end_turn']`). Wait for the CLI's own write instead of a
   timer (docs/TESTING_INTERNALS.md#flake-ledger). **Effort:** S. **Priority:** P2.
 - **Split the free files the weekly seed puts over 60 s** —
-  `test/setup-install-registry.test.ts` (117 s), `test/brain-sync.test.ts` (91 s)
-  and `test/setup-codex-scope.test.ts` (77 s) are allowlisted with this todo in
-  `scripts/free-test-seed-allowlist.json` (2026-10-31 recording, run 41229924108).
+  `test/setup-install-registry.test.ts` (117 s) and `test/brain-sync.test.ts` (91 s)
+  are allowlisted with this todo in
+  `scripts/free-test-seed-allowlist.json` (2026-10-31 recording, run 41229924108);
+  `test/setup-codex-scope.test.ts` left the list at 58 s in the 2026-11-22 recording.
   `test/host-renders-prune.test.ts`, `test/setup-codex-scope-namespaces.test.ts`
   and seven other files the recordings put over 60 s were split in
   GSTA-151. Split each remaining file by describe block, rerun `bun run test:ubicloud --record-durations` and

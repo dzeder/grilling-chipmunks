@@ -59,6 +59,17 @@ const HEADING = /^(?:#{1,6}\s|\*\*[^*]+\*\*:?$)/;
 const LIST_ITEM = /^(?:[-*+]|\d+[.)])\s+\S/;
 /** A numbered finding heading ("**1. …**", "### 2) …", GST-1031) or a finding lead that names its number ("**Finding 1 (FIXABLE): …**", GST-1657). */
 const NUMBERED_HEAD = /^(?:#{1,6}\s+|\*\*\s*)(?:\d+[.)]\s|Finding\s+\d+\b)/;
+/**
+ * A severity word that names something in the code under review rather than rating a finding (GSTA-711: "the redact-doc HIGH and
+ * scanner-failure branches", "runs after the HIGH branch"): in capitals, as code spells a constant, after "the" and at most one
+ * qualifier, and before a noun (after an optional "and X") that is not a word for a finding or its rating. CRITICAL never counts, so
+ * "reaches the CRITICAL write path" and "the HIGH and CRITICAL write paths" still block until judged: X is a name only when it is
+ * HIGH, MEDIUM or LOW. nameUses gives each such word's index; a line whose every label is one
+ * collects at INFORMATIONAL, kept on record without a severity it never stated.
+ */
+const RATING_NOUN = '(?:findings?|fix(?:es)?|issues?|severity|severities|risks?|priority|impact|bugs?|defects?|problems?|concerns?|blockers?|items?|notes?|regressions?|ones?|levels?|rating|labels?|bar|floor|threshold|confidence|vulnerabilit(?:y|ies)|chances?|likelihood|probability|exposures?)';
+const NAME_USE = new RegExp(`(?<![A-Za-z0-9])[Tt]he\\s+(?:[\\w.\\x60-]+\\s+)?(HIGH|MEDIUM|LOW)(?:\\s+(?:and|or)\\s+(?:(HIGH|MEDIUM|LOW)|[\\w.\\x60-]+))?\\s+(?!${RATING_NOUN}(?![\\w-]))[a-z][\\w-]*`, 'dg');
+const nameUses = (t: string) => new Set([...t.matchAll(NAME_USE)].flatMap(m => [m.indices![1]![0], m.indices![2]?.[0] ?? -1]));
 const stronger = (a: string, b: string) => ((rank(a) ?? 0) >= (rank(b) ?? 0) ? a : b);
 /** A prose voice's `Blocks: yes` (GSTA-167 normalizer v2): the finding is CRITICAL whatever its label; `Blocks: no` never lowers one. */
 const BLOCKS_YES = /(?<![A-Za-z0-9])Blocks:?\**:?\s*\**\s*yes(?![A-Za-z0-9])/i;
@@ -188,11 +199,13 @@ export interface MergedLine { id: string; reader: string; label: string; stated?
  * A native FIXABLE finding that states `Blocks: no` and one Severity field collects at that field on every class (GST-1031 ruling A);
  * one with no Blocks: no, no Severity field or only a FIXABLE field stays CRITICAL. fixableRaises false (a code or docs review with no
  * risk, error, history or floor reason, GST-987) also drops FIXABLE's raise from label headings and leads.
- * In a reply that says NO FINDINGS (GST-2122) a finding with no structure (JSON, lead label, label heading, numbered finding heading,
- * Severity or Blocks: yes field, the native voice's FIXABLE or INVESTIGATE, or a file:line on it or on the line it runs on from) collects
- * nothing; elsewhere it collects as above. A line led by a bold, unlabelled lead ("**1. Coverage:** …") is read for a closing summary after it.
+ * In a reply that says NO FINDINGS (GST-2122) a finding with no file:line in its prose or on the line it runs on from, and no structure
+ * (JSON, lead label, label heading, numbered finding heading, Severity or Blocks: yes field, the native voice's FIXABLE or INVESTIGATE),
+ * collects nothing. One with a file:line but no structure still collects, since it may name a real blocker. parseReply anchors a row
+ * there only by a field, lead label, heading or JSON: a file:line, a list item or the FIXABLE or INVESTIGATE tag does not (GST-2972: a
+ * reader confirming code names its lines). Elsewhere it collects as above. A line led by a bold, unlabelled lead ("**1. Coverage:** …") is read for a closing summary after it.
  */
-function parseLabelled(reader: string, output: string, fixableRaises: boolean): Array<{ label: string; raw: string; shaped: boolean; anchored: boolean }> {
+function parseLabelled(reader: string, output: string, fixableRaises: boolean): Array<{ label: string; raw: string; shaped: boolean; fielded: boolean; anchored: boolean }> {
   type Finding = { label: string; raw: string; fields: Set<string>; list: boolean; lead?: string; fixable?: boolean; heading?: boolean; item?: boolean; nested?: boolean; closed?: boolean; section?: boolean; context?: string };
   const out: Finding[] = [];
   let section: string | null = null;
@@ -205,6 +218,7 @@ function parseLabelled(reader: string, output: string, fixableRaises: boolean): 
   const named = (l: string) => (role === 'adversarial-native' && l.toUpperCase() === 'FIXABLE' ? 'CRITICAL' : l);
   const strongestOf = (labels: Array<string | undefined>) => labels.reduce<string | undefined>((a, b) => (a === undefined ? b : b === undefined ? a : stronger(a, b)), undefined);
   const strongest = (t: string) => strongestOf([...t.matchAll(ALL_LABELS)].map(m => named(m[1]!)));
+  const namesOnly = (t: string) => { const at = nameUses(t); const ms = [...t.matchAll(ALL_LABELS)]; return ms.length > 0 && ms.every(m => at.has(m.index!)); };
   const fieldOf = (t: string) => { const ls = [...t.matchAll(SEVERITY_FIELD)].flatMap(m => (m[1] ?? m[2]!).match(FIELD_LABELS)!); return ls.length === 1 && (fixableRaises || role !== 'adversarial-native' || rank(ls[0]!)) ? ls[0] : undefined; };
   const critical = (t: string) => BLOCKS_YES.test(t) || (fixableRaises && role === 'adversarial-native' && /(?<![A-Za-z0-9])FIXABLE(?![A-Za-z0-9])/.test(t));
   const leadOf = (t: string) => { const l = LEAD_LABEL.exec(t)?.[1]; return l === undefined || !fixableRaises ? l : named(l); };
@@ -214,7 +228,7 @@ function parseLabelled(reader: string, output: string, fixableRaises: boolean): 
     const summary = continued ? undefined : closingSummary(led && !ANY_LABEL.test(led[1]!) ? led[2]! : t);
     if (summary) return strongestOf([...summary.labels.map(named), summary.prose ? 'INFORMATIONAL' : undefined]);
     const field = fieldOf(t);
-    if (field === undefined) return strongest(t);
+    if (field === undefined) return namesOnly(t) && !critical(t) ? 'INFORMATIONAL' : strongest(t);
     return critical(t) ? 'CRITICAL' : strongestOf([leadOf(t), field])!;
   };
   const push = (label: string, raw: string, fields: string[] = [], lead?: string): Finding => { const f = { label, raw, fields: new Set(fields), list: LIST_ITEM.test(raw), lead }; out.push(f); return f; };
@@ -313,11 +327,11 @@ function parseLabelled(reader: string, output: string, fixableRaises: boolean): 
   const unblocked = (f: Finding) => fixableRaises || role !== 'adversarial-native' || !(f.fixable || f.label.toUpperCase() === 'FIXABLE' || /(?<![A-Za-z0-9])FIXABLE(?![A-Za-z0-9])/.test(f.raw)) || statesNoBlocks(f.raw);
   const relaxed = fixableRaises && role === 'adversarial-native' ? parseLabelled(reader, output, false) : undefined;
   const statesSeverity = (raw: string) => { const ls = [...raw.matchAll(SEVERITY_FIELD)].flatMap(m => (m[1] ?? m[2]!).match(FIELD_LABELS)!); return ls.length === 1 && !!rank(ls[0]); };
-  const shaped = (f: Finding, tag = true) => f.section || f.heading || [...f.raw.split(' | '), f.context ?? ''].some(t => t.startsWith('{') || LEAD_LABEL.test(t) || META.test(t) || !!t.match(STATED_SEVERITY) || BLOCKS_YES.test(t)
-    || LOCUS.test(t) || PATH_LOCUS.test(t) || (tag && role === 'adversarial-native' && /(?<![A-Za-z0-9])(?:FIXABLE|INVESTIGATE)(?![A-Za-z0-9])/i.test(t)));
+  const shaped = (f: Finding, tag = true, loci = true) => f.section || f.heading || [...f.raw.split(' | '), f.context ?? ''].some(t => t.startsWith('{') || LEAD_LABEL.test(t) || META.test(t) || !!t.match(STATED_SEVERITY) || BLOCKS_YES.test(t)
+    || (loci && (LOCUS.test(t) || PATH_LOCUS.test(t))) || (tag && role === 'adversarial-native' && /(?<![A-Za-z0-9])(?:FIXABLE|INVESTIGATE)(?![A-Za-z0-9])/i.test(t)));
   return out.map((f, i) => {
     const own = relaxed?.length === out.length && relaxed[i]!.raw === f.raw && statesNoBlocks(f.raw) && statesSeverity(f.raw) ? relaxed[i]!.label : undefined;
-    return { label: own ?? (unblocked(f) ? f.label : 'CRITICAL'), raw: f.raw, shaped: shaped(f), anchored: f.list || shaped(f, false) };
+    return { label: own ?? (unblocked(f) ? f.label : 'CRITICAL'), raw: f.raw, shaped: shaped(f), fielded: shaped(f, false, false), anchored: f.list || shaped(f, false, false) };
   });
 }
 
@@ -327,28 +341,35 @@ export function parseFindings(reader: string, output: string, fixableRaises = tr
 
 export interface VerdictCheck { state: 'valid' | 'missing' | 'malformed'; parsed: number; declared?: number; agrees?: boolean; why?: string }
 export interface ReplyFinding { label: string; raw: string; summary?: true; synthetic?: true }
+const KIND_STATUS = '(?:noted|deferred|ruled|dismissed|lowered|downgraded|duplicate|folded)';
+const FINDING_KIND = new RegExp(`(?<![A-Za-z0-9])(?:${SEV_LIST}\\s+(?:findings?|duplicates?)|${KIND_STATUS}\\s+${SEV_LIST}|${SEV}(?:\\s*(?:,|/|\\bor\\b|\\band\\b|\\bnor\\b)\\s*${SEV})+)(?![A-Za-z0-9])(?!\\s*:)`, 'g');
 const blockingRow = (f: { label: string; raw: string }) => (rank(f.label) ?? 0) >= 4 && !statesNoBlocks(f.raw);
 
 /**
  * A reply's findings, and with asked (its render carried the verdict ask, GST-2495) the check of its REVIEW_VERDICT line
  * (lib/review-verdict.ts, docs/review-policy.md#verdict-line). A well-formed verdict line never parses as a finding, and a valid
  * line lowers nothing by itself. Declared more than parsed adds CRITICAL rows, one per unmatched at= location and one for the
- * rest; declared fewer marks each blocking row with no anchor (no list item, heading, field, lead label, JSON or file:line) and
- * no Blocks: yes a summary candidate, whether a CRITICAL or P0 word or the native voice's FIXABLE raise made it block. It still
- * blocks until lead judgment lowers it with a reason.
+ * rest; declared fewer marks each blocking row with no anchor (no list item, heading, field, lead label or JSON; a file:line in prose
+ * is not one, and in a NO FINDINGS reply a list item is not one either, GST-2972) and no Blocks: yes a summary candidate, whether a CRITICAL or P0 word or the native voice's FIXABLE raise made it block. It still
+ * blocks until lead judgment lowers it with a reason. A reply whose valid line declares blocking=0 marks the same way, at its own label,
+ * each single-line bullet with no structure, no file:line and no label beyond severities naming findings as a kind (`- a HIGH finding still
+ * refused;`, `- \`missing_verdict\` can't occur alongside P0 or P1 findings.`, #4518 and #4519), a list of severities (`P0 or P1`), or a
+ * status a finding already has (`noted CRITICAL duplicates`, `a deferred CRITICAL`, #4553): a scope list or passed check the lead
+ * may lower with a reason, though `- Two P0 findings remain unfixed.` has the same shape, so it still blocks until judged.
  */
 export function parseReply(reader: string, output: string, fixableRaises = true, asked = false): { findings: ReplyFinding[]; verdict?: VerdictCheck } {
   const verdict = asked ? parseVerdict(output) : undefined;
   const text = asked ? withoutVerdictLines(output) : output;
   const clean = text.split('\n').some(l => /^NO FINDINGS\.?$/.test(l.trim()));
-  const rows = parseLabelled(reader, text, fixableRaises).filter(r => r.shaped || !clean);
+  const rows = parseLabelled(reader, text, fixableRaises).filter(r => r.shaped || !clean).map(r => clean ? { ...r, anchored: r.fielded } : r);
   if (verdict?.state !== 'valid') {
     const findings = rows.map(({ label, raw }) => ({ label, raw }));
     return { findings, ...(verdict ? { verdict: { state: verdict.state, parsed: findings.filter(blockingRow).length, ...(verdict.state === 'malformed' ? { why: verdict.why } : {}) } } : {}) };
   }
   const n = verdict.blocking;
   const parsed = rows.filter(blockingRow).length;
-  const findings: ReplyFinding[] = rows.map(f => ({ label: f.label, raw: f.raw, ...(n < parsed && blockingRow(f) && !f.anchored && !BLOCKS_YES.test(f.raw) ? { summary: true as const } : {}) }));
+  const kindOnly = (f: { raw: string; shaped: boolean }) => n === 0 && !f.shaped && /^[-*+]\s/.test(f.raw) && !f.raw.includes(' | ') && !ANY_LABEL.test(f.raw.replace(FINDING_KIND, ' '));
+  const findings: ReplyFinding[] = rows.map(f => ({ label: f.label, raw: f.raw, ...((n < parsed && blockingRow(f) && !f.anchored && !BLOCKS_YES.test(f.raw)) || kindOnly(f) ? { summary: true as const } : {}) }));
   if (n > parsed) {
     const loci = new Set(rows.filter(blockingRow).map(f => lineLocus(f.raw)));
     const unmatched = verdict.at.map(a => a.replace(/^\.\//, '')).filter(a => !loci.has(a)).slice(0, n - parsed);

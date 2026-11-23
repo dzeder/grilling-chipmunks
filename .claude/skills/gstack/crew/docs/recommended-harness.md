@@ -239,8 +239,9 @@ moves `stable` more than once in 72 hours otherwise, except for a verified
 security or regression fix (`--security` or `--regression`, with `--ref`): it takes the newest green commit on main's first-parent history
 (its required check succeeded, the backstop check succeeded, every check run
 completed and none failed, no active freeze), tags it `v<VERSION>`, publishes a
-GitHub Release whose notes are one line per CHANGELOG version since the
-previous release, and fast-forwards `stable`. New installs and team-mode installs
+GitHub Release whose notes list every change in the CHANGELOG versions since
+the previous release, one line each with the pull request that made it
+([release notes](../../docs/releases.md#release-notes)), and fast-forwards `stable`. New installs and team-mode installs
 follow `stable`; `gstack-config set update_channel main` follows every merge. A
 hotfix is `--ref <sha on main>`, held by the same floor. Details, the floor's
 refusal codes and the "nothing green in the window" failure mode:
@@ -288,7 +289,7 @@ measured later does not count anything that happened after that week.
 | Gate runs green / red / cancelled | completed runs of the gate workflow (`workflow_dispatch` by default; `--gate-event any`); cost from the run's `report-verdict-a*` artifact (`collector-outcomes.json` `.verdict.costUsd`), else the `**$N** rule/judge cost` or `cost=$N` line of the PR's verdict comment | green on 95%+ of runs, cancelled near 0, cost known for every run |
 | Known gate cost per merged PR | known cost / merged PRs; unknown-cost runs make it a floor | known, stable or falling week over week |
 | Red-train rate | runs whose head branch starts with `--train-prefix`, cancelled excluded; red = conclusion other than success; red backstops and screens shown beside it | under 5% (each red train is a bisect plus a rebuild, about two gates) |
-| Flaky events | `flake-records-a*` records of the newest gate runs (count, known rerun spend) and `flake-ledger-*` entries of free runs on the default branch; a run whose artifacts cannot be read is counted and named, never scored 0, and a main push that reused its pull request's run (no artifacts, `reuse` job green) is left out and named | 0 repeat cases; under 1 flaky case per 10 gates; free retries under 1% of runs |
+| Flaky events | `flake-records-a*` records of the newest gate runs (count, known rerun spend) and `flake-ledger-*` entries of free runs on the default branch; a run whose artifacts cannot be read is counted and named, never scored 0, and a main push that reused its pull request's run (no shard artifacts, `reuse` job green) is left out and named | 0 repeat cases; under 1 flaky case per 10 gates; free retries under 1% of runs |
 | Issues opened / closed | GitHub search, created and closed in the window | closed ≥ opened; nothing severe older than a week |
 | Releases cut | releases published in the window, drafts excluded | at least one tagged release a week, on schedule |
 
