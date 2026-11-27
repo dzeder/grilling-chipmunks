@@ -36,6 +36,8 @@ export interface PregateContext {
   configLabel: string;
   /** Where the policy came from: the base branch, the unreviewed head, the user-owned file, or nowhere (defaults). */
   configKind: 'base' | 'head' | 'user' | 'none';
+  /** A `--policy-from head` run with no base or user policy: the head file is a bootstrap, so its `[]` declarations on test folders drop nothing. */
+  headBootstrap?: boolean;
   /** The active policy has a `dependencies`, `empty_lanes`, `selection` or `local` key (config LANE_KEYS); false keeps the no-policy lane verdicts. Absent counts as declared. */
   policyDeclaresLanes?: boolean;
   /** This run's scratch directory under the state root (lib/pregate/run-scratch.ts): logs and scan files, never os.tmpdir(). */
@@ -62,8 +64,8 @@ export interface PregateContext {
   cores: number;
   testBackend: string;
   policyFrom: 'base' | 'head';
-  /** `--from-run`: a Free Tests run whose tree.json files count as passed for this tree (lanes, lib/run-evidence.ts verifyFromRun), with the base branch's run check or why it could not be built. */
-  fromRun?: { ref: string; check: RunSource | { error: string } };
+  /** `--from-run`: a Free Tests run whose tree.json files count as passed for this tree (lanes, lib/run-evidence.ts verifyFromRun), with the base branch's run check or why it could not be built. The CI carry sets `runs`, every profile's verified run at this tree (`ref` is the remote gate's, else the first), and their files count together. */
+  fromRun?: { ref: string; check: RunSource | { error: string }; runs?: Array<{ ref: string; profile: string }> };
   /** `--no-ci-carry`: false skips the tests stage's automatic --from-run (lib/ci-carry.ts findCarry at HEAD's clean tree). */
   ciCarry?: boolean;
   /** `--remote`: run the declared remote gate now, under this spend cap. */
@@ -103,7 +105,7 @@ export interface CheckResult extends PregateCheck {
   environment?: EnvironmentCause;
 }
 
-export type EnvironmentKind = 'missing-binary' | 'network' | 'quota' | 'disk' | 'runtime' | 'tool';
+export type EnvironmentKind = 'missing-binary' | 'arg-limit' | 'network' | 'quota' | 'disk' | 'runtime' | 'tool';
 /** How the cause was established: `launch` (the command could not start, its binary is off PATH, the runtime or a gstack tool refused), or `output` (a rule matched the command's text before any test was counted, which the diff's own output could have written). */
 export type EnvironmentProof = 'launch' | 'output';
 export interface EnvironmentCause { kind: EnvironmentKind; evidence: string; proof: EnvironmentProof }

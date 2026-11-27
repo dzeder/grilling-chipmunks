@@ -15,6 +15,7 @@ import { EXIT } from '../../lib/headless-artifacts';
 import { TRAIN_GATES_KEY_VERSION, validatePolicy } from '../../lib/ship-policy';
 import { baseRedAdmission, classifyPrefixes, classifyWorkflowRun, commandReservation, concurrencyKeyed, gatedChain, parseTestRecord } from '../lib/ship-queue-train-gate';
 import { pushMatchesPrefix, workflowFacts } from '../lib/ship-queue-train-init';
+import { fixesBaseRedCases } from '../lib/ship-queue-train-cli';
 import type { TrainSlot } from '../lib/ship-queue-train-record';
 import { BASE_POLICY, cleanup } from '../../test/helpers/restamp-fixture';
 import { line, nonceOf, openPr, queue, readyReceipt, repoKey, shippedBody, trainFixture, trainJson, TRAIN_POLICY, type TrainFixture } from '../../test/helpers/ship-queue-train-fixture';
@@ -52,6 +53,7 @@ function wrap(fx: TrainFixture): void {
     "if(a[0]==='pr'&&a[1]==='view'&&d.prs[a[2]]){const p=d.prs[a[2]];const h=rev('refs/heads/'+p.headRefName);if(h)p.headRefOid=h;out(p)}",
     "if(a[0]==='pr'&&a[1]==='merge'){const p=d.prs[a[2]];const want=a[a.indexOf('--match-head-commit')+1];d.log.push({cmd:'pr merge',args:a});if(rev('refs/heads/'+p.headRefName)!==want){save();console.error('Head branch was modified');process.exit(1)}",
     "  const before=rev('main');const tree=g('merge-tree','--write-tree',before,want).split('\\n')[0];g('update-ref','refs/heads/main',g('commit-tree',tree,'-p',before,'-m','squash #'+a[2]));p.state='MERGED';save();process.exit(0)}",
+    "if(a[0]==='api'&&/actions\\/runs\\?head_sha=/.test(a[1])){console.log(JSON.stringify({total_count:0,workflow_runs:[]}));process.exit(0)}",
     "const paged=/commits\\/([0-9a-f]+)\\/(check-runs|status)\\?.*page=(\\d+)/.exec(a[1]||'');",
     "if(a[0]==='api'&&paged&&!(d.ci||{})[paged[1]]){const list=paged[2]==='check-runs'?[{name:'test',status:'completed',conclusion:'success',id:1,completed_at:'2026-10-26T00:00:00Z'}]:[];const key=paged[2]==='check-runs'?'check_runs':'statuses';console.log(JSON.stringify(paged[3]==='1'?{total_count:list.length,state:'success',[key]:list}:{total_count:list.length,[key]:[]}));process.exit(0)}",
     "const r=cp.spawnSync('node',[" + JSON.stringify(shim) + ",D,...a],{stdio:'inherit',timeout:120000});process.exit(r.status??1);",
@@ -166,6 +168,24 @@ describe('prefix verdicts', () => {
     expect(parseTestRecord([{ name: 'r.json', text: JSON.stringify({ tests: [{ id: 'x', status: 'pass' }, { id: 'y', status: 'fail' }, { id: 'z', status: 'skip' }] }) }])).toEqual({ executed: 2, failed: ['y'] });
     expect(parseTestRecord([{ name: 'r.txt', text: '' }])).toBeNull();
   });
+  test('a JUnit case name with XML character references reads as the name a READY declares (#4569)', () => {
+    const xml = '<testsuite><testcase classname="cancel.test.ts" name="saves, and the create saves before the cancel writes &gt; it&apos;s &#x2192; done &amp; &#44;"><failure/></testcase></testsuite>';
+    expect(parseTestRecord([{ name: 'r.xml', text: xml }])!.failed).toEqual(["cancel.test.ts.saves, and the create saves before the cancel writes > it's \u2192 done & ,"]);
+  });
+  test('--fixes-base-red-file names cases that hold a comma, one per line; the comma list and the errors are unchanged (#4569)', () => {
+    const d = fs.mkdtempSync(path.join(os.tmpdir(), 'gstack-fixes-red-'));
+    try {
+      const file = path.join(d, 'cases.txt');
+      fs.writeFileSync(file, 'a.test.ts > saves, and the create saves before the cancel writes\r\n\n  b.test.ts > other  \n');
+      expect(fixesBaseRedCases(['--fixes-base-red-file', file])).toEqual({ cases: ['a.test.ts > saves, and the create saves before the cancel writes', 'b.test.ts > other'] });
+      expect(fixesBaseRedCases(['--fixes-base-red', 'a, b'])).toEqual({ cases: ['a', 'b'] });
+      expect(fixesBaseRedCases([])).toEqual({ cases: undefined });
+      expect(fixesBaseRedCases(['--fixes-base-red', 'a', '--fixes-base-red-file', file])).toEqual({ error: 'pass --fixes-base-red or --fixes-base-red-file, not both' });
+      expect('error' in fixesBaseRedCases(['--fixes-base-red-file', path.join(d, 'missing')])).toBe(true);
+      fs.writeFileSync(file, '\n');
+      expect('error' in fixesBaseRedCases(['--fixes-base-red-file', file])).toBe(true);
+    } finally { fs.rmSync(d, { recursive: true, force: true }); }
+  });
   test('gated refs and the command price', () => {
     const prefixes = [0, 1, 2].map(index => ({ index, commit: String(index).repeat(40), tree: 't'.repeat(40) }));
     expect(gatedChain('n1', prefixes as never).map(p => p.ref)).toEqual(['train-prefix/n1/t0', 'train-prefix/n1/t1', 'train-prefix/n1/t2']);
@@ -247,7 +267,7 @@ describe('generic trains end to end (fixture repos)', () => {
     expect(origin('rev-parse', 'main^{tree}')).toBe(t.gated[2].tree);
     expect(trainJson(fx, nonce)).toMatchObject({ state: 'merged', landing: { 1: { mode: 'direct', update: null }, 2: { mode: 'direct' } } });
     const merges = fx.read().log.filter(l => l.cmd === 'pr merge').map(l => (l.args as string[]).join(' '));
-    expect(merges[0]).toMatch(/^pr merge 1 --squash --match-head-commit [0-9a-f]{40} --subject Change from #1 \(#1\)$/);
+    expect(merges[0]).toMatch(/^pr merge 1 --squash --match-head-commit [0-9a-f]{40} --subject Change from #1 \(#1\) --body $/);
   }, 300_000);
 
   test('strict protection forces update; a rebase method refuses it; a fork head is refused', () => {

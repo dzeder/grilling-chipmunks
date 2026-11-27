@@ -32,17 +32,18 @@ import { CHECKS, pregateMirrorPath, readPregateFile, verifyPregate, PREGATE_OUT_
 import { exceptionConsumerProblem, flakyExceptionLines } from './pregate/flaky-exception';
 import { ensureTmpExcluded, restamp, versionAtRef } from './restamp';
 import type { ResultCodeName } from './result-codes';
-import { extractReceipt, readyTailLines } from './ship-receipt';
+import { extractReceipt, readyTailLines, type ReadyTail } from './ship-receipt';
 import { bindShippedReceipt } from './ship-receipt-depth';
 import { isUnavailable, loadPolicyFromBase, type LoadedPolicy } from './ship-policy';
-import { readyPlan } from './plan-record';
+import { finishPlanLine, readyPlan } from './plan-record';
 import {
   QUEUE_DIR_REL, applyStampPatch, commitForTree, currentAttempt, git, listAttempts, recomputeMergeTree, sha256, writeJsonAtomic,
   type AttemptRecord, type QueueFailure,
 } from '../crew/lib/ship-queue-gate';
 import { wtreeFingerprint } from './script-invocation';
-import { nowIso, persist, readyPath, repoIdentity } from '../crew/lib/ship-queue-train-record';
+import { nowIso, persist, readyNoteUnpushed, readyPath, repoIdentity } from '../crew/lib/ship-queue-train-record';
 import { buildReceipt, type TreeReceipt } from './tree-receipt';
+import { gateAcceptance } from './gate-dispositions';
 
 export type Gh = (args: string[]) => { ok: boolean; out: string; err?: string };
 export interface QueueContext { repoRoot: string; base: string; gh: Gh; remote?: string }
@@ -107,10 +108,10 @@ const CI_PAGE = 100;
 const CI_MAX_PAGES = 10;
 
 /** Every page of one GitHub list for a commit; anything short of exactly total_count is an error, never a partial answer. */
-function readAllPages(ctx: QueueContext, endpoint: string, key: 'check_runs' | 'statuses'): { items: Array<Record<string, unknown>> } | { error: string } {
+function readAllPages(ctx: QueueContext, endpoint: string, key: 'check_runs' | 'statuses' | 'workflow_runs'): { items: Array<Record<string, unknown>> } | { error: string } {
   const items: Array<Record<string, unknown>> = [];
   for (let page = 1; page <= CI_MAX_PAGES; page++) {
-    const r = ctx.gh(['api', `${endpoint}?per_page=${CI_PAGE}&page=${page}`]);
+    const r = ctx.gh(['api', `${endpoint}${endpoint.includes('?') ? '&' : '?'}per_page=${CI_PAGE}&page=${page}`]);
     let body: { total_count?: unknown; [k: string]: unknown } | null = null;
     try { body = r.ok ? JSON.parse(r.out) : null; } catch {}
     const list = body?.[key];
@@ -134,29 +135,97 @@ function readAllPages(ctx: QueueContext, endpoint: string, key: 'check_runs' | '
  * completed run with no readable completed_at, is never collapsed and counts on
  * its own (fail closed).
  */
-export function latestRunPerName<T extends { name?: unknown; id?: unknown; status?: unknown; completed_at?: unknown; app?: unknown }>(runs: T[]): T[] {
+type CheckRun = { name?: unknown; id?: unknown; status?: unknown; completed_at?: unknown; app?: unknown };
+const runRank = (r: CheckRun) => (r.status !== 'completed' ? Infinity : typeof r.completed_at === 'string' ? Date.parse(r.completed_at) : NaN);
+/** One app's check name, or null for a run that is never collapsed (no name, or completed with no readable completed_at). */
+function checkKey(r: CheckRun): string | null {
+  if (typeof r.name !== 'string' || !r.name || Number.isNaN(runRank(r))) return null;
+  const app = (r.app as { id?: unknown } | null | undefined)?.id;
+  return `${typeof app === 'number' || typeof app === 'string' ? app : ''}\0${r.name}`;
+}
+
+export function latestRunPerName<T extends CheckRun>(runs: T[]): T[] {
   const latest = new Map<string, T>();
   const standalone: T[] = [];
-  const rank = (r: T) => (r.status !== 'completed' ? Infinity : typeof r.completed_at === 'string' ? Date.parse(r.completed_at) : NaN);
   const id = (r: T) => (typeof r.id === 'number' ? r.id : Number(r.id) || 0);
   for (const r of runs) {
-    const app = (r.app as { id?: unknown } | null | undefined)?.id;
-    if (typeof r.name !== 'string' || !r.name || Number.isNaN(rank(r))) { standalone.push(r); continue; }
-    const key = `${typeof app === 'number' || typeof app === 'string' ? app : ''}\0${r.name}`;
+    const key = checkKey(r);
+    if (key === null) { standalone.push(r); continue; }
     const have = latest.get(key);
-    if (!have || rank(r) > rank(have) || (rank(r) === rank(have) && id(r) > id(have))) latest.set(key, r);
+    if (!have || runRank(r) > runRank(have) || (runRank(r) === runRank(have) && id(r) > id(have))) latest.set(key, r);
   }
   return [...latest.values(), ...standalone];
 }
 
-/** CI at one exact SHA: the latest check run per name (as GitHub's rollup counts) and every commit-status context; unreadable or incomplete is unknown, never green. */
-export function ciAtHead(ctx: QueueContext, sha: string): { line: string; green: boolean; none: boolean; checks: Array<{ name: string; status: string; conclusion: string | null }>; contexts: Array<{ name: string; state: string }> } {
+const suiteOf = (r: Record<string, unknown>) => String((r.check_suite as { id?: unknown } | null | undefined)?.id ?? '');
+const PASSING = ['success', 'skipped', 'neutral'];
+
+/**
+ * A CI_SUPERSEDED line for each red run whose check counts by a passing newer run from another check suite, such as a
+ * branch-only dispatch that replaced a red pull_request run, which tested the merge with the base (reports/GSTA-461.md
+ * item 7). It only warns: the verdict is latestRunPerName's. A rerun in the same suite prints nothing.
+ */
+function supersededLines(runs: Array<Record<string, unknown>>, judged: Array<Record<string, unknown>>): string[] {
+  const winners = new Map(judged.map(r => [checkKey(r), r] as const).filter(([k]) => k !== null));
+  return runs.flatMap(r => {
+    const key = checkKey(r);
+    const by = key === null ? undefined : winners.get(key);
+    if (!by || by === r || r.status !== 'completed' || PASSING.includes(String(r.conclusion))) return [];
+    if (by.status !== 'completed' || !PASSING.includes(String(by.conclusion)) || suiteOf(r) === suiteOf(by)) return [];
+    return [`CI_SUPERSEDED: ${String(r.name)} red run ${String(r.id ?? '?')} replaced by ${String(by.id ?? '?')} (suite ${suiteOf(r) || '?'} → ${suiteOf(by) || '?'})`];
+  });
+}
+
+/**
+ * Workflow runs at a head that ended without a passing conclusion and without one check run (a startup_failure, or a
+ * run that failed before scheduling a job), so the check-runs list never names them. Each counts as its own failed
+ * check unless a later run of the same workflow at this head replaced it; that run's own checks then count (Plain
+ * title on #4225 failed with no jobs and passed two minutes later; gstack-evals#303's second sealed run had no later one).
+ * A later run replaces it only once that run has check runs or has finished; while it is still queued with no jobs the
+ * failure still counts. A run cancelled before any job never ran: a concurrency group cancels a pending run when a newer
+ * one at another SHA arrives (the main backstop at 526f604f911e), so it is not counted. "Has jobs" means its suite is in
+ * latestSuites (its latest attempt ran jobs), so a passing first attempt never hides a rerun that failed with no jobs; a
+ * suite whose earlier-attempt runs already count a failure (judged) adds no second entry.
+ */
+export function joblessRuns(latestSuites: Set<string>, judged: Array<Record<string, unknown>>, workflowRuns: Array<Record<string, unknown>>): Array<{ name: string; status: string; conclusion: string | null }> {
+  const failedSuites = new Set(judged.filter(r => r.status === 'completed' && !['success', 'skipped', 'neutral'].includes(String(r.conclusion))).map(suiteOf).filter(Boolean));
+  const workflow = (w: Record<string, unknown>) => String(w.workflow_id ?? w.path ?? '');
+  const order = (w: Record<string, unknown>) => [Date.parse(String(w.created_at ?? '')) || 0, Number(w.id) || 0] as const;
+  const newer = (a: Record<string, unknown>, b: Record<string, unknown>) => order(a)[0] > order(b)[0] || (order(a)[0] === order(b)[0] && order(a)[1] > order(b)[1]);
+  const started = (w: Record<string, unknown>) => latestSuites.has(String(w.check_suite_id ?? ''));
+  const replaces = (o: Record<string, unknown>, w: Record<string, unknown>) => o !== w && workflow(o) === workflow(w) && newer(o, w) && (started(o) || (o.status === 'completed' && o.conclusion !== 'cancelled'));
+  return workflowRuns
+    .filter(w => w.status === 'completed' && !['success', 'skipped', 'neutral', 'cancelled'].includes(String(w.conclusion)) && !started(w) && !failedSuites.has(String(w.check_suite_id ?? '')))
+    .filter(w => !workflow(w) || !workflowRuns.some(o => replaces(o, w)))
+    .map(w => ({ name: `${String(w.name ?? w.path ?? 'workflow')} (run ${String(w.id ?? '?')}, no jobs)`, status: 'completed', conclusion: w.conclusion === undefined || w.conclusion === null ? null : String(w.conclusion) }));
+}
+
+/**
+ * CI at one exact SHA: the latest check run per name, every workflow run that ended with no jobs (joblessRuns), and
+ * every commit-status context; unreadable or incomplete is unknown, never green. Check runs are read twice: GitHub's
+ * default (filter=latest) lists only each check suite's latest attempt, so a rerun attempt that created no jobs hides the
+ * failed run before it (gstack-evals#303), and GitHub's own rollup drops it the same way. A suite the latest list names is
+ * judged by that list alone, so a rerun whose matrix dropped a failed job retires it; a suite only filter=all names (its
+ * latest attempt had no jobs) is judged by its earlier attempts. latestRunPerName then picks the newest run per name.
+ */
+export function ciAtHead(ctx: QueueContext, sha: string): { line: string; green: boolean; none: boolean; checks: Array<{ name: string; status: string; conclusion: string | null }>; contexts: Array<{ name: string; state: string }>; superseded: string[] } {
   const at = sha.slice(0, 12);
-  const runs = readAllPages(ctx, `repos/{owner}/{repo}/commits/${sha}/check-runs`, 'check_runs');
-  if ('error' in runs) return { line: `unknown at ${at} (${runs.error})`, green: false, none: false, checks: [], contexts: [] };
+  const latest = readAllPages(ctx, `repos/{owner}/{repo}/commits/${sha}/check-runs`, 'check_runs');
+  if ('error' in latest) return { line: `unknown at ${at} (${latest.error})`, green: false, none: false, checks: [], contexts: [], superseded: [] };
+  const all = readAllPages(ctx, `repos/{owner}/{repo}/commits/${sha}/check-runs?filter=all`, 'check_runs');
+  if ('error' in all) return { line: `unknown at ${at} (${all.error})`, green: false, none: false, checks: [], contexts: [], superseded: [] };
   const statuses = readAllPages(ctx, `repos/{owner}/{repo}/commits/${sha}/status`, 'statuses');
-  if ('error' in statuses) return { line: `unknown at ${at} (${statuses.error})`, green: false, none: false, checks: [], contexts: [] };
-  const checks = latestRunPerName(runs.items).map(c => ({ name: String(c.name ?? ''), status: String(c.status ?? ''), conclusion: c.conclusion === undefined || c.conclusion === null ? null : String(c.conclusion) }));
+  if ('error' in statuses) return { line: `unknown at ${at} (${statuses.error})`, green: false, none: false, checks: [], contexts: [], superseded: [] };
+  const workflowRuns = readAllPages(ctx, `repos/{owner}/{repo}/actions/runs?head_sha=${sha}`, 'workflow_runs');
+  if ('error' in workflowRuns) return { line: `unknown at ${at} (${workflowRuns.error})`, green: false, none: false, checks: [], contexts: [], superseded: [] };
+  const latestSuites = new Set(latest.items.map(suiteOf).filter(Boolean));
+  const latestIds = new Set(latest.items.map(r => String(r.id ?? '')).filter(Boolean));
+  const candidates = [...latest.items, ...all.items.filter(r => suiteOf(r) ? !latestSuites.has(suiteOf(r)) : !!r.id && !latestIds.has(String(r.id)))];
+  const judged = latestRunPerName(candidates);
+  const checks = [
+    ...judged.map(c => ({ name: String(c.name ?? ''), status: String(c.status ?? ''), conclusion: c.conclusion === undefined || c.conclusion === null ? null : String(c.conclusion) })),
+    ...joblessRuns(latestSuites, judged, workflowRuns.items),
+  ];
   const verdicts = [
     ...checks.map(c => c.status !== 'completed' ? 'pending' : c.conclusion === 'success' ? 'passed' : c.conclusion === 'skipped' || c.conclusion === 'neutral' ? 'skipped' : 'failed'),
     ...statuses.items.map(s => s.state === 'success' ? 'passed' : s.state === 'pending' ? 'pending' : 'failed'),
@@ -164,7 +233,7 @@ export function ciAtHead(ctx: QueueContext, sha: string): { line: string; green:
   const count = (v: string) => verdicts.filter(x => x === v).length;
   const [passed, failed, pending, skipped] = [count('passed'), count('failed'), count('pending'), count('skipped')];
   const green = verdicts.length > 0 && pending === 0 && failed === 0;
-  return { line: `${green ? 'green' : pending ? 'pending' : verdicts.length ? 'red' : 'none'} at ${at} (passed=${passed} failed=${failed} pending=${pending} skipped=${skipped})`, green, none: verdicts.length === 0, checks, contexts: statuses.items.map(s => ({ name: String(s.context ?? ''), state: String(s.state ?? '') })) };
+  return { line: `${green ? 'green' : pending ? 'pending' : verdicts.length ? 'red' : 'none'} at ${at} (passed=${passed} failed=${failed} pending=${pending} skipped=${skipped})`, green, none: verdicts.length === 0, checks, contexts: statuses.items.map(s => ({ name: String(s.context ?? ''), state: String(s.state ?? '') })), superseded: supersededLines(candidates, judged) };
 }
 
 /**
@@ -213,19 +282,90 @@ function gateLine(policy: LoadedPolicy, attempt: AttemptRecord | null): string {
   return `gate: command=${p.gate_command ? JSON.stringify(p.gate_command) : 'none'} full_e2e=${p.full_e2e ? 'yes' : 'no'} gate-ahead=${rec}`;
 }
 
+/**
+ * Refresh origin/<base>: ready reads the base policy (which also picks the train or plain path) and binds the receipt
+ * against the current base, never a ref it did not refresh.
+ */
+export function refreshBase(ctx: QueueContext): QueueFailure | null {
+  const fetched = git(ctx.repoRoot, ['fetch', '--no-tags', '-q', 'origin', `+refs/heads/${ctx.base}:refs/remotes/origin/${ctx.base}`]);
+  if (fetched.ok) return null;
+  return { code: 'QUEUE_BASE_UNFETCHED', message: `cannot fetch origin/${ctx.base} (${fetched.err.trim().split('\n')[0]?.slice(0, 200) ?? ''}); ready reads the policy and checks the receipt against the current base, never a ref it did not refresh`, fix: `fix the fetch (git fetch origin ${ctx.base}), then rerun ready` };
+}
+
+/**
+ * TRIAL_MERGES (rule 14): each open PR into the base that changes a path this PR changes, trial-merged with this head by git
+ * merge-tree; one line per such PR, or a MISSING line when gh or the fetch cannot tell. A PR from a fork is an outside
+ * contribution, not a sibling lane: it is labelled and never fetched or merged (outside code is read as text only). Heads this
+ * clone lacks come down in one git fetch, then one at a time if that fails, all within GSTACK_TRIAL_FETCH_TIMEOUT_MS (default
+ * 60 s); a head still missing when the time runs out gets a TRIAL_FETCH_STALLED line, which ready refuses (GST-3460).
+ */
+export const TRIAL_FETCH_STALLED = 'the trial-merge fetch time limit ran out';
+
+export function trialMergeLines(ctx: QueueContext, pr: string, head: string, changed: readonly string[], progress?: (line: string) => void): string[] {
+  const list = ctx.gh(['pr', 'list', '--state', 'open', '--base', ctx.base, '--limit', '200', '--json', 'number,headRefOid,files,isCrossRepository']);
+  let open: Array<{ number: number; headRefOid: string; files?: Array<{ path: string }>; isCrossRepository?: boolean }> | undefined;
+  try { open = list.ok ? JSON.parse(list.out) : undefined; } catch { open = undefined; }
+  if (!Array.isArray(open)) return [`TRIAL_MERGES: MISSING: cannot list the open PRs into ${ctx.base} through gh (${(list.err ?? list.out).trim().split('\n')[0]?.slice(0, 160) || 'no JSON'}), so no trial merge ran (rule 14)`];
+  const own = new Set(changed);
+  const others = open.filter(p => String(p.number) !== pr);
+  const siblings = others.map(p => ({ ...p, shared: (p.files ?? []).map(f => f.path).filter(f => own.has(f)) })).filter(p => p.shared.length);
+  if (!siblings.length) return [`TRIAL_MERGES: none share a file (${others.length} open PRs checked)`];
+  const remote = ctx.remote ?? 'origin';
+  const has = (sha: string) => git(ctx.repoRoot, ['cat-file', '-e', `${sha}^{commit}`]).ok;
+  const limitMs = Number(process.env.GSTACK_TRIAL_FETCH_TIMEOUT_MS) || 60_000;
+  const deadline = Date.now() + limitMs;
+  let missing = siblings.filter(p => !p.isCrossRepository && !has(p.headRefOid));
+  let stalled = false;
+  if (missing.length) {
+    const refs = missing.map(p => `refs/pull/${p.number}/head`);
+    progress?.(`TRIAL_MERGES: fetching ${refs.length} PR head(s) from ${remote} (time limit ${Math.ceil(limitMs / 1000)} s): ${refs.slice(0, 5).join(' ')}${refs.length > 5 ? ` (+${refs.length - 5} more)` : ''}`);
+    stalled = git(ctx.repoRoot, ['fetch', '--no-tags', '-q', remote, ...refs], undefined, undefined, limitMs).status === null;
+    missing = missing.filter(p => !has(p.headRefOid));
+    for (const p of stalled ? [] : missing) {
+      const left = deadline - Date.now();
+      if (left <= 0 || git(ctx.repoRoot, ['fetch', '--no-tags', '-q', remote, `refs/pull/${p.number}/head`], undefined, undefined, left).status === null) { stalled = true; break; }
+    }
+  }
+  return siblings.map(p => {
+    const at = `#${p.number} ${p.headRefOid.slice(0, 12)} shares ${p.shared.slice(0, 5).join(', ')}${p.shared.length > 5 ? ` (+${p.shared.length - 5} more)` : ''}`;
+    if (p.isCrossRepository) return `TRIAL_MERGES: ${at}: outside PR from a fork, not a sibling lane; not trial-merged (rule 19)`;
+    if (!has(p.headRefOid)) return stalled
+      ? `TRIAL_MERGES: ${at}: MISSING: ${TRIAL_FETCH_STALLED} (${Math.ceil(limitMs / 1000)} s) waiting on git fetch ${remote} refs/pull/${p.number}/head, so no trial merge ran`
+      : `TRIAL_MERGES: ${at}: MISSING: its head is not in this clone after git fetch ${remote} refs/pull/${p.number}/head, so no trial merge ran`;
+    const m = git(ctx.repoRoot, ['merge-tree', '--write-tree', '--name-only', '--no-messages', head, p.headRefOid]);
+    const [tree, ...files] = m.out.split('\n').filter(Boolean);
+    if (m.status === 0) return `TRIAL_MERGES: ${at}: merge-tree clean (tree ${(tree ?? '').slice(0, 12)})`;
+    if (m.status === 1) return `TRIAL_MERGES: ${at}: CONFLICT in ${files.join(', ')}; the lane states the resolution`;
+    return `TRIAL_MERGES: ${at}: MISSING: git merge-tree failed (${m.err.split('\n')[0]})`;
+  });
+}
+
+/** The newest row of a decision trail (gstack-decision-trail) whose phase is trail-read: its row number, the reader it names and its result, the reader's flags. */
+export function trailReadRow(file: string | undefined): ReadyTail['trailRead'] {
+  if (!file) return { missing: 'ready got no --trail <decisions.tsv>' };
+  let text: string;
+  try { text = fs.readFileSync(file, 'utf8'); } catch (e: any) { return { missing: `cannot read --trail ${file} (${e?.code ?? 'unreadable'})` }; }
+  const rows = text.split('\n').slice(1).filter(Boolean).map(l => l.split('\t'));
+  for (let i = rows.length - 1; i >= 0; i--) if (rows[i]![1]?.trim().toLowerCase() === 'trail-read' && rows[i]![2]?.trim()) return { row: i + 1, reader: rows[i]![2]!.trim(), flags: rows[i]![5]?.trim() ?? '' };
+  return { missing: `${file} has no trail-read row` };
+}
+
 /** READY: one block, identifiers first, about the exact pushed PR head. */
-export function ready(ctx: QueueContext, o: { pr: string; pregate?: string; gateExit?: number; gateLog?: string }): StepOutput {
+export function ready(ctx: QueueContext, o: { pr: string; pregate?: string; gateExit?: number; gateLog?: string; trail?: string }): StepOutput {
   const run = PREGATE_OUT_REL;
+  const unfetched = refreshBase(ctx);
+  if (unfetched) return fail(unfetched, [], run);
   const policy = loadBasePolicy(ctx);
   if ('message' in policy) return fail(policy, [], run);
   const head = git(ctx.repoRoot, ['rev-parse', 'HEAD']).out;
   const dirty = git(ctx.repoRoot, ['status', '--porcelain', '--untracked-files=no']).out;
   if (dirty) return fail({ code: 'QUEUE_NOT_READY', message: `uncommitted tracked changes: ${dirty.split('\n').map(l => l.slice(3)).slice(0, 8).join(', ')}` }, [], run);
-  const view = ctx.gh(['pr', 'view', o.pr, '--json', 'headRefOid,url,body,mergeable,headRefName,isCrossRepository']);
-  let info: { headRefOid?: string; url?: string; body?: string; mergeable?: string; headRefName?: string; isCrossRepository?: boolean } = {};
+  const view = ctx.gh(['pr', 'view', o.pr, '--json', 'headRefOid,url,body,mergeable,headRefName,isCrossRepository,baseRefName']);
+  let info: { headRefOid?: string; url?: string; body?: string; mergeable?: string; headRefName?: string; isCrossRepository?: boolean; baseRefName?: string } = {};
   try { info = view.ok ? JSON.parse(view.out) : {}; } catch {}
   if (!info.headRefOid) return fail({ code: 'QUEUE_NOT_READY', message: `cannot read PR #${o.pr}'s head through gh (${(view.err ?? view.out).trim().slice(0, 120)})` }, [], run);
   if (info.headRefOid !== head) return fail({ code: 'QUEUE_NOT_READY', message: `HEAD ${head.slice(0, 12)} is not PR #${o.pr}'s pushed head ${info.headRefOid.slice(0, 12)}` }, [], run);
+  if (info.baseRefName && info.baseRefName !== ctx.base) return fail({ code: 'QUEUE_NOT_READY', message: `#${o.pr} targets ${info.baseRefName}, not ${ctx.base}` }, [], run);
   const atHead = versionAtRef(ctx.repoRoot, head);
   const baseSha = git(ctx.repoRoot, ['rev-parse', `origin/${ctx.base}`]).out;
   const atFork = versionAtRef(ctx.repoRoot, git(ctx.repoRoot, ['merge-base', baseSha, head]).out || baseSha);
@@ -243,7 +383,7 @@ export function ready(ctx: QueueContext, o: { pr: string; pregate?: string; gate
   if (fs.existsSync(pregateFile)) {
     const read = readPregateFile(pregateFile);
     if (read.file) {
-      const v = verifyPregate(ctx.repoRoot, read.file, treeNow);
+      const v = verifyPregate(ctx.repoRoot, read.file, treeNow, ctx.base);
       pregateOk = v.ok;
       if (v.ok) accepted = read.file;
       useMirror = !v.ok && v.code !== 'PREGATE_LANE_FAILED' && v.code !== 'PREGATE_INCOMPLETE' && v.code !== 'PREGATE_ENVIRONMENT';
@@ -264,8 +404,12 @@ export function ready(ctx: QueueContext, o: { pr: string; pregate?: string; gate
   const foreign = accepted && exceptionConsumerProblem(accepted, head, o.pr);
   if (foreign) { pregateOk = false; accepted = null; pregateLine += ` — ${foreign} (PREGATE_REMOTE_UNCLEARED)`; }
   const receipt = bindShippedReceipt(ctx.repoRoot, `origin/${ctx.base}`, info.body ?? '', o.pr, acceptedReceiptHeads(ctx, policy, head, info.body ?? ''));
+  const gates = receipt.ok ? gateAcceptance({ cwd: ctx.repoRoot, branch: info.headRefName ?? '', pin: head, body: info.body ?? '', receipt: receipt.receipt }) : null;
   const attempt = currentAttempt(ctx.repoRoot, o.pr);
+  const changed = git(ctx.repoRoot, ['-c', 'core.quotePath=false', 'diff', '--name-only', `${baseSha}...${head}`]).out.split('\n').filter(Boolean);
   const hint = conflictHint(info.mergeable, ci, info.headRefName, info.isCrossRepository === true, head);
+  const trials = trialMergeLines(ctx, o.pr, head, changed, line => process.stderr.write(`gstack-ship-queue ready: ${line}\n`));
+  const stalled = trials.filter(l => l.includes(TRIAL_FETCH_STALLED)).map(l => /refs\/pull\/\d+\/head/.exec(l)?.[0]);
   const lines = [
     `READY #${o.pr} ${head} STAMP_VERSION=${version}`,
     `pr: ${info.url ?? `#${o.pr}`}`,
@@ -273,6 +417,7 @@ export function ready(ctx: QueueContext, o: { pr: string; pregate?: string; gate
     `version: ${version}`,
     `base: origin/${ctx.base}@${baseSha}`,
     `ci: ${ci.line}`,
+    ...ci.superseded,
     ...(hint ? [hint] : []),
     pregateLine,
     ...(accepted ? flakyExceptionLines(accepted) : []),
@@ -280,7 +425,8 @@ export function ready(ctx: QueueContext, o: { pr: string; pregate?: string; gate
     receipt.line,
     ...(receipt.depthLine ? [receipt.depthLine] : []),
     ...(receipt.targetedLine ? [receipt.targetedLine] : []),
-    ...readyTailLines(receipt.ok ? receipt.receipt : undefined),
+    ...(gates?.lines ?? []),
+    ...readyTailLines(receipt.ok ? { ...receipt.receipt, gate_dispositions: undefined } : undefined, { trialMerges: trials, trailRead: trailReadRow(o.trail) }),
   ];
   const gate = policy.policy.full_e2e ? gateEvidence(ctx, o.pr, head, attempt, o.gateExit, o.gateLog) : null;
   if (gate) lines.push(gate.line);
@@ -288,15 +434,18 @@ export function ready(ctx: QueueContext, o: { pr: string; pregate?: string; gate
   if (!pregateOk) return fail({ code: 'QUEUE_NOT_READY', message: `the pregate result is not a current pass: ${pregateLine}` }, lines, run);
   if (gate && !gate.ok) return fail({ code: 'QUEUE_GATE_MISSING', message: `full_e2e is set and no passing gate is bound to ${head.slice(0, 12)}: ${gate.line}` }, lines, run);
   if (!receipt.ok) return fail({ code: receipt.code, message: receipt.message }, lines, run);
-  const changed = git(ctx.repoRoot, ['diff', '--name-only', `${baseSha}...${head}`]).out.split('\n').filter(Boolean);
-  const plan: ReturnType<typeof readyPlan> = policy.policy.train ? {} : readyPlan({ cwd: ctx.repoRoot, env: process.env, body: info.body ?? '', policyValue: policy.policy.plan_record, changed, fragmentsDir: policy.policy.changelog_fragments?.dir });
+  if (gates?.failure) return fail(gates.failure, lines, run);
+  if (stalled.length) return fail({ code: 'QUEUE_NOT_READY', message: `the trial merges (rule 14) ran out of time waiting on git fetch ${ctx.remote ?? 'origin'} ${stalled.join(' ')}`, fix: `fetch those refs by hand (git fetch ${ctx.remote ?? 'origin'} <ref>), then rerun ready; GSTACK_TRIAL_FETCH_TIMEOUT_MS raises the limit` }, lines, run);
+  const plan: ReturnType<typeof readyPlan> = policy.policy.train ? {} : readyPlan({ cwd: ctx.repoRoot, env: process.env, body: info.body ?? '', policyValue: policy.policy.plan_record, changed, fragmentsDir: policy.policy.changelog_fragments?.dir, finishLine: finishPlanLine(ctx.repoRoot, info.headRefName, head) });
   if (plan.line) lines.push(plan.line);
   if (plan.failure) return fail(plan.failure, lines, run);
   if (!policy.policy.train && policy.policy.changelog_fragments) {
     const repo = repoIdentity(ctx.repoRoot);
     const now = nowIso();
-    const p = persist(ctx.repoRoot, [{ schema: 1, kind: 'ready', repo_key: repo.key, pr: o.pr, head, base_sha: baseSha, ready_at: now, screen: { choice: 'no-screen', policy: null, nonce: null, run: null, merge_sha: null }, updated_at: now, ...(plan.record ? { plan: plan.record } : {}) }], { remote: ctx.remote ?? 'origin' });
+    const remote = ctx.remote ?? 'origin';
+    const p = persist(ctx.repoRoot, [{ schema: 1, kind: 'ready', repo_key: repo.key, pr: o.pr, head, base_sha: baseSha, ready_at: now, screen: { choice: 'no-screen', policy: null, nonce: null, run: null, merge_sha: null }, updated_at: now, ...(plan.record ? { plan: plan.record } : {}), ...(gates?.noteRows?.length ? { gate_dispositions: gates.noteRows } : {}) }], { remote });
     lines.push(`READY_RECEIPT: ${readyPath(repo.key, o.pr, head)} (${p.detail})`);
+    if (!p.pushed) return fail({ ...readyNoteUnpushed(o.pr, head, remote, p.detail), fix: `fix the notes push to ${remote} (the READY_RECEIPT line ends with its error), then rerun gstack-ship-queue ready --pr ${o.pr} with the same flags` }, lines, run);
   }
   return { ok: true, lines, run };
 }
