@@ -7,7 +7,7 @@
  * runner-owned selection manifest `.gstack/pregate.json` declares for a
  * planner-computed matrix. Every uncertainty widens the selection.
  */
-import { spawnSync } from 'node:child_process';
+import { spawnSync } from '../spawn-sync';
 import { GENERATED_PATH } from '../regen';
 import { runBashSync } from '../script-invocation';
 import { matchesAny } from '../ship-policy';
@@ -22,6 +22,9 @@ import type { Lane } from './workflows';
 
 /** Whole-tree tests every selection that runs a test must include (GST-98). Kept out of pregate.json so older readers, which reject unknown keys, keep working. */
 export const ALWAYS_RUN_PATH = '.gstack/always-run.json';
+
+/** A glob naming a folder inside a test directory (`tests/live/**`, never `test/**` or a single file): its `[]` declaration keeps the tests under it out of the local lane. */
+const TEST_SUBTREE = /(?:^|\/)(?:test|tests|spec|__tests__)\/[^*?[{/]+\//;
 
 /** The `tests` globs of one `.gstack/always-run.json` text; `label` names the copy in errors. */
 export function parseAlwaysRun(text: string, label: string = ALWAYS_RUN_PATH): string[] {
@@ -68,10 +71,14 @@ export interface Selection {
   inert: string[];
   /** Release manifests whose diff against the merge base changes only version values (lib/pregate/stamp-only.ts): waived, no lane needed. */
   stampOnly: string[];
+  /** Local-lane tests a `[]` declaration on a folder inside a test directory (TEST_SUBTREE) kept out, per glob: the repo runs them in their own tier. Never an always-run test; they stay in `tests`, `gateTests` and any remote obligation. */
+  declaredTier: Array<{ glob: string; tests: string[] }>;
   /** Every test the touched files select, sorted. */
   tests: string[];
   /** Tests that run on this machine. */
   localTests: string[];
+  /** The local selection before declared test trees were left out: what the remote gate and `test_backend` owe, since that exclusion is local-only. */
+  gateTests: string[];
   /** Platform lanes this machine cannot run that select part of the set. */
   remote: RemoteObligation[];
   /** Tiers of the local lanes the selection touches. */
@@ -142,20 +149,53 @@ function outputsOf(all: readonly string[], globs: readonly string[]): string[] {
 /**
  * Tracked files outside Markdown that mention `file`'s name without its final extension anywhere, where the import graph cannot
  * see: a curation list, a durations manifest, a script, a workflow, an extensionless path (`node test/alpha.test`), a dotted
- * module (`tests.test_alpha`), or an escaped or encoded path (`\talpha.test.js`, `test%2Falpha.test.js`).
+ * module (`tests.test_alpha`), or an escaped or encoded path (`\talpha.test.js`, `test%2Falpha.test.js`). A file whose every mention sits under
+ * another directory's path (`packages/b/alpha.test`) does not count, nor does `.gstack/pregate.json` when its only mentions are `dependencies` keys,
+ * listed tests beside another test that still exists, or another directory's listed test.
  */
 function namedBy(ctx: PregateContext, file: string): string[] {
   const base = path.posix.basename(file);
   const stem = base.includes('.') ? base.slice(0, base.lastIndexOf('.')) : base;
   const r = spawnSync('git', ['grep', '--untracked', '-l', '-F', '-e', stem, '--', '.', ':(exclude)*.md', ':(exclude)*.mdx'], { cwd: ctx.repoRoot, encoding: 'utf8', timeout: 60_000, maxBuffer: 16 * 1024 * 1024, env: ctx.env });
   if (r.status === 1) return [];
-  return r.status === 0 ? (r.stdout ?? '').split('\n').filter(Boolean) : ['(git grep failed)'];
+  if (r.status !== 0) return ['(git grep failed)'];
+  const dir = path.posix.dirname(file);
+  return (r.stdout ?? '').split('\n').filter(Boolean).filter(n => {
+    let text: string;
+    try { text = fs.readFileSync(path.join(ctx.repoRoot, n), 'utf8'); } catch { return true; }
+    if (n === PREGATE_CONFIG_PATH) {
+      try {
+        const { dependencies: deps, ...rest } = JSON.parse(text);
+        if (deps && typeof deps === 'object' && !Array.isArray(deps) && !JSON.stringify(rest).includes(stem)) {
+          const own = (t: unknown) => typeof t === 'string' ? t.includes(stem) && (!t.includes('/') || path.posix.normalize(path.posix.dirname(t)) === dir) : JSON.stringify(t ?? null).includes(stem);
+          const sibling = (t: unknown) => typeof t === 'string' && !t.includes(stem) && !!fs.statSync(path.join(ctx.repoRoot, t), { throwIfNoEntry: false })?.isFile();
+          return Object.values(deps).some(list => Array.isArray(list) ? list.some(own) && !list.some(sibling) : own(list));
+        }
+      } catch { return true; }
+    }
+    return text.split(stem).slice(0, -1).some(before => {
+      if (before.endsWith(`${dir}/`)) return true;
+      const q = /(?:^|[\s'"`=,(\[])((?:[\w.@-]+\/)+)$/.exec(before)?.[1];
+      return !q || q.startsWith('./') || q.startsWith('../') || `/${dir}/`.endsWith(`/${q}`) || `/${q}`.endsWith(`/${dir}/`);
+    });
+  });
 }
 
 /** Test languages whose importers the graph resolves file by file; a Go or Ruby test may define helpers its package still uses. */
 const RESOLVED_IMPORTS = /\.(?:[cm]?[jt]sx?|py|dart)$/;
 
 const shown = (files: readonly string[]) => `${files.slice(0, 8).join(' ')}${files.length > 8 ? ` … +${files.length - 8} more` : ''}`;
+
+/** The tests of the remaining non-Markdown files that name a removed test (a curation list, a durations manifest), and why it is refused when one of them has no test. */
+function namerCoverage(ctx: PregateContext, graph: Graph, gone: ReadonlySet<string>, file: string): { suite: string[]; refused?: string } {
+  const suite = new Set<string>();
+  const uncovered = namedBy(ctx, file).filter(f => !gone.has(f)).filter(n => {
+    const m = testsFor(graph, n, ctx.config.dependencies);
+    for (const t of m.tests) suite.add(t);
+    return !m.tests.length && !m.declaredNone;
+  });
+  return { suite: [...suite].sort(), ...(uncovered.length ? { refused: `removed, but still named by ${shown(uncovered)}, which no test covers` } : {}) };
+}
 
 /**
  * Why a removed test no remaining test selects owes no lane, and the tests it selects, or `refused` when it must fail closed as
@@ -172,19 +212,14 @@ function removedPath(ctx: PregateContext, graph: Graph, gone: ReadonlySet<string
   const edges = [...graph.reverse].filter(([k]) => k === file || (k.endsWith('/**') && file.startsWith(k.slice(0, -2)))).flatMap(([, list]) => list);
   const importers = [...new Set(edges.map(e => e.from))].filter(f => !gone.has(f)).sort();
   if (importers.length) return { refused: `removed, but still imported by ${shown(importers)}` };
-  const namerSuite = new Set<string>();
-  const uncovered = namedBy(ctx, file).filter(f => !gone.has(f)).filter(n => {
-    const m = testsFor(graph, n, ctx.config.dependencies);
-    for (const t of m.tests) namerSuite.add(t);
-    return !m.tests.length && !m.declaredNone;
-  });
-  if (uncovered.length) return { refused: `removed, but still named by ${shown(uncovered)}, which no test covers` };
-  const namerNote = namerSuite.size ? `files naming it run: ${shown([...namerSuite].sort())}` : '';
+  const { suite: namerSuite, refused } = namerCoverage(ctx, graph, gone, file);
+  if (refused) return { refused };
+  const namerNote = namerSuite.length ? `files naming it run: ${shown(namerSuite)}` : '';
   const renamedTo = ctx.touched.find(t => t.renamedFrom === file)?.path;
-  if (renamedTo && isTestFile(renamedTo)) return { removed: { file, note: [`old name of ${renamedTo}`, namerNote].filter(Boolean).join('; '), lostCoverage: [] }, suite: [...namerSuite] };
+  if (renamedTo && isTestFile(renamedTo)) return { removed: { file, note: [`old name of ${renamedTo}`, namerNote].filter(Boolean).join('; '), lostCoverage: [] }, suite: namerSuite };
   const subjects = graph.goneSubjects?.get(file);
   if (!subjects) return { refused: 'removed test whose merge-base text could not be read (not a regular file there, invalid UTF-8 or over 1 MiB)' };
-  if (!subjects.length) return { removed: { file, note: ['it exercised no file still in the tree', namerNote].filter(Boolean).join('; '), lostCoverage: [] }, suite: [...namerSuite] };
+  if (!subjects.length) return { removed: { file, note: ['it exercised no file still in the tree', namerNote].filter(Boolean).join('; '), lostCoverage: [] }, suite: namerSuite };
   const suite = new Set<string>();
   const lostCoverage: string[] = [];
   for (const subject of subjects) {
@@ -236,6 +271,12 @@ export function selectLanes(ctx: PregateContext): Selection {
     const m = testsFor(graph, file, ctx.config.dependencies);
     for (const t of m.tests) tests.add(t);
     provenance.push(...m.provenance.map(p => `${p} [${why}]`));
+    if (m.tests.length && goneSet.has(file) && isTestFile(file)) {
+      const namers = namerCoverage(ctx, graph, goneSet, file);
+      for (const t of namers.suite) tests.add(t);
+      if (namers.refused) { noLane.push(file); provenance.push(`${file}: ${namers.refused}; no lane until declared`); }
+      else if (namers.suite.length) provenance.push(`${file}: files naming it run: ${shown(namers.suite)}`);
+    }
     if (m.tests.length || why.startsWith('generated')) continue;
     // An explicit `[]` already cleared the file. A removed test still runs its owning suite; label the rest docs/no-tests only when it is that class.
     if (m.declaredNone) {
@@ -283,8 +324,10 @@ export function selectLanes(ctx: PregateContext): Selection {
     }
     noLane.push(file);
   }
+  const alwaysRun = new Set<string>();
   if (tests.size || noLane.length || seeds.has(ALWAYS_RUN_PATH)) {
     const always = alwaysRunTests(ctx.repoRoot, [...graph.tests].filter(t => !goneSet.has(t)), readAtMergeBase(ctx, ALWAYS_RUN_PATH, ['100644', '100755']));
+    for (const t of always.tests) alwaysRun.add(t);
     for (const t of always.tests) if (!tests.has(t)) { tests.add(t); provenance.push(`${t} (always_run, ${always.baseOnly.includes(t) ? 'merge base ' : ''}${ALWAYS_RUN_PATH})`); }
     for (const glob of always.unmatched) provenance.push(`${ALWAYS_RUN_PATH}: ${glob} matches no test file`);
   }
@@ -293,6 +336,8 @@ export function selectLanes(ctx: PregateContext): Selection {
   const remote: RemoteObligation[] = [];
   const tiers = new Set<string>();
   const selected = [...tests].sort();
+  const declaredTier = ctx.headBootstrap ? [] : Object.entries(ctx.config.dependencies ?? {}).filter(([glob, list]) => list.length === 0 && TEST_SUBTREE.test(glob) && /\/\*\*?$/.test(glob)).map(([glob]) => ({ glob, tests: [] as string[] }));
+  const tierOf = (t: string) => alwaysRun.has(t) ? undefined : declaredTier.find(d => matchesAny([d.glob], t));
   let anyLocalAll = false;
   for (const lane of ctx.lanes.filter(l => l.runsTests && !l.manual)) {
     const set = laneFileSet(ctx, lane);
@@ -304,12 +349,21 @@ export function selectLanes(ctx: PregateContext): Selection {
       continue;
     }
     if (set === 'all') anyLocalAll = true;
-    if (inLane.length) { tiers.add(lane.tier === 'platform' ? 'unit' : lane.tier); for (const t of inLane) local.add(t); }
+    if (inLane.some(t => !tierOf(t))) tiers.add(lane.tier === 'platform' ? 'unit' : lane.tier);
+    for (const t of inLane) local.add(t);
   }
   if (anyLocalAll || ctx.lanes.filter(l => l.runsTests && !l.manual && l.tier !== 'platform').length === 0) for (const t of selected) local.add(t);
   for (const t of selected) if (!local.has(t) && !remote.some(r => r.tests.includes(t))) local.add(t);
+  const gateTests = [...local].sort();
+  for (const t of gateTests) {
+    const tier = tierOf(t);
+    if (!tier) continue;
+    tier.tests.push(t);
+    local.delete(t);
+    provenance.push(`${t}: not run in the local lane; ${tier.glob} is declared [] in ${PREGATE_CONFIG_PATH} (its own tier)`);
+  }
   if (local.size && tiers.size === 0) tiers.add('unit');
-  return { noLane: noLane.sort(), removed: removed.sort((a, b) => a.file.localeCompare(b.file)), emptyLane: emptyLane.sort(), inert: inert.sort(), stampOnly: stampOnly.sort(), tests: selected, localTests: [...local].sort(), remote, tiersRan: [...tiers].sort(), laneSets, provenance };
+  return { noLane: noLane.sort(), removed: removed.sort((a, b) => a.file.localeCompare(b.file)), emptyLane: emptyLane.sort(), inert: inert.sort(), stampOnly: stampOnly.sort(), declaredTier: declaredTier.filter(d => d.tests.length), tests: selected, localTests: [...local].sort(), gateTests, remote, tiersRan: [...tiers].sort(), laneSets, provenance };
 }
 
 export function isTest(file: string): boolean { return isTestFile(file); }
