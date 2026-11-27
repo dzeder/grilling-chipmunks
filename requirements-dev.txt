@@ -42,7 +42,7 @@ pip-tools==7.7.0
     # via sf-skills (pyproject.toml)
 platformdirs==4.12.4
     # via black
-pluggy==1.6.0
+pluggy==1.7.0
     # via
     #   pytest
     #   pytest-cov
